@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Explore from "@/pages/explore";
 import Profile from "@/pages/profile";
+import Chat from "@/pages/chat";
 
 function Router() {
   return (
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/explore" component={Explore} />
       <Route path="/coworking" component={Explore} />
+      <Route path="/chat" component={Chat} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
