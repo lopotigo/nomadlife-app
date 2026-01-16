@@ -9,13 +9,14 @@ import Home from "@/pages/home";
 import Explore from "@/pages/explore";
 import Profile from "@/pages/profile";
 import Chat from "@/pages/chat";
+import Coworking from "@/pages/coworking";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/explore" component={Explore} />
-      <Route path="/coworking" component={Explore} />
+      <Route path="/coworking" component={Coworking} />
       <Route path="/chat" component={Chat} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
