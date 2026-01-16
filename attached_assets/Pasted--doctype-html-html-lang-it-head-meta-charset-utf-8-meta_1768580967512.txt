@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Social Map Nomadi — Demo</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    :root{--bg:#FFF7EE;--card:#fff;--muted:#7B8A86;--accent:#FF6B35;--accent-alt:#FFC857}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:#032B3A}
+    .app{display:grid;grid-template-columns:320px 1fr 360px;gap:12px;height:100vh;padding:12px}
+    .panel{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 8px 24px rgba(2,6,23,0.06);overflow:auto}
+    .small{font-size:.88rem;color:var(--muted)}
+    .btn{padding:8px 10px;border-radius:8px;border:0;cursor:pointer}
+    .btn-outline{background:transparent;border:1px solid #e6eef2;padding:6px 8px;border-radius:8px}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-alt));color:#022;padding:8px 10px;border-radius:8px}
+    .card{background:#fff;border-radius:8px;padding:10px;border:1px solid #eef2f6;margin-bottom:10px}
+    .chat-window{height:30vh;overflow:auto;padding:8px;background:#fff;border-radius:8px;border:1px solid #eef2f6;margin-bottom:8px}
+    #map{height:56vh;border-radius:10px;box-shadow:0 12px 40px rgba(2,6,23,0.08)}
+    .row{display:flex;gap:8px}
+    input, select, textarea{padding:8px;border-radius:8px;border:1px solid #e6eef2}
+    .modal-bg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000}
+    .modal-bg.show{display:flex}
+    .modal{background:#fff;padding:16px;border-radius:10px;min-width:320px;max-width:720px}
+    .note{font-size:.85rem;color:var(--muted);margin-top:6px}
+    .top-toggle{position:fixed;top:10px;right:10px;z-index:3000;display:flex;gap:8px;align-items:center}
+    .view-hidden{display:none}
+    @media(max-width:1000px){ .app{grid-template-columns:1fr;grid-auto-rows:auto} #map{height:320px} }
+    .popup-card .muted{ color: #666; font-size: 12px; }
+    .attachment-img{ max-width: 200px; border-radius:6px; display:block; margin-top:6px }
+    .chat-attachment{ display:block; margin-top:6px; color:#0a6; text-decoration:underline; cursor:pointer }
+  </style>
+
+  <!-- Load runtime env (server provides /env.js) in head so inline scripts can read it -->
+  <script src="/env.js"></script>
+
+  <!-- Vite entry: reference the source entry (do NOT hardcode dist/assets/* here) -->
+  <!-- Replace /src/main.jsx with your real entry if different -->
+  <script type="module" crossorigin src="/assets/index-ppWoDo22.js"></script>
+</head>
+<body>
+  <div class="top-toggle">
+    <button id="showDemo" class="btn btn-outline">Mostra Demo</button>
+    <button id="showReact" class="btn btn-primary">Mostra App React</button>
+    <button id="openAuth" class="btn btn-primary">Autenticazione</button>
+  </div>
+
+  <div id="root" class="view-hidden" style="min-height:100vh"></div>
+
+  <div id="demoContainer">
+    <div class="app">
+      <aside class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Gruppi città</strong>
+            <div class="small">Crea, iscriviti e partecipa</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div id="accountBox" class="small">Account: You</div>
+            <button id="btnSubscribe" class="btn-outline">Abbonati (demo)</button>
+            <button id="btnNewGroup" class="btn-primary">+ Nuovo</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small">Filtra per città</div>
+          <select id="filterCity" style="margin-top:8px;width:100%"></select>
+        </div>
+
+        <div id="groupsList" style="margin-top:12px;max-height:62vh;overflow:auto"></div>
+      </aside>
+
+      <main class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div id="centerTitle" style="font-weight:700">Chat: Globale</div>
+            <div id="centerSubtitle" class="small">Seleziona chat globale, di gruppo o privata</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="btnOpenMap" class="btn-outline">Apri mappa</button>
+            <button id="btnJoin" class="btn-primary" style="display:none">Iscriviti</button>
+            <button id="btnLeave" class="btn-outline" style="display:none">Lascia</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:12px;margin-top:12px">
+          <section>
+            <div class="chat-window" id="groupChat"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="chatInput" placeholder="Scrivi nella chat attiva..." />
+              <button id="chatSend" class="btn-primary">Invia</button>
+              <button id="btnSwitchGlobal" class="btn-outline" title="Vai alla chat globale">Globale</button>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <strong>Post nel gruppo</strong>
+              <textarea id="postText" rows="3" style="margin-top:8px;width:100%"></textarea>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+                <label class="btn-outline" style="padding:6px;cursor:pointer"><input id="postFile" type="file" accept="image/*,video/*" style="display:none"/>Carica file</label>
+                <button id="postAttachPos" class="btn-outline">Allega posizione</button>
+                <label style="margin-left:auto"><input id="postCross" type="checkbox"/> Condividi in Globale</label>
+                <button id="postPublish" class="btn-primary">Pubblica</button>
+              </div>
+              <div id="postInfo" class="small" style="margin-top:8px;color:var(--muted)"></div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <strong>Crea percorso</strong>
+              <div class="row" style="margin-top:8px">
+                <input id="from" placeholder="Partenza (e.g. Milano)"/>
+                <input id="to" placeholder="Arrivo (e.g. Roma)"/>
+              </div>
+              <div class="row" style="margin-top:8px">
+                <select id="mode">
+                  <option value="driving-car">Auto</option>
+                  <option value="public-transport">Pubblico</option>
+                  <option value="cycling-regular">Bici</option>
+                  <option value="foot-walking">A piedi</option>
+                  <option value="eco">Eco</option>
+                </select>
+                <button id="btnRoute" class="btn-primary">Calcola</button>
+              </div>
+              <div id="routeInfo" class="small" style="margin-top:8px;color:var(--muted)"></div>
+            </div>
+          </section>
+
+          <aside>
+            <div style="font-weight:700">Mappa</div>
+            <div id="map" style="margin-top:8px"></div>
+
+            <div class="card" style="margin-top:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <strong>Prenotazione rapida</strong>
+                <div class="small">Demo</div>
+              </div>
+
+              <div class="filters-row" style="margin-top:8px">
+                <select id="quickCity" style="width:100%"><option value="">Tutte le città</option></select>
+
+                <select id="quickType" style="width:100%">
+                  <option value="">Tutti</option>
+                  <option value="hotel">Hotel</option>
+                  <option value="hostel">Ostello</option>
+                  <option value="coworking">Coworking</option>
+                  <option value="event">Evento</option>
+                </select>
+
+                <select id="quickPriceFilter" style="width:100%">
+                  <option value="">Tutti i prezzi</option>
+                  <option value="cheap">&lt; 20€</option>
+                  <option value="budget">20-40€</option>
+                  <option value="premium">&gt; 40€</option>
+                </select>
+              </div>
+
+              <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+                <button id="quickSearch" class="btn-primary" style="flex:0 0 auto">Cerca</button>
+                <div id="quickSearchNote" class="note">Premi "Cerca" per visualizzare le strutture.</div>
+              </div>
+
+              <select id="quickStructure" style="margin-top:8px;width:100%"></select>
+              <div id="quickResults" class="results-list"></div>
+
+              <input id="quickDate" type="date" style="margin-top:8px;width:100%"/>
+              <input id="quickName" placeholder="Tuo nome" style="margin-top:8px;width:100%"/>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button id="quickBook" class="btn-primary">Prenota</button>
+                <div id="quickMsg" class="small" style="align-self:center;color:var(--muted)"></div>
+              </div>
+              <div style="margin-top:10px"><strong>Prenotazioni demo</strong><div id="bookings" class="small" style="margin-top:6px;color:var(--muted)">Nessuna prenotazione</div></div>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      <aside class="panel">
+        <div><strong>Profili</strong><div class="small">Visualizza o apri chat privata</div></div>
+        <div id="profiles" style="margin-top:12px"></div>
+        <div style="margin-top:12px"><div style="font-weight:700">Feed Globale</div><div id="globalFeed" style="margin-top:8px;max-height:40vh;overflow:auto"></div></div>
+      </aside>
+    </div>
+
+    <div class="modal-bg" id="modalGroup" aria-hidden="true">
+      <div class="modal">
+        <strong>Nuovo gruppo</strong>
+        <div style="margin-top:8px">
+          <input id="gName" placeholder="Nome gruppo" />
+          <input id="gCity" placeholder="Città" style="margin-top:8px"/>
+          <textarea id="gDesc" rows="3" placeholder="Descrizione" style="margin-top:8px"></textarea>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+            <button id="gCancel" class="btn-outline">Annulla</button>
+            <button id="gSave" class="btn-primary">Crea</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet (kept in body; CSS already loaded in head) -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Main inline module (demo app) - left in body because it initialises the demo UI -->
+
+  <script>
+    (function(){
+      const btnDemo = document.getElementById('showDemo');
+      const btnReact = document.getElementById('showReact');
+      const btnAuth = document.getElementById('openAuth');
+      const root = document.getElementById('root');
+      const demo = document.getElementById('demoContainer');
+      function showReact(){ if(root) root.classList.remove('view-hidden'), root.style.display='block'; if(demo) demo.style.display='none'; }
+      function showDemo(){ if(root) root.classList.add('view-hidden'), root.style.display='none'; if(demo) demo.style.display='block'; }
+      btnDemo?.addEventListener('click', ()=> showDemo());
+      btnReact?.addEventListener('click', ()=> showReact());
+      btnAuth?.addEventListener('click', ()=>{ showReact(); window.dispatchEvent(new CustomEvent('navigateToAuth')); });
+      try { if(location && location.pathname === '/auth') showReact(); else showDemo(); } catch(e){ showDemo(); }
+    })();
+  </script>
+</body>
+</html>
