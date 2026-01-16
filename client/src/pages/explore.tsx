@@ -1,5 +1,5 @@
 import Layout from "@/components/layout";
-import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X } from "lucide-react";
+import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, Globe } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PLACES } from "@/lib/mock-data";
