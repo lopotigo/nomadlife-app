@@ -32,9 +32,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="mt-auto p-4 bg-secondary/50 rounded-xl">
           <p className="text-xs font-medium text-secondary-foreground mb-1">Nomad Premium</p>
           <p className="text-xs text-muted-foreground mb-3">Unlock global perks & insurance.</p>
-          <button className="w-full py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors">
-            Upgrade
-          </button>
+          <Link href="/subscription">
+            <button className="w-full py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
+              Upgrade
+            </button>
+          </Link>
         </div>
       </aside>
 

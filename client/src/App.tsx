@@ -10,6 +10,7 @@ import Explore from "@/pages/explore";
 import Profile from "@/pages/profile";
 import Chat from "@/pages/chat";
 import Coworking from "@/pages/coworking";
+import Subscription from "@/pages/subscription";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/explore" component={Explore} />
       <Route path="/coworking" component={Coworking} />
       <Route path="/chat" component={Chat} />
+      <Route path="/subscription" component={Subscription} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
