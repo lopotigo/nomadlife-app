@@ -1,17 +1,75 @@
+import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
-import { PLACES } from "@/lib/mock-data";
-import { Calendar, Users, CreditCard, ChevronRight, CheckCircle2, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { useLocation } from "wouter";
+import { Calendar, Users, ChevronRight, CheckCircle2, MapPin, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import type { Place } from "@shared/schema";
 
 export default function Coworking() {
-  const [selectedPlace, setSelectedPlace] = useState<any>(null);
+  const { user, loading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [step, setStep] = useState(1);
+  const [guestName, setGuestName] = useState("");
 
-  const handleBook = () => {
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user) {
+      setLocation("/auth");
+      return;
+    }
+
+    setGuestName(user.name);
+
+    fetch("/api/places?type=coworking")
+      .then((res) => res.json())
+      .then((data) => setPlaces(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [user, authLoading, setLocation]);
+
+  const handleBook = async () => {
+    if (!selectedPlace || !user) return;
+
     setStep(2);
-    setTimeout(() => setStep(3), 2000);
+
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          placeId: selectedPlace.id,
+          checkInDate: new Date().toISOString(),
+          guestName,
+        }),
+      });
+
+      if (res.ok) {
+        setTimeout(() => setStep(3), 1500);
+      } else {
+        throw new Error("Booking failed");
+      }
+    } catch (error) {
+      toast({ title: "Booking failed", description: "Please try again", variant: "destructive" });
+      setStep(1);
+    }
   };
+
+  if (authLoading || loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -24,34 +82,45 @@ export default function Coworking() {
         </header>
 
         <div className="space-y-4">
-          {PLACES.map((place) => (
-            <button 
-              key={place.id} 
-              onClick={() => { setSelectedPlace(place); setStep(1); }}
-              className="w-full text-left group"
-            >
-              <div className="bg-card border border-border rounded-3xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                <div className="h-40 relative">
-                  <img src={place.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase">
-                    {place.type}
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-bold text-lg">{place.name}</h3>
-                      <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
-                        <MapPin className="w-3 h-3" />
-                        {place.location}
-                      </div>
+          {places.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <p>No coworking spaces available yet.</p>
+            </div>
+          ) : (
+            places.map((place) => (
+              <button 
+                key={place.id} 
+                onClick={() => { setSelectedPlace(place); setStep(1); }}
+                className="w-full text-left group"
+                data-testid={`button-place-${place.id}`}
+              >
+                <div className="bg-card border border-border rounded-3xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                  <div className="h-40 relative">
+                    {place.imageUrl ? (
+                      <img src={place.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full bg-muted" />
+                    )}
+                    <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase">
+                      {place.type}
                     </div>
-                    <span className="text-primary font-bold">{place.price}</span>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-lg" data-testid={`text-place-name-${place.id}`}>{place.name}</h3>
+                        <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
+                          <MapPin className="w-3 h-3" />
+                          {place.location}
+                        </div>
+                      </div>
+                      <span className="text-primary font-bold" data-testid={`text-place-price-${place.id}`}>{place.price}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))
+          )}
         </div>
 
         <AnimatePresence>
@@ -86,14 +155,20 @@ export default function Coworking() {
                           <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1 block">Check-in</label>
                           <div className="flex items-center gap-2 text-sm font-medium">
                             <Calendar className="w-4 h-4 text-primary" />
-                            May 24, 2026
+                            {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </div>
                         </div>
                         <div className="p-3 bg-muted/50 rounded-2xl border border-border">
-                          <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1 block">Guests</label>
+                          <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1 block">Guest Name</label>
                           <div className="flex items-center gap-2 text-sm font-medium">
                             <Users className="w-4 h-4 text-primary" />
-                            1 Person
+                            <input
+                              type="text"
+                              value={guestName}
+                              onChange={(e) => setGuestName(e.target.value)}
+                              className="bg-transparent border-none outline-none w-full"
+                              data-testid="input-guest-name"
+                            />
                           </div>
                         </div>
                       </div>
@@ -112,7 +187,9 @@ export default function Coworking() {
 
                       <button 
                         onClick={handleBook}
-                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                        disabled={!guestName.trim()}
+                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        data-testid="button-confirm-booking"
                       >
                         Confirm Booking
                         <ChevronRight className="w-5 h-5" />
@@ -123,7 +200,7 @@ export default function Coworking() {
                   {step === 2 && (
                     <div className="py-12 flex flex-col items-center justify-center space-y-4">
                       <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="font-bold">Processing payment...</p>
+                      <p className="font-bold">Processing booking...</p>
                     </div>
                   )}
 
@@ -133,12 +210,13 @@ export default function Coworking() {
                         <CheckCircle2 className="w-10 h-10 text-green-600" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-display font-bold">Booking Confirmed!</h2>
-                        <p className="text-sm text-muted-foreground mt-2">We've sent the details to your email and the group chat.</p>
+                        <h2 className="text-2xl font-display font-bold" data-testid="text-booking-confirmed">Booking Confirmed!</h2>
+                        <p className="text-sm text-muted-foreground mt-2">We've saved your booking details.</p>
                       </div>
                       <button 
                         onClick={() => setSelectedPlace(null)}
                         className="w-full py-4 bg-muted rounded-2xl font-bold hover:bg-muted/80 transition-colors"
+                        data-testid="button-done"
                       >
                         Done
                       </button>

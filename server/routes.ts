@@ -228,6 +228,7 @@ export async function registerRoutes(
       const data = insertBookingSchema.parse({
         ...req.body,
         userId: (req.user as User).id,
+        checkInDate: new Date(req.body.checkInDate),
       });
       const booking = await storage.createBooking(data);
       res.status(201).send(booking);
