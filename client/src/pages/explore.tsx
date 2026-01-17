@@ -1,66 +1,128 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, Globe, CheckCircle2, Loader2, ArrowRight, Train, Plane, Car } from "lucide-react";
+import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, CheckCircle2, Loader2, ArrowRight, Train, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CITIES = [
   { 
     id: "bali", 
-    name: "Canggu, Bali", 
+    name: "Bali", 
+    fullName: "Canggu, Bali",
     country: "Indonesia",
     nomads: 1240, 
     coworking: 15, 
     hotels: 42, 
     events: 8, 
-    coords: { top: "60%", left: "75%" },
+    coords: { top: "58%", left: "77%" },
   },
   { 
     id: "lisbon", 
     name: "Lisbon", 
+    fullName: "Lisbon",
     country: "Portugal",
     nomads: 850, 
     coworking: 12, 
     hotels: 35, 
     events: 5, 
-    coords: { top: "40%", left: "45%" },
+    coords: { top: "38%", left: "44%" },
   },
   { 
     id: "mexico", 
     name: "Mexico City", 
+    fullName: "Mexico City",
     country: "Mexico",
     nomads: 620, 
     coworking: 9, 
     hotels: 28, 
     events: 4, 
-    coords: { top: "50%", left: "25%" },
+    coords: { top: "48%", left: "18%" },
   },
   { 
     id: "chiangmai", 
     name: "Chiang Mai", 
+    fullName: "Chiang Mai",
     country: "Thailand",
     nomads: 980, 
     coworking: 18, 
     hotels: 55, 
     events: 12, 
-    coords: { top: "55%", left: "70%" },
+    coords: { top: "50%", left: "72%" },
   },
   { 
     id: "barcelona", 
     name: "Barcelona", 
+    fullName: "Barcelona",
     country: "Spain",
     nomads: 720, 
     coworking: 14, 
     hotels: 48, 
     events: 7, 
-    coords: { top: "42%", left: "48%" },
+    coords: { top: "37%", left: "47%" },
+  },
+  { 
+    id: "milan", 
+    name: "Milan", 
+    fullName: "Milan",
+    country: "Italy",
+    nomads: 540, 
+    coworking: 11, 
+    hotels: 38, 
+    events: 6, 
+    coords: { top: "35%", left: "49%" },
+  },
+  { 
+    id: "rome", 
+    name: "Rome", 
+    fullName: "Rome",
+    country: "Italy",
+    nomads: 480, 
+    coworking: 8, 
+    hotels: 45, 
+    events: 5, 
+    coords: { top: "38%", left: "50%" },
+  },
+  { 
+    id: "berlin", 
+    name: "Berlin", 
+    fullName: "Berlin",
+    country: "Germany",
+    nomads: 890, 
+    coworking: 20, 
+    hotels: 52, 
+    events: 9, 
+    coords: { top: "32%", left: "50%" },
+  },
+  { 
+    id: "paris", 
+    name: "Paris", 
+    fullName: "Paris",
+    country: "France",
+    nomads: 760, 
+    coworking: 16, 
+    hotels: 60, 
+    events: 8, 
+    coords: { top: "34%", left: "47%" },
+  },
+  { 
+    id: "tokyo", 
+    name: "Tokyo", 
+    fullName: "Tokyo",
+    country: "Japan",
+    nomads: 650, 
+    coworking: 22, 
+    hotels: 70, 
+    events: 10, 
+    coords: { top: "40%", left: "85%" },
   },
 ];
 
 interface RouteResult {
   from: string;
   to: string;
+  fromCity: typeof CITIES[0] | null;
+  toCity: typeof CITIES[0] | null;
   distance: number;
   ecoRoute: {
     mode: string;
@@ -75,30 +137,41 @@ interface RouteResult {
   };
 }
 
+function findCity(name: string): typeof CITIES[0] | null {
+  const lowerName = name.toLowerCase().trim();
+  return CITIES.find(c => 
+    c.name.toLowerCase().includes(lowerName) || 
+    c.fullName.toLowerCase().includes(lowerName) ||
+    lowerName.includes(c.name.toLowerCase())
+  ) || null;
+}
+
 function calculateRoute(from: string, to: string): RouteResult | null {
   if (!from.trim() || !to.trim()) return null;
   
-  // Simulated distances (in km) based on city pairs
+  const fromCity = findCity(from);
+  const toCity = findCity(to);
+  
   const baseDistance = Math.floor(Math.random() * 2000) + 500;
   
-  // Eco route (train/bus) - slower but less CO2
   const ecoRoute = {
     mode: baseDistance > 1000 ? "Train + Bus" : "Train",
     duration: `${Math.floor(baseDistance / 80)}h ${Math.floor((baseDistance % 80) / 1.3)}m`,
-    co2: Math.floor(baseDistance * 0.041), // Train emits ~41g CO2/km per passenger
-    savings: Math.floor(baseDistance * 0.255 * 0.84), // 84% less than flying
+    co2: Math.floor(baseDistance * 0.041),
+    savings: Math.floor(baseDistance * 0.255 * 0.84),
   };
 
-  // Fast route (plane) - faster but more CO2
   const fastRoute = {
     mode: "Flight",
     duration: `${Math.floor(baseDistance / 800)}h ${Math.floor((baseDistance % 800) / 13)}m`,
-    co2: Math.floor(baseDistance * 0.255), // Plane emits ~255g CO2/km per passenger
+    co2: Math.floor(baseDistance * 0.255),
   };
 
   return {
     from,
     to,
+    fromCity,
+    toCity,
     distance: baseDistance,
     ecoRoute,
     fastRoute,
@@ -115,6 +188,7 @@ export default function Explore() {
   const [toCity, setToCity] = useState("");
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [calculating, setCalculating] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -127,7 +201,6 @@ export default function Explore() {
     if (!fromCity.trim() || !toCity.trim()) return;
     
     setCalculating(true);
-    // Simulate API call delay
     setTimeout(() => {
       const result = calculateRoute(fromCity, toCity);
       setRouteResult(result);
@@ -161,7 +234,7 @@ export default function Explore() {
               />
             </div>
             <button 
-              onClick={() => { setShowRoute(!showRoute); setRouteResult(null); }}
+              onClick={() => { setShowRoute(!showRoute); if (showRoute) setRouteResult(null); }}
               className={`p-2 rounded-xl transition-colors ${showRoute ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}
               data-testid="button-toggle-route"
             >
@@ -219,8 +292,9 @@ export default function Explore() {
                     className="space-y-3 pt-3 border-t border-border"
                   >
                     <div className="text-center">
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Distance</p>
-                      <p className="text-lg font-bold">{routeResult.distance} km</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Route</p>
+                      <p className="text-sm font-bold">{routeResult.from} → {routeResult.to}</p>
+                      <p className="text-lg font-bold text-primary">{routeResult.distance} km</p>
                     </div>
 
                     <div className="flex gap-2">
@@ -290,33 +364,151 @@ export default function Explore() {
         </div>
 
         {/* Map Background */}
-        <div className="flex-1 bg-[#e8e4df] relative cursor-grab active:cursor-grabbing overflow-hidden">
+        <div ref={mapRef} className="flex-1 bg-[#e8e4df] relative cursor-grab active:cursor-grabbing overflow-hidden">
           {/* World Map Image */}
           <img 
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Equirectangular_projection_SW.jpg/2560px-Equirectangular_projection_SW.jpg"
             alt="World Map"
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
+            className="absolute inset-0 w-full h-full object-cover opacity-70"
           />
           
-          {/* Overlay gradient for better marker visibility */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/30 pointer-events-none" />
+          {/* Overlay gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/20 pointer-events-none" />
+
+          {/* Route Line SVG */}
+          {routeResult && routeResult.fromCity && routeResult.toCity && (
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+              <defs>
+                <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor={transportMode === "eco" ? "#22c55e" : "#6366f1"} />
+                  <stop offset="100%" stopColor={transportMode === "eco" ? "#16a34a" : "#4f46e5"} />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* Animated route line */}
+              <motion.line
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+                x1={routeResult.fromCity.coords.left}
+                y1={routeResult.fromCity.coords.top}
+                x2={routeResult.toCity.coords.left}
+                y2={routeResult.toCity.coords.top}
+                stroke="url(#routeGradient)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray="8 4"
+                filter="url(#glow)"
+              />
+              
+              {/* Start point */}
+              <motion.circle
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2 }}
+                cx={routeResult.fromCity.coords.left}
+                cy={routeResult.fromCity.coords.top}
+                r="12"
+                fill={transportMode === "eco" ? "#22c55e" : "#6366f1"}
+                stroke="white"
+                strokeWidth="3"
+              />
+              
+              {/* End point */}
+              <motion.circle
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1.2 }}
+                cx={routeResult.toCity.coords.left}
+                cy={routeResult.toCity.coords.top}
+                r="12"
+                fill={transportMode === "eco" ? "#16a34a" : "#4f46e5"}
+                stroke="white"
+                strokeWidth="3"
+              />
+
+              {/* Moving dot along route */}
+              <motion.circle
+                initial={{ cx: routeResult.fromCity.coords.left, cy: routeResult.fromCity.coords.top }}
+                animate={{ 
+                  cx: [routeResult.fromCity.coords.left, routeResult.toCity.coords.left],
+                  cy: [routeResult.fromCity.coords.top, routeResult.toCity.coords.top]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                r="6"
+                fill="white"
+                stroke={transportMode === "eco" ? "#22c55e" : "#6366f1"}
+                strokeWidth="2"
+              />
+            </svg>
+          )}
+
+          {/* Route Labels */}
+          {routeResult && routeResult.fromCity && routeResult.toCity && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                style={{ top: routeResult.fromCity.coords.top, left: routeResult.fromCity.coords.left }}
+                className="absolute z-30 -translate-x-1/2 -translate-y-full -mt-4"
+              >
+                <div className={`px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg ${transportMode === "eco" ? "bg-green-500" : "bg-primary"}`}>
+                  {routeResult.fromCity.name}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.3 }}
+                style={{ top: routeResult.toCity.coords.top, left: routeResult.toCity.coords.left }}
+                className="absolute z-30 -translate-x-1/2 translate-y-4"
+              >
+                <div className={`px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg ${transportMode === "eco" ? "bg-green-600" : "bg-indigo-600"}`}>
+                  {routeResult.toCity.name}
+                </div>
+              </motion.div>
+            </>
+          )}
 
           {/* City Markers */}
-          {CITIES.map(city => (
-            <motion.button
-              key={city.id}
-              whileHover={{ scale: 1.2 }}
-              onClick={() => setSelectedCity(city)}
-              style={{ top: city.coords.top, left: city.coords.left }}
-              className="absolute z-10 p-2 bg-primary text-white rounded-full shadow-lg shadow-primary/30 group"
-              data-testid={`marker-${city.id}`}
-            >
-              <MapPin className="w-5 h-5" />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                {city.name}
-              </div>
-            </motion.button>
-          ))}
+          {CITIES.map(city => {
+            const isInRoute = routeResult && (
+              routeResult.fromCity?.id === city.id || 
+              routeResult.toCity?.id === city.id
+            );
+            
+            return (
+              <motion.button
+                key={city.id}
+                whileHover={{ scale: 1.3 }}
+                onClick={() => setSelectedCity(city)}
+                style={{ top: city.coords.top, left: city.coords.left }}
+                className={`absolute z-10 -translate-x-1/2 -translate-y-1/2 p-2 rounded-full shadow-lg group transition-all ${
+                  isInRoute 
+                    ? "bg-transparent scale-0" 
+                    : "bg-primary text-white shadow-primary/30"
+                }`}
+                data-testid={`marker-${city.id}`}
+              >
+                <MapPin className="w-5 h-5" />
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  {city.fullName}
+                </div>
+              </motion.button>
+            );
+          })}
         </div>
 
         {/* City Popup */}
@@ -343,7 +535,7 @@ export default function Explore() {
 
                   <div className="relative">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF6B35] mb-1 block">Trending Destination</span>
-                    <h2 className="text-3xl font-display font-black leading-none text-[#032B3A] mb-1" data-testid="text-city-name">{selectedCity.name}</h2>
+                    <h2 className="text-3xl font-display font-black leading-none text-[#032B3A] mb-1" data-testid="text-city-name">{selectedCity.fullName}</h2>
                     <p className="text-sm text-muted-foreground mb-4">{selectedCity.country}</p>
                     
                     <div className="grid grid-cols-2 gap-3">
