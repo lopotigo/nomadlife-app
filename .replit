@@ -23,7 +23,6 @@ publicDir = "dist/public"
 run = ["node", "./dist/index.cjs"]
 
 [workflows]
-runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
