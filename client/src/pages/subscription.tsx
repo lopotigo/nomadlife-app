@@ -23,7 +23,7 @@ export default function SubscriptionPage() {
       return;
     }
 
-    fetch("/api/subscription")
+    fetch("/api/subscription", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setSubscription(data))
       .catch(console.error)
@@ -41,6 +41,7 @@ export default function SubscriptionPage() {
       const res = await fetch("/api/subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           plan: "pro",
           status: "active",
@@ -70,6 +71,7 @@ export default function SubscriptionPage() {
       const res = await fetch(`/api/subscription/${subscription.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status: "cancelled" }),
       });
 

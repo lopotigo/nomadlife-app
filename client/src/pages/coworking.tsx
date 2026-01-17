@@ -27,7 +27,7 @@ export default function Coworking() {
 
     setGuestName(user.name);
 
-    fetch("/api/places?type=coworking")
+    fetch("/api/places", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setPlaces(data))
       .catch(console.error)
@@ -43,6 +43,7 @@ export default function Coworking() {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           placeId: selectedPlace.id,
           checkInDate: new Date().toISOString(),

@@ -22,7 +22,7 @@ export default function Home() {
       return;
     }
 
-    fetch("/api/posts")
+    fetch("/api/posts", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch(console.error)
@@ -31,7 +31,7 @@ export default function Home() {
 
   const handleLike = async (postId: string) => {
     try {
-      const res = await fetch(`/api/posts/${postId}/like`, { method: "POST" });
+      const res = await fetch(`/api/posts/${postId}/like`, { method: "POST", credentials: "include" });
       if (res.ok) {
         const updatedPost = await res.json();
         setPosts((prev) =>

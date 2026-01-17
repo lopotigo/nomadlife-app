@@ -20,7 +20,7 @@ export default function Profile() {
       return;
     }
 
-    fetch(`/api/posts/user/${user.id}`)
+    fetch(`/api/posts/user/${user.id}`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch(console.error)

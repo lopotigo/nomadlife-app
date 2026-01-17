@@ -27,7 +27,7 @@ export default function Chat() {
       return;
     }
 
-    fetch("/api/chat-groups")
+    fetch("/api/chat-groups", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setGroups(data))
       .catch(console.error)
@@ -37,7 +37,7 @@ export default function Chat() {
   useEffect(() => {
     if (!selectedChat) return;
 
-    fetch(`/api/messages/group/${selectedChat.id}`)
+    fetch(`/api/messages/group/${selectedChat.id}`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch(console.error);
@@ -52,6 +52,7 @@ export default function Chat() {
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           groupId: selectedChat.id,
           receiverId: null,
