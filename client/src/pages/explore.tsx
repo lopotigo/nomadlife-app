@@ -1,9 +1,31 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, CheckCircle2, Loader2, ArrowRight, Train, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Fix Leaflet default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
+
+// Custom marker icon
+const customIcon = new L.Icon({
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 const CITIES = [
   { 
@@ -15,7 +37,8 @@ const CITIES = [
     coworking: 15, 
     hotels: 42, 
     events: 8, 
-    coords: { top: "58%", left: "77%" },
+    lat: -8.6500,
+    lng: 115.1389,
   },
   { 
     id: "lisbon", 
@@ -26,7 +49,8 @@ const CITIES = [
     coworking: 12, 
     hotels: 35, 
     events: 5, 
-    coords: { top: "38%", left: "44%" },
+    lat: 38.7223,
+    lng: -9.1393,
   },
   { 
     id: "mexico", 
@@ -37,7 +61,8 @@ const CITIES = [
     coworking: 9, 
     hotels: 28, 
     events: 4, 
-    coords: { top: "48%", left: "18%" },
+    lat: 19.4326,
+    lng: -99.1332,
   },
   { 
     id: "chiangmai", 
@@ -48,7 +73,8 @@ const CITIES = [
     coworking: 18, 
     hotels: 55, 
     events: 12, 
-    coords: { top: "50%", left: "72%" },
+    lat: 18.7883,
+    lng: 98.9853,
   },
   { 
     id: "barcelona", 
@@ -59,7 +85,8 @@ const CITIES = [
     coworking: 14, 
     hotels: 48, 
     events: 7, 
-    coords: { top: "37%", left: "47%" },
+    lat: 41.3851,
+    lng: 2.1734,
   },
   { 
     id: "milan", 
@@ -70,7 +97,8 @@ const CITIES = [
     coworking: 11, 
     hotels: 38, 
     events: 6, 
-    coords: { top: "35%", left: "49%" },
+    lat: 45.4642,
+    lng: 9.1900,
   },
   { 
     id: "rome", 
@@ -81,7 +109,8 @@ const CITIES = [
     coworking: 8, 
     hotels: 45, 
     events: 5, 
-    coords: { top: "38%", left: "50%" },
+    lat: 41.9028,
+    lng: 12.4964,
   },
   { 
     id: "berlin", 
@@ -92,7 +121,8 @@ const CITIES = [
     coworking: 20, 
     hotels: 52, 
     events: 9, 
-    coords: { top: "32%", left: "50%" },
+    lat: 52.5200,
+    lng: 13.4050,
   },
   { 
     id: "paris", 
@@ -103,7 +133,8 @@ const CITIES = [
     coworking: 16, 
     hotels: 60, 
     events: 8, 
-    coords: { top: "34%", left: "47%" },
+    lat: 48.8566,
+    lng: 2.3522,
   },
   { 
     id: "tokyo", 
@@ -114,7 +145,56 @@ const CITIES = [
     coworking: 22, 
     hotels: 70, 
     events: 10, 
-    coords: { top: "40%", left: "85%" },
+    lat: 35.6762,
+    lng: 139.6503,
+  },
+  { 
+    id: "newyork", 
+    name: "New York", 
+    fullName: "New York City",
+    country: "USA",
+    nomads: 920, 
+    coworking: 35, 
+    hotels: 120, 
+    events: 15, 
+    lat: 40.7128,
+    lng: -74.0060,
+  },
+  { 
+    id: "sydney", 
+    name: "Sydney", 
+    fullName: "Sydney",
+    country: "Australia",
+    nomads: 680, 
+    coworking: 18, 
+    hotels: 65, 
+    events: 9, 
+    lat: -33.8688,
+    lng: 151.2093,
+  },
+  { 
+    id: "dubai", 
+    name: "Dubai", 
+    fullName: "Dubai",
+    country: "UAE",
+    nomads: 520, 
+    coworking: 12, 
+    hotels: 85, 
+    events: 7, 
+    lat: 25.2048,
+    lng: 55.2708,
+  },
+  { 
+    id: "capetown", 
+    name: "Cape Town", 
+    fullName: "Cape Town",
+    country: "South Africa",
+    nomads: 380, 
+    coworking: 8, 
+    hotels: 40, 
+    events: 5, 
+    lat: -33.9249,
+    lng: 18.4241,
   },
 ];
 
@@ -146,25 +226,41 @@ function findCity(name: string): typeof CITIES[0] | null {
   ) || null;
 }
 
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return Math.round(R * c);
+}
+
 function calculateRoute(from: string, to: string): RouteResult | null {
   if (!from.trim() || !to.trim()) return null;
   
   const fromCity = findCity(from);
   const toCity = findCity(to);
   
-  const baseDistance = Math.floor(Math.random() * 2000) + 500;
+  let distance: number;
+  if (fromCity && toCity) {
+    distance = calculateDistance(fromCity.lat, fromCity.lng, toCity.lat, toCity.lng);
+  } else {
+    distance = Math.floor(Math.random() * 2000) + 500;
+  }
   
   const ecoRoute = {
-    mode: baseDistance > 1000 ? "Train + Bus" : "Train",
-    duration: `${Math.floor(baseDistance / 80)}h ${Math.floor((baseDistance % 80) / 1.3)}m`,
-    co2: Math.floor(baseDistance * 0.041),
-    savings: Math.floor(baseDistance * 0.255 * 0.84),
+    mode: distance > 1000 ? "Train + Bus" : "Train",
+    duration: `${Math.floor(distance / 80)}h ${Math.floor((distance % 80) / 1.3)}m`,
+    co2: Math.floor(distance * 0.041),
+    savings: Math.floor(distance * 0.255 * 0.84),
   };
 
   const fastRoute = {
     mode: "Flight",
-    duration: `${Math.floor(baseDistance / 800)}h ${Math.floor((baseDistance % 800) / 13)}m`,
-    co2: Math.floor(baseDistance * 0.255),
+    duration: `${Math.floor(distance / 800)}h ${Math.floor((distance % 800) / 13)}m`,
+    co2: Math.floor(distance * 0.255),
   };
 
   return {
@@ -172,7 +268,7 @@ function calculateRoute(from: string, to: string): RouteResult | null {
     to,
     fromCity,
     toCity,
-    distance: baseDistance,
+    distance,
     ecoRoute,
     fastRoute,
   };
@@ -188,7 +284,6 @@ export default function Explore() {
   const [toCity, setToCity] = useState("");
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [calculating, setCalculating] = useState(false);
-  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -210,7 +305,7 @@ export default function Explore() {
 
   if (authLoading) {
     return (
-      <Layout>
+      <Layout fullWidth>
         <div className="flex items-center justify-center h-screen">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -222,7 +317,7 @@ export default function Explore() {
     <Layout fullWidth>
       <div className="flex flex-col min-h-[500px] h-[calc(100dvh-64px)] md:h-screen relative overflow-hidden">
         {/* Header / Search */}
-        <div className="absolute top-4 inset-x-4 z-40 space-y-2">
+        <div className="absolute top-4 inset-x-4 z-[1000] space-y-2">
           <div className="bg-card/90 backdrop-blur-xl border border-border/40 p-2 rounded-2xl shadow-xl flex items-center gap-2">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -363,195 +458,90 @@ export default function Explore() {
           </AnimatePresence>
         </div>
 
-        {/* Map Background */}
-        <div ref={mapRef} className="flex-1 relative overflow-hidden" style={{ minHeight: "500px", background: "#1a5fb4" }}>
-          {/* World Map SVG */}
-          <svg 
-            viewBox="0 0 1000 500" 
-            className="absolute inset-0 w-full h-full"
-            preserveAspectRatio="xMidYMid slice"
+        {/* Real World Map */}
+        <div className="flex-1 relative" style={{ minHeight: "500px" }}>
+          <MapContainer
+            center={[20, 0]}
+            zoom={2}
+            style={{ height: "100%", width: "100%" }}
+            scrollWheelZoom={true}
+            className="z-0"
           >
-            {/* Ocean background - bright blue */}
-            <rect width="1000" height="500" fill="#3584e4" />
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
             
-            {/* Grid lines for visual effect */}
-            {[...Array(10)].map((_, i) => (
-              <line key={`h${i}`} x1="0" y1={i * 50} x2="1000" y2={i * 50} stroke="#62a0ea" strokeWidth="0.5" opacity="0.5" />
-            ))}
-            {[...Array(20)].map((_, i) => (
-              <line key={`v${i}`} x1={i * 50} y1="0" x2={i * 50} y2="500" stroke="#62a0ea" strokeWidth="0.5" opacity="0.5" />
-            ))}
-            
-            {/* Simplified world continents - bright green */}
-            {/* North America */}
-            <path d="M50,80 Q120,60 180,90 L220,120 Q250,150 240,200 L200,250 Q150,280 100,260 L60,200 Q30,150 50,80" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-            
-            {/* South America */}
-            <path d="M180,280 Q220,270 240,300 L260,380 Q250,450 200,480 L160,460 Q140,400 150,340 L180,280" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-            
-            {/* Europe */}
-            <path d="M440,80 Q500,60 540,90 L560,130 Q550,160 520,170 L480,160 Q450,140 440,110 L440,80" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-            
-            {/* Africa */}
-            <path d="M460,180 Q520,170 560,200 L580,280 Q570,380 500,420 L440,400 Q420,320 440,240 L460,180" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-            
-            {/* Asia */}
-            <path d="M560,60 Q700,40 800,80 L860,140 Q880,200 840,260 L760,280 Q680,290 620,260 L580,200 Q560,140 560,60" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-            
-            {/* Australia */}
-            <path d="M760,340 Q820,320 860,360 L870,420 Q850,460 800,460 L760,440 Q740,400 760,340" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-            
-            {/* Indonesia/Southeast Asia */}
-            <path d="M720,260 Q780,250 820,280 L840,320 Q820,340 780,330 L740,310 Q720,290 720,260" fill="#57e389" stroke="#33d17a" strokeWidth="2"/>
-          </svg>
-          
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/20 pointer-events-none" />
-
-          {/* Route Line SVG */}
-          {routeResult && routeResult.fromCity && routeResult.toCity && (
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
-              <defs>
-                <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor={transportMode === "eco" ? "#22c55e" : "#6366f1"} />
-                  <stop offset="100%" stopColor={transportMode === "eco" ? "#16a34a" : "#4f46e5"} />
-                </linearGradient>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                  <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-              
-              {/* Animated route line */}
-              <motion.line
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-                x1={routeResult.fromCity.coords.left}
-                y1={routeResult.fromCity.coords.top}
-                x2={routeResult.toCity.coords.left}
-                y2={routeResult.toCity.coords.top}
-                stroke="url(#routeGradient)"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeDasharray="8 4"
-                filter="url(#glow)"
-              />
-              
-              {/* Start point */}
-              <motion.circle
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2 }}
-                cx={routeResult.fromCity.coords.left}
-                cy={routeResult.fromCity.coords.top}
-                r="12"
-                fill={transportMode === "eco" ? "#22c55e" : "#6366f1"}
-                stroke="white"
-                strokeWidth="3"
-              />
-              
-              {/* End point */}
-              <motion.circle
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.2 }}
-                cx={routeResult.toCity.coords.left}
-                cy={routeResult.toCity.coords.top}
-                r="12"
-                fill={transportMode === "eco" ? "#16a34a" : "#4f46e5"}
-                stroke="white"
-                strokeWidth="3"
-              />
-
-              {/* Moving dot along route */}
-              <motion.circle
-                initial={{ cx: routeResult.fromCity.coords.left, cy: routeResult.fromCity.coords.top }}
-                animate={{ 
-                  cx: [routeResult.fromCity.coords.left, routeResult.toCity.coords.left],
-                  cy: [routeResult.fromCity.coords.top, routeResult.toCity.coords.top]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                r="6"
-                fill="white"
-                stroke={transportMode === "eco" ? "#22c55e" : "#6366f1"}
-                strokeWidth="2"
-              />
-            </svg>
-          )}
-
-          {/* Route Labels */}
-          {routeResult && routeResult.fromCity && routeResult.toCity && (
-            <>
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                style={{ top: routeResult.fromCity.coords.top, left: routeResult.fromCity.coords.left }}
-                className="absolute z-30 -translate-x-1/2 -translate-y-full -mt-4"
-              >
-                <div className={`px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg ${transportMode === "eco" ? "bg-green-500" : "bg-primary"}`}>
-                  {routeResult.fromCity.name}
-                </div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.3 }}
-                style={{ top: routeResult.toCity.coords.top, left: routeResult.toCity.coords.left }}
-                className="absolute z-30 -translate-x-1/2 translate-y-4"
-              >
-                <div className={`px-3 py-1 rounded-full text-white text-xs font-bold shadow-lg ${transportMode === "eco" ? "bg-green-600" : "bg-indigo-600"}`}>
-                  {routeResult.toCity.name}
-                </div>
-              </motion.div>
-            </>
-          )}
-
-          {/* City Markers */}
-          {CITIES.map(city => {
-            const isInRoute = routeResult && (
-              routeResult.fromCity?.id === city.id || 
-              routeResult.toCity?.id === city.id
-            );
-            
-            return (
-              <motion.button
+            {/* City Markers */}
+            {CITIES.map((city) => (
+              <Marker
                 key={city.id}
-                whileHover={{ scale: 1.3 }}
-                onClick={() => setSelectedCity(city)}
-                style={{ top: city.coords.top, left: city.coords.left }}
-                className={`absolute z-10 -translate-x-1/2 -translate-y-1/2 p-2 rounded-full shadow-lg group transition-all ${
-                  isInRoute 
-                    ? "bg-transparent scale-0" 
-                    : "bg-primary text-white shadow-primary/30"
-                }`}
-                data-testid={`marker-${city.id}`}
+                position={[city.lat, city.lng]}
+                icon={customIcon}
+                eventHandlers={{
+                  click: () => setSelectedCity(city),
+                }}
               >
-                <MapPin className="w-5 h-5" />
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  {city.fullName}
-                </div>
-              </motion.button>
-            );
-          })}
+                <Popup>
+                  <div className="text-center p-1">
+                    <h3 className="font-bold text-sm">{city.fullName}</h3>
+                    <p className="text-xs text-gray-500">{city.country}</p>
+                    <div className="grid grid-cols-2 gap-1 mt-2 text-xs">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3 text-blue-500" />
+                        <span>{city.nomads}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-green-500" />
+                        <span>{city.coworking}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Hotel className="w-3 h-3 text-orange-500" />
+                        <span>{city.hotels}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-red-500" />
+                        <span>{city.events}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setToCity(city.name);
+                        setShowRoute(true);
+                        setSelectedCity(null);
+                      }}
+                      className="mt-2 w-full py-1 bg-primary text-white rounded text-xs font-medium"
+                    >
+                      Plan Trip
+                    </button>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+            {/* Route Line */}
+            {routeResult && routeResult.fromCity && routeResult.toCity && (
+              <Polyline
+                positions={[
+                  [routeResult.fromCity.lat, routeResult.fromCity.lng],
+                  [routeResult.toCity.lat, routeResult.toCity.lng],
+                ]}
+                color={transportMode === "eco" ? "#22c55e" : "#6366f1"}
+                weight={4}
+                dashArray="10, 10"
+              />
+            )}
+          </MapContainer>
         </div>
 
-        {/* City Popup */}
+        {/* City Detail Modal */}
         <AnimatePresence>
           {selectedCity && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.5, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: 100 }}
-              className="absolute inset-x-4 bottom-24 md:bottom-8 z-50 flex justify-center pointer-events-none"
+              className="absolute inset-x-4 bottom-24 md:bottom-8 z-[1001] flex justify-center pointer-events-none"
             >
               <div className="bg-[#FF6B35] p-1 rounded-[2.5rem] shadow-2xl pointer-events-auto max-w-sm w-full">
                 <div className="bg-white rounded-[2.3rem] p-6 relative overflow-hidden">
@@ -619,8 +609,8 @@ function PopupStat({ icon: Icon, label, value, color }: { icon: any; label: stri
         <Icon className="w-4 h-4" style={{ color }} />
       </div>
       <div>
-        <p className="text-lg font-black leading-none" style={{ color }}>{value}</p>
-        <p className="text-[10px] text-gray-500 uppercase font-bold">{label}</p>
+        <p className="text-lg font-bold text-[#032B3A] leading-tight">{value}</p>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
       </div>
     </div>
   );
