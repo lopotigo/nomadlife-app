@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post, User } from "@shared/schema";
+import { CreatePostForm } from "@/components/CreatePostForm";
 
 type PostWithUser = Post & { user: User };
 
@@ -14,6 +15,14 @@ export default function Home() {
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchPosts = useCallback(() => {
+    fetch("/api/posts", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setPosts(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   useEffect(() => {
     if (authLoading) return;
     
@@ -22,12 +31,8 @@ export default function Home() {
       return;
     }
 
-    fetch("/api/posts", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [user, authLoading, setLocation]);
+    fetchPosts();
+  }, [user, authLoading, setLocation, fetchPosts]);
 
   const handleLike = async (postId: string) => {
     try {
@@ -65,6 +70,8 @@ export default function Home() {
 
       <div className="p-4 space-y-6">
         <StoryRail />
+        
+        <CreatePostForm onPostCreated={fetchPosts} />
         
         <div className="space-y-6">
           {posts.length === 0 ? (

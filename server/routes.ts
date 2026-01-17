@@ -6,6 +6,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 
 // Configure Passport Local Strategy
 passport.use(
@@ -39,7 +40,7 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 
-function requireAuth(req: any, res: any, next: any) {
+export function requireAuth(req: any, res: any, next: any) {
   if (req.isAuthenticated()) {
     return next();
   }
@@ -50,6 +51,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  
+  // Register Object Storage routes for file uploads (with authentication)
+  registerObjectStorageRoutes(app, requireAuth);
   
   // ========== AUTH ROUTES ==========
   app.post("/api/auth/signup", async (req, res, next) => {
