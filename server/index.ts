@@ -34,6 +34,9 @@ const pgPool = new pg.Pool({
 
 app.set("trust proxy", 1);
 
+const isProduction = process.env.NODE_ENV === "production";
+const isReplit = !!process.env.REPL_ID;
+
 app.use(
   session({
     store: new PgSession({
@@ -45,9 +48,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production" || process.env.REPL_ID !== undefined,
+      secure: isProduction || isReplit,
       httpOnly: true,
-      sameSite: process.env.REPL_ID ? "none" : "lax",
+      sameSite: isReplit ? "none" as const : "lax" as const,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     },
   })
