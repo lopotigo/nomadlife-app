@@ -330,6 +330,7 @@ export async function registerRoutes(
       const data = insertSubscriptionSchema.parse({
         ...req.body,
         userId: (req.user as User).id,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
       });
       
       // Mark user as premium
