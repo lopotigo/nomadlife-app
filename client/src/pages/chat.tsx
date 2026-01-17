@@ -29,7 +29,7 @@ export default function Chat() {
 
     fetch("/api/chat-groups", { credentials: "include" })
       .then((res) => res.json())
-      .then((data) => setGroups(data))
+      .then((data) => setGroups(Array.isArray(data) ? data : []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user, authLoading, setLocation]);
@@ -39,7 +39,7 @@ export default function Chat() {
 
     fetch(`/api/messages/group/${selectedChat.id}`, { credentials: "include" })
       .then((res) => res.json())
-      .then((data) => setMessages(data))
+      .then((data) => setMessages(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, [selectedChat]);
 
