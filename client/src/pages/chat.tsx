@@ -21,6 +21,12 @@ function getGroupColor(index: number) {
   return GROUP_COLORS[index % GROUP_COLORS.length];
 }
 
+const EMOJI_LIST = [
+  "😀", "😂", "🥰", "😎", "🤔", "👍", "👋", "🙌",
+  "❤️", "🔥", "✨", "🎉", "🌍", "✈️", "🏖️", "🌴",
+  "☕", "💻", "📍", "🎒", "🌅", "🏄", "🧳", "🗺️",
+];
+
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -32,7 +38,13 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const addEmoji = (emoji: string) => {
+    setNewMessage(prev => prev + emoji);
+    setShowEmoji(false);
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -340,7 +352,34 @@ export default function Chat() {
               </div>
 
               {/* Input */}
-              <footer className="p-4 bg-slate-900 border-t border-slate-800">
+              <footer className="p-4 bg-slate-900 border-t border-slate-800 relative">
+                {/* Emoji Picker */}
+                <AnimatePresence>
+                  {showEmoji && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute bottom-20 right-4 bg-slate-800 border border-slate-700 rounded-2xl p-3 shadow-xl z-10"
+                      data-testid="emoji-picker"
+                    >
+                      <div className="grid grid-cols-8 gap-1">
+                        {EMOJI_LIST.map((emoji, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => addEmoji(emoji)}
+                            className="w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-700 rounded-lg transition-colors"
+                            data-testid={`emoji-${i}`}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                   <div className="flex gap-1">
                     <button type="button" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-violet-400 hover:bg-slate-700 transition-colors" data-testid="button-attach">
@@ -360,7 +399,12 @@ export default function Chat() {
                       disabled={sending}
                       data-testid="input-message"
                     />
-                    <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-yellow-400 transition-colors" data-testid="button-emoji">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowEmoji(!showEmoji)}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${showEmoji ? "text-yellow-400" : "text-slate-400 hover:text-yellow-400"}`}
+                      data-testid="button-emoji"
+                    >
                       <Smile className="w-5 h-5" />
                     </button>
                   </div>
