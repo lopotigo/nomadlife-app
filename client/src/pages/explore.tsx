@@ -365,12 +365,37 @@ export default function Explore() {
 
         {/* Map Background */}
         <div ref={mapRef} className="flex-1 bg-[#e8e4df] relative cursor-grab active:cursor-grabbing overflow-hidden">
-          {/* World Map Image */}
-          <img 
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Equirectangular_projection_SW.jpg/2560px-Equirectangular_projection_SW.jpg"
-            alt="World Map"
-            className="absolute inset-0 w-full h-full object-cover opacity-70"
-          />
+          {/* World Map SVG */}
+          <svg 
+            viewBox="0 0 1000 500" 
+            className="absolute inset-0 w-full h-full"
+            style={{ background: "linear-gradient(180deg, #87CEEB 0%, #B0E0E6 50%, #E0F7FA 100%)" }}
+          >
+            {/* Ocean background */}
+            <rect width="1000" height="500" fill="#B4D4E7" />
+            
+            {/* Simplified world continents */}
+            {/* North America */}
+            <path d="M50,80 Q120,60 180,90 L220,120 Q250,150 240,200 L200,250 Q150,280 100,260 L60,200 Q30,150 50,80" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+            
+            {/* South America */}
+            <path d="M180,280 Q220,270 240,300 L260,380 Q250,450 200,480 L160,460 Q140,400 150,340 L180,280" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+            
+            {/* Europe */}
+            <path d="M440,80 Q500,60 540,90 L560,130 Q550,160 520,170 L480,160 Q450,140 440,110 L440,80" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+            
+            {/* Africa */}
+            <path d="M460,180 Q520,170 560,200 L580,280 Q570,380 500,420 L440,400 Q420,320 440,240 L460,180" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+            
+            {/* Asia */}
+            <path d="M560,60 Q700,40 800,80 L860,140 Q880,200 840,260 L760,280 Q680,290 620,260 L580,200 Q560,140 560,60" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+            
+            {/* Australia */}
+            <path d="M760,340 Q820,320 860,360 L870,420 Q850,460 800,460 L760,440 Q740,400 760,340" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+            
+            {/* Indonesia/Southeast Asia */}
+            <path d="M720,260 Q780,250 820,280 L840,320 Q820,340 780,330 L740,310 Q720,290 720,260" fill="#C5D5C5" stroke="#9AB59A" strokeWidth="1"/>
+          </svg>
           
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/20 pointer-events-none" />
