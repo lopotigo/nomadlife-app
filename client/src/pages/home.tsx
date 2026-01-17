@@ -119,10 +119,15 @@ function StoryRail() {
 }
 
 function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) => void }) {
+  const [, navigate] = useLocation();
   const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
+
+  const handleProfileClick = () => {
+    navigate(`/user/${post.user.id}`);
+  };
 
   return (
     <motion.article 
@@ -133,9 +138,21 @@ function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) =
     >
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src={post.user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"} alt={post.user.name} className="w-10 h-10 rounded-full object-cover" />
+          <img 
+            src={post.user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"} 
+            alt={post.user.name} 
+            className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={handleProfileClick}
+            data-testid={`avatar-${post.id}`}
+          />
           <div>
-            <h3 className="text-sm font-bold leading-none" data-testid={`text-username-${post.id}`}>{post.user.name}</h3>
+            <h3 
+              className="text-sm font-bold leading-none cursor-pointer hover:text-primary transition-colors" 
+              data-testid={`text-username-${post.id}`}
+              onClick={handleProfileClick}
+            >
+              {post.user.name}
+            </h3>
             <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
               <span>{post.user.location}</span>
               <span>•</span>

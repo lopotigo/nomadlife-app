@@ -9,6 +9,7 @@ import { AuthProvider } from "@/lib/auth";
 import Home from "@/pages/home";
 import Explore from "@/pages/explore";
 import Profile from "@/pages/profile";
+import UserProfile from "@/pages/user-profile";
 import Chat from "@/pages/chat";
 import Coworking from "@/pages/coworking";
 import Subscription from "@/pages/subscription";
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/chat" component={Chat} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/profile" component={Profile} />
+      <Route path="/user/:id" component={UserProfile} />
       <Route component={NotFound} />
     </Switch>
   );
