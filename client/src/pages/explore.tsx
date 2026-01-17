@@ -219,8 +219,8 @@ export default function Explore() {
   }
 
   return (
-    <Layout>
-      <div className="flex flex-col h-[calc(100vh-64px)] md:h-screen relative overflow-hidden">
+    <Layout fullWidth>
+      <div className="flex flex-col min-h-[500px] h-[calc(100dvh-64px)] md:h-screen relative overflow-hidden">
         {/* Header / Search */}
         <div className="absolute top-4 inset-x-4 z-40 space-y-2">
           <div className="bg-card/90 backdrop-blur-xl border border-border/40 p-2 rounded-2xl shadow-xl flex items-center gap-2">
