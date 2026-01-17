@@ -290,12 +290,16 @@ export default function Explore() {
         </div>
 
         {/* Map Background */}
-        <div className="flex-1 bg-[#f8f5f2] relative cursor-grab active:cursor-grabbing overflow-hidden">
-          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/topography.png')] pointer-events-none" />
+        <div className="flex-1 bg-[#e8e4df] relative cursor-grab active:cursor-grabbing overflow-hidden">
+          {/* World Map Image */}
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Equirectangular_projection_SW.jpg/2560px-Equirectangular_projection_SW.jpg"
+            alt="World Map"
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
+          />
           
-          <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-            <Globe className="w-[80%] h-[80%] stroke-[0.5]" />
-          </div>
+          {/* Overlay gradient for better marker visibility */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white/30 pointer-events-none" />
 
           {/* City Markers */}
           {CITIES.map(city => (
