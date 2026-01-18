@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Map, Briefcase, User, MessageSquare, BarChart3 } from "lucide-react";
+import { Home, Map, Briefcase, User, MessageSquare } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,7 +34,6 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/explore" icon={Map} label="Explore" active={location === "/explore"} />
           <NavItem href="/chat" icon={MessageSquare} label="Messages" active={location === "/chat"} />
           <NavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
-          <NavItem href="/analytics" icon={BarChart3} label="Analytics" active={location === "/analytics"} />
           <NavItem href="/profile" icon={User} label="Profile" active={location === "/profile"} />
         </nav>
 

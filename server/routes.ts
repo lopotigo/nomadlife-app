@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { createRepository, pushFile, getGitHubUser } from "./github";
 
 // Configure Passport Local Strategy
 passport.use(
@@ -370,6 +371,110 @@ export async function registerRoutes(
     try {
       const analytics = await storage.getAnalytics();
       res.send(analytics);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== GITHUB ROUTES ==========
+  app.post("/api/github/create-analytics-dashboard", requireAuth, async (req, res) => {
+    try {
+      const githubUser = await getGitHubUser();
+      const repoName = "nomadlife-analytics-dashboard";
+      const repoDescription = "Animated Analytics Dashboard for NomadLife - React + Recharts + Framer Motion";
+      
+      const repo = await createRepository(repoName, repoDescription, false);
+      
+      const analyticsCode = [
+        '// NomadLife Analytics Dashboard',
+        '// React component with animated charts using Recharts and Framer Motion',
+        '',
+        'import { useEffect, useState } from "react";',
+        'import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";',
+        'import { motion } from "framer-motion";',
+        'import { Users, FileText, Calendar, CreditCard, TrendingUp } from "lucide-react";',
+        '',
+        'interface Analytics {',
+        '  totalUsers: number;',
+        '  premiumUsers: number;',
+        '  totalPosts: number;',
+        '  totalBookings: number;',
+        '  totalMessages: number;',
+        '  recentActivity: { date: string; users: number; posts: number; bookings: number }[];',
+        '  postsByCity: { city: string; count: number }[];',
+        '}',
+        '',
+        'function AnimatedCounter({ value }: { value: number }) {',
+        '  const [count, setCount] = useState(0);',
+        '  useEffect(() => {',
+        '    let start = 0;',
+        '    const timer = setInterval(() => { start += 1; setCount(start); if (start >= value) clearInterval(timer); }, 20);',
+        '    return () => clearInterval(timer);',
+        '  }, [value]);',
+        '  return <span>{count}</span>;',
+        '}',
+        '',
+        'export default function AnalyticsDashboard({ analytics }: { analytics: Analytics }) {',
+        '  const mrr = analytics.premiumUsers * 29;',
+        '  return (',
+        '    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">',
+        '      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-8">',
+        '        <h1 className="text-3xl font-black text-white">Analytics Dashboard</h1>',
+        '      </motion.div>',
+        '      <div className="grid grid-cols-4 gap-4 mb-8">',
+        '        <KPICard title="Users" value={analytics.totalUsers} icon={Users} />',
+        '        <KPICard title="Premium" value={analytics.premiumUsers} icon={CreditCard} />',
+        '        <KPICard title="Posts" value={analytics.totalPosts} icon={FileText} />',
+        '        <KPICard title="Bookings" value={analytics.totalBookings} icon={Calendar} />',
+        '      </div>',
+        '      <div className="bg-green-500 rounded-2xl p-6 text-white mb-8">',
+        '        <p>Monthly Revenue: $<AnimatedCounter value={mrr} /></p>',
+        '      </div>',
+        '    </div>',
+        '  );',
+        '}',
+        '',
+        'function KPICard({ title, value, icon: Icon }: any) {',
+        '  return (',
+        '    <div className="bg-slate-800 rounded-2xl p-4">',
+        '      <Icon className="w-5 h-5 text-white" />',
+        '      <p className="text-2xl font-black text-white"><AnimatedCounter value={value} /></p>',
+        '      <p className="text-xs text-slate-400">{title}</p>',
+        '    </div>',
+        '  );',
+        '}',
+      ].join('\n');
+
+      const readmeContent = [
+        '# NomadLife Analytics Dashboard',
+        '',
+        'An animated analytics dashboard built with React, Recharts, and Framer Motion.',
+        '',
+        '## Features',
+        '- Animated KPI Cards with counting animations',
+        '- Interactive Charts (Area, Bar, Pie)',
+        '- Glassmorphism dark theme design',
+        '- Real-time data from API',
+        '',
+        '## Tech Stack',
+        '- React 18',
+        '- Recharts',
+        '- Framer Motion',
+        '- Tailwind CSS',
+        '- Lucide React Icons',
+        '',
+        '## License',
+        'MIT',
+      ].join('\n');
+
+      await pushFile(githubUser.login, repoName, "src/AnalyticsDashboard.tsx", analyticsCode, "Add Analytics Dashboard component");
+      await pushFile(githubUser.login, repoName, "README.md", readmeContent, "Add README");
+      
+      res.send({ 
+        success: true, 
+        repository: repo.html_url,
+        message: "Repository created at " + repo.html_url
+      });
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }
