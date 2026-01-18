@@ -13,6 +13,7 @@ import UserProfile from "@/pages/user-profile";
 import Chat from "@/pages/chat";
 import Coworking from "@/pages/coworking";
 import Subscription from "@/pages/subscription";
+import Analytics from "@/pages/analytics";
 import Auth from "@/pages/auth";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/subscription" component={Subscription} />
       <Route path="/profile" component={Profile} />
       <Route path="/user/:id" component={UserProfile} />
+      <Route path="/analytics" component={Analytics} />
       <Route component={NotFound} />
     </Switch>
   );

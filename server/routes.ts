@@ -365,5 +365,15 @@ export async function registerRoutes(
     }
   });
 
+  // ========== ANALYTICS ROUTES ==========
+  app.get("/api/analytics", requireAuth, async (req, res) => {
+    try {
+      const analytics = await storage.getAnalytics();
+      res.send(analytics);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   return httpServer;
 }
