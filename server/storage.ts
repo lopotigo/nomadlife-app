@@ -29,6 +29,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
 
@@ -106,6 +107,10 @@ export class DrizzleStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const result = await this.db.select().from(schema.users).where(eq(schema.users.email, email));
     return result[0];
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await this.db.select().from(schema.users).orderBy(desc(schema.users.createdAt));
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {

@@ -3,75 +3,10 @@ import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation, useSearch } from "wouter";
 import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import type { ChatGroup, Message, User } from "@shared/schema";
 
 type MessageWithSender = Message & { sender: User };
-
-type PrivateChat = {
-  id: string;
-  name: string;
-  username: string;
-  avatar: string;
-  location: string;
-  isOnline: boolean;
-  lastMessage?: string;
-};
-
-const nomadProfiles: PrivateChat[] = [
-  {
-    id: "1",
-    name: "Sofia Martinez",
-    username: "sofiatravels",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-    location: "Bali, Indonesia",
-    isOnline: true,
-    lastMessage: "Hey! Are you coming to the meetup?",
-  },
-  {
-    id: "2",
-    name: "James Chen",
-    username: "jamesdigital",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    location: "Lisbon, Portugal",
-    isOnline: true,
-    lastMessage: "The coworking space is amazing!",
-  },
-  {
-    id: "3",
-    name: "Emma Wilson",
-    username: "emmawanders",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    location: "Chiang Mai, Thailand",
-    isOnline: false,
-    lastMessage: "Thanks for the recommendation!",
-  },
-  {
-    id: "4",
-    name: "Lucas Silva",
-    username: "lucascode",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    location: "Barcelona, Spain",
-    isOnline: true,
-    lastMessage: "Let's catch up soon!",
-  },
-  {
-    id: "5",
-    name: "Mia Anderson",
-    username: "mianomad",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-    location: "Mexico City, Mexico",
-    isOnline: false,
-  },
-  {
-    id: "6",
-    name: "Alex Kowalski",
-    username: "alexremote",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    location: "Berlin, Germany",
-    isOnline: true,
-  },
-];
 
 const GROUP_COLORS = [
   "from-violet-500 to-purple-600",
@@ -90,24 +25,15 @@ export default function Chat() {
 
   const [activeTab, setActiveTab] = useState<"groups" | "private">(privateUserId ? "private" : "groups");
   const [groups, setGroups] = useState<ChatGroup[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
-  const [selectedPrivate, setSelectedPrivate] = useState<PrivateChat | null>(null);
-  const [messages, setMessages] = useState<MessageWithSender[]>([]);
-  const [privateMessages, setPrivateMessages] = useState<{ id: string; content: string; isOwn: boolean; time: string }[]>([]);
+  const [selectedPrivateUser, setSelectedPrivateUser] = useState<User | null>(null);
+  const [groupMessages, setGroupMessages] = useState<MessageWithSender[]>([]);
+  const [privateMessages, setPrivateMessages] = useState<MessageWithSender[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (privateUserId) {
-      const profile = nomadProfiles.find(p => p.id === privateUserId);
-      if (profile) {
-        setSelectedPrivate(profile);
-        setActiveTab("private");
-      }
-    }
-  }, [privateUserId]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -116,24 +42,46 @@ export default function Chat() {
       return;
     }
 
-    fetch("/api/chat-groups", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setGroups(Array.isArray(data) ? data : []))
+    Promise.all([
+      fetch("/api/chat-groups", { credentials: "include" }).then(res => res.json()),
+      fetch("/api/users", { credentials: "include" }).then(res => res.json())
+    ])
+      .then(([groupsData, usersData]) => {
+        setGroups(Array.isArray(groupsData) ? groupsData : []);
+        const otherUsers = Array.isArray(usersData) ? usersData.filter((u: User) => u.id !== user.id) : [];
+        setAllUsers(otherUsers);
+        
+        if (privateUserId) {
+          const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
+          if (targetUser) {
+            setSelectedPrivateUser(targetUser);
+            setActiveTab("private");
+          }
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user, authLoading, setLocation]);
+  }, [user, authLoading, setLocation, privateUserId]);
 
   useEffect(() => {
     if (!selectedGroup) return;
     fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setMessages(Array.isArray(data) ? data : []))
+      .then(res => res.json())
+      .then(data => setGroupMessages(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, [selectedGroup]);
 
   useEffect(() => {
+    if (!selectedPrivateUser || !user) return;
+    fetch(`/api/messages/private/${selectedPrivateUser.id}`, { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setPrivateMessages(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  }, [selectedPrivateUser, user]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, privateMessages]);
+  }, [groupMessages, privateMessages]);
 
   const handleSendGroupMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +96,7 @@ export default function Chat() {
       });
       if (res.ok) {
         const message = await res.json();
-        setMessages((prev) => [...prev, { ...message, sender: user }]);
+        setGroupMessages(prev => [...prev, { ...message, sender: user }]);
         setNewMessage("");
       }
     } catch (error) {
@@ -158,17 +106,27 @@ export default function Chat() {
     }
   };
 
-  const handleSendPrivateMessage = (e: React.FormEvent) => {
+  const handleSendPrivateMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedPrivate) return;
-    const now = new Date();
-    setPrivateMessages(prev => [...prev, {
-      id: Date.now().toString(),
-      content: newMessage,
-      isOwn: true,
-      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }]);
-    setNewMessage("");
+    if (!newMessage.trim() || !selectedPrivateUser || !user) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ groupId: null, receiverId: selectedPrivateUser.id, content: newMessage }),
+      });
+      if (res.ok) {
+        const message = await res.json();
+        setPrivateMessages(prev => [...prev, { ...message, sender: user }]);
+        setNewMessage("");
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setSending(false);
+    }
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -183,14 +141,14 @@ export default function Chat() {
     );
   }
 
-  const hasActiveChat = selectedGroup || selectedPrivate;
+  const hasActiveChat = selectedGroup || selectedPrivateUser;
+  const currentMessages = selectedGroup ? groupMessages : privateMessages;
 
   return (
     <Layout>
       <div className="flex h-[calc(100vh-64px)] md:h-screen bg-slate-900">
         {/* Left Sidebar - Chat List */}
         <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} md:flex flex-col w-full md:w-80 lg:w-96 bg-slate-900 border-r border-slate-800`}>
-          {/* Header */}
           <div className="p-4 border-b border-slate-800">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-xl font-bold text-white">Messages</h1>
@@ -209,86 +167,77 @@ export default function Chat() {
               />
             </div>
 
-            {/* Tabs */}
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => { setActiveTab("private"); setSelectedGroup(null); }}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  activeTab === "private"
-                    ? "bg-violet-500 text-white"
-                    : "bg-slate-800 text-slate-400 hover:text-white"
+                  activeTab === "private" ? "bg-violet-500 text-white" : "bg-slate-800 text-slate-400 hover:text-white"
                 }`}
                 data-testid="tab-private"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <Send className="w-4 h-4" />
-                  Direct
+                  <Send className="w-4 h-4" /> Direct
                 </div>
               </button>
               <button
-                onClick={() => { setActiveTab("groups"); setSelectedPrivate(null); }}
+                onClick={() => { setActiveTab("groups"); setSelectedPrivateUser(null); }}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  activeTab === "groups"
-                    ? "bg-violet-500 text-white"
-                    : "bg-slate-800 text-slate-400 hover:text-white"
+                  activeTab === "groups" ? "bg-violet-500 text-white" : "bg-slate-800 text-slate-400 hover:text-white"
                 }`}
                 data-testid="tab-groups"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Groups
+                  <Users className="w-4 h-4" /> Groups
                 </div>
               </button>
             </div>
           </div>
 
-          {/* Chat List */}
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {activeTab === "private" ? (
-              nomadProfiles.map((profile) => (
-                <button
-                  key={profile.id}
-                  onClick={() => { setSelectedPrivate(profile); setSelectedGroup(null); }}
-                  className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                    selectedPrivate?.id === profile.id
-                      ? "bg-violet-500/20 border border-violet-500/50"
-                      : "hover:bg-slate-800"
-                  }`}
-                  data-testid={`chat-private-${profile.id}`}
-                >
-                  <div className="relative">
-                    <img
-                      src={profile.avatar}
-                      alt={profile.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                    {profile.isOnline && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="font-semibold text-white text-sm truncate">{profile.name}</p>
-                      {profile.isOnline && (
-                        <span className="text-[10px] text-green-400">online</span>
+              allUsers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <Send className="w-10 h-10 text-slate-600 mb-4" />
+                  <p className="text-slate-400 font-medium">No users found</p>
+                </div>
+              ) : (
+                allUsers.map(u => (
+                  <button
+                    key={u.id}
+                    onClick={() => { setSelectedPrivateUser(u); setSelectedGroup(null); }}
+                    className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
+                      selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
+                    }`}
+                    data-testid={`chat-private-${u.id}`}
+                  >
+                    <div className="relative">
+                      {u.avatar ? (
+                        <img src={u.avatar} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                          {u.name.charAt(0)}
+                        </div>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 truncate">{profile.location}</p>
-                    {profile.lastMessage && (
-                      <p className="text-xs text-slate-400 truncate mt-1">{profile.lastMessage}</p>
-                    )}
-                  </div>
-                </button>
-              ))
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-white text-sm truncate">{u.name}</p>
+                      <p className="text-xs text-slate-500 truncate">@{u.username}</p>
+                      {u.location && (
+                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3" /> {u.location}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ))
+              )
             ) : (
               groups.map((group, index) => (
                 <button
                   key={group.id}
-                  onClick={() => { setSelectedGroup(group); setSelectedPrivate(null); }}
+                  onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); }}
                   className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                    selectedGroup?.id === group.id
-                      ? "bg-violet-500/20 border border-violet-500/50"
-                      : "hover:bg-slate-800"
+                    selectedGroup?.id === group.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
                   }`}
                   data-testid={`chat-group-${group.id}`}
                 >
@@ -311,33 +260,27 @@ export default function Chat() {
         <main className={`${!hasActiveChat && isMobile ? 'hidden' : 'flex'} flex-1 flex-col bg-slate-950`}>
           {hasActiveChat ? (
             <>
-              {/* Chat Header */}
               <header className="p-4 bg-slate-900 border-b border-slate-800 flex items-center gap-3">
                 <button
-                  onClick={() => { setSelectedGroup(null); setSelectedPrivate(null); }}
+                  onClick={() => { setSelectedGroup(null); setSelectedPrivateUser(null); }}
                   className="md:hidden w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"
                   data-testid="button-back"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 
-                {selectedPrivate ? (
+                {selectedPrivateUser ? (
                   <>
-                    <div className="relative">
-                      <img
-                        src={selectedPrivate.avatar}
-                        alt={selectedPrivate.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      {selectedPrivate.isOnline && (
-                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-slate-900" />
-                      )}
-                    </div>
+                    {selectedPrivateUser.avatar ? (
+                      <img src={selectedPrivateUser.avatar} alt={selectedPrivateUser.name} className="w-10 h-10 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                        {selectedPrivateUser.name.charAt(0)}
+                      </div>
+                    )}
                     <div className="flex-1">
-                      <h2 className="font-bold text-white">{selectedPrivate.name}</h2>
-                      <p className="text-xs text-slate-400">
-                        {selectedPrivate.isOnline ? "Online" : "Offline"} • {selectedPrivate.location}
-                      </p>
+                      <h2 className="font-bold text-white">{selectedPrivateUser.name}</h2>
+                      <p className="text-xs text-slate-400">@{selectedPrivateUser.username}</p>
                     </div>
                   </>
                 ) : selectedGroup ? (
@@ -365,78 +308,74 @@ export default function Chat() {
                 </div>
               </header>
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {selectedPrivate ? (
-                  privateMessages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                      <img
-                        src={selectedPrivate.avatar}
-                        alt={selectedPrivate.name}
-                        className="w-20 h-20 rounded-full object-cover mb-4"
-                      />
-                      <h3 className="font-bold text-white text-lg">{selectedPrivate.name}</h3>
-                      <p className="text-slate-500 text-sm mt-1">Start a conversation!</p>
-                    </div>
-                  ) : (
-                    privateMessages.map((msg) => (
-                      <div key={msg.id} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${
-                          msg.isOwn
-                            ? 'bg-violet-500 text-white rounded-br-sm'
-                            : 'bg-slate-800 text-white rounded-bl-sm'
-                        }`}>
-                          <p className="text-sm">{msg.content}</p>
-                          <p className={`text-[10px] mt-1 ${msg.isOwn ? 'text-violet-200' : 'text-slate-500'}`}>{msg.time}</p>
-                        </div>
-                      </div>
-                    ))
-                  )
-                ) : selectedGroup ? (
-                  messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                      <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-2xl mb-4`}>
-                        {selectedGroup.name[0]}
-                      </div>
-                      <h3 className="font-bold text-white text-lg">{selectedGroup.name}</h3>
-                      <p className="text-slate-500 text-sm mt-1">Be the first to say hello!</p>
-                    </div>
-                  ) : (
-                    messages.map((msg, idx) => {
-                      const isOwn = msg.senderId === user?.id;
-                      const showAvatar = !isOwn && (idx === 0 || messages[idx - 1].senderId !== msg.senderId);
-                      return (
-                        <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end gap-2`}>
-                          {!isOwn && (
-                            <div className={`w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
-                              {msg.sender?.avatar ? (
-                                <img src={msg.sender.avatar} alt="" className="w-full h-full rounded-full object-cover" />
-                              ) : (
-                                msg.sender?.name?.[0] || "?"
-                              )}
-                            </div>
-                          )}
-                          <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${
-                            isOwn
-                              ? 'bg-violet-500 text-white rounded-br-sm'
-                              : 'bg-slate-800 text-white rounded-bl-sm'
-                          }`}>
-                            {!isOwn && showAvatar && (
-                              <p className="text-xs font-semibold text-violet-400 mb-1">{msg.sender?.name}</p>
-                            )}
-                            <p className="text-sm">{msg.content}</p>
+                {currentMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    {selectedPrivateUser ? (
+                      <>
+                        {selectedPrivateUser.avatar ? (
+                          <img src={selectedPrivateUser.avatar} alt={selectedPrivateUser.name} className="w-20 h-20 rounded-full object-cover mb-4" />
+                        ) : (
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl mb-4">
+                            {selectedPrivateUser.name.charAt(0)}
                           </div>
+                        )}
+                        <h3 className="font-bold text-white text-lg">{selectedPrivateUser.name}</h3>
+                        <p className="text-slate-500 text-sm mt-1">Start a conversation!</p>
+                      </>
+                    ) : selectedGroup ? (
+                      <>
+                        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-2xl mb-4`}>
+                          {selectedGroup.name[0]}
                         </div>
-                      );
-                    })
-                  )
-                ) : null}
+                        <h3 className="font-bold text-white text-lg">{selectedGroup.name}</h3>
+                        <p className="text-slate-500 text-sm mt-1">Be the first to say hello!</p>
+                      </>
+                    ) : null}
+                  </div>
+                ) : (
+                  currentMessages.map((msg, idx) => {
+                    const isOwn = msg.senderId === user?.id;
+                    const showAvatar = !isOwn && (idx === 0 || currentMessages[idx - 1].senderId !== msg.senderId);
+                    return (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end gap-2`}
+                        data-testid={`message-${msg.id}`}
+                      >
+                        {!isOwn && (
+                          <div className={`w-7 h-7 rounded-full overflow-hidden ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
+                            {msg.sender?.avatar ? (
+                              <img src={msg.sender.avatar} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold">
+                                {msg.sender?.name?.[0] || "?"}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${
+                          isOwn ? 'bg-violet-500 text-white rounded-br-sm' : 'bg-slate-800 text-white rounded-bl-sm'
+                        }`}>
+                          {!isOwn && showAvatar && selectedGroup && (
+                            <p className="text-xs font-semibold text-violet-400 mb-1">{msg.sender?.name}</p>
+                          )}
+                          <p className="text-sm">{msg.content}</p>
+                          <p className={`text-[10px] mt-1 ${isOwn ? 'text-violet-200' : 'text-slate-500'}`}>
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Message Input */}
               <form
-                onSubmit={selectedPrivate ? handleSendPrivateMessage : handleSendGroupMessage}
+                onSubmit={selectedPrivateUser ? handleSendPrivateMessage : handleSendGroupMessage}
                 className="p-4 bg-slate-900 border-t border-slate-800 flex gap-2"
               >
                 <input

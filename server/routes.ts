@@ -104,6 +104,16 @@ export async function registerRoutes(
   });
 
   // ========== USER ROUTES ==========
+  app.get("/api/users", requireAuth, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.send(usersWithoutPasswords);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/users/:id", async (req, res) => {
     try {
       const user = await storage.getUser(req.params.id);

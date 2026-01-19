@@ -310,7 +310,7 @@ export default function MapFeed() {
           </div>
         </main>
 
-        <ProfilesSidebar />
+        <ProfilesSidebar currentUserId={user?.id || ""} />
       </div>
 
       <AnimatePresence>
@@ -392,71 +392,19 @@ export default function MapFeed() {
   );
 }
 
-const nomadProfiles = [
-  {
-    id: "1",
-    name: "Sofia Martinez",
-    username: "sofiatravels",
-    location: "Bali, Indonesia",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-    bio: "Digital marketer exploring Southeast Asia",
-    countriesVisited: 23,
-    isOnline: true,
-  },
-  {
-    id: "2",
-    name: "James Chen",
-    username: "jamesdigital",
-    location: "Lisbon, Portugal",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    bio: "Full-stack developer & coffee enthusiast",
-    countriesVisited: 31,
-    isOnline: true,
-  },
-  {
-    id: "3",
-    name: "Emma Wilson",
-    username: "emmawanders",
-    location: "Chiang Mai, Thailand",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    bio: "UX designer living the remote life",
-    countriesVisited: 18,
-    isOnline: false,
-  },
-  {
-    id: "4",
-    name: "Lucas Silva",
-    username: "lucascode",
-    location: "Barcelona, Spain",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    bio: "Startup founder, surfing when not coding",
-    countriesVisited: 27,
-    isOnline: true,
-  },
-  {
-    id: "5",
-    name: "Mia Anderson",
-    username: "mianomad",
-    location: "Mexico City, Mexico",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-    bio: "Content creator & travel photographer",
-    countriesVisited: 42,
-    isOnline: false,
-  },
-  {
-    id: "6",
-    name: "Alex Kowalski",
-    username: "alexremote",
-    location: "Berlin, Germany",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    bio: "Product manager working across time zones",
-    countriesVisited: 15,
-    isOnline: true,
-  },
-];
-
-function ProfilesSidebar() {
+function ProfilesSidebar({ currentUserId }: { currentUserId: string }) {
   const [, setLocation] = useLocation();
+  const [users, setUsers] = useState<UserType[]>([]);
+
+  useEffect(() => {
+    fetch("/api/users", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        const otherUsers = Array.isArray(data) ? data.filter((u: UserType) => u.id !== currentUserId) : [];
+        setUsers(otherUsers.slice(0, 6));
+      })
+      .catch(console.error);
+  }, [currentUserId]);
 
   return (
     <aside className="w-80 bg-slate-900 border-l border-slate-800 hidden xl:flex flex-col">
@@ -468,7 +416,7 @@ function ProfilesSidebar() {
       </div>
       
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
-        {nomadProfiles.map((profile) => (
+        {users.map((profile) => (
           <div
             key={profile.id}
             onClick={() => setLocation(`/chat?user=${profile.id}`)}
@@ -477,32 +425,34 @@ function ProfilesSidebar() {
           >
             <div className="flex items-start gap-3">
               <div className="relative">
-                <img
-                  src={profile.avatar}
-                  alt={profile.name}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-slate-700"
-                />
-                {profile.isOnline && (
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-slate-700"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold border-2 border-slate-700">
+                    {profile.name.charAt(0)}
+                  </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-sm truncate">{profile.name}</p>
-                  {profile.isOnline && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded-full">Online</span>
-                  )}
                 </div>
                 <p className="text-xs text-slate-500">@{profile.username}</p>
-                <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                  <MapPin className="w-3 h-3 text-teal-400" /> {profile.location}
-                </p>
+                {profile.location && (
+                  <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                    <MapPin className="w-3 h-3 text-teal-400" /> {profile.location}
+                  </p>
+                )}
               </div>
             </div>
-            <p className="text-xs text-slate-400 mt-2 line-clamp-2">{profile.bio}</p>
+            {profile.bio && <p className="text-xs text-slate-400 mt-2 line-clamp-2">{profile.bio}</p>}
             <div className="flex items-center justify-between mt-3">
               <span className="text-xs text-slate-500">
-                <span className="text-teal-400 font-semibold">{profile.countriesVisited}</span> countries
+                <span className="text-teal-400 font-semibold">{profile.countriesVisited || 0}</span> countries
               </span>
               <span className="text-xs text-teal-400 flex items-center gap-1">
                 <MessageCircle className="w-3 h-3" /> Chat
