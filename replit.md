@@ -65,8 +65,12 @@ API routes follow RESTful conventions under the `/api` prefix. Protected routes 
   - Fields: id, username, email, password (hashed), name, bio, avatar, location, isPremium, countriesVisited, citiesVisited, coworkingSpaces
 - `posts` - Social feed posts with location tagging, GPS coordinates, and engagement metrics
   - Fields: id, userId, content, imageUrl, location, latitude, longitude, likes, commentsCount, createdAt
-- `places` - Coworking spaces and hotels with booking capabilities
-  - Fields: id, name, type, location, city, description, price, imageUrl, rating, reviews, tags
+- `places` - Coworking spaces, hotels, and hostels with booking capabilities
+  - Fields: id, name, type, location, city, country, description, price, pricePerNight, pricePerHour, imageUrl, rating, reviews, tags, amenities (array), capacity, latitude, longitude
+- `events` - Public and nomad-only events
+  - Fields: id, title, description, city, location, type (public/nomad), hostId, startDate, endDate, capacity, price, imageUrl, createdAt
+- `event_registrations` - User event registrations
+  - Fields: id, userId, eventId, registeredAt
 - `bookings` - User reservations for places
   - Fields: id, userId, placeId, checkInDate, guestName, status, createdAt
 - `chatGroups` - Group chat rooms organized by city
@@ -115,11 +119,20 @@ API routes follow RESTful conventions under the `/api` prefix. Protected routes 
 
 **Places & Bookings**:
 - `GET /api/places` - Get all places (optional filters: city, type)
+- `GET /api/places/search` - Advanced search with filters (query, city, type, priceMin, priceMax, amenities)
 - `GET /api/places/:id` - Get place by ID
 - `POST /api/places` - Create new place (authenticated)
 - `GET /api/bookings` - Get user's bookings (authenticated)
 - `POST /api/bookings` - Create booking (authenticated)
 - `DELETE /api/bookings/:id` - Cancel booking (authenticated)
+
+**Events**:
+- `GET /api/events` - Get all events (optional filters: city, type)
+- `GET /api/events/:id` - Get event by ID
+- `POST /api/events` - Create new event (authenticated)
+- `POST /api/events/:id/register` - Register for event (authenticated)
+- `DELETE /api/events/:id/register` - Cancel event registration (authenticated)
+- `GET /api/event-registrations` - Get user's event registrations (authenticated)
 
 **Chat & Messages**:
 - `GET /api/chat-groups` - Get all chat groups
@@ -169,11 +182,21 @@ The project uses a dual-build approach:
 - Logout from profile page
 
 ### ✅ Coworking Space Booking
-- Browse coworking spaces by type
+- Browse coworking spaces, hotels, and hostels
+- Advanced search with filters (city, type, price range, amenities)
+- Debounced search for performance (300ms)
+- Amenities filtering (WiFi, Kitchen, Meeting rooms, etc.)
 - View detailed place information
 - Booking modal with date and guest selection
 - Booking confirmation flow
 - View user's booking history
+
+### ✅ Events System
+- Browse public and nomad-only events
+- City-based event filtering
+- Event registration with one-click signup
+- Cancel event registrations
+- Event details with date, location, and pricing
 
 ### ✅ Group Messaging
 - City-based chat groups
