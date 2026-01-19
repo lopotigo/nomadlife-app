@@ -392,6 +392,7 @@ export default function MapFeed() {
 
         {showCreateForm && (
           <CreatePostModal
+            key={clickedCoords ? `${clickedCoords.lat}-${clickedCoords.lng}` : 'no-coords'}
             coords={clickedCoords}
             onClose={() => {
               setShowCreateForm(false);
@@ -604,8 +605,8 @@ function CreatePostModal({
 
           <Button
             onClick={handleSubmit}
-            disabled={!content.trim() || isSubmitting || isUploading}
-            className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+            disabled={!content.trim() || isSubmitting || isUploading || !latitude || !longitude}
+            className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 disabled:opacity-50"
             data-testid="button-submit-new-post"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Share</>}
