@@ -260,31 +260,33 @@ export default function MapFeed() {
 
         <aside className="w-80 bg-slate-900 border-l border-slate-800 p-4 hidden xl:block overflow-y-auto">
           <h2 className="text-lg font-bold mb-4">Nearby Nomads</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             {nearbyNomads.map((nomad) => (
               <Link key={nomad.id} href={`/user/${nomad.id}`}>
                 <div
-                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="relative rounded-2xl overflow-hidden bg-slate-800 hover:scale-105 transition-transform cursor-pointer group"
                   data-testid={`nomad-card-${nomad.id}`}
                 >
-                  <div className="w-12 h-12 rounded-full bg-slate-700 overflow-hidden">
+                  <div className="aspect-square w-full bg-slate-700 overflow-hidden">
                     {nomad.avatar ? (
-                      <img src={nomad.avatar} alt={nomad.name} className="w-full h-full object-cover" />
+                      <img src={nomad.avatar} alt={nomad.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-teal-400 font-bold">
+                      <div className="w-full h-full flex items-center justify-center text-teal-400 text-4xl font-bold bg-gradient-to-br from-slate-700 to-slate-800">
                         {nomad.name.charAt(0)}
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{nomad.name}</p>
-                    <p className="text-xs text-slate-500 truncate flex items-center gap-1">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                    <p className="font-medium text-sm truncate">{nomad.name}</p>
+                    <p className="text-xs text-slate-400 truncate flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      {nomad.location || "Somewhere on Earth"}
+                      {nomad.location || "Earth"}
                     </p>
                   </div>
                   {nomad.isPremium && (
-                    <Crown className="w-4 h-4 text-yellow-500" />
+                    <div className="absolute top-2 right-2 bg-yellow-500/90 rounded-full p-1">
+                      <Crown className="w-3 h-3 text-white" />
+                    </div>
                   )}
                 </div>
               </Link>
