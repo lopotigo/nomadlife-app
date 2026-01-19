@@ -1,12 +1,77 @@
 import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
-import { useLocation } from "wouter";
-import { Send, Image, MapPin, MoreVertical, Search, Plus, Loader2, ArrowLeft, Users, Smile, Paperclip, Phone, Video, Globe } from "lucide-react";
+import { useLocation, useSearch } from "wouter";
+import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ChatGroup, Message, User } from "@shared/schema";
 
 type MessageWithSender = Message & { sender: User };
+
+type PrivateChat = {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  location: string;
+  isOnline: boolean;
+  lastMessage?: string;
+};
+
+const nomadProfiles: PrivateChat[] = [
+  {
+    id: "1",
+    name: "Sofia Martinez",
+    username: "sofiatravels",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    location: "Bali, Indonesia",
+    isOnline: true,
+    lastMessage: "Hey! Are you coming to the meetup?",
+  },
+  {
+    id: "2",
+    name: "James Chen",
+    username: "jamesdigital",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    location: "Lisbon, Portugal",
+    isOnline: true,
+    lastMessage: "The coworking space is amazing!",
+  },
+  {
+    id: "3",
+    name: "Emma Wilson",
+    username: "emmawanders",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    location: "Chiang Mai, Thailand",
+    isOnline: false,
+    lastMessage: "Thanks for the recommendation!",
+  },
+  {
+    id: "4",
+    name: "Lucas Silva",
+    username: "lucascode",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    location: "Barcelona, Spain",
+    isOnline: true,
+    lastMessage: "Let's catch up soon!",
+  },
+  {
+    id: "5",
+    name: "Mia Anderson",
+    username: "mianomad",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    location: "Mexico City, Mexico",
+    isOnline: false,
+  },
+  {
+    id: "6",
+    name: "Alex Kowalski",
+    username: "alexremote",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    location: "Berlin, Germany",
+    isOnline: true,
+  },
+];
 
 const GROUP_COLORS = [
   "from-violet-500 to-purple-600",
@@ -14,41 +79,38 @@ const GROUP_COLORS = [
   "from-emerald-500 to-teal-600",
   "from-orange-500 to-red-600",
   "from-pink-500 to-rose-600",
-  "from-amber-500 to-yellow-600",
-];
-
-function getGroupColor(index: number) {
-  return GROUP_COLORS[index % GROUP_COLORS.length];
-}
-
-const EMOJI_LIST = [
-  "😀", "😂", "🥰", "😎", "🤔", "👍", "👋", "🙌",
-  "❤️", "🔥", "✨", "🎉", "🌍", "✈️", "🏖️", "🌴",
-  "☕", "💻", "📍", "🎒", "🌅", "🏄", "🧳", "🗺️",
 ];
 
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState("groups");
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const privateUserId = urlParams.get("user");
+
+  const [activeTab, setActiveTab] = useState<"groups" | "private">(privateUserId ? "private" : "groups");
   const [groups, setGroups] = useState<ChatGroup[]>([]);
-  const [selectedChat, setSelectedChat] = useState<ChatGroup | null>(null);
-  const [selectedChatIndex, setSelectedChatIndex] = useState(0);
+  const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
+  const [selectedPrivate, setSelectedPrivate] = useState<PrivateChat | null>(null);
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
+  const [privateMessages, setPrivateMessages] = useState<{ id: string; content: string; isOwn: boolean; time: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [showEmoji, setShowEmoji] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const addEmoji = (emoji: string) => {
-    setNewMessage(prev => prev + emoji);
-    setShowEmoji(false);
-  };
+  useEffect(() => {
+    if (privateUserId) {
+      const profile = nomadProfiles.find(p => p.id === privateUserId);
+      if (profile) {
+        setSelectedPrivate(profile);
+        setActiveTab("private");
+      }
+    }
+  }, [privateUserId]);
 
   useEffect(() => {
     if (authLoading) return;
-    
     if (!user) {
       setLocation("/auth");
       return;
@@ -62,35 +124,28 @@ export default function Chat() {
   }, [user, authLoading, setLocation]);
 
   useEffect(() => {
-    if (!selectedChat) return;
-
-    fetch(`/api/messages/group/${selectedChat.id}`, { credentials: "include" })
+    if (!selectedGroup) return;
+    fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setMessages(Array.isArray(data) ? data : []))
       .catch(console.error);
-  }, [selectedChat]);
+  }, [selectedGroup]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, privateMessages]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendGroupMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedChat || !user) return;
-
+    if (!newMessage.trim() || !selectedGroup || !user) return;
     setSending(true);
     try {
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          groupId: selectedChat.id,
-          receiverId: null,
-          content: newMessage,
-        }),
+        body: JSON.stringify({ groupId: selectedGroup.id, receiverId: null, content: newMessage }),
       });
-
       if (res.ok) {
         const message = await res.json();
         setMessages((prev) => [...prev, { ...message, sender: user }]);
@@ -103,326 +158,315 @@ export default function Chat() {
     }
   };
 
-  const selectChat = (group: ChatGroup, index: number) => {
-    setSelectedChat(group);
-    setSelectedChatIndex(index);
+  const handleSendPrivateMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedPrivate) return;
+    const now = new Date();
+    setPrivateMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      content: newMessage,
+      isOwn: true,
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
+    setNewMessage("");
   };
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   if (authLoading || loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center animate-pulse">
-              <Send className="w-8 h-8 text-white" />
-            </div>
-            <Loader2 className="w-6 h-6 animate-spin text-violet-400" />
-          </div>
+        <div className="flex items-center justify-center h-screen bg-slate-900">
+          <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
         </div>
       </Layout>
     );
   }
 
+  const hasActiveChat = selectedGroup || selectedPrivate;
+
   return (
     <Layout>
-      <div className="flex flex-col h-[calc(100vh-64px)] md:h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <AnimatePresence mode="wait">
-          {!selectedChat ? (
-            <motion.div
-              key="list"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="flex flex-col h-full"
-            >
-              {/* Header */}
-              <header className="p-6 pb-4">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h1 className="text-3xl font-display font-black text-white tracking-tight">Messages</h1>
-                    <p className="text-sm text-slate-400 mt-1">Connect with nomads worldwide</p>
+      <div className="flex h-[calc(100vh-64px)] md:h-screen bg-slate-900">
+        {/* Left Sidebar - Chat List */}
+        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} md:flex flex-col w-full md:w-80 lg:w-96 bg-slate-900 border-r border-slate-800`}>
+          {/* Header */}
+          <div className="p-4 border-b border-slate-800">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-bold text-white">Messages</h1>
+              <button className="w-10 h-10 bg-violet-500 text-white rounded-xl flex items-center justify-center hover:bg-violet-600 transition-colors" data-testid="button-new-chat">
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+                data-testid="input-search-chats"
+              />
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => { setActiveTab("private"); setSelectedGroup(null); }}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === "private"
+                    ? "bg-violet-500 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+                data-testid="tab-private"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Send className="w-4 h-4" />
+                  Direct
+                </div>
+              </button>
+              <button
+                onClick={() => { setActiveTab("groups"); setSelectedPrivate(null); }}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === "groups"
+                    ? "bg-violet-500 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+                data-testid="tab-groups"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Groups
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Chat List */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {activeTab === "private" ? (
+              nomadProfiles.map((profile) => (
+                <button
+                  key={profile.id}
+                  onClick={() => { setSelectedPrivate(profile); setSelectedGroup(null); }}
+                  className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
+                    selectedPrivate?.id === profile.id
+                      ? "bg-violet-500/20 border border-violet-500/50"
+                      : "hover:bg-slate-800"
+                  }`}
+                  data-testid={`chat-private-${profile.id}`}
+                >
+                  <div className="relative">
+                    <img
+                      src={profile.avatar}
+                      alt={profile.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    {profile.isOnline && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
+                    )}
                   </div>
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 text-white rounded-2xl shadow-lg shadow-violet-500/30 flex items-center justify-center"
-                    data-testid="button-new-chat"
-                  >
-                    <Plus className="w-6 h-6" />
-                  </motion.button>
-                </div>
-
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                  <input 
-                    type="text" 
-                    placeholder="Search conversations..." 
-                    className="w-full bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
-                    data-testid="input-search-chats"
-                  />
-                </div>
-
-                {/* Tabs */}
-                <div className="flex gap-2 mt-6">
-                  <button 
-                    onClick={() => setActiveTab("groups")}
-                    className={`flex-1 py-3 rounded-2xl text-sm font-bold transition-all ${
-                      activeTab === "groups" 
-                        ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30" 
-                        : "bg-slate-800/50 text-slate-400 hover:text-white"
-                    }`}
-                    data-testid="tab-groups"
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Groups
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-white text-sm truncate">{profile.name}</p>
+                      {profile.isOnline && (
+                        <span className="text-[10px] text-green-400">online</span>
+                      )}
                     </div>
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab("private")}
-                    className={`flex-1 py-3 rounded-2xl text-sm font-bold transition-all ${
-                      activeTab === "private" 
-                        ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30" 
-                        : "bg-slate-800/50 text-slate-400 hover:text-white"
-                    }`}
-                    data-testid="tab-private"
-                  >
-                    <div className="flex items-center justify-center gap-2">
-                      <Send className="w-4 h-4" />
-                      Direct
-                    </div>
-                  </button>
-                </div>
-              </header>
-
-              {/* Chat List */}
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
-                {activeTab === "groups" ? (
-                  groups.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <div className="w-20 h-20 rounded-3xl bg-slate-800/50 flex items-center justify-center mb-4">
-                        <Globe className="w-10 h-10 text-slate-600" />
-                      </div>
-                      <p className="text-slate-400 font-medium">No groups yet</p>
-                      <p className="text-slate-500 text-sm mt-1">Join a community to start chatting!</p>
-                    </div>
-                  ) : (
-                    groups.map((group, index) => (
-                      <motion.button 
-                        key={group.id} 
-                        onClick={() => selectChat(group, index)}
-                        whileHover={{ scale: 1.02, x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full p-4 flex items-center gap-4 bg-slate-800/30 hover:bg-slate-800/60 backdrop-blur-xl border border-slate-700/30 hover:border-slate-600/50 rounded-2xl transition-all text-left group"
-                        data-testid={`button-group-${group.id}`}
-                      >
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getGroupColor(index)} flex items-center justify-center text-white font-display font-bold text-xl shadow-lg`}>
-                          {group.name[0]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start">
-                            <span className="font-bold text-white text-base" data-testid={`text-group-name-${group.id}`}>
-                              {group.name}
-                            </span>
-                            <span className="text-[11px] text-slate-500 font-medium">
-                              {new Date(group.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-700/50 rounded-full text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-                              <MapPin className="w-3 h-3" />
-                              {group.city}
-                            </span>
-                            <span className="text-[11px] text-slate-500">
-                              {group.members} members
-                            </span>
-                          </div>
-                          <p className="text-sm text-slate-400 mt-2 truncate">
-                            {group.description}
-                          </p>
-                        </div>
-                      </motion.button>
-                    ))
-                  )
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-20 h-20 rounded-3xl bg-slate-800/50 flex items-center justify-center mb-4">
-                      <Send className="w-10 h-10 text-slate-600" />
-                    </div>
-                    <p className="text-slate-400 font-medium">No direct messages</p>
-                    <p className="text-slate-500 text-sm mt-1">Start a conversation with someone!</p>
+                    <p className="text-xs text-slate-500 truncate">{profile.location}</p>
+                    {profile.lastMessage && (
+                      <p className="text-xs text-slate-400 truncate mt-1">{profile.lastMessage}</p>
+                    )}
                   </div>
-                )}
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="chat"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="flex flex-col h-full"
-            >
+                </button>
+              ))
+            ) : (
+              groups.map((group, index) => (
+                <button
+                  key={group.id}
+                  onClick={() => { setSelectedGroup(group); setSelectedPrivate(null); }}
+                  className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
+                    selectedGroup?.id === group.id
+                      ? "bg-violet-500/20 border border-violet-500/50"
+                      : "hover:bg-slate-800"
+                  }`}
+                  data-testid={`chat-group-${group.id}`}
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg`}>
+                    {group.name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-white text-sm truncate">{group.name}</p>
+                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {group.city} • {group.members} members
+                    </p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </aside>
+
+        {/* Right Side - Chat Window */}
+        <main className={`${!hasActiveChat && isMobile ? 'hidden' : 'flex'} flex-1 flex-col bg-slate-950`}>
+          {hasActiveChat ? (
+            <>
               {/* Chat Header */}
-              <header className={`p-4 bg-gradient-to-r ${getGroupColor(selectedChatIndex)} bg-opacity-90 backdrop-blur-xl`}>
-                <div className="flex items-center gap-3">
-                  <motion.button 
-                    onClick={() => setSelectedChat(null)} 
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center text-white"
-                    data-testid="button-back"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </motion.button>
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center text-white font-display font-bold text-lg">
-                    {selectedChat.name[0]}
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="font-bold text-white text-lg leading-tight">{selectedChat.name}</h2>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                      <span className="text-white/70 text-xs">{selectedChat.members} members online</span>
+              <header className="p-4 bg-slate-900 border-b border-slate-800 flex items-center gap-3">
+                <button
+                  onClick={() => { setSelectedGroup(null); setSelectedPrivate(null); }}
+                  className="md:hidden w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"
+                  data-testid="button-back"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                
+                {selectedPrivate ? (
+                  <>
+                    <div className="relative">
+                      <img
+                        src={selectedPrivate.avatar}
+                        alt={selectedPrivate.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      {selectedPrivate.isOnline && (
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-slate-900" />
+                      )}
                     </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <button className="w-10 h-10 bg-white/10 backdrop-blur-xl rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors" data-testid="button-call">
-                      <Phone className="w-5 h-5" />
-                    </button>
-                    <button className="w-10 h-10 bg-white/10 backdrop-blur-xl rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors" data-testid="button-video">
-                      <Video className="w-5 h-5" />
-                    </button>
-                    <button className="w-10 h-10 bg-white/10 backdrop-blur-xl rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors" data-testid="button-more">
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
-                  </div>
+                    <div className="flex-1">
+                      <h2 className="font-bold text-white">{selectedPrivate.name}</h2>
+                      <p className="text-xs text-slate-400">
+                        {selectedPrivate.isOnline ? "Online" : "Offline"} • {selectedPrivate.location}
+                      </p>
+                    </div>
+                  </>
+                ) : selectedGroup ? (
+                  <>
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold`}>
+                      {selectedGroup.name[0]}
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="font-bold text-white">{selectedGroup.name}</h2>
+                      <p className="text-xs text-slate-400">{selectedGroup.members} members • {selectedGroup.city}</p>
+                    </div>
+                  </>
+                ) : null}
+
+                <div className="flex gap-1">
+                  <button className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                    <Phone className="w-4 h-4" />
+                  </button>
+                  <button className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                    <Video className="w-4 h-4" />
+                  </button>
+                  <button className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
                 </div>
               </header>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-900/50">
-                {messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${getGroupColor(selectedChatIndex)} flex items-center justify-center mb-4`}>
-                      <span className="text-3xl font-display font-bold text-white">{selectedChat.name[0]}</span>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {selectedPrivate ? (
+                  privateMessages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <img
+                        src={selectedPrivate.avatar}
+                        alt={selectedPrivate.name}
+                        className="w-20 h-20 rounded-full object-cover mb-4"
+                      />
+                      <h3 className="font-bold text-white text-lg">{selectedPrivate.name}</h3>
+                      <p className="text-slate-500 text-sm mt-1">Start a conversation!</p>
                     </div>
-                    <p className="text-white font-bold text-lg">Welcome to {selectedChat.name}</p>
-                    <p className="text-slate-500 text-sm mt-2 max-w-xs">
-                      This is the start of your journey with fellow nomads in {selectedChat.city}
-                    </p>
-                  </div>
-                ) : (
-                  messages.map((message, idx) => {
-                    const isOwn = message.senderId === user?.id;
-                    const showAvatar = !isOwn && (idx === 0 || messages[idx - 1].senderId !== message.senderId);
-                    
-                    return (
-                      <motion.div 
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className={`flex ${isOwn ? "justify-end" : "justify-start"} items-end gap-2`}
-                        data-testid={`message-${message.id}`}
-                      >
-                        {!isOwn && (
-                          <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white text-xs font-bold ${showAvatar ? "opacity-100" : "opacity-0"}`}>
-                            {message.sender.name?.[0] || "?"}
-                          </div>
-                        )}
-                        <div className={`max-w-[75%] ${
-                          isOwn 
-                            ? `bg-gradient-to-br ${getGroupColor(selectedChatIndex)} text-white rounded-2xl rounded-br-md shadow-lg` 
-                            : "bg-slate-800 text-white rounded-2xl rounded-bl-md"
-                        } px-4 py-3`}>
-                          {!isOwn && showAvatar && (
-                            <p className="text-[11px] font-bold text-violet-400 mb-1">{message.sender.name}</p>
-                          )}
-                          <p className="text-sm leading-relaxed">{message.content}</p>
-                          <p className={`text-[10px] mt-1 ${isOwn ? "text-white/50" : "text-slate-500"}`}>
-                            {new Date(message.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                          </p>
+                  ) : (
+                    privateMessages.map((msg) => (
+                      <div key={msg.id} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${
+                          msg.isOwn
+                            ? 'bg-violet-500 text-white rounded-br-sm'
+                            : 'bg-slate-800 text-white rounded-bl-sm'
+                        }`}>
+                          <p className="text-sm">{msg.content}</p>
+                          <p className={`text-[10px] mt-1 ${msg.isOwn ? 'text-violet-200' : 'text-slate-500'}`}>{msg.time}</p>
                         </div>
-                      </motion.div>
-                    );
-                  })
-                )}
+                      </div>
+                    ))
+                  )
+                ) : selectedGroup ? (
+                  messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-2xl mb-4`}>
+                        {selectedGroup.name[0]}
+                      </div>
+                      <h3 className="font-bold text-white text-lg">{selectedGroup.name}</h3>
+                      <p className="text-slate-500 text-sm mt-1">Be the first to say hello!</p>
+                    </div>
+                  ) : (
+                    messages.map((msg, idx) => {
+                      const isOwn = msg.senderId === user?.id;
+                      const showAvatar = !isOwn && (idx === 0 || messages[idx - 1].senderId !== msg.senderId);
+                      return (
+                        <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end gap-2`}>
+                          {!isOwn && (
+                            <div className={`w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
+                              {msg.sender?.avatar ? (
+                                <img src={msg.sender.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                              ) : (
+                                msg.sender?.name?.[0] || "?"
+                              )}
+                            </div>
+                          )}
+                          <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${
+                            isOwn
+                              ? 'bg-violet-500 text-white rounded-br-sm'
+                              : 'bg-slate-800 text-white rounded-bl-sm'
+                          }`}>
+                            {!isOwn && showAvatar && (
+                              <p className="text-xs font-semibold text-violet-400 mb-1">{msg.sender?.name}</p>
+                            )}
+                            <p className="text-sm">{msg.content}</p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )
+                ) : null}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
-              <footer className="p-4 bg-slate-900 border-t border-slate-800 relative">
-                {/* Emoji Picker */}
-                <AnimatePresence>
-                  {showEmoji && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute bottom-20 right-4 bg-slate-800 border border-slate-700 rounded-2xl p-3 shadow-xl z-10"
-                      data-testid="emoji-picker"
-                    >
-                      <div className="grid grid-cols-8 gap-1">
-                        {EMOJI_LIST.map((emoji, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => addEmoji(emoji)}
-                            className="w-9 h-9 flex items-center justify-center text-xl hover:bg-slate-700 rounded-lg transition-colors"
-                            data-testid={`emoji-${i}`}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-                  <div className="flex gap-1">
-                    <button type="button" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-violet-400 hover:bg-slate-700 transition-colors" data-testid="button-attach">
-                      <Paperclip className="w-5 h-5" />
-                    </button>
-                    <button type="button" className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 hover:text-violet-400 hover:bg-slate-700 transition-colors" data-testid="button-image">
-                      <Image className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="flex-1 relative">
-                    <input 
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type a message..." 
-                      className="w-full bg-slate-800 border border-slate-700 focus:border-violet-500 rounded-2xl pl-4 pr-12 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition-all"
-                      disabled={sending}
-                      data-testid="input-message"
-                    />
-                    <button 
-                      type="button" 
-                      onClick={() => setShowEmoji(!showEmoji)}
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${showEmoji ? "text-yellow-400" : "text-slate-400 hover:text-yellow-400"}`}
-                      data-testid="button-emoji"
-                    >
-                      <Smile className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <motion.button 
-                    type="submit"
-                    disabled={!newMessage.trim() || sending}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`w-12 h-12 bg-gradient-to-br ${getGroupColor(selectedChatIndex)} text-white rounded-2xl shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
-                    data-testid="button-send"
-                  >
-                    {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                  </motion.button>
-                </form>
-              </footer>
-            </motion.div>
+              {/* Message Input */}
+              <form
+                onSubmit={selectedPrivate ? handleSendPrivateMessage : handleSendGroupMessage}
+                className="p-4 bg-slate-900 border-t border-slate-800 flex gap-2"
+              >
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+                  data-testid="input-message"
+                />
+                <button
+                  type="submit"
+                  disabled={!newMessage.trim() || sending}
+                  className="w-12 h-12 bg-violet-500 text-white rounded-xl flex items-center justify-center hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  data-testid="button-send"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="hidden md:flex flex-col items-center justify-center h-full text-center">
+              <div className="w-24 h-24 rounded-3xl bg-slate-800 flex items-center justify-center mb-4">
+                <Send className="w-12 h-12 text-slate-600" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Select a conversation</h2>
+              <p className="text-slate-500 mt-2">Choose from your contacts or groups</p>
+            </div>
           )}
-        </AnimatePresence>
+        </main>
       </div>
     </Layout>
   );

@@ -471,6 +471,7 @@ function ProfilesSidebar() {
         {nomadProfiles.map((profile) => (
           <div
             key={profile.id}
+            onClick={() => setLocation(`/chat?user=${profile.id}`)}
             className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 cursor-pointer transition-all hover:scale-[1.02]"
             data-testid={`profile-card-${profile.id}`}
           >
@@ -503,15 +504,9 @@ function ProfilesSidebar() {
               <span className="text-xs text-slate-500">
                 <span className="text-teal-400 font-semibold">{profile.countriesVisited}</span> countries
               </span>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="h-7 text-xs text-teal-400 hover:text-teal-300 hover:bg-teal-500/10"
-                onClick={() => setLocation("/chat")}
-                data-testid={`button-message-${profile.id}`}
-              >
-                <MessageCircle className="w-3 h-3 mr-1" /> Message
-              </Button>
+              <span className="text-xs text-teal-400 flex items-center gap-1">
+                <MessageCircle className="w-3 h-3" /> Chat
+              </span>
             </div>
           </div>
         ))}
