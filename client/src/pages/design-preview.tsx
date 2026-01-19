@@ -3,13 +3,23 @@ import { MapPin, Compass, Plane, Leaf, Users, Globe, Sun, Moon, Wind, Mountain, 
 import { motion } from "framer-motion";
 
 export default function DesignPreview() {
-  const [activeDesign, setActiveDesign] = useState<"A" | "B" | "C" | "D">("D");
+  const [activeDesign, setActiveDesign] = useState<"A" | "B" | "C" | "D" | "E">("E");
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700 p-4">
         <h1 className="text-xl font-bold text-center mb-4">Design Preview - NomadLife</h1>
         <div className="flex justify-center gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveDesign("E")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              activeDesign === "E" 
+                ? "bg-teal-500 text-white" 
+                : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+            }`}
+          >
+            E) Map + Posts
+          </button>
           <button
             onClick={() => setActiveDesign("D")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
@@ -53,7 +63,9 @@ export default function DesignPreview() {
         </div>
       </div>
 
-      {activeDesign === "D" ? (
+      {activeDesign === "E" ? (
+        <DesignE />
+      ) : activeDesign === "D" ? (
         <DesignD />
       ) : (
         <div className="max-w-md mx-auto bg-slate-800 min-h-screen">
@@ -645,6 +657,247 @@ function DesignD() {
                     <p className="text-sm font-medium">{dest.nomads}</p>
                     <p className="text-xs text-green-400">{dest.trend}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesignE() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-0 min-h-screen">
+        
+        <div className="col-span-2 bg-slate-900/80 border-r border-slate-800 p-3 sticky top-16 h-[calc(100vh-64px)]">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+              <Globe className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold">NomadLife</span>
+          </div>
+
+          <nav className="space-y-1">
+            {[
+              { icon: Globe, label: "Map Feed", active: true },
+              { icon: Compass, label: "Explore", active: false },
+              { icon: Coffee, label: "Coworking", active: false },
+              { icon: MessageCircle, label: "Chat", active: false },
+              { icon: Plane, label: "Trips", active: false },
+              { icon: Leaf, label: "Eco", active: false },
+              { icon: Users, label: "People", active: false },
+            ].map((item, i) => (
+              <button
+                key={i}
+                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                  item.active 
+                    ? "bg-teal-500/20 text-teal-400 border border-teal-500/30" 
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <item.icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="absolute bottom-3 left-3 right-3">
+            <div className="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20">
+              <div className="flex items-center gap-2 mb-1">
+                <Leaf className="w-3 h-3 text-emerald-400" />
+                <span className="text-xs">CO2 Saved</span>
+              </div>
+              <div className="text-lg font-bold text-emerald-400">-127kg</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-7 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900">
+            <div className="absolute inset-0 opacity-20">
+              <svg viewBox="0 0 800 600" className="w-full h-full">
+                <defs>
+                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(20,184,166,0.3)" strokeWidth="0.5"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+                
+                <ellipse cx="200" cy="250" rx="80" ry="40" fill="rgba(20,184,166,0.1)" stroke="rgba(20,184,166,0.3)" strokeWidth="1"/>
+                <ellipse cx="500" cy="200" rx="60" ry="30" fill="rgba(20,184,166,0.1)" stroke="rgba(20,184,166,0.3)" strokeWidth="1"/>
+                <ellipse cx="600" cy="400" rx="100" ry="50" fill="rgba(20,184,166,0.1)" stroke="rgba(20,184,166,0.3)" strokeWidth="1"/>
+                
+                <path d="M200 250 Q350 200 500 200" stroke="rgba(20,184,166,0.4)" strokeWidth="2" fill="none" strokeDasharray="5,5"/>
+                <path d="M500 200 Q550 300 600 400" stroke="rgba(20,184,166,0.4)" strokeWidth="2" fill="none" strokeDasharray="5,5"/>
+              </svg>
+            </div>
+            
+            <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
+              <div className="bg-slate-900/90 backdrop-blur-sm px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
+                <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+                <span className="text-sm">Live Map</span>
+                <span className="text-xs text-slate-400">• 24 nomadi online</span>
+              </div>
+              <div className="flex gap-2">
+                <button className="bg-slate-900/90 backdrop-blur-sm p-2 rounded-lg border border-slate-700 hover:border-teal-500/50 transition-colors">
+                  <MapPin className="w-4 h-4" />
+                </button>
+                <button className="bg-slate-900/90 backdrop-blur-sm p-2 rounded-lg border border-slate-700 hover:border-teal-500/50 transition-colors">
+                  <Leaf className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="absolute" style={{ top: "30%", left: "25%" }}>
+              <div className="relative group cursor-pointer">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 p-0.5 animate-pulse">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" className="w-full h-full rounded-full object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900" />
+                
+                <div className="absolute left-14 top-0 w-64 bg-slate-900/95 backdrop-blur-md rounded-xl p-3 border border-teal-500/30 shadow-xl opacity-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" className="w-8 h-8 rounded-full object-cover" />
+                    <div>
+                      <p className="font-bold text-sm">Sarah Chen</p>
+                      <p className="text-xs text-teal-400">Bali, Indonesia</p>
+                    </div>
+                  </div>
+                  <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=300" className="w-full h-24 object-cover rounded-lg mb-2" />
+                  <p className="text-xs text-slate-300">Sunset vibes at Uluwatu! Best coworking day ever</p>
+                  <div className="flex items-center gap-3 mt-2 text-slate-400">
+                    <span className="text-xs flex items-center gap-1"><Heart className="w-3 h-3" /> 89</span>
+                    <span className="text-xs flex items-center gap-1"><MessageCircle className="w-3 h-3" /> 12</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute" style={{ top: "25%", left: "60%" }}>
+              <div className="relative group cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 p-0.5">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" className="w-full h-full rounded-full object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
+              </div>
+            </div>
+
+            <div className="absolute" style={{ top: "55%", left: "70%" }}>
+              <div className="relative group cursor-pointer">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 p-0.5 animate-pulse" style={{animationDelay: "0.5s"}}>
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" className="w-full h-full rounded-full object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900" />
+                <div className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">NEW</div>
+              </div>
+            </div>
+
+            <div className="absolute" style={{ top: "45%", left: "35%" }}>
+              <div className="w-8 h-8 rounded-full bg-slate-700/80 border border-slate-600 flex items-center justify-center">
+                <Coffee className="w-4 h-4 text-amber-400" />
+              </div>
+            </div>
+
+            <div className="absolute" style={{ top: "35%", left: "55%" }}>
+              <div className="w-8 h-8 rounded-full bg-slate-700/80 border border-slate-600 flex items-center justify-center">
+                <Wifi className="w-4 h-4 text-teal-400" />
+              </div>
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className="bg-slate-900/90 backdrop-blur-md rounded-2xl p-4 border border-slate-700">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500" />
+                  <input 
+                    type="text" 
+                    placeholder="Share your location update..." 
+                    className="flex-1 bg-slate-800 rounded-full px-4 py-2 text-sm placeholder:text-slate-500 border border-slate-700 focus:border-teal-500 focus:outline-none"
+                  />
+                  <button className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center hover:bg-teal-600 transition-colors">
+                    <MapPin className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 rounded-full text-xs text-slate-400 hover:text-white transition-colors">
+                    <Camera className="w-3 h-3" /> Photo
+                  </button>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 rounded-full text-xs text-slate-400 hover:text-white transition-colors">
+                    <MapPin className="w-3 h-3" /> Location
+                  </button>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 rounded-full text-xs text-emerald-400">
+                    <Leaf className="w-3 h-3" /> Eco Route
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-3 bg-slate-900/50 border-l border-slate-800 p-4 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto">
+          <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+            <Users className="w-4 h-4" /> Nearby Nomads
+          </h3>
+          
+          <div className="space-y-2 mb-6">
+            {[
+              { name: "Sarah Chen", location: "Bali", status: "Posted 2m ago", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100", online: true, hasPost: true },
+              { name: "Marco Rossi", location: "Lisbon", status: "Working", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100", online: true, hasPost: false },
+              { name: "Elena V.", location: "Tokyo", status: "Just posted", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100", online: true, hasPost: true },
+              { name: "Alex Kim", location: "Bali", status: "Exploring", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100", online: false, hasPost: false },
+            ].map((user, i) => (
+              <div key={i} className={`flex items-center gap-2 p-2 rounded-lg transition-colors cursor-pointer ${user.hasPost ? "bg-teal-500/10 border border-teal-500/20" : "hover:bg-slate-800"}`}>
+                <div className="relative">
+                  <img src={user.avatar} className="w-9 h-9 rounded-full object-cover" />
+                  {user.online && (
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-slate-900" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{user.name}</p>
+                  <p className="text-xs text-slate-400 truncate">{user.status}</p>
+                </div>
+                {user.hasPost && (
+                  <div className="w-2 h-2 bg-teal-400 rounded-full" />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <h3 className="text-sm font-medium text-slate-400 mb-3">Recent Posts</h3>
+          <div className="space-y-3">
+            {[
+              { user: "Sarah", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=200", location: "Uluwatu, Bali" },
+              { user: "Elena", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=200", location: "Shibuya, Tokyo" },
+            ].map((post, i) => (
+              <div key={i} className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-teal-500/30 transition-colors cursor-pointer">
+                <img src={post.image} className="w-full h-20 object-cover" />
+                <div className="p-2">
+                  <p className="text-xs font-medium">{post.user}</p>
+                  <p className="text-xs text-slate-400 flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> {post.location}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-xl p-3 border border-teal-500/20">
+            <h3 className="font-medium text-sm mb-2 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-teal-400" />
+              Hot Spots
+            </h3>
+            <div className="space-y-2">
+              {[
+                { city: "Bali", nomads: 127 },
+                { city: "Lisbon", nomads: 89 },
+                { city: "Tokyo", nomads: 64 },
+              ].map((spot, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <span>{spot.city}</span>
+                  <span className="text-teal-400">{spot.nomads}</span>
                 </div>
               ))}
             </div>
