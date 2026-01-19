@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation, Link } from "wouter";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
-import { Heart, MessageCircle, MapPin, Loader2, Home, Compass, Building2, MessageSquare, User, Crown, Plus, X, Send, Image } from "lucide-react";
+import { Heart, MessageCircle, MapPin, Loader2, Home, Compass, Building2, MessageSquare, User, Crown, Plus, X, Send, Image, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Post, User as UserType } from "@shared/schema";
+import type { Post, User as UserType, ChatGroup, Message } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -216,96 +216,67 @@ export default function MapFeed() {
           </div>
         </aside>
 
-        <main className="flex-1 relative">
-          <MapContainer
-            center={defaultCenter}
-            zoom={defaultZoom}
-            className="w-full h-full"
-            zoomControl={false}
-            style={{ background: "#0f172a" }}
-          >
-            <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-            />
-            <MapEvents onMapClick={handleMapClick} />
-
-            {postsWithCoords.map((post) => (
-              <Marker
-                key={post.id}
-                position={[post.latitude!, post.longitude!]}
-                icon={createPostMarkerIcon(post.imageUrl)}
-                eventHandlers={{ click: () => setSelectedPost(post) }}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="relative h-1/2 min-h-[300px]">
+            <MapContainer
+              center={defaultCenter}
+              zoom={defaultZoom}
+              className="w-full h-full"
+              zoomControl={false}
+              style={{ background: "#0f172a" }}
+            >
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://carto.com/">CARTO</a>'
               />
-            ))}
-          </MapContainer>
+              <MapEvents onMapClick={handleMapClick} />
 
-          <button
-            onClick={() => {
-              setClickedCoords(null);
-              setShowCreateForm(true);
-            }}
-            className="absolute bottom-6 right-6 z-[1000] w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-            data-testid="button-new-post"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
+              {postsWithCoords.map((post) => (
+                <Marker
+                  key={post.id}
+                  position={[post.latitude!, post.longitude!]}
+                  icon={createPostMarkerIcon(post.imageUrl)}
+                  eventHandlers={{ click: () => setSelectedPost(post) }}
+                />
+              ))}
+            </MapContainer>
 
-          <div className="absolute top-4 left-4 z-[1000] bg-slate-900/90 backdrop-blur-sm rounded-xl px-4 py-2 border border-slate-700">
-            <p className="text-sm text-slate-300">
-              <span className="text-teal-400 font-bold">{postsWithCoords.length}</span> posts on map
-            </p>
+            <button
+              onClick={() => {
+                setClickedCoords(null);
+                setShowCreateForm(true);
+              }}
+              className="absolute bottom-4 right-4 z-[1000] w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+              data-testid="button-new-post"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+
+            <div className="absolute top-4 left-4 z-[1000] bg-slate-900/90 backdrop-blur-sm rounded-xl px-3 py-1.5 border border-slate-700">
+              <p className="text-xs text-slate-300">
+                <span className="text-teal-400 font-bold">{postsWithCoords.length}</span> posts on map
+              </p>
+            </div>
           </div>
-        </main>
 
-        <aside className="w-80 bg-slate-900 border-l border-slate-800 p-4 hidden xl:block overflow-y-auto">
-          <h2 className="text-lg font-bold mb-4">Nearby Nomads</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {nearbyNomads.map((nomad) => (
-              <Link key={nomad.id} href={`/user/${nomad.id}`}>
+          <div className="flex-1 overflow-y-auto bg-slate-950 p-4">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <span>📍</span> Latest Posts
+            </h2>
+            <div className="space-y-4">
+              {posts.map((post) => (
                 <div
-                  className="relative rounded-2xl overflow-hidden bg-slate-800 hover:scale-105 transition-transform cursor-pointer group"
-                  data-testid={`nomad-card-${nomad.id}`}
+                  key={post.id}
+                  onClick={() => setSelectedPost(post)}
+                  className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer"
+                  data-testid={`feed-post-${post.id}`}
                 >
-                  <div className="aspect-square w-full bg-slate-700 overflow-hidden">
-                    {nomad.avatar ? (
-                      <img src={nomad.avatar} alt={nomad.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-teal-400 text-4xl font-bold bg-gradient-to-br from-slate-700 to-slate-800">
-                        {nomad.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                    <p className="font-medium text-sm truncate">{nomad.name}</p>
-                    <p className="text-xs text-slate-400 truncate flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {nomad.location || "Earth"}
-                    </p>
-                  </div>
-                  {nomad.isPremium && (
-                    <div className="absolute top-2 right-2 bg-yellow-500/90 rounded-full p-1">
-                      <Crown className="w-3 h-3 text-white" />
-                    </div>
+                  {post.imageUrl && (
+                    <img src={post.imageUrl} alt="Post" className="w-full h-40 object-cover" />
                   )}
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {posts.length > 0 && (
-            <>
-              <h2 className="text-lg font-bold mt-6 mb-4">Recent Activity</h2>
-              <div className="space-y-3">
-                {posts.slice(0, 5).map((post) => (
-                  <div
-                    key={post.id}
-                    onClick={() => setSelectedPost(post)}
-                    className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer"
-                    data-testid={`activity-${post.id}`}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full bg-slate-700 overflow-hidden">
+                  <div className="p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-slate-700 overflow-hidden">
                         {post.user.avatar ? (
                           <img src={post.user.avatar} alt={post.user.name} className="w-full h-full object-cover" />
                         ) : (
@@ -314,23 +285,32 @@ export default function MapFeed() {
                           </div>
                         )}
                       </div>
-                      <span className="text-sm font-medium truncate">{post.user.name}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{post.user.name}</p>
+                        {post.location && (
+                          <p className="text-xs text-slate-500 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {post.location}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <p className="text-sm text-slate-300 line-clamp-2">{post.content}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" /> {post.likes}
+                        <Heart className="w-4 h-4" /> {post.likes}
                       </span>
                       <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" /> {post.commentsCount}
+                        <MessageCircle className="w-4 h-4" /> {post.commentsCount}
                       </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
-        </aside>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+
+        <ChatSidebar user={user} />
       </div>
 
       <AnimatePresence>
@@ -409,6 +389,138 @@ export default function MapFeed() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+type MessageWithSender = Message & { sender: UserType };
+
+function ChatSidebar({ user }: { user: UserType | null }) {
+  const [groups, setGroups] = useState<ChatGroup[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
+  const [messages, setMessages] = useState<MessageWithSender[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/chat-groups", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setGroups(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedGroup) return;
+    fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setMessages(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  }, [selectedGroup]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedGroup || !user) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ groupId: selectedGroup.id, receiverId: null, content: newMessage }),
+      });
+      if (res.ok) {
+        const message = await res.json();
+        setMessages((prev) => [...prev, { ...message, sender: user }]);
+        setNewMessage("");
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <aside className="w-80 bg-slate-900 border-l border-slate-800 hidden xl:flex flex-col">
+      {!selectedGroup ? (
+        <>
+          <div className="p-4 border-b border-slate-800">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-teal-400" /> Chat Groups
+            </h2>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {groups.map((group, index) => (
+              <div
+                key={group.id}
+                onClick={() => setSelectedGroup(group)}
+                className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 cursor-pointer transition-colors"
+                data-testid={`chat-group-${group.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${['from-violet-500 to-purple-600', 'from-cyan-500 to-blue-600', 'from-emerald-500 to-teal-600'][index % 3]} flex items-center justify-center`}>
+                    <span className="text-lg">🌍</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{group.name}</p>
+                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                      <Users className="w-3 h-3" /> {group.members} members
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="p-3 border-b border-slate-800 flex items-center gap-3">
+            <button onClick={() => setSelectedGroup(null)} className="p-2 rounded-lg hover:bg-slate-800">
+              <X className="w-4 h-4" />
+            </button>
+            <div>
+              <p className="font-bold text-sm">{selectedGroup.name}</p>
+              <p className="text-xs text-slate-500">{selectedGroup.members} members</p>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex gap-2 ${msg.senderId === user?.id ? 'flex-row-reverse' : ''}`}>
+                <div className="w-7 h-7 rounded-full bg-slate-700 overflow-hidden shrink-0">
+                  {msg.sender?.avatar ? (
+                    <img src={msg.sender.avatar} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-teal-400">
+                      {msg.sender?.name?.charAt(0) || "?"}
+                    </div>
+                  )}
+                </div>
+                <div className={`max-w-[70%] p-2 rounded-xl text-sm ${msg.senderId === user?.id ? 'bg-teal-600 text-white' : 'bg-slate-800'}`}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 flex gap-2">
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+              className="flex-1 bg-slate-800 border-slate-700 text-sm"
+              data-testid="input-chat-message"
+            />
+            <Button type="submit" size="sm" disabled={!newMessage.trim() || sending} className="bg-teal-500 hover:bg-teal-600">
+              <Send className="w-4 h-4" />
+            </Button>
+          </form>
+        </>
+      )}
+    </aside>
   );
 }
 
