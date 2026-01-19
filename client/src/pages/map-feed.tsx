@@ -310,7 +310,7 @@ export default function MapFeed() {
           </div>
         </main>
 
-        <ChatSidebar user={user} />
+        <ProfilesSidebar />
       </div>
 
       <AnimatePresence>
@@ -392,134 +392,141 @@ export default function MapFeed() {
   );
 }
 
-type MessageWithSender = Message & { sender: UserType };
+const nomadProfiles = [
+  {
+    id: "1",
+    name: "Sofia Martinez",
+    username: "sofiatravels",
+    location: "Bali, Indonesia",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    bio: "Digital marketer exploring Southeast Asia",
+    countriesVisited: 23,
+    isOnline: true,
+  },
+  {
+    id: "2",
+    name: "James Chen",
+    username: "jamesdigital",
+    location: "Lisbon, Portugal",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    bio: "Full-stack developer & coffee enthusiast",
+    countriesVisited: 31,
+    isOnline: true,
+  },
+  {
+    id: "3",
+    name: "Emma Wilson",
+    username: "emmawanders",
+    location: "Chiang Mai, Thailand",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    bio: "UX designer living the remote life",
+    countriesVisited: 18,
+    isOnline: false,
+  },
+  {
+    id: "4",
+    name: "Lucas Silva",
+    username: "lucascode",
+    location: "Barcelona, Spain",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    bio: "Startup founder, surfing when not coding",
+    countriesVisited: 27,
+    isOnline: true,
+  },
+  {
+    id: "5",
+    name: "Mia Anderson",
+    username: "mianomad",
+    location: "Mexico City, Mexico",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    bio: "Content creator & travel photographer",
+    countriesVisited: 42,
+    isOnline: false,
+  },
+  {
+    id: "6",
+    name: "Alex Kowalski",
+    username: "alexremote",
+    location: "Berlin, Germany",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    bio: "Product manager working across time zones",
+    countriesVisited: 15,
+    isOnline: true,
+  },
+];
 
-function ChatSidebar({ user }: { user: UserType | null }) {
-  const [groups, setGroups] = useState<ChatGroup[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
-  const [messages, setMessages] = useState<MessageWithSender[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetch("/api/chat-groups", { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setGroups(Array.isArray(data) ? data : []))
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    if (!selectedGroup) return;
-    fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setMessages(Array.isArray(data) ? data : []))
-      .catch(console.error);
-  }, [selectedGroup]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !selectedGroup || !user) return;
-    setSending(true);
-    try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ groupId: selectedGroup.id, receiverId: null, content: newMessage }),
-      });
-      if (res.ok) {
-        const message = await res.json();
-        setMessages((prev) => [...prev, { ...message, sender: user }]);
-        setNewMessage("");
-      }
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    } finally {
-      setSending(false);
-    }
-  };
+function ProfilesSidebar() {
+  const [, setLocation] = useLocation();
 
   return (
     <aside className="w-80 bg-slate-900 border-l border-slate-800 hidden xl:flex flex-col">
-      {!selectedGroup ? (
-        <>
-          <div className="p-4 border-b border-slate-800">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-teal-400" /> Chat Groups
-            </h2>
-          </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {groups.map((group, index) => (
-              <div
-                key={group.id}
-                onClick={() => setSelectedGroup(group)}
-                className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 cursor-pointer transition-colors"
-                data-testid={`chat-group-${group.id}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${['from-violet-500 to-purple-600', 'from-cyan-500 to-blue-600', 'from-emerald-500 to-teal-600'][index % 3]} flex items-center justify-center`}>
-                    <span className="text-lg">🌍</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{group.name}</p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                      <Users className="w-3 h-3" /> {group.members} members
-                    </p>
-                  </div>
-                </div>
+      <div className="p-4 border-b border-slate-800">
+        <h2 className="text-lg font-bold flex items-center gap-2">
+          <Users className="w-5 h-5 text-teal-400" /> Nearby Nomads
+        </h2>
+        <p className="text-xs text-slate-500 mt-1">Connect with fellow travelers</p>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {nomadProfiles.map((profile) => (
+          <div
+            key={profile.id}
+            className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 cursor-pointer transition-all hover:scale-[1.02]"
+            data-testid={`profile-card-${profile.id}`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="relative">
+                <img
+                  src={profile.avatar}
+                  alt={profile.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-slate-700"
+                />
+                {profile.isOnline && (
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
+                )}
               </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="p-3 border-b border-slate-800 flex items-center gap-3">
-            <button onClick={() => setSelectedGroup(null)} className="p-2 rounded-lg hover:bg-slate-800">
-              <X className="w-4 h-4" />
-            </button>
-            <div>
-              <p className="font-bold text-sm">{selectedGroup.name}</p>
-              <p className="text-xs text-slate-500">{selectedGroup.members} members</p>
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex gap-2 ${msg.senderId === user?.id ? 'flex-row-reverse' : ''}`}>
-                <div className="w-7 h-7 rounded-full bg-slate-700 overflow-hidden shrink-0">
-                  {msg.sender?.avatar ? (
-                    <img src={msg.sender.avatar} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-teal-400">
-                      {msg.sender?.name?.charAt(0) || "?"}
-                    </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm truncate">{profile.name}</p>
+                  {profile.isOnline && (
+                    <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded-full">Online</span>
                   )}
                 </div>
-                <div className={`max-w-[70%] p-2 rounded-xl text-sm ${msg.senderId === user?.id ? 'bg-teal-600 text-white' : 'bg-slate-800'}`}>
-                  {msg.content}
-                </div>
+                <p className="text-xs text-slate-500">@{profile.username}</p>
+                <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                  <MapPin className="w-3 h-3 text-teal-400" /> {profile.location}
+                </p>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
+            </div>
+            <p className="text-xs text-slate-400 mt-2 line-clamp-2">{profile.bio}</p>
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-xs text-slate-500">
+                <span className="text-teal-400 font-semibold">{profile.countriesVisited}</span> countries
+              </span>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="h-7 text-xs text-teal-400 hover:text-teal-300 hover:bg-teal-500/10"
+                onClick={() => setLocation("/chat")}
+                data-testid={`button-message-${profile.id}`}
+              >
+                <MessageCircle className="w-3 h-3 mr-1" /> Message
+              </Button>
+            </div>
           </div>
-          <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 flex gap-2">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-1 bg-slate-800 border-slate-700 text-sm"
-              data-testid="input-chat-message"
-            />
-            <Button type="submit" size="sm" disabled={!newMessage.trim() || sending} className="bg-teal-500 hover:bg-teal-600">
-              <Send className="w-4 h-4" />
-            </Button>
-          </form>
-        </>
-      )}
+        ))}
+      </div>
+
+      <div className="p-3 border-t border-slate-800">
+        <Button 
+          variant="outline" 
+          className="w-full border-slate-700 text-slate-400 hover:text-white hover:border-teal-500"
+          onClick={() => setLocation("/chat")}
+          data-testid="button-view-all-nomads"
+        >
+          <Users className="w-4 h-4 mr-2" /> View All Nomads
+        </Button>
+      </div>
     </aside>
   );
 }
