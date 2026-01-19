@@ -18,6 +18,10 @@ import type {
   InsertMessage,
   Subscription,
   InsertSubscription,
+  Event,
+  InsertEvent,
+  EventRegistration,
+  InsertEventRegistration,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -58,6 +62,24 @@ export interface IStorage {
   getUserSubscription(userId: string): Promise<Subscription | undefined>;
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
   updateSubscription(id: string, updates: Partial<Subscription>): Promise<Subscription | undefined>;
+
+  // Events
+  getEvents(filters?: { city?: string; type?: string }): Promise<(Event & { host?: User })[]>;
+  getEvent(id: string): Promise<(Event & { host?: User }) | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration>;
+  cancelEventRegistration(eventId: string, userId: string): Promise<EventRegistration | undefined>;
+  getUserEventRegistrations(userId: string): Promise<(EventRegistration & { event: Event })[]>;
+
+  // Advanced Search
+  searchPlaces(filters: {
+    query?: string;
+    city?: string;
+    type?: string;
+    priceMin?: number;
+    priceMax?: number;
+    amenities?: string[];
+  }): Promise<Place[]>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -258,6 +280,115 @@ export class DrizzleStorage implements IStorage {
       .where(eq(schema.subscriptions.id, id))
       .returning();
     return result[0];
+  }
+
+  // Events
+  async getEvents(filters?: { city?: string; type?: string }): Promise<(Event & { host?: User })[]> {
+    let query = this.db
+      .select()
+      .from(schema.events)
+      .leftJoin(schema.users, eq(schema.events.hostId, schema.users.id))
+      .orderBy(desc(schema.events.startDate));
+    
+    const conditions = [];
+    if (filters?.city) conditions.push(eq(schema.events.city, filters.city));
+    if (filters?.type) conditions.push(eq(schema.events.type, filters.type));
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions) as any) as any;
+    }
+    
+    const result = await query;
+    return result.map((row) => ({
+      ...row.events,
+      host: row.users || undefined,
+    }));
+  }
+
+  async getEvent(id: string): Promise<(Event & { host?: User }) | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.events)
+      .leftJoin(schema.users, eq(schema.events.hostId, schema.users.id))
+      .where(eq(schema.events.id, id));
+    if (!result[0]) return undefined;
+    return {
+      ...result[0].events,
+      host: result[0].users || undefined,
+    };
+  }
+
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const result = await this.db.insert(schema.events).values(insertEvent).returning();
+    return result[0];
+  }
+
+  async registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration> {
+    const result = await this.db.insert(schema.eventRegistrations).values(registration).returning();
+    await this.db.update(schema.events).set({ attendees: sql`${schema.events.attendees} + 1` }).where(eq(schema.events.id, registration.eventId));
+    return result[0];
+  }
+
+  async cancelEventRegistration(eventId: string, userId: string): Promise<EventRegistration | undefined> {
+    const result = await this.db
+      .update(schema.eventRegistrations)
+      .set({ status: "cancelled" })
+      .where(and(eq(schema.eventRegistrations.eventId, eventId), eq(schema.eventRegistrations.userId, userId)) as any)
+      .returning();
+    if (result[0]) {
+      await this.db.update(schema.events).set({ attendees: sql`GREATEST(0, ${schema.events.attendees} - 1)` }).where(eq(schema.events.id, eventId));
+    }
+    return result[0];
+  }
+
+  async getUserEventRegistrations(userId: string): Promise<(EventRegistration & { event: Event })[]> {
+    const result = await this.db
+      .select()
+      .from(schema.eventRegistrations)
+      .leftJoin(schema.events, eq(schema.eventRegistrations.eventId, schema.events.id))
+      .where(eq(schema.eventRegistrations.userId, userId))
+      .orderBy(desc(schema.events.startDate));
+    return result.map((row) => ({
+      ...row.event_registrations,
+      event: row.events!,
+    }));
+  }
+
+  // Advanced Search
+  async searchPlaces(filters: {
+    query?: string;
+    city?: string;
+    type?: string;
+    priceMin?: number;
+    priceMax?: number;
+    amenities?: string[];
+  }): Promise<Place[]> {
+    const conditions = [];
+    
+    if (filters.query) {
+      conditions.push(sql`(${schema.places.name} ILIKE ${'%' + filters.query + '%'} OR ${schema.places.description} ILIKE ${'%' + filters.query + '%'})`);
+    }
+    if (filters.city) {
+      conditions.push(sql`${schema.places.city} ILIKE ${'%' + filters.city + '%'}`);
+    }
+    if (filters.type) {
+      conditions.push(eq(schema.places.type, filters.type));
+    }
+    if (filters.priceMin !== undefined) {
+      conditions.push(sql`${schema.places.pricePerNight} >= ${filters.priceMin}`);
+    }
+    if (filters.priceMax !== undefined) {
+      conditions.push(sql`${schema.places.pricePerNight} <= ${filters.priceMax}`);
+    }
+    if (filters.amenities && filters.amenities.length > 0) {
+      conditions.push(sql`${schema.places.amenities} && ${filters.amenities}`);
+    }
+    
+    if (conditions.length === 0) {
+      return await this.db.select().from(schema.places);
+    }
+    
+    return await this.db.select().from(schema.places).where(and(...conditions) as any);
   }
 
   // Analytics

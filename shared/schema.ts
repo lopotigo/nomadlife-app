@@ -54,15 +54,23 @@ export type Post = typeof posts.$inferSelect;
 export const places = pgTable("places", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  type: text("type").notNull(), // "hotel", "hostel", "coworking", "event"
+  type: text("type").notNull(), // "hotel", "hostel", "coworking"
   location: text("location").notNull(),
   city: text("city").notNull(),
+  country: text("country"),
   description: text("description"),
   price: text("price").notNull(),
+  pricePerNight: integer("price_per_night"),
+  pricePerHour: integer("price_per_hour"),
+  currency: text("currency").default("USD"),
   imageUrl: text("image_url"),
   rating: integer("rating").default(0).notNull(),
   reviews: integer("reviews").default(0).notNull(),
   tags: text("tags").array(),
+  amenities: text("amenities").array(),
+  capacity: integer("capacity"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -145,3 +153,50 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
 });
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
+
+// Events table
+export const events = pgTable("events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // "public", "nomad"
+  city: text("city").notNull(),
+  country: text("country"),
+  location: text("location"),
+  imageUrl: text("image_url"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  capacity: integer("capacity"),
+  price: integer("price").default(0),
+  currency: text("currency").default("USD"),
+  hostId: varchar("host_id").references(() => users.id, { onDelete: "set null" }),
+  placeId: varchar("place_id").references(() => places.id, { onDelete: "set null" }),
+  tags: text("tags").array(),
+  attendees: integer("attendees").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  attendees: true,
+  createdAt: true,
+});
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Event = typeof events.$inferSelect;
+
+// Event Registrations table
+export const eventRegistrations = pgTable("event_registrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").default("confirmed").notNull(), // "confirmed", "cancelled", "waitlist"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
+export type EventRegistration = typeof eventRegistrations.$inferSelect;

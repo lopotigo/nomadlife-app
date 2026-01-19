@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema } from "@shared/schema";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { createRepository, pushFile, getGitHubUser } from "./github";
@@ -196,6 +196,23 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/places/search", async (req, res) => {
+    try {
+      const filters = {
+        query: req.query.query as string | undefined,
+        city: req.query.city as string | undefined,
+        type: req.query.type as string | undefined,
+        priceMin: req.query.priceMin ? parseInt(req.query.priceMin as string) : undefined,
+        priceMax: req.query.priceMax ? parseInt(req.query.priceMax as string) : undefined,
+        amenities: req.query.amenities ? (req.query.amenities as string).split(",") : undefined,
+      };
+      const places = await storage.searchPlaces(filters);
+      res.send(places);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/places/:id", async (req, res) => {
     try {
       const place = await storage.getPlace(req.params.id);
@@ -361,6 +378,80 @@ export async function registerRoutes(
       }
       
       res.send(subscription);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== EVENT ROUTES ==========
+  app.get("/api/events", async (req, res) => {
+    try {
+      const filters: any = {};
+      if (req.query.city) filters.city = req.query.city as string;
+      if (req.query.type) filters.type = req.query.type as string;
+      const events = await storage.getEvents(filters);
+      res.send(events);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/events/:id", async (req, res) => {
+    try {
+      const event = await storage.getEvent(req.params.id);
+      if (!event) {
+        return res.status(404).send({ error: "Event not found" });
+      }
+      res.send(event);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/events", requireAuth, async (req, res) => {
+    try {
+      const data = insertEventSchema.parse({
+        ...req.body,
+        hostId: (req.user as User).id,
+        startDate: new Date(req.body.startDate),
+        endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
+      });
+      const event = await storage.createEvent(data);
+      res.status(201).send(event);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/events/:id/register", requireAuth, async (req, res) => {
+    try {
+      const data = insertEventRegistrationSchema.parse({
+        eventId: req.params.id,
+        userId: (req.user as User).id,
+      });
+      const registration = await storage.registerForEvent(data);
+      res.status(201).send(registration);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/events/:id/register", requireAuth, async (req, res) => {
+    try {
+      const registration = await storage.cancelEventRegistration(req.params.id, (req.user as User).id);
+      if (!registration) {
+        return res.status(404).send({ error: "Registration not found" });
+      }
+      res.send(registration);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/event-registrations", requireAuth, async (req, res) => {
+    try {
+      const registrations = await storage.getUserEventRegistrations((req.user as User).id);
+      res.send(registrations);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }
