@@ -275,13 +275,16 @@ Run seed script: `tsx server/seed.ts`
 
 ## Recent Changes (January 19, 2026)
 
-### Private Chat Persistence
-- ✅ Fixed getPrivateMessages() query - changed from `eq(groupId, null)` to `isNull(groupId)` for proper PostgreSQL NULL comparison
+### Chat System Enhancements
+- ✅ Fixed getPrivateMessages() query - uses `isNull(groupId)` for proper PostgreSQL NULL comparison
 - ✅ Added GET /api/users endpoint to fetch all users from database
-- ✅ Updated chat page with two-column layout (contacts on left, conversation on right)
-- ✅ ProfilesSidebar now loads real users from database instead of hardcoded profiles
-- ✅ Clicking user profiles in home sidebar navigates to /chat?user={id} for direct messaging
-- ✅ All private messages now persist to PostgreSQL database
+- ✅ Three-column chat layout: Groups sidebar | Contacts list | Conversation
+- ✅ ProfilesSidebar loads real users from database
+- ✅ Clicking user profiles navigates to /chat?user={id} for direct messaging
+- ✅ All private messages persist to PostgreSQL database
+- ✅ Avatar displayed next to each message (sender's photo)
+- ✅ Create new groups with name, city, and description
+- ✅ Group icons shown in left sidebar with tooltips
 
 ## Known Limitations
 

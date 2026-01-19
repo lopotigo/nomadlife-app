@@ -2,8 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation, useSearch } from "wouter";
-import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin, MessageCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin, MessageCircle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import type { ChatGroup, Message, User } from "@shared/schema";
 
 type MessageWithSender = Message & { sender: User };
@@ -18,6 +20,7 @@ const GROUP_COLORS = [
 
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -33,7 +36,15 @@ export default function Chat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const fetchGroups = () => {
+    fetch("/api/chat-groups", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setGroups(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  };
 
   useEffect(() => {
     if (authLoading) return;
@@ -128,6 +139,28 @@ export default function Chat() {
     }
   };
 
+  const handleCreateGroup = async (name: string, city: string, description: string) => {
+    try {
+      const res = await fetch("/api/chat-groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, city, description, members: 1 }),
+      });
+      if (res.ok) {
+        const newGroup = await res.json();
+        setGroups(prev => [newGroup, ...prev]);
+        setSelectedGroup(newGroup);
+        setSelectedPrivateUser(null);
+        setShowCreateGroup(false);
+        toast({ title: "Group created!", description: `${name} is ready to use` });
+      }
+    } catch (error) {
+      console.error("Failed to create group:", error);
+      toast({ title: "Error", description: "Failed to create group", variant: "destructive" });
+    }
+  };
+
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
   const hasActiveChat = selectedGroup || selectedPrivateUser;
   const currentMessages = selectedGroup ? groupMessages : privateMessages;
@@ -156,6 +189,7 @@ export default function Chat() {
             <div className="w-12 h-12 mx-auto bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
+            <p className="text-[10px] text-slate-500 text-center mt-1">My Groups</p>
           </div>
           
           <div className="flex-1 overflow-y-auto py-3 space-y-2">
@@ -163,7 +197,7 @@ export default function Chat() {
               <button
                 key={group.id}
                 onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); }}
-                className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-all ${
+                className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-all relative group ${
                   selectedGroup?.id === group.id 
                     ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-slate-950" 
                     : "hover:scale-110"
@@ -174,14 +208,22 @@ export default function Chat() {
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg`}>
                   {group.name[0]}
                 </div>
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                  {group.name}
+                </div>
               </button>
             ))}
           </div>
 
           <div className="p-3 border-t border-slate-800">
-            <button className="w-12 h-12 mx-auto bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+            <button 
+              onClick={() => setShowCreateGroup(true)}
+              className="w-12 h-12 mx-auto bg-violet-500 hover:bg-violet-600 rounded-xl flex items-center justify-center text-white transition-colors"
+              data-testid="button-create-group"
+            >
               <Plus className="w-5 h-5" />
             </button>
+            <p className="text-[10px] text-slate-500 text-center mt-1">New</p>
           </div>
         </aside>
 
@@ -416,6 +458,124 @@ export default function Chat() {
           )}
         </main>
       </div>
+
+      {/* Create Group Modal */}
+      <AnimatePresence>
+        {showCreateGroup && (
+          <CreateGroupModal
+            onClose={() => setShowCreateGroup(false)}
+            onCreate={handleCreateGroup}
+          />
+        )}
+      </AnimatePresence>
     </Layout>
+  );
+}
+
+function CreateGroupModal({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void;
+  onCreate: (name: string, city: string, description: string) => void;
+}) {
+  const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [description, setDescription] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !city.trim()) return;
+    setCreating(true);
+    await onCreate(name, city, description);
+    setCreating(false);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-slate-900 rounded-2xl w-full max-w-md p-6 border border-slate-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Create New Group</h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Group Name *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Bali Digital Nomads"
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+              data-testid="input-group-name"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">City *</label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="e.g., Bali"
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+              data-testid="input-group-city"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What's this group about?"
+              rows={3}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none resize-none"
+              data-testid="input-group-description"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 border-slate-700 text-slate-400 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!name.trim() || !city.trim() || creating}
+              className="flex-1 bg-violet-500 hover:bg-violet-600 text-white"
+              data-testid="button-create-group-submit"
+            >
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Group"}
+            </Button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
   );
 }
