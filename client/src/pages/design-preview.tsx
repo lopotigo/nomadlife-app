@@ -3,13 +3,23 @@ import { MapPin, Compass, Plane, Leaf, Users, Globe, Sun, Moon, Wind, Mountain, 
 import { motion } from "framer-motion";
 
 export default function DesignPreview() {
-  const [activeDesign, setActiveDesign] = useState<"A" | "B" | "C">("A");
+  const [activeDesign, setActiveDesign] = useState<"A" | "B" | "C" | "D">("D");
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700 p-4">
         <h1 className="text-xl font-bold text-center mb-4">Design Preview - NomadLife</h1>
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-2 flex-wrap">
+          <button
+            onClick={() => setActiveDesign("D")}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              activeDesign === "D" 
+                ? "bg-violet-500 text-white" 
+                : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+            }`}
+          >
+            D) 3 Colonne
+          </button>
           <button
             onClick={() => setActiveDesign("A")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
@@ -43,11 +53,15 @@ export default function DesignPreview() {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto bg-slate-800 min-h-screen">
-        {activeDesign === "A" && <DesignA />}
-        {activeDesign === "B" && <DesignB />}
-        {activeDesign === "C" && <DesignC />}
-      </div>
+      {activeDesign === "D" ? (
+        <DesignD />
+      ) : (
+        <div className="max-w-md mx-auto bg-slate-800 min-h-screen">
+          {activeDesign === "A" && <DesignA />}
+          {activeDesign === "B" && <DesignB />}
+          {activeDesign === "C" && <DesignC />}
+        </div>
+      )}
     </div>
   );
 }
@@ -407,6 +421,234 @@ function DesignC() {
               {!item.special && <span className="text-xs mt-1">{item.label}</span>}
             </button>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesignD() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-0 min-h-screen">
+        
+        <div className="col-span-3 bg-slate-900/50 border-r border-slate-800 p-4 sticky top-16 h-[calc(100vh-64px)]">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <Compass className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-lg">NomadLife</h1>
+              <p className="text-xs text-slate-500">Explore the world</p>
+            </div>
+          </div>
+
+          <nav className="space-y-2">
+            {[
+              { icon: Globe, label: "Feed", active: true, color: "violet" },
+              { icon: MapPin, label: "Explore Map", active: false },
+              { icon: Coffee, label: "Coworking", active: false },
+              { icon: MessageCircle, label: "Messages", active: false },
+              { icon: Plane, label: "My Trips", active: false },
+              { icon: Leaf, label: "Eco Impact", active: false },
+              { icon: Users, label: "Community", active: false },
+            ].map((item, i) => (
+              <button
+                key={i}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  item.active 
+                    ? "bg-violet-500/20 text-violet-400 border border-violet-500/30" 
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="absolute bottom-4 left-4 right-4">
+            <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-2xl p-4 border border-violet-500/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Leaf className="w-4 h-4 text-green-400" />
+                <span className="text-sm font-medium">Eco Score</span>
+              </div>
+              <div className="text-2xl font-bold text-green-400">87/100</div>
+              <p className="text-xs text-slate-400 mt-1">Top 15% dei nomadi!</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-5 border-r border-slate-800 overflow-y-auto">
+          <div className="sticky top-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 p-4 z-10">
+            <h2 className="text-xl font-bold">Feed</h2>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500" />
+                <input 
+                  type="text" 
+                  placeholder="Condividi la tua avventura..." 
+                  className="flex-1 bg-slate-700/50 rounded-full px-4 py-2 text-sm placeholder:text-slate-500 border border-slate-600 focus:border-violet-500 focus:outline-none"
+                />
+                <button className="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center hover:bg-violet-600 transition-colors">
+                  <Camera className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {[
+              {
+                user: "Sarah Chen",
+                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
+                location: "Bali, Indonesia",
+                time: "2h",
+                content: "Il tramonto da Uluwatu oggi era incredibile! Chi vuole fare surf domani mattina?",
+                image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600",
+                likes: 124,
+                comments: 18,
+                eco: true
+              },
+              {
+                user: "Marco Rossi",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
+                location: "Lisbon, Portugal",
+                time: "5h",
+                content: "Nuovo coworking scoperto vicino al LX Factory. WiFi velocissimo e ottimo caffe!",
+                image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600",
+                likes: 89,
+                comments: 12,
+                eco: false
+              },
+              {
+                user: "Elena Vasquez",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100",
+                location: "Tokyo, Japan",
+                time: "8h",
+                content: "Cherry blossom season is magical. Working from a cafe with this view!",
+                image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600",
+                likes: 234,
+                comments: 42,
+                eco: true
+              }
+            ].map((post, i) => (
+              <div key={i} className="bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-700 hover:border-violet-500/50 transition-colors">
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img src={post.avatar} className="w-10 h-10 rounded-full object-cover border-2 border-violet-500" />
+                    <div>
+                      <p className="font-bold text-sm">{post.user}</p>
+                      <p className="text-xs text-slate-400 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {post.location} - {post.time}
+                      </p>
+                    </div>
+                  </div>
+                  {post.eco && (
+                    <div className="px-2 py-1 bg-green-500/20 rounded-full flex items-center gap-1">
+                      <Leaf className="w-3 h-3 text-green-400" />
+                      <span className="text-xs text-green-400">Eco</span>
+                    </div>
+                  )}
+                </div>
+                <img src={post.image} className="w-full aspect-video object-cover" />
+                <div className="p-4">
+                  <p className="text-sm mb-3">{post.content}</p>
+                  <div className="flex items-center gap-4 text-slate-400">
+                    <button className="flex items-center gap-1 hover:text-red-400 transition-colors">
+                      <Heart className="w-5 h-5" />
+                      <span className="text-sm">{post.likes}</span>
+                    </button>
+                    <button className="flex items-center gap-1 hover:text-violet-400 transition-colors">
+                      <MessageCircle className="w-5 h-5" />
+                      <span className="text-sm">{post.comments}</span>
+                    </button>
+                    <button className="ml-auto hover:text-violet-400 transition-colors">
+                      <Share2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="col-span-4 p-4 sticky top-16 h-[calc(100vh-64px)] overflow-y-auto">
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-slate-400 mb-3">Nomadi nelle vicinanze</h3>
+            <div className="space-y-3">
+              {[
+                { name: "Alex Kim", location: "Bali, 2km", status: "Working", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100", online: true },
+                { name: "Maria Santos", location: "Bali, 5km", status: "Exploring", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100", online: true },
+                { name: "Tom Wilson", location: "Bali, 8km", status: "Chilling", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100", online: false },
+              ].map((user, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-colors cursor-pointer border border-slate-700">
+                  <div className="relative">
+                    <img src={user.avatar} className="w-12 h-12 rounded-full object-cover" />
+                    {user.online && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{user.name}</p>
+                    <p className="text-xs text-slate-400">{user.location}</p>
+                  </div>
+                  <div className="px-2 py-1 bg-violet-500/20 rounded-full">
+                    <span className="text-xs text-violet-300">{user.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-slate-400 mb-3">Suggeriti per te</h3>
+            <div className="space-y-3">
+              {[
+                { name: "Digital Nomad Hub", members: "12.4k", type: "Community", avatar: "DN" },
+                { name: "Eco Travelers", members: "8.2k", type: "Community", avatar: "ET" },
+              ].map((group, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-sm font-bold">
+                    {group.avatar}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{group.name}</p>
+                    <p className="text-xs text-slate-400">{group.members} members</p>
+                  </div>
+                  <button className="px-3 py-1.5 bg-violet-500 rounded-full text-xs font-medium hover:bg-violet-600 transition-colors">
+                    Join
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl p-4 border border-violet-500/20">
+            <h3 className="font-bold mb-2 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-violet-400" />
+              Trending Destinations
+            </h3>
+            <div className="space-y-2">
+              {[
+                { city: "Bali", country: "Indonesia", nomads: 1247, trend: "+12%" },
+                { city: "Lisbon", country: "Portugal", nomads: 892, trend: "+8%" },
+                { city: "Medellin", country: "Colombia", nomads: 654, trend: "+23%" },
+              ].map((dest, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-slate-700/50 last:border-0">
+                  <div>
+                    <p className="font-medium text-sm">{dest.city}</p>
+                    <p className="text-xs text-slate-400">{dest.country}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{dest.nomads}</p>
+                    <p className="text-xs text-green-400">{dest.trend}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
