@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 const { Pool } = pkg;
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, isNull, or } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import type {
   User,
@@ -246,9 +246,18 @@ export class DrizzleStorage implements IStorage {
       .leftJoin(schema.users, eq(schema.messages.senderId, schema.users.id))
       .where(
         and(
-          eq(schema.messages.groupId, null as any),
-          sql`(sender_id = ${userId1} AND receiver_id = ${userId2}) OR (sender_id = ${userId2} AND receiver_id = ${userId1})`
-        ) as any
+          isNull(schema.messages.groupId),
+          or(
+            and(
+              eq(schema.messages.senderId, userId1),
+              eq(schema.messages.receiverId, userId2)
+            ),
+            and(
+              eq(schema.messages.senderId, userId2),
+              eq(schema.messages.receiverId, userId1)
+            )
+          )
+        )
       )
       .orderBy(desc(schema.messages.createdAt))
       .limit(limit);
