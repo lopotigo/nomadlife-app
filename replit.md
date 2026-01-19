@@ -25,12 +25,18 @@ The frontend follows a page-based structure with shared layout components. Authe
 
 **Key Pages**:
 - `/auth` - Login and signup (public)
-- `/` - Social feed with posts from all users (protected)
+- `/` - Map-centered feed with posts as interactive Leaflet markers, 3-column layout (protected)
 - `/profile` - User profile with travel stats and posts (protected)
 - `/coworking` - Browse and book coworking spaces (protected)
 - `/chat` - Group and private messaging (protected)
 - `/subscription` - Manage premium subscription (protected)
 - `/explore` - Interactive map with cities and eco-routing (protected)
+
+**New Home Layout (Design E)**:
+- Left column: Navigation sidebar with user profile
+- Center: Interactive Leaflet map with dark theme tiles, posts appear as markers
+- Right column: Nearby nomads and recent activity (desktop only)
+- Mobile: Bottom tab navigation with full-screen map
 
 ### Backend Architecture
 
@@ -57,8 +63,8 @@ API routes follow RESTful conventions under the `/api` prefix. Protected routes 
 **Database Tables**:
 - `users` - User accounts with profile data, location, and premium status
   - Fields: id, username, email, password (hashed), name, bio, avatar, location, isPremium, countriesVisited, citiesVisited, coworkingSpaces
-- `posts` - Social feed posts with location tagging and engagement metrics
-  - Fields: id, userId, content, imageUrl, location, likes, commentsCount, createdAt
+- `posts` - Social feed posts with location tagging, GPS coordinates, and engagement metrics
+  - Fields: id, userId, content, imageUrl, location, latitude, longitude, likes, commentsCount, createdAt
 - `places` - Coworking spaces and hotels with booking capabilities
   - Fields: id, name, type, location, city, description, price, imageUrl, rating, reviews, tags
 - `bookings` - User reservations for places

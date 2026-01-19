@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/lib/auth";
 
-import Home from "@/pages/home";
+import MapFeed from "@/pages/map-feed";
 import Explore from "@/pages/explore";
 import Profile from "@/pages/profile";
 import UserProfile from "@/pages/user-profile";
@@ -20,7 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={Auth} />
-      <Route path="/" component={Home} />
+      <Route path="/" component={MapFeed} />
       <Route path="/explore" component={Explore} />
       <Route path="/coworking" component={Coworking} />
       <Route path="/chat" component={Chat} />
