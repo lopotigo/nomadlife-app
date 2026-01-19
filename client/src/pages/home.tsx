@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
-import { useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Link, useLocation } from "wouter";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Post, User } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
 
@@ -90,6 +90,9 @@ export default function Home() {
 }
 
 function StoryRail() {
+  const [showStoryModal, setShowStoryModal] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<{name: string; img: string} | null>(null);
+  
   const stories = [
     { id: 0, name: "Add Story", img: "me", active: false },
     { id: 1, name: "Sarah", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop", active: true },
@@ -98,36 +101,108 @@ function StoryRail() {
     { id: 4, name: "Marc", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop", active: false },
   ];
 
+  const handleStoryClick = (story: typeof stories[0]) => {
+    if (story.id === 0) {
+      setShowStoryModal(true);
+    } else {
+      setSelectedStory({ name: story.name, img: story.img });
+    }
+  };
+
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
-      {stories.map((story) => (
-        <div key={story.id} className="flex flex-col items-center gap-1.5 flex-shrink-0">
-          <div className={`w-16 h-16 rounded-full p-[2px] ${story.active ? "bg-gradient-to-tr from-yellow-400 to-primary" : "bg-border"}`}>
-            <div className="w-full h-full rounded-full border-2 border-background overflow-hidden relative bg-muted">
-               {story.id === 0 ? (
-                 <div className="w-full h-full flex items-center justify-center bg-muted text-2xl font-light text-muted-foreground">+</div>
-               ) : (
-                 <img src={story.img} alt={story.name} className="w-full h-full object-cover" />
-               )}
+    <>
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+        {stories.map((story) => (
+          <button 
+            key={story.id} 
+            className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer"
+            onClick={() => handleStoryClick(story)}
+            data-testid={story.id === 0 ? "button-add-story" : `story-${story.id}`}
+          >
+            <div className={`w-16 h-16 rounded-full p-[2px] ${story.active ? "bg-gradient-to-tr from-yellow-400 to-primary" : "bg-border"} hover:scale-105 transition-transform`}>
+              <div className="w-full h-full rounded-full border-2 border-background overflow-hidden relative bg-muted">
+                 {story.id === 0 ? (
+                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                     <Plus className="w-6 h-6" />
+                   </div>
+                 ) : (
+                   <img src={story.img} alt={story.name} className="w-full h-full object-cover" />
+                 )}
+              </div>
             </div>
-          </div>
-          <span className="text-xs font-medium text-muted-foreground">{story.name}</span>
-        </div>
-      ))}
-    </div>
+            <span className="text-xs font-medium text-muted-foreground">{story.name}</span>
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {showStoryModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowStoryModal(false)}
+            data-testid="overlay-story-modal"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-card rounded-2xl p-6 max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-bold mb-4">Create Story</h2>
+              <div className="flex flex-col gap-3">
+                <button className="flex items-center gap-3 p-4 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid="button-take-photo">
+                  <Camera className="w-6 h-6 text-primary" />
+                  <span>Take Photo</span>
+                </button>
+                <button className="flex items-center gap-3 p-4 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid="button-upload-gallery">
+                  <Plus className="w-6 h-6 text-primary" />
+                  <span>Upload from Gallery</span>
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4 text-center">Stories disappear after 24 hours</p>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {selectedStory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+            onClick={() => setSelectedStory(null)}
+            data-testid="overlay-story-viewer"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="relative w-full h-full max-w-lg"
+            >
+              <div className="absolute top-4 left-4 right-4 flex items-center gap-3 z-10">
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
+                  <img src={selectedStory.img} alt={selectedStory.name} className="w-full h-full object-cover" />
+                </div>
+                <span className="text-white font-bold">{selectedStory.name}</span>
+              </div>
+              <img src={selectedStory.img} alt={selectedStory.name} className="w-full h-full object-contain" />
+              <p className="absolute bottom-4 left-4 right-4 text-white text-center text-sm">Tap to close</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
 function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) => void }) {
-  const [, navigate] = useLocation();
   const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
-
-  const handleProfileClick = () => {
-    navigate(`/user/${post.user.id}`);
-  };
 
   return (
     <motion.article 
@@ -138,21 +213,22 @@ function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) =
     >
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img 
-            src={post.user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"} 
-            alt={post.user.name} 
-            className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity" 
-            onClick={handleProfileClick}
-            data-testid={`avatar-${post.id}`}
-          />
+          <Link href={`/user/${post.user.id}`} data-testid={`link-avatar-${post.id}`}>
+            <img 
+              src={post.user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=default"} 
+              alt={post.user.name} 
+              className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity" 
+              data-testid={`avatar-${post.id}`}
+            />
+          </Link>
           <div>
-            <h3 
+            <Link 
+              href={`/user/${post.user.id}`}
               className="text-sm font-bold leading-none cursor-pointer hover:text-primary transition-colors" 
-              data-testid={`text-username-${post.id}`}
-              onClick={handleProfileClick}
+              data-testid={`link-username-${post.id}`}
             >
               {post.user.name}
-            </h3>
+            </Link>
             <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
               <span>{post.user.location}</span>
               <span>•</span>
