@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation, useSearch } from "wouter";
-import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin } from "lucide-react";
+import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ChatGroup, Message, User } from "@shared/schema";
 
@@ -23,7 +23,6 @@ export default function Chat() {
   const urlParams = new URLSearchParams(searchString);
   const privateUserId = urlParams.get("user");
 
-  const [activeTab, setActiveTab] = useState<"groups" | "private">(privateUserId ? "private" : "groups");
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
@@ -33,6 +32,7 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,7 +55,6 @@ export default function Chat() {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
           if (targetUser) {
             setSelectedPrivateUser(targetUser);
-            setActiveTab("private");
           }
         }
       })
@@ -129,7 +128,14 @@ export default function Chat() {
     }
   };
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const hasActiveChat = selectedGroup || selectedPrivateUser;
+  const currentMessages = selectedGroup ? groupMessages : privateMessages;
+
+  const filteredUsers = allUsers.filter(u => 
+    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (authLoading || loading) {
     return (
@@ -141,114 +147,100 @@ export default function Chat() {
     );
   }
 
-  const hasActiveChat = selectedGroup || selectedPrivateUser;
-  const currentMessages = selectedGroup ? groupMessages : privateMessages;
-
   return (
     <Layout>
       <div className="flex h-[calc(100vh-64px)] md:h-screen bg-slate-900">
-        {/* Left Sidebar - Chat List */}
-        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} md:flex flex-col w-full md:w-80 lg:w-96 bg-slate-900 border-r border-slate-800`}>
+        {/* Left Sidebar - Groups */}
+        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-20 bg-slate-950 border-r border-slate-800`}>
+          <div className="p-3 border-b border-slate-800">
+            <div className="w-12 h-12 mx-auto bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto py-3 space-y-2">
+            {groups.map((group, index) => (
+              <button
+                key={group.id}
+                onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); }}
+                className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-all ${
+                  selectedGroup?.id === group.id 
+                    ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-slate-950" 
+                    : "hover:scale-110"
+                }`}
+                title={group.name}
+                data-testid={`group-icon-${group.id}`}
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg`}>
+                  {group.name[0]}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="p-3 border-t border-slate-800">
+            <button className="w-12 h-12 mx-auto bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        </aside>
+
+        {/* Middle Section - Contacts List */}
+        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-full lg:w-80 bg-slate-900 border-r border-slate-800`}>
           <div className="p-4 border-b border-slate-800">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold text-white">Messages</h1>
-              <button className="w-10 h-10 bg-violet-500 text-white rounded-xl flex items-center justify-center hover:bg-violet-600 transition-colors" data-testid="button-new-chat">
-                <Plus className="w-5 h-5" />
-              </button>
+              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-violet-400" />
+                Messages
+              </h1>
             </div>
             
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search contacts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
-                data-testid="input-search-chats"
+                data-testid="input-search-contacts"
               />
-            </div>
-
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => { setActiveTab("private"); setSelectedGroup(null); }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  activeTab === "private" ? "bg-violet-500 text-white" : "bg-slate-800 text-slate-400 hover:text-white"
-                }`}
-                data-testid="tab-private"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Send className="w-4 h-4" /> Direct
-                </div>
-              </button>
-              <button
-                onClick={() => { setActiveTab("groups"); setSelectedPrivateUser(null); }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  activeTab === "groups" ? "bg-violet-500 text-white" : "bg-slate-800 text-slate-400 hover:text-white"
-                }`}
-                data-testid="tab-groups"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Users className="w-4 h-4" /> Groups
-                </div>
-              </button>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {activeTab === "private" ? (
-              allUsers.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <Send className="w-10 h-10 text-slate-600 mb-4" />
-                  <p className="text-slate-400 font-medium">No users found</p>
-                </div>
-              ) : (
-                allUsers.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => { setSelectedPrivateUser(u); setSelectedGroup(null); }}
-                    className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                      selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
-                    }`}
-                    data-testid={`chat-private-${u.id}`}
-                  >
-                    <div className="relative">
-                      {u.avatar ? (
-                        <img src={u.avatar} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                          {u.name.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white text-sm truncate">{u.name}</p>
-                      <p className="text-xs text-slate-500 truncate">@{u.username}</p>
-                      {u.location && (
-                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" /> {u.location}
-                        </p>
-                      )}
-                    </div>
-                  </button>
-                ))
-              )
+            {filteredUsers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <Send className="w-10 h-10 text-slate-600 mb-4" />
+                <p className="text-slate-400 font-medium">No contacts found</p>
+              </div>
             ) : (
-              groups.map((group, index) => (
+              filteredUsers.map(u => (
                 <button
-                  key={group.id}
-                  onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); }}
+                  key={u.id}
+                  onClick={() => { setSelectedPrivateUser(u); setSelectedGroup(null); }}
                   className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                    selectedGroup?.id === group.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
+                    selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
                   }`}
-                  data-testid={`chat-group-${group.id}`}
+                  data-testid={`chat-private-${u.id}`}
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg`}>
-                    {group.name[0]}
+                  <div className="relative">
+                    {u.avatar ? (
+                      <img src={u.avatar} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                        {u.name.charAt(0)}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-white text-sm truncate">{group.name}</p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> {group.city} • {group.members} members
-                    </p>
+                    <p className="font-semibold text-white text-sm truncate">{u.name}</p>
+                    <p className="text-xs text-slate-500 truncate">@{u.username}</p>
+                    {u.location && (
+                      <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3 h-3" /> {u.location}
+                      </p>
+                    )}
                   </div>
                 </button>
               ))
@@ -263,7 +255,7 @@ export default function Chat() {
               <header className="p-4 bg-slate-900 border-b border-slate-800 flex items-center gap-3">
                 <button
                   onClick={() => { setSelectedGroup(null); setSelectedPrivateUser(null); }}
-                  className="md:hidden w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"
+                  className="lg:hidden w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"
                   data-testid="button-back"
                 >
                   <ArrowLeft className="w-5 h-5" />
@@ -290,7 +282,7 @@ export default function Chat() {
                     </div>
                     <div className="flex-1">
                       <h2 className="font-bold text-white">{selectedGroup.name}</h2>
-                      <p className="text-xs text-slate-400">{selectedGroup.members} members • {selectedGroup.city}</p>
+                      <p className="text-xs text-slate-400">{selectedGroup.members} members - {selectedGroup.city}</p>
                     </div>
                   </>
                 ) : null}
@@ -308,7 +300,7 @@ export default function Chat() {
                 </div>
               </header>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {currentMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     {selectedPrivateUser ? (
@@ -334,39 +326,56 @@ export default function Chat() {
                     ) : null}
                   </div>
                 ) : (
-                  currentMessages.map((msg, idx) => {
+                  currentMessages.map((msg) => {
                     const isOwn = msg.senderId === user?.id;
-                    const showAvatar = !isOwn && (idx === 0 || currentMessages[idx - 1].senderId !== msg.senderId);
+                    const senderAvatar = isOwn ? user?.avatar : msg.sender?.avatar;
+                    const senderName = isOwn ? user?.name : msg.sender?.name;
+                    
                     return (
                       <motion.div
                         key={msg.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-end gap-2`}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-start gap-3`}
                         data-testid={`message-${msg.id}`}
                       >
                         {!isOwn && (
-                          <div className={`w-7 h-7 rounded-full overflow-hidden ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
-                            {msg.sender?.avatar ? (
-                              <img src={msg.sender.avatar} alt="" className="w-full h-full object-cover" />
+                          <div className="flex-shrink-0">
+                            {senderAvatar ? (
+                              <img src={senderAvatar} alt={senderName || ""} className="w-9 h-9 rounded-full object-cover" />
                             ) : (
-                              <div className="w-full h-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold">
-                                {msg.sender?.name?.[0] || "?"}
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                                {senderName?.[0] || "?"}
                               </div>
                             )}
                           </div>
                         )}
-                        <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl ${
-                          isOwn ? 'bg-violet-500 text-white rounded-br-sm' : 'bg-slate-800 text-white rounded-bl-sm'
-                        }`}>
-                          {!isOwn && showAvatar && selectedGroup && (
-                            <p className="text-xs font-semibold text-violet-400 mb-1">{msg.sender?.name}</p>
+                        
+                        <div className={`max-w-[70%] ${isOwn ? 'order-1' : ''}`}>
+                          {!isOwn && selectedGroup && (
+                            <p className="text-xs font-semibold text-violet-400 mb-1 ml-1">{senderName}</p>
                           )}
-                          <p className="text-sm">{msg.content}</p>
-                          <p className={`text-[10px] mt-1 ${isOwn ? 'text-violet-200' : 'text-slate-500'}`}>
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
+                          <div className={`px-4 py-2.5 rounded-2xl ${
+                            isOwn ? 'bg-violet-500 text-white rounded-br-sm' : 'bg-slate-800 text-white rounded-bl-sm'
+                          }`}>
+                            <p className="text-sm">{msg.content}</p>
+                            <p className={`text-[10px] mt-1 ${isOwn ? 'text-violet-200' : 'text-slate-500'}`}>
+                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
                         </div>
+
+                        {isOwn && (
+                          <div className="flex-shrink-0">
+                            {senderAvatar ? (
+                              <img src={senderAvatar} alt={senderName || ""} className="w-9 h-9 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold">
+                                {senderName?.[0] || "?"}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </motion.div>
                     );
                   })
@@ -397,12 +406,12 @@ export default function Chat() {
               </form>
             </>
           ) : (
-            <div className="hidden md:flex flex-col items-center justify-center h-full text-center">
+            <div className="hidden lg:flex flex-col items-center justify-center h-full text-center">
               <div className="w-24 h-24 rounded-3xl bg-slate-800 flex items-center justify-center mb-4">
                 <Send className="w-12 h-12 text-slate-600" />
               </div>
               <h2 className="text-xl font-bold text-white">Select a conversation</h2>
-              <p className="text-slate-500 mt-2">Choose from your contacts or groups</p>
+              <p className="text-slate-500 mt-2">Choose a contact or group to start chatting</p>
             </div>
           )}
         </main>
