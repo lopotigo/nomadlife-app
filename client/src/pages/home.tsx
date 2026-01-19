@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Post, User } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
@@ -91,19 +91,112 @@ export default function Home() {
 
 function StoryRail() {
   const [showStoryModal, setShowStoryModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
   const [selectedStory, setSelectedStory] = useState<{name: string; img: string} | null>(null);
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+  const [myStory, setMyStory] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   
-  const stories = [
-    { id: 0, name: "Add Story", img: "me", active: false },
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const baseStories = [
     { id: 1, name: "Sarah", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop", active: true },
     { id: 2, name: "Davide", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop", active: true },
     { id: 3, name: "Elena", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop", active: false },
     { id: 4, name: "Marc", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop", active: false },
   ];
 
+  const stories = myStory 
+    ? [{ id: 0, name: "Your Story", img: myStory, active: true, isMyStory: true }, ...baseStories]
+    : [{ id: 0, name: "Add Story", img: "add", active: false, isMyStory: false }, ...baseStories];
+
+  const startCamera = async () => {
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false 
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Camera error:", err);
+      setCameraError("Could not access camera. Please allow camera permissions.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+        setCapturedPhoto(dataUrl);
+        stopCamera();
+      }
+    }
+  };
+
+  const retakePhoto = () => {
+    setCapturedPhoto(null);
+    startCamera();
+  };
+
+  const shareStory = () => {
+    if (capturedPhoto) {
+      setMyStory(capturedPhoto);
+      setCapturedPhoto(null);
+      setShowCameraModal(false);
+    }
+  };
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setMyStory(dataUrl);
+        setShowStoryModal(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openCamera = () => {
+    setShowStoryModal(false);
+    setShowCameraModal(true);
+    setCapturedPhoto(null);
+    setTimeout(startCamera, 100);
+  };
+
+  const closeCamera = () => {
+    stopCamera();
+    setCapturedPhoto(null);
+    setShowCameraModal(false);
+  };
+
   const handleStoryClick = (story: typeof stories[0]) => {
-    if (story.id === 0) {
+    if (story.id === 0 && !myStory) {
       setShowStoryModal(true);
+    } else if (story.id === 0 && myStory) {
+      setSelectedStory({ name: "Your Story", img: myStory });
     } else {
       setSelectedStory({ name: story.name, img: story.img });
     }
@@ -111,6 +204,16 @@ function StoryRail() {
 
   return (
     <>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        accept="image/*" 
+        onChange={handleFileUpload}
+        data-testid="input-file-upload"
+      />
+      <canvas ref={canvasRef} className="hidden" />
+      
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
         {stories.map((story) => (
           <button 
@@ -121,10 +224,12 @@ function StoryRail() {
           >
             <div className={`w-16 h-16 rounded-full p-[2px] ${story.active ? "bg-gradient-to-tr from-yellow-400 to-primary" : "bg-border"} hover:scale-105 transition-transform`}>
               <div className="w-full h-full rounded-full border-2 border-background overflow-hidden relative bg-muted">
-                 {story.id === 0 ? (
+                 {story.id === 0 && !myStory ? (
                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
                      <Plus className="w-6 h-6" />
                    </div>
+                 ) : story.id === 0 && myStory ? (
+                   <img src={myStory} alt="Your story" className="w-full h-full object-cover" />
                  ) : (
                    <img src={story.img} alt={story.name} className="w-full h-full object-cover" />
                  )}
@@ -154,17 +259,99 @@ function StoryRail() {
             >
               <h2 className="text-xl font-bold mb-4">Create Story</h2>
               <div className="flex flex-col gap-3">
-                <button className="flex items-center gap-3 p-4 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid="button-take-photo">
+                <button 
+                  className="flex items-center gap-3 p-4 rounded-xl bg-muted hover:bg-muted/80 transition-colors" 
+                  data-testid="button-take-photo"
+                  onClick={openCamera}
+                >
                   <Camera className="w-6 h-6 text-primary" />
                   <span>Take Photo</span>
                 </button>
-                <button className="flex items-center gap-3 p-4 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid="button-upload-gallery">
-                  <Plus className="w-6 h-6 text-primary" />
+                <button 
+                  className="flex items-center gap-3 p-4 rounded-xl bg-muted hover:bg-muted/80 transition-colors" 
+                  data-testid="button-upload-gallery"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-6 h-6 text-primary" />
                   <span>Upload from Gallery</span>
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mt-4 text-center">Stories disappear after 24 hours</p>
             </motion.div>
+          </motion.div>
+        )}
+
+        {showCameraModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black z-50 flex flex-col"
+            data-testid="overlay-camera-modal"
+          >
+            <div className="absolute top-4 left-4 z-10">
+              <button 
+                onClick={closeCamera}
+                className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                data-testid="button-close-camera"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="flex-1 flex items-center justify-center">
+              {cameraError ? (
+                <div className="text-center p-4">
+                  <p className="text-red-400 mb-4">{cameraError}</p>
+                  <button 
+                    onClick={startCamera}
+                    className="px-4 py-2 bg-primary text-white rounded-lg"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : capturedPhoto ? (
+                <img src={capturedPhoto} alt="Captured" className="max-w-full max-h-full object-contain" />
+              ) : (
+                <video 
+                  ref={videoRef} 
+                  autoPlay 
+                  playsInline 
+                  muted 
+                  className="max-w-full max-h-full object-contain scale-x-[-1]"
+                />
+              )}
+            </div>
+            
+            <div className="p-6 flex items-center justify-center gap-6">
+              {capturedPhoto ? (
+                <>
+                  <button 
+                    onClick={retakePhoto}
+                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+                    data-testid="button-retake"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    Retake
+                  </button>
+                  <button 
+                    onClick={shareStory}
+                    className="flex items-center gap-2 px-8 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary/90 transition-colors"
+                    data-testid="button-share-story"
+                  >
+                    Share Story
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={capturePhoto}
+                  className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform"
+                  data-testid="button-capture"
+                >
+                  <div className="w-16 h-16 rounded-full bg-white" />
+                </button>
+              )}
+            </div>
           </motion.div>
         )}
 
