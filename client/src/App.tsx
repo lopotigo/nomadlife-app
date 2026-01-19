@@ -15,6 +15,7 @@ import Coworking from "@/pages/coworking";
 import Subscription from "@/pages/subscription";
 import Auth from "@/pages/auth";
 import DesignPreview from "@/pages/design-preview";
+import MobilePreview from "@/pages/mobile-preview";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/user/:id" component={UserProfile} />
       <Route path="/design-preview" component={DesignPreview} />
+      <Route path="/mobile-preview" component={MobilePreview} />
       <Route component={NotFound} />
     </Switch>
   );
