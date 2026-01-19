@@ -14,6 +14,7 @@ import Chat from "@/pages/chat";
 import Coworking from "@/pages/coworking";
 import Subscription from "@/pages/subscription";
 import Auth from "@/pages/auth";
+import DesignPreview from "@/pages/design-preview";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/subscription" component={Subscription} />
       <Route path="/profile" component={Profile} />
       <Route path="/user/:id" component={UserProfile} />
+      <Route path="/design-preview" component={DesignPreview} />
       <Route component={NotFound} />
     </Switch>
   );
