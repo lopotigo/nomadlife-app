@@ -273,9 +273,18 @@ Run seed script: `tsx server/seed.ts`
 - ✅ Messaging tested (view groups, send messages)
 - ✅ Subscription tested (subscribe, cancel)
 
+## Recent Changes (January 19, 2026)
+
+### Private Chat Persistence
+- ✅ Fixed getPrivateMessages() query - changed from `eq(groupId, null)` to `isNull(groupId)` for proper PostgreSQL NULL comparison
+- ✅ Added GET /api/users endpoint to fetch all users from database
+- ✅ Updated chat page with two-column layout (contacts on left, conversation on right)
+- ✅ ProfilesSidebar now loads real users from database instead of hardcoded profiles
+- ✅ Clicking user profiles in home sidebar navigates to /chat?user={id} for direct messaging
+- ✅ All private messages now persist to PostgreSQL database
+
 ## Known Limitations
 
-- Private messaging UI exists but only group messages are fully implemented
 - Explore page is mostly presentational (no backend integration)
 - Comments feature exists in data model but UI is not implemented
 - Real-time chat updates require page refresh (no WebSocket implementation)
@@ -284,7 +293,6 @@ Run seed script: `tsx server/seed.ts`
 ## Future Enhancements
 
 - WebSocket integration for real-time chat
-- Private messaging backend implementation
 - Comment system for posts
 - File upload for post images and avatars
 - Search functionality for users, places, and posts
