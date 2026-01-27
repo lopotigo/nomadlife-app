@@ -181,7 +181,14 @@ export default function UnifiedMap() {
       if (publicTripsRes.ok) {
         const publicData = await publicTripsRes.json();
         const otherTrips = publicData.filter((t: Trip) => t.userId !== user?.id);
-        setFollowingTrips(otherTrips);
+        const tripsWithStops = await Promise.all(
+          otherTrips.map(async (trip: any) => {
+            const detailRes = await fetch(`/api/trips/${trip.id}`, { credentials: "include" });
+            if (detailRes.ok) return detailRes.json();
+            return { ...trip, stops: [] };
+          })
+        );
+        setFollowingTrips(tripsWithStops);
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
@@ -890,7 +897,7 @@ function CreatePostModal({
 
           <Button
             onClick={handleSubmit}
-            disabled={!content.trim() || isSubmitting || isUploading}
+            disabled={!content.trim() || isSubmitting || isUploading || !latitude || !longitude}
             data-testid="button-submit-new-post"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Pubblica</>}
