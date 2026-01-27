@@ -270,17 +270,29 @@ export default function UnifiedMap() {
   }, [myTrips, followingTrips, filters]);
 
   const mapCenter: [number, number] = useMemo(() => {
-    const allStops = tripsToShow.flatMap(t => t.stops);
-    if (allStops.length > 0) {
-      const validStops = allStops.filter(s => s.latitude && s.longitude);
-      if (validStops.length > 0) {
-        const avgLat = validStops.reduce((sum, s) => sum + (s.latitude || 0), 0) / validStops.length;
-        const avgLng = validStops.reduce((sum, s) => sum + (s.longitude || 0), 0) / validStops.length;
-        return [avgLat, avgLng];
+    const allPoints: { lat: number; lng: number }[] = [];
+    
+    postsWithCoords.forEach(p => {
+      if (p.latitude && p.longitude) {
+        allPoints.push({ lat: p.latitude, lng: p.longitude });
       }
+    });
+    
+    tripsToShow.forEach(t => {
+      t.stops.forEach(s => {
+        if (s.latitude && s.longitude) {
+          allPoints.push({ lat: s.latitude, lng: s.longitude });
+        }
+      });
+    });
+    
+    if (allPoints.length > 0) {
+      const avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
+      const avgLng = allPoints.reduce((sum, p) => sum + p.lng, 0) / allPoints.length;
+      return [avgLat, avgLng];
     }
-    return [20, 100];
-  }, [tripsToShow]);
+    return [41, 12];
+  }, [postsWithCoords, tripsToShow]);
 
   if (authLoading || loading) {
     return (
@@ -509,28 +521,6 @@ export default function UnifiedMap() {
             )}
           </AnimatePresence>
           
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] bg-card/90 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-border/50">
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-red-400" />
-                <span>Post</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-amber-400" />
-                <span>Miei</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-blue-400" />
-                <span>Seguiti</span>
-              </div>
-              {filters.ecoMode && (
-                <div className="flex items-center gap-1 text-green-400">
-                  <Leaf className="w-3 h-3" />
-                  <span>Eco</span>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
