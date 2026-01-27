@@ -327,14 +327,15 @@ export default function UnifiedMap() {
   }
 
   return (
-    <Layout fullWidth>
-      <div className="relative h-screen w-full">
-        <MapContainer
-          center={mapCenter}
-          zoom={4}
-          className="h-full w-full z-0"
-          style={{ background: "#1a1a2e" }}
-        >
+    <Layout>
+      <div className="flex flex-col h-full">
+        <div className="relative h-[50vh] w-full">
+          <MapContainer
+            center={mapCenter}
+            zoom={4}
+            className="h-full w-full z-0"
+            style={{ background: "#1a1a2e" }}
+          >
           <TileLayer
             attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -557,109 +558,171 @@ export default function UnifiedMap() {
         </AnimatePresence>
         
         <div className="absolute bottom-4 left-4 z-[1000] bg-card/90 backdrop-blur-md rounded-2xl p-3 shadow-lg border border-border/50">
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <span>Post</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-amber-400" />
-              <span>Miei Viaggi</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-blue-400" />
-              <span>Seguiti</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span>Eco</span>
+            <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <span>Post</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-amber-400" />
+                <span>Miei Viaggi</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-blue-400" />
+                <span>Seguiti</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span>Eco</span>
+              </div>
             </div>
           </div>
         </div>
         
-        <Dialog open={showNewTrip} onOpenChange={setShowNewTrip}>
-          <DialogContent className="bg-card border-border">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Plane className="w-5 h-5 text-primary" />
-                Nuovo Diario di Viaggio
-              </DialogTitle>
-            </DialogHeader>
-            
-            <form onSubmit={handleCreateTrip} className="space-y-4">
-              <div>
-                <Label htmlFor="title">Titolo del Viaggio</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="Es: Avventura Sud-Est Asiatico"
-                  required
-                  className="mt-1"
-                  data-testid="input-trip-title"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="description">Descrizione</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Racconta il tuo viaggio..."
-                  className="mt-1"
-                  rows={3}
-                  data-testid="input-trip-description"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="startLocation">Partenza</Label>
-                  <Input
-                    id="startLocation"
-                    name="startLocation"
-                    placeholder="Es: Milano"
-                    className="mt-1"
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Heart className="w-5 h-5 text-red-400" />
+            Feed
+          </h2>
+          
+          {posts.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">Nessun post ancora</p>
+          ) : (
+            posts.map((post) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-card rounded-xl p-4 border border-border shadow-sm"
+                data-testid={`post-card-${post.id}`}
+              >
+                <div className="flex items-start gap-3">
+                  <Link href={`/user/${post.userId}`}>
+                    <img
+                      src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
+                      alt={post.user.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Link href={`/user/${post.userId}`}>
+                        <span className="font-semibold hover:underline">{post.user.name}</span>
+                      </Link>
+                      <span className="text-muted-foreground text-sm">@{post.user.username}</span>
+                    </div>
+                    {post.location && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        <MapPin className="w-3 h-3" />
+                        <span>{post.location}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <p className="mt-3 text-sm">{post.content}</p>
+                
+                {post.imageUrl && (
+                  <img
+                    src={post.imageUrl}
+                    alt=""
+                    className="mt-3 rounded-xl w-full max-h-64 object-cover"
                   />
+                )}
+                
+                <div className="flex items-center gap-4 mt-3 text-muted-foreground">
+                  <button className="flex items-center gap-1 text-sm hover:text-red-400 transition-colors">
+                    <Heart className="w-4 h-4" />
+                    <span>{post.likes}</span>
+                  </button>
+                  <button className="flex items-center gap-1 text-sm hover:text-primary transition-colors">
+                    <MessageCircle className="w-4 h-4" />
+                    <span>{post.commentsCount}</span>
+                  </button>
                 </div>
-                <div>
-                  <Label htmlFor="endLocation">Destinazione</Label>
-                  <Input
-                    id="endLocation"
-                    name="endLocation"
-                    placeholder="Es: Bali"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="startDate">Data Inizio</Label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  required
-                  className="mt-1"
-                  data-testid="input-start-date"
-                />
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-                <div>
-                  <Label htmlFor="isPublic" className="text-sm font-medium">Viaggio Pubblico</Label>
-                  <p className="text-xs text-muted-foreground">Altri utenti potranno vedere il tuo viaggio sulla mappa</p>
-                </div>
-                <Switch id="isPublic" name="isPublic" data-testid="switch-public" />
-              </div>
-              
-              <Button type="submit" className="w-full" data-testid="button-create-trip">
-                <Plus className="w-4 h-4 mr-2" />
-                Crea Diario di Viaggio
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+              </motion.div>
+            ))
+          )}
+        </div>
       </div>
+        
+      <Dialog open={showNewTrip} onOpenChange={setShowNewTrip}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plane className="w-5 h-5 text-primary" />
+              Nuovo Diario di Viaggio
+            </DialogTitle>
+          </DialogHeader>
+            
+          <form onSubmit={handleCreateTrip} className="space-y-4">
+          <div>
+            <Label htmlFor="title">Titolo del Viaggio</Label>
+            <Input
+              id="title"
+              name="title"
+              placeholder="Es: Avventura Sud-Est Asiatico"
+              required
+              className="mt-1"
+              data-testid="input-trip-title"
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">Descrizione</Label>
+            <Textarea
+              id="description"
+              name="description"
+              placeholder="Racconta il tuo viaggio..."
+              className="mt-1"
+              rows={3}
+              data-testid="input-trip-description"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="startLocation">Partenza</Label>
+              <Input
+                id="startLocation"
+                name="startLocation"
+                placeholder="Es: Milano"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="endLocation">Destinazione</Label>
+              <Input
+                id="endLocation"
+                name="endLocation"
+                placeholder="Es: Bali"
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="startDate">Data Inizio</Label>
+            <Input
+              id="startDate"
+              name="startDate"
+              type="date"
+              required
+              className="mt-1"
+              data-testid="input-start-date"
+            />
+          </div>
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+            <div>
+              <Label htmlFor="isPublic" className="text-sm font-medium">Viaggio Pubblico</Label>
+              <p className="text-xs text-muted-foreground">Altri utenti potranno vedere il tuo viaggio sulla mappa</p>
+            </div>
+            <Switch id="isPublic" name="isPublic" data-testid="switch-public" />
+          </div>
+          <Button type="submit" className="w-full" data-testid="button-create-trip">
+            <Plus className="w-4 h-4 mr-2" />
+            Crea Diario di Viaggio
+          </Button>
+        </form>
+        </DialogContent>
+      </Dialog>
       
       <style>{`
         .custom-post-marker {
