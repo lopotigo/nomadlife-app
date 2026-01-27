@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Map, Briefcase, User, MessageSquare } from "lucide-react";
+import { Home, Map, Briefcase, User, MessageSquare, Plane } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,6 +32,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         <nav className="flex flex-col gap-2">
           <NavItem href="/" icon={Home} label="Feed" active={location === "/"} />
           <NavItem href="/explore" icon={Map} label="Explore" active={location === "/explore"} />
+          <NavItem href="/travel-diary" icon={Plane} label="Viaggi" active={location === "/travel-diary"} />
           <NavItem href="/chat" icon={MessageSquare} label="Messages" active={location === "/chat"} />
           <NavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
           <NavItem href="/profile" icon={User} label="Profile" active={location === "/profile"} />
@@ -52,8 +53,8 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-2 z-50">
         <MobileNavItem href="/" icon={Home} label="Feed" active={location === "/"} />
         <MobileNavItem href="/explore" icon={Map} label="Explore" active={location === "/explore"} />
+        <MobileNavItem href="/travel-diary" icon={Plane} label="Viaggi" active={location === "/travel-diary"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label="Chat" active={location === "/chat"} />
-        <MobileNavItem href="/coworking" icon={Briefcase} label="Book" active={location === "/coworking"} />
         <MobileNavItem href="/profile" icon={User} label="Profile" active={location === "/profile"} />
       </nav>
     </div>

@@ -16,6 +16,7 @@ import Subscription from "@/pages/subscription";
 import Auth from "@/pages/auth";
 import DesignPreview from "@/pages/design-preview";
 import MobilePreview from "@/pages/mobile-preview";
+import TravelDiary from "@/pages/travel-diary";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/user/:id" component={UserProfile} />
       <Route path="/design-preview" component={DesignPreview} />
       <Route path="/mobile-preview" component={MobilePreview} />
+      <Route path="/travel-diary" component={TravelDiary} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
-import { useLocation, useParams } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, ArrowLeft } from "lucide-react";
+import { useLocation, useParams, Link } from "wouter";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, ArrowLeft, UserPlus, UserMinus, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post, User } from "@shared/schema";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserProfile() {
   const { user: currentUser, loading: authLoading } = useAuth();
@@ -13,6 +15,30 @@ export default function UserProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 });
+  const [followLoading, setFollowLoading] = useState(false);
+  const { toast } = useToast();
+
+  const fetchFollowStatus = useCallback(async () => {
+    if (!params.id) return;
+    try {
+      const [followRes, statsRes] = await Promise.all([
+        fetch(`/api/is-following/${params.id}`, { credentials: "include" }),
+        fetch(`/api/users/${params.id}/follow-stats`, { credentials: "include" }),
+      ]);
+      if (followRes.ok) {
+        const { isFollowing: following } = await followRes.json();
+        setIsFollowing(following);
+      }
+      if (statsRes.ok) {
+        const stats = await statsRes.json();
+        setFollowStats(stats);
+      }
+    } catch (error) {
+      console.error("Failed to fetch follow status:", error);
+    }
+  }, [params.id]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -37,7 +63,49 @@ export default function UserProfile() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [currentUser, authLoading, setLocation, params.id]);
+    
+    fetchFollowStatus();
+  }, [currentUser, authLoading, setLocation, params.id, fetchFollowStatus]);
+
+  const handleFollow = async () => {
+    if (!params.id) return;
+    setFollowLoading(true);
+    try {
+      const res = await fetch(`/api/follow/${params.id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setIsFollowing(true);
+        setFollowStats(prev => ({ ...prev, followersCount: prev.followersCount + 1 }));
+        toast({ title: `Ora segui ${user?.name}` });
+      }
+    } catch (error) {
+      toast({ title: "Errore", description: "Impossibile seguire l'utente", variant: "destructive" });
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    if (!params.id) return;
+    setFollowLoading(true);
+    try {
+      const res = await fetch(`/api/follow/${params.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setIsFollowing(false);
+        setFollowStats(prev => ({ ...prev, followersCount: Math.max(0, prev.followersCount - 1) }));
+        toast({ title: `Non segui più ${user?.name}` });
+      }
+    } catch (error) {
+      toast({ title: "Errore", description: "Impossibile smettere di seguire", variant: "destructive" });
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -100,17 +168,54 @@ export default function UserProfile() {
             <p className="text-primary font-medium" data-testid="text-user-username">@{user.username}</p>
           </div>
 
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex items-center gap-3 mt-4">
             <div className="flex items-center gap-1.5 text-sm font-medium bg-secondary/50 text-secondary-foreground px-4 py-2 rounded-2xl border border-secondary">
               <MapPin className="w-4 h-4" />
               <span data-testid="text-user-location">{user.location || "Nomadic"}</span>
             </div>
-            <button 
-              className="p-2 rounded-2xl border border-border hover:bg-muted transition-colors"
-              data-testid="button-message-user"
+            
+            <Button
+              onClick={isFollowing ? handleUnfollow : handleFollow}
+              disabled={followLoading}
+              variant={isFollowing ? "outline" : "default"}
+              className={isFollowing ? "border-primary text-primary" : "bg-primary hover:bg-primary/90"}
+              data-testid="button-follow"
             >
-              <Mail className="w-5 h-5 text-muted-foreground" />
-            </button>
+              {followLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isFollowing ? (
+                <>
+                  <UserMinus className="w-4 h-4 mr-1" />
+                  Smetti seguire
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Segui
+                </>
+              )}
+            </Button>
+
+            <Link href={`/chat?user=${params.id}`}>
+              <button 
+                className="p-2 rounded-2xl border border-border hover:bg-muted transition-colors"
+                data-testid="button-message-user"
+              >
+                <Mail className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </Link>
+          </div>
+          
+          <div className="flex items-center gap-6 mt-4 text-sm">
+            <div className="flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="font-bold" data-testid="text-followers-count">{followStats.followersCount}</span>
+              <span className="text-muted-foreground">follower</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold" data-testid="text-following-count">{followStats.followingCount}</span>
+              <span className="text-muted-foreground">seguiti</span>
+            </div>
           </div>
 
           {user.bio && (

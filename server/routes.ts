@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema } from "@shared/schema";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { createRepository, pushFile, getGitHubUser } from "./github";
@@ -472,6 +472,440 @@ export async function registerRoutes(
     try {
       const analytics = await storage.getAnalytics();
       res.send(analytics);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== TRIP ROUTES (TRAVEL DIARY) ==========
+  app.get("/api/trips", async (req, res) => {
+    try {
+      const userId = req.isAuthenticated() ? (req.user as User).id : null;
+      
+      // Always enforce visibility: only public trips OR own trips
+      // Ignore client-provided isPublic/userId filters that would expose private data
+      if (!userId) {
+        // Unauthenticated: only public trips
+        const trips = await storage.getTrips({ isPublic: true });
+        res.send(trips);
+      } else {
+        // Authenticated: public trips + own trips
+        const [publicTrips, ownTrips] = await Promise.all([
+          storage.getTrips({ isPublic: true }),
+          storage.getTrips({ userId, isPublic: false }),
+        ]);
+        // Merge and deduplicate (own public trips would be in both)
+        const tripMap = new Map<string, any>();
+        for (const trip of publicTrips) tripMap.set(trip.id, trip);
+        for (const trip of ownTrips) tripMap.set(trip.id, trip);
+        res.send(Array.from(tripMap.values()));
+      }
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/trips/:id", async (req, res) => {
+    try {
+      const trip = await storage.getTrip(req.params.id);
+      if (!trip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      // Only allow access to public trips or own trips
+      const userId = req.isAuthenticated() ? (req.user as User).id : null;
+      if (!trip.isPublic && trip.userId !== userId) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      res.send(trip);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/my-trips", requireAuth, async (req, res) => {
+    try {
+      const trips = await storage.getUserTrips((req.user as User).id);
+      res.send(trips);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/trips", requireAuth, async (req, res) => {
+    try {
+      const data = insertTripSchema.parse({
+        ...req.body,
+        userId: (req.user as User).id,
+        startDate: new Date(req.body.startDate),
+        endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
+      });
+      const trip = await storage.createTrip(data);
+      
+      // Notify followers about new trip
+      const followers = await storage.getFollowers((req.user as User).id);
+      for (const f of followers) {
+        await storage.createNotification({
+          userId: f.followerId,
+          type: "new_trip",
+          message: `${(req.user as User).name} ha iniziato un nuovo viaggio: "${trip.title}"`,
+          relatedUserId: (req.user as User).id,
+          relatedTripId: trip.id,
+        });
+      }
+      
+      res.status(201).send(trip);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.patch("/api/trips/:id", requireAuth, async (req, res) => {
+    try {
+      const existingTrip = await storage.getTrip(req.params.id);
+      if (!existingTrip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      if (existingTrip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const updates = { ...req.body };
+      if (updates.startDate) updates.startDate = new Date(updates.startDate);
+      if (updates.endDate) updates.endDate = new Date(updates.endDate);
+      
+      const trip = await storage.updateTrip(req.params.id, updates);
+      res.send(trip);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/trips/:id", requireAuth, async (req, res) => {
+    try {
+      const existingTrip = await storage.getTrip(req.params.id);
+      if (!existingTrip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      if (existingTrip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      await storage.deleteTrip(req.params.id);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== TRIP STOP ROUTES ==========
+  app.get("/api/trips/:tripId/stops", async (req, res) => {
+    try {
+      const trip = await storage.getTrip(req.params.tripId);
+      if (!trip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      // Only allow access to public trips or own trips
+      const userId = req.isAuthenticated() ? (req.user as User).id : null;
+      if (!trip.isPublic && trip.userId !== userId) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      const stops = await storage.getTripStops(req.params.tripId);
+      res.send(stops);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/trips/:tripId/stops", requireAuth, async (req, res) => {
+    try {
+      const trip = await storage.getTrip(req.params.tripId);
+      if (!trip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      if (trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const data = insertTripStopSchema.parse({
+        ...req.body,
+        tripId: req.params.tripId,
+        arrivalDate: new Date(req.body.arrivalDate),
+        departureDate: req.body.departureDate ? new Date(req.body.departureDate) : undefined,
+      });
+      const stop = await storage.createTripStop(data);
+      
+      // Notify followers about new stop
+      if (trip.isPublic) {
+        const followers = await storage.getFollowers((req.user as User).id);
+        for (const f of followers) {
+          await storage.createNotification({
+            userId: f.followerId,
+            type: "new_stop",
+            message: `${(req.user as User).name} ha aggiunto una nuova tappa a "${trip.title}": ${stop.city}, ${stop.country}`,
+            relatedUserId: (req.user as User).id,
+            relatedTripId: trip.id,
+          });
+        }
+      }
+      
+      res.status(201).send(stop);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.patch("/api/stops/:id", requireAuth, async (req, res) => {
+    try {
+      // Get the stop first to check ownership
+      const existingStop = await storage.getTripStop(req.params.id);
+      if (!existingStop) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      const trip = await storage.getTrip(existingStop.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const updates = { ...req.body };
+      if (updates.arrivalDate) updates.arrivalDate = new Date(updates.arrivalDate);
+      if (updates.departureDate) updates.departureDate = new Date(updates.departureDate);
+      
+      const stop = await storage.updateTripStop(req.params.id, updates);
+      res.send(stop);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/stops/:id", requireAuth, async (req, res) => {
+    try {
+      // Get the stop first to check ownership
+      const existingStop = await storage.getTripStop(req.params.id);
+      if (!existingStop) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      const trip = await storage.getTrip(existingStop.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      await storage.deleteTripStop(req.params.id);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== TRIP EXPENSE ROUTES ==========
+  app.get("/api/stops/:stopId/expenses", async (req, res) => {
+    try {
+      // Check visibility of the trip this stop belongs to
+      const stop = await storage.getTripStop(req.params.stopId);
+      if (!stop) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      const trip = await storage.getTrip(stop.tripId);
+      if (!trip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      const userId = req.isAuthenticated() ? (req.user as User).id : null;
+      if (!trip.isPublic && trip.userId !== userId) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      const expenses = await storage.getStopExpenses(req.params.stopId);
+      res.send(expenses);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/stops/:stopId/expenses", requireAuth, async (req, res) => {
+    try {
+      // Verify ownership through stop -> trip
+      const stop = await storage.getTripStop(req.params.stopId);
+      if (!stop) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      const trip = await storage.getTrip(stop.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const data = insertTripExpenseSchema.parse({
+        ...req.body,
+        stopId: req.params.stopId,
+      });
+      const expense = await storage.createTripExpense(data);
+      res.status(201).send(expense);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.patch("/api/expenses/:id", requireAuth, async (req, res) => {
+    try {
+      // Verify ownership through expense -> stop -> trip
+      const existingExpense = await storage.getTripExpense(req.params.id);
+      if (!existingExpense) {
+        return res.status(404).send({ error: "Expense not found" });
+      }
+      const stop = await storage.getTripStop(existingExpense.stopId);
+      if (!stop) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      const trip = await storage.getTrip(stop.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const expense = await storage.updateTripExpense(req.params.id, req.body);
+      res.send(expense);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/expenses/:id", requireAuth, async (req, res) => {
+    try {
+      // Verify ownership through expense -> stop -> trip
+      const existingExpense = await storage.getTripExpense(req.params.id);
+      if (!existingExpense) {
+        return res.status(404).send({ error: "Expense not found" });
+      }
+      const stop = await storage.getTripStop(existingExpense.stopId);
+      if (!stop) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      const trip = await storage.getTrip(stop.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      await storage.deleteTripExpense(req.params.id);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== FOLLOWER ROUTES ==========
+  app.get("/api/users/:id/followers", async (req, res) => {
+    try {
+      const followers = await storage.getFollowers(req.params.id);
+      res.send(followers);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/users/:id/following", async (req, res) => {
+    try {
+      const following = await storage.getFollowing(req.params.id);
+      res.send(following);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/users/:id/follow-stats", async (req, res) => {
+    try {
+      const [followersCount, followingCount] = await Promise.all([
+        storage.getFollowersCount(req.params.id),
+        storage.getFollowingCount(req.params.id),
+      ]);
+      res.send({ followersCount, followingCount });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/is-following/:userId", requireAuth, async (req, res) => {
+    try {
+      const isFollowing = await storage.isFollowing((req.user as User).id, req.params.userId);
+      res.send({ isFollowing });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/follow/:userId", requireAuth, async (req, res) => {
+    try {
+      const targetUserId = req.params.userId;
+      const currentUserId = (req.user as User).id;
+      
+      if (targetUserId === currentUserId) {
+        return res.status(400).send({ error: "Cannot follow yourself" });
+      }
+      
+      const alreadyFollowing = await storage.isFollowing(currentUserId, targetUserId);
+      if (alreadyFollowing) {
+        return res.status(400).send({ error: "Already following" });
+      }
+      
+      const follower = await storage.follow(currentUserId, targetUserId);
+      
+      // Notify the user they have a new follower
+      await storage.createNotification({
+        userId: targetUserId,
+        type: "new_follower",
+        message: `${(req.user as User).name} ha iniziato a seguirti`,
+        relatedUserId: currentUserId,
+      });
+      
+      res.status(201).send(follower);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/follow/:userId", requireAuth, async (req, res) => {
+    try {
+      const unfollowed = await storage.unfollow((req.user as User).id, req.params.userId);
+      if (!unfollowed) {
+        return res.status(404).send({ error: "Follow relationship not found" });
+      }
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== NOTIFICATION ROUTES ==========
+  app.get("/api/notifications", requireAuth, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const notifications = await storage.getUserNotifications((req.user as User).id, limit);
+      res.send(notifications);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
+    try {
+      const count = await storage.getUnreadNotificationsCount((req.user as User).id);
+      res.send({ count });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", requireAuth, async (req, res) => {
+    try {
+      const notification = await storage.markNotificationAsRead(req.params.id);
+      if (!notification) {
+        return res.status(404).send({ error: "Notification not found" });
+      }
+      res.send(notification);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/notifications/read-all", requireAuth, async (req, res) => {
+    try {
+      await storage.markAllNotificationsAsRead((req.user as User).id);
+      res.send({ success: true });
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

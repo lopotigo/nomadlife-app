@@ -22,6 +22,16 @@ import type {
   InsertEvent,
   EventRegistration,
   InsertEventRegistration,
+  Trip,
+  InsertTrip,
+  TripStop,
+  InsertTripStop,
+  TripExpense,
+  InsertTripExpense,
+  Follower,
+  InsertFollower,
+  Notification,
+  InsertNotification,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -81,6 +91,44 @@ export interface IStorage {
     priceMax?: number;
     amenities?: string[];
   }): Promise<Place[]>;
+
+  // Trips (Travel Diary)
+  getTrips(filters?: { userId?: string; isPublic?: boolean }): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
+  getTrip(id: string): Promise<(Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] }) | undefined>;
+  getUserTrips(userId: string): Promise<Trip[]>;
+  createTrip(trip: InsertTrip): Promise<Trip>;
+  updateTrip(id: string, updates: Partial<Trip>): Promise<Trip | undefined>;
+  deleteTrip(id: string): Promise<boolean>;
+
+  // Trip Stops
+  getTripStop(id: string): Promise<TripStop | undefined>;
+  getTripStops(tripId: string): Promise<TripStop[]>;
+  createTripStop(stop: InsertTripStop): Promise<TripStop>;
+  updateTripStop(id: string, updates: Partial<TripStop>): Promise<TripStop | undefined>;
+  deleteTripStop(id: string): Promise<boolean>;
+
+  // Trip Expenses
+  getTripExpense(id: string): Promise<TripExpense | undefined>;
+  getStopExpenses(stopId: string): Promise<TripExpense[]>;
+  createTripExpense(expense: InsertTripExpense): Promise<TripExpense>;
+  updateTripExpense(id: string, updates: Partial<TripExpense>): Promise<TripExpense | undefined>;
+  deleteTripExpense(id: string): Promise<boolean>;
+
+  // Followers
+  getFollowers(userId: string): Promise<(Follower & { follower: User })[]>;
+  getFollowing(userId: string): Promise<(Follower & { following: User })[]>;
+  isFollowing(followerId: string, followingId: string): Promise<boolean>;
+  follow(followerId: string, followingId: string): Promise<Follower>;
+  unfollow(followerId: string, followingId: string): Promise<boolean>;
+  getFollowersCount(userId: string): Promise<number>;
+  getFollowingCount(userId: string): Promise<number>;
+
+  // Notifications
+  getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: string): Promise<Notification | undefined>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  getUnreadNotificationsCount(userId: string): Promise<number>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -403,6 +451,241 @@ export class DrizzleStorage implements IStorage {
     }
     
     return await this.db.select().from(schema.places).where(and(...conditions) as any);
+  }
+
+  // Trips (Travel Diary)
+  async getTrips(filters?: { userId?: string; isPublic?: boolean }): Promise<(Trip & { user: User; stops: TripStop[] })[]> {
+    const conditions = [];
+    if (filters?.userId) conditions.push(eq(schema.trips.userId, filters.userId));
+    if (filters?.isPublic !== undefined) conditions.push(eq(schema.trips.isPublic, filters.isPublic));
+
+    const tripsQuery = conditions.length > 0
+      ? this.db.select().from(schema.trips)
+          .leftJoin(schema.users, eq(schema.trips.userId, schema.users.id))
+          .where(and(...conditions) as any)
+          .orderBy(desc(schema.trips.createdAt))
+      : this.db.select().from(schema.trips)
+          .leftJoin(schema.users, eq(schema.trips.userId, schema.users.id))
+          .orderBy(desc(schema.trips.createdAt));
+
+    const tripsResult = await tripsQuery;
+    
+    const tripsWithStops = await Promise.all(
+      tripsResult.map(async (row) => {
+        const stops = await this.db.select().from(schema.tripStops)
+          .where(eq(schema.tripStops.tripId, row.trips.id))
+          .orderBy(schema.tripStops.orderIndex);
+        return {
+          ...row.trips,
+          user: row.users!,
+          stops,
+        };
+      })
+    );
+    return tripsWithStops;
+  }
+
+  async getTrip(id: string): Promise<(Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] }) | undefined> {
+    const tripResult = await this.db.select().from(schema.trips)
+      .leftJoin(schema.users, eq(schema.trips.userId, schema.users.id))
+      .where(eq(schema.trips.id, id));
+    
+    if (!tripResult[0]) return undefined;
+
+    const stops = await this.db.select().from(schema.tripStops)
+      .where(eq(schema.tripStops.tripId, id))
+      .orderBy(schema.tripStops.orderIndex);
+
+    const stopsWithExpenses = await Promise.all(
+      stops.map(async (stop) => {
+        const expenses = await this.db.select().from(schema.tripExpenses)
+          .where(eq(schema.tripExpenses.stopId, stop.id));
+        return { ...stop, expenses };
+      })
+    );
+
+    return {
+      ...tripResult[0].trips,
+      user: tripResult[0].users!,
+      stops: stopsWithExpenses,
+    };
+  }
+
+  async getUserTrips(userId: string): Promise<Trip[]> {
+    return await this.db.select().from(schema.trips)
+      .where(eq(schema.trips.userId, userId))
+      .orderBy(desc(schema.trips.createdAt));
+  }
+
+  async createTrip(insertTrip: InsertTrip): Promise<Trip> {
+    const result = await this.db.insert(schema.trips).values(insertTrip).returning();
+    return result[0];
+  }
+
+  async updateTrip(id: string, updates: Partial<Trip>): Promise<Trip | undefined> {
+    const result = await this.db.update(schema.trips).set(updates)
+      .where(eq(schema.trips.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteTrip(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.trips).where(eq(schema.trips.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Trip Stops
+  async getTripStop(id: string): Promise<TripStop | undefined> {
+    const result = await this.db.select().from(schema.tripStops)
+      .where(eq(schema.tripStops.id, id));
+    return result[0];
+  }
+
+  async getTripStops(tripId: string): Promise<TripStop[]> {
+    return await this.db.select().from(schema.tripStops)
+      .where(eq(schema.tripStops.tripId, tripId))
+      .orderBy(schema.tripStops.orderIndex);
+  }
+
+  async createTripStop(insertStop: InsertTripStop): Promise<TripStop> {
+    const result = await this.db.insert(schema.tripStops).values(insertStop).returning();
+    return result[0];
+  }
+
+  async updateTripStop(id: string, updates: Partial<TripStop>): Promise<TripStop | undefined> {
+    const result = await this.db.update(schema.tripStops).set(updates)
+      .where(eq(schema.tripStops.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteTripStop(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.tripStops).where(eq(schema.tripStops.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Trip Expenses
+  async getTripExpense(id: string): Promise<TripExpense | undefined> {
+    const result = await this.db.select().from(schema.tripExpenses)
+      .where(eq(schema.tripExpenses.id, id));
+    return result[0];
+  }
+
+  async getStopExpenses(stopId: string): Promise<TripExpense[]> {
+    return await this.db.select().from(schema.tripExpenses)
+      .where(eq(schema.tripExpenses.stopId, stopId));
+  }
+
+  async createTripExpense(insertExpense: InsertTripExpense): Promise<TripExpense> {
+    const result = await this.db.insert(schema.tripExpenses).values(insertExpense).returning();
+    return result[0];
+  }
+
+  async updateTripExpense(id: string, updates: Partial<TripExpense>): Promise<TripExpense | undefined> {
+    const result = await this.db.update(schema.tripExpenses).set(updates)
+      .where(eq(schema.tripExpenses.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteTripExpense(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.tripExpenses).where(eq(schema.tripExpenses.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Followers
+  async getFollowers(userId: string): Promise<(Follower & { follower: User })[]> {
+    const result = await this.db.select().from(schema.followers)
+      .leftJoin(schema.users, eq(schema.followers.followerId, schema.users.id))
+      .where(eq(schema.followers.followingId, userId));
+    return result.map((row) => ({
+      ...row.followers,
+      follower: row.users!,
+    }));
+  }
+
+  async getFollowing(userId: string): Promise<(Follower & { following: User })[]> {
+    const result = await this.db.select().from(schema.followers)
+      .leftJoin(schema.users, eq(schema.followers.followingId, schema.users.id))
+      .where(eq(schema.followers.followerId, userId));
+    return result.map((row) => ({
+      ...row.followers,
+      following: row.users!,
+    }));
+  }
+
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    const result = await this.db.select().from(schema.followers)
+      .where(and(
+        eq(schema.followers.followerId, followerId),
+        eq(schema.followers.followingId, followingId)
+      ) as any);
+    return result.length > 0;
+  }
+
+  async follow(followerId: string, followingId: string): Promise<Follower> {
+    const result = await this.db.insert(schema.followers)
+      .values({ followerId, followingId })
+      .returning();
+    return result[0];
+  }
+
+  async unfollow(followerId: string, followingId: string): Promise<boolean> {
+    const result = await this.db.delete(schema.followers)
+      .where(and(
+        eq(schema.followers.followerId, followerId),
+        eq(schema.followers.followingId, followingId)
+      ) as any)
+      .returning();
+    return result.length > 0;
+  }
+
+  async getFollowersCount(userId: string): Promise<number> {
+    const result = await this.db.select({ count: sql<number>`count(*)` })
+      .from(schema.followers)
+      .where(eq(schema.followers.followingId, userId));
+    return Number(result[0]?.count || 0);
+  }
+
+  async getFollowingCount(userId: string): Promise<number> {
+    const result = await this.db.select({ count: sql<number>`count(*)` })
+      .from(schema.followers)
+      .where(eq(schema.followers.followerId, userId));
+    return Number(result[0]?.count || 0);
+  }
+
+  // Notifications
+  async getUserNotifications(userId: string, limit: number = 50): Promise<Notification[]> {
+    return await this.db.select().from(schema.notifications)
+      .where(eq(schema.notifications.userId, userId))
+      .orderBy(desc(schema.notifications.createdAt))
+      .limit(limit);
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const result = await this.db.insert(schema.notifications).values(insertNotification).returning();
+    return result[0];
+  }
+
+  async markNotificationAsRead(id: string): Promise<Notification | undefined> {
+    const result = await this.db.update(schema.notifications)
+      .set({ isRead: true })
+      .where(eq(schema.notifications.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await this.db.update(schema.notifications)
+      .set({ isRead: true })
+      .where(eq(schema.notifications.userId, userId));
+  }
+
+  async getUnreadNotificationsCount(userId: string): Promise<number> {
+    const result = await this.db.select({ count: sql<number>`count(*)` })
+      .from(schema.notifications)
+      .where(and(
+        eq(schema.notifications.userId, userId),
+        eq(schema.notifications.isRead, false)
+      ) as any);
+    return Number(result[0]?.count || 0);
   }
 
   // Analytics
