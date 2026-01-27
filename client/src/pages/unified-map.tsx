@@ -147,7 +147,7 @@ export default function UnifiedMap() {
   const [showNewTrip, setShowNewTrip] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip"; id: string; title: string } | null>(null);
+  const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite"; id: string; title: string } | null>(null);
   const { toast } = useToast();
   
   const [filters, setFilters] = useState({
