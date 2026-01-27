@@ -93,7 +93,7 @@ export default function Profile() {
             data-testid="button-share-profile-main"
           >
             <Share2 className="w-4 h-4" />
-            Condividi Profilo
+            Invita Amici
           </button>
 
           {user.bio && (
@@ -160,9 +160,9 @@ export default function Profile() {
         <ShareQRModal
           open={showShareQR}
           onClose={() => setShowShareQR(false)}
-          type="profile"
-          id={user.id}
-          title={`${user.name} (@${user.username})`}
+          type="invite"
+          id="auth"
+          title="Unisciti a NomadLife!"
         />
       )}
     </Layout>

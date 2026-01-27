@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ShareQRModalProps {
   open: boolean;
   onClose: () => void;
-  type: "post" | "profile" | "trip";
+  type: "post" | "profile" | "trip" | "invite";
   id: string;
   title: string;
 }
@@ -19,11 +19,16 @@ export function ShareQRModal({ open, onClose, type, id, title }: ShareQRModalPro
   const qrRef = useRef<HTMLDivElement>(null);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const shareUrl = type === "post" 
-    ? `${baseUrl}/post/${id}` 
-    : type === "profile"
-    ? `${baseUrl}/profile/${id}`
-    : `${baseUrl}/trip/${id}`;
+  const getShareUrl = () => {
+    switch (type) {
+      case "post": return `${baseUrl}/post/${id}`;
+      case "profile": return `${baseUrl}/user/${id}`;
+      case "trip": return `${baseUrl}/trip/${id}`;
+      case "invite": return `${baseUrl}/auth`;
+      default: return baseUrl;
+    }
+  };
+  const shareUrl = getShareUrl();
 
   const handleCopyLink = async () => {
     try {
