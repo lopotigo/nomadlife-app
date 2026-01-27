@@ -197,6 +197,7 @@ export default function UnifiedMap() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showNewTrip, setShowNewTrip] = useState(false);
+  const [showFeed, setShowFeed] = useState(true);
   const { toast } = useToast();
   
   const [filters, setFilters] = useState({
