@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Map, Briefcase, User, MessageSquare, Plane } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -30,12 +30,10 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         </div>
         
         <nav className="flex flex-col gap-2">
-          <NavItem href="/" icon={Home} label="Feed" active={location === "/"} />
-          <NavItem href="/explore" icon={Map} label="Explore" active={location === "/explore"} />
-          <NavItem href="/travel-diary" icon={Plane} label="Diario di Viaggio" active={location === "/travel-diary"} />
-          <NavItem href="/chat" icon={MessageSquare} label="Messages" active={location === "/chat"} />
+          <NavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
+          <NavItem href="/chat" icon={MessageSquare} label="Messaggi" active={location === "/chat"} />
           <NavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
-          <NavItem href="/profile" icon={User} label="Profile" active={location === "/profile"} />
+          <NavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
         </nav>
 
         <div className="mt-auto p-4 bg-secondary/50 rounded-xl">
@@ -51,11 +49,10 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-2 z-50">
-        <MobileNavItem href="/" icon={Home} label="Feed" active={location === "/"} />
-        <MobileNavItem href="/explore" icon={Map} label="Explore" active={location === "/explore"} />
-        <MobileNavItem href="/travel-diary" icon={Plane} label="Diario" active={location === "/travel-diary"} />
+        <MobileNavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label="Chat" active={location === "/chat"} />
-        <MobileNavItem href="/profile" icon={User} label="Profile" active={location === "/profile"} />
+        <MobileNavItem href="/coworking" icon={Briefcase} label="Spazi" active={location === "/coworking"} />
+        <MobileNavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
       </nav>
     </div>
   );

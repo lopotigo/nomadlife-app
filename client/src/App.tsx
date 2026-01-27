@@ -17,12 +17,14 @@ import Auth from "@/pages/auth";
 import DesignPreview from "@/pages/design-preview";
 import MobilePreview from "@/pages/mobile-preview";
 import TravelDiary from "@/pages/travel-diary";
+import UnifiedMap from "@/pages/unified-map";
 
 function Router() {
   return (
     <Switch>
       <Route path="/auth" component={Auth} />
-      <Route path="/" component={MapFeed} />
+      <Route path="/" component={UnifiedMap} />
+      <Route path="/feed" component={MapFeed} />
       <Route path="/explore" component={Explore} />
       <Route path="/coworking" component={Coworking} />
       <Route path="/chat" component={Chat} />
