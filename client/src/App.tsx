@@ -18,6 +18,8 @@ import DesignPreview from "@/pages/design-preview";
 import MobilePreview from "@/pages/mobile-preview";
 import TravelDiary from "@/pages/travel-diary";
 import UnifiedMap from "@/pages/unified-map";
+import PostDetail from "@/pages/post-detail";
+import TripDetail from "@/pages/trip-detail";
 
 function Router() {
   return (
@@ -31,6 +33,8 @@ function Router() {
       <Route path="/subscription" component={Subscription} />
       <Route path="/profile" component={Profile} />
       <Route path="/user/:id" component={UserProfile} />
+      <Route path="/post/:id" component={PostDetail} />
+      <Route path="/trip/:id" component={TripDetail} />
       <Route path="/design-preview" component={DesignPreview} />
       <Route path="/mobile-preview" component={MobilePreview} />
       <Route path="/travel-diary" component={TravelDiary} />

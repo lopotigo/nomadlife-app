@@ -4,9 +4,11 @@ import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Leaf, Users, Compass, 
-  Filter, X, Plane, MessageCircle, Calendar, Send, Image
+  Filter, X, Plane, MessageCircle, Calendar, Send, Image,
+  Video, Link as LinkIcon, Share2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import type { Post, User } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
+import { ShareQRModal } from "@/components/share-qr-modal";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -144,6 +147,7 @@ export default function UnifiedMap() {
   const [showNewTrip, setShowNewTrip] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip"; id: string; title: string } | null>(null);
   const { toast } = useToast();
   
   const [filters, setFilters] = useState({
@@ -358,9 +362,18 @@ export default function UnifiedMap() {
                       <img src={post.imageUrl} className="w-full h-24 object-cover rounded mb-2" alt="" />
                     )}
                     <p className="text-sm">{post.content.substring(0, 100)}...</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                      <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {post.likes}</span>
-                      <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {post.likes}</span>
+                        <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
+                      </div>
+                      <button
+                        onClick={() => setShareModal({ open: true, type: "post", id: post.id, title: post.content.substring(0, 50) + "..." })}
+                        className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                        data-testid={`button-share-post-${post.id}`}
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 </Popup>
@@ -399,9 +412,18 @@ export default function UnifiedMap() {
                             </div>
                           </div>
                           <p className="text-xs text-slate-600 mb-1">{trip.title}</p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Calendar className="w-3 h-3" />
-                            <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Calendar className="w-3 h-3" />
+                              <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
+                            </div>
+                            <button
+                              onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
+                              className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                              data-testid={`button-share-trip-${trip.id}`}
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                           {stop.notes && (
                             <p className="text-xs text-gray-600 mt-2 italic">{stop.notes}</p>
@@ -683,6 +705,16 @@ export default function UnifiedMap() {
         </DialogContent>
       </Dialog>
       
+      {shareModal && (
+        <ShareQRModal
+          open={shareModal.open}
+          onClose={() => setShareModal(null)}
+          type={shareModal.type}
+          id={shareModal.id}
+          title={shareModal.title}
+        />
+      )}
+      
       <style>{`
         .custom-post-marker { background: transparent !important; border: none !important; }
         .post-marker {
@@ -719,15 +751,30 @@ function CreatePostModal({
   const [content, setContent] = useState("");
   const [location, setLocationName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [showTripSelect, setShowTripSelect] = useState(false);
+
+  const { data: userTrips } = useQuery({
+    queryKey: ["/api/my-trips"],
+    enabled: !!user && showTripSelect,
+  });
 
   const { uploadFile, isUploading, progress } = useUpload({
     onSuccess: (response) => {
-      setImageUrl(response.objectPath);
-      toast({ title: "Foto caricata!" });
+      if (response.objectPath.match(/\.(mp4|webm|mov)$/i)) {
+        setVideoUrl(response.objectPath);
+        toast({ title: "Video caricato!" });
+      } else {
+        setImageUrl(response.objectPath);
+        toast({ title: "Foto caricata!" });
+      }
     },
     onError: (error) => {
       toast({ title: "Errore upload", description: error.message, variant: "destructive" });
@@ -754,6 +801,11 @@ function CreatePostModal({
       setContent("");
       setLocationName("");
       setImageUrl("");
+      setVideoUrl("");
+      setLinkUrl("");
+      setSelectedTripId(null);
+      setShowLinkInput(false);
+      setShowTripSelect(false);
       setLatitude(null);
       setLongitude(null);
     }
@@ -794,6 +846,9 @@ function CreatePostModal({
         body: JSON.stringify({
           content: content.trim(),
           imageUrl: imageUrl || null,
+          videoUrl: videoUrl || null,
+          linkUrl: linkUrl || null,
+          tripId: selectedTripId || null,
           location: location.trim() || null,
           latitude,
           longitude,
@@ -854,6 +909,48 @@ function CreatePostModal({
           </div>
         )}
 
+        {videoUrl && (
+          <div className="relative mb-4 rounded-xl overflow-hidden">
+            <video src={videoUrl} controls className="w-full h-40 object-cover" />
+            <button onClick={() => setVideoUrl("")} className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {showLinkInput && (
+          <div className="flex items-center gap-2 mb-4">
+            <LinkIcon className="w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="https://..."
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              className="flex-1"
+              data-testid="input-link-url"
+            />
+            <button onClick={() => { setShowLinkInput(false); setLinkUrl(""); }} className="text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {showTripSelect && (userTrips as any)?.length > 0 && (
+          <div className="mb-4">
+            <label className="text-sm text-muted-foreground mb-2 block">Collega un viaggio:</label>
+            <select
+              value={selectedTripId || ""}
+              onChange={(e) => setSelectedTripId(e.target.value || null)}
+              className="w-full p-2 rounded-lg bg-muted border-0 text-sm"
+              data-testid="select-trip"
+            >
+              <option value="">Nessun viaggio</option>
+              {(userTrips as any)?.map((trip: any) => (
+                <option key={trip.id} value={trip.id}>{trip.title}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {isUploading && (
           <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -885,7 +982,7 @@ function CreatePostModal({
           </p>
         )}
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
           <label className="cursor-pointer">
             <input
               type="file"
@@ -894,12 +991,46 @@ function CreatePostModal({
               className="hidden"
               disabled={isUploading}
             />
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
               <Image className="w-4 h-4 text-primary" />
-              <span className="text-sm">Foto</span>
+              <span className="text-xs">Foto</span>
             </div>
           </label>
 
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept="video/*"
+              onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
+              className="hidden"
+              disabled={isUploading}
+            />
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
+              <Video className="w-4 h-4 text-red-500" />
+              <span className="text-xs">Video</span>
+            </div>
+          </label>
+
+          <button
+            type="button"
+            onClick={() => setShowLinkInput(!showLinkInput)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <LinkIcon className="w-4 h-4 text-blue-500" />
+            <span className="text-xs">Link</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowTripSelect(!showTripSelect)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <Plane className="w-4 h-4 text-green-500" />
+            <span className="text-xs">Viaggio</span>
+          </button>
+        </div>
+
+        <div className="flex justify-end">
           <Button
             onClick={handleSubmit}
             disabled={!content.trim() || isSubmitting || isUploading || !latitude || !longitude}

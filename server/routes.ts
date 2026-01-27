@@ -167,6 +167,18 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/posts/:id", async (req, res) => {
+    try {
+      const post = await storage.getPostById(req.params.id);
+      if (!post) {
+        return res.status(404).send({ error: "Post not found" });
+      }
+      res.send(post);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.post("/api/posts", requireAuth, async (req, res) => {
     try {
       const data = insertPostSchema.parse({

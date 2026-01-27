@@ -46,6 +46,7 @@ export interface IStorage {
   // Posts
   getPosts(limit?: number): Promise<(Post & { user: User })[]>;
   getPostsByUser(userId: string): Promise<Post[]>;
+  getPostById(id: string): Promise<(Post & { user: User }) | undefined>;
   createPost(post: InsertPost): Promise<Post>;
   likePost(postId: string): Promise<Post | undefined>;
 
@@ -188,6 +189,21 @@ export class DrizzleStorage implements IStorage {
 
   async getPostsByUser(userId: string): Promise<Post[]> {
     return await this.db.select().from(schema.posts).where(eq(schema.posts.userId, userId)).orderBy(desc(schema.posts.createdAt));
+  }
+
+  async getPostById(id: string): Promise<(Post & { user: User }) | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.posts)
+      .leftJoin(schema.users, eq(schema.posts.userId, schema.users.id))
+      .where(eq(schema.posts.id, id))
+      .limit(1);
+    
+    if (result.length === 0) return undefined;
+    return {
+      ...result[0].posts,
+      user: result[0].users!,
+    };
   }
 
   async createPost(insertPost: InsertPost): Promise<Post> {

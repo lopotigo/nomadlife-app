@@ -62,12 +62,22 @@ Preferred communication style: Simple, everyday language.
 
 - User Authentication (session-based, secure hashing)
 - Social Feed (post creation with images/location, likes, engagement metrics)
+- **Multi-format Sharing** (video, photo, link, trip association, location-based posts)
+- **QR Code Sharing** (share posts, trips and profiles via scannable QR codes)
 - User Profiles (personal info, travel stats, profile editing)
 - Coworking Space Booking (search, filter, booking flow, history)
 - Events System (browse, register, manage events)
 - Group Messaging (city-based groups, private messaging, chat history)
 - Premium Subscription (subscribe/cancel, status tracking)
 - Explore & Discovery (interactive map, city markers, eco-routing)
+
+### Recent Updates
+
+- Added multi-format post creation: video upload, photo upload, link attachment, trip association
+- Implemented QR code sharing system with `qrcode.react` library
+- Created dedicated pages for viewing individual posts (`/post/:id`) and trips (`/trip/:id`)
+- Added share buttons to post and trip popups on the map
+- ShareQRModal component with download, copy and native share functionality
 
 ## External Dependencies
 
