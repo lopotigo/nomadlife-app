@@ -86,21 +86,41 @@ export function useUpload(options: UseUploadOptions = {}) {
   );
 
   /**
-   * Upload a file directly to the presigned URL.
+   * Upload a file directly to the presigned URL with progress tracking.
    */
   const uploadToPresignedUrl = useCallback(
     async (file: File, uploadURL: string): Promise<void> => {
-      const response = await fetch(uploadURL, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type || "application/octet-stream",
-        },
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 70) + 20;
+            setProgress(Math.min(percentComplete, 90));
+          }
+        });
+        
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error("Caricamento fallito - riprova"));
+          }
+        });
+        
+        xhr.addEventListener("error", () => {
+          reject(new Error("Errore di rete durante il caricamento"));
+        });
+        
+        xhr.addEventListener("timeout", () => {
+          reject(new Error("Caricamento troppo lento - riprova con una connessione migliore"));
+        });
+        
+        xhr.open("PUT", uploadURL);
+        xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+        xhr.timeout = 300000;
+        xhr.send(file);
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload file to storage");
-      }
     },
     []
   );
