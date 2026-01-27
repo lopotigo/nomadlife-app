@@ -4,8 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Leaf, Users, Compass, 
-  Filter, X, Eye, EyeOff, Plane, MessageCircle, ChevronDown,
-  Hotel, Coffee, Utensils, Car, Star, Calendar
+  Filter, X, Plane, MessageCircle, Calendar, Send, Image
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Post, User } from "@shared/schema";
@@ -16,7 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useUpload } from "@/hooks/use-upload";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -54,20 +54,22 @@ interface Trip {
   stops: TripStop[];
 }
 
-function createPostMarkerIcon() {
+function createPostMarkerIcon(imageUrl: string | null) {
+  const html = imageUrl 
+    ? `<div class="post-marker"><img src="${imageUrl}" alt="post" /></div>`
+    : `<div class="post-marker post-marker-text"><svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>`;
   return L.divIcon({
-    html: `<div class="post-marker"><svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>`,
+    html,
     className: "custom-post-marker",
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -36],
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
   });
 }
 
-function createStopMarkerIcon(orderIndex: number, isEco: boolean = false) {
-  const bgColor = isEco ? "#22c55e" : "#3b82f6";
+function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6") {
   return L.divIcon({
-    html: `<div style="background:${bgColor};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${orderIndex + 1}</div>`,
+    html: `<div style="background:${color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${orderIndex + 1}</div>`,
     className: "custom-stop-marker",
     iconSize: [28, 28],
     iconAnchor: [14, 14],
@@ -75,78 +77,21 @@ function createStopMarkerIcon(orderIndex: number, isEco: boolean = false) {
   });
 }
 
-function BezierCurve({ points, color = "#3b82f6", isEco = false }: { points: [number, number][]; color?: string; isEco?: boolean }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (points.length < 2) return;
-    
-    const curveColor = isEco ? "#22c55e" : color;
-    const pathData = generateBezierPath(points, map);
-    
-    const svgOverlay = L.svgOverlay(
-      createSvgElement(pathData, curveColor),
-      map.getBounds(),
-      { interactive: false }
-    );
-    
-    const polyline = L.polyline(points, {
-      color: curveColor,
-      weight: 3,
-      opacity: 0.8,
-      smoothFactor: 2,
-      dashArray: isEco ? "10, 5" : undefined,
-    });
-    
-    polyline.addTo(map);
-    
-    return () => {
-      map.removeLayer(polyline);
-    };
-  }, [points, map, color, isEco]);
-  
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
   return null;
 }
 
-function generateBezierPath(points: [number, number][], map: L.Map): string {
-  if (points.length < 2) return "";
-  
-  const pixelPoints = points.map(p => map.latLngToContainerPoint(L.latLng(p[0], p[1])));
-  
-  let path = `M ${pixelPoints[0].x} ${pixelPoints[0].y}`;
-  
-  for (let i = 1; i < pixelPoints.length; i++) {
-    const prev = pixelPoints[i - 1];
-    const curr = pixelPoints[i];
-    const midX = (prev.x + curr.x) / 2;
-    const midY = (prev.y + curr.y) / 2;
-    const cpOffset = Math.abs(curr.x - prev.x) * 0.3;
-    
-    path += ` Q ${prev.x + cpOffset} ${midY - 20}, ${curr.x} ${curr.y}`;
-  }
-  
-  return path;
-}
-
-function createSvgElement(pathData: string, color: string): SVGSVGElement {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 1000 1000");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", pathData);
-  path.setAttribute("fill", "none");
-  path.setAttribute("stroke", color);
-  path.setAttribute("stroke-width", "3");
-  svg.appendChild(path);
-  return svg;
-}
-
-function CurvedPolyline({ positions, color = "#3b82f6", isEco = false }: { positions: [number, number][]; color?: string; isEco?: boolean }) {
+function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { positions: [number, number][]; color?: string; dashed?: boolean }) {
   const map = useMap();
   
   useEffect(() => {
     if (positions.length < 2) return;
     
-    const curveColor = isEco ? "#22c55e" : color;
     const curvedPoints: L.LatLng[] = [];
     
     for (let i = 0; i < positions.length - 1; i++) {
@@ -170,12 +115,12 @@ function CurvedPolyline({ positions, color = "#3b82f6", isEco = false }: { posit
     curvedPoints.push(L.latLng(positions[positions.length - 1][0], positions[positions.length - 1][1]));
     
     const polyline = L.polyline(curvedPoints, {
-      color: curveColor,
+      color,
       weight: 4,
       opacity: 0.85,
       lineCap: "round",
       lineJoin: "round",
-      dashArray: isEco ? "8, 6" : undefined,
+      dashArray: dashed ? "8, 6" : undefined,
     });
     
     polyline.addTo(map);
@@ -183,7 +128,7 @@ function CurvedPolyline({ positions, color = "#3b82f6", isEco = false }: { posit
     return () => {
       map.removeLayer(polyline);
     };
-  }, [positions, map, color, isEco]);
+  }, [positions, map, color, dashed]);
   
   return null;
 }
@@ -197,7 +142,8 @@ export default function UnifiedMap() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showNewTrip, setShowNewTrip] = useState(false);
-  const [showFeed, setShowFeed] = useState(true);
+  const [showNewPost, setShowNewPost] = useState(false);
+  const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const { toast } = useToast();
   
   const [filters, setFilters] = useState({
@@ -253,6 +199,11 @@ export default function UnifiedMap() {
     fetchData();
   }, [user, authLoading, setLocation, fetchData]);
 
+  const handleMapClick = useCallback((lat: number, lng: number) => {
+    setClickedCoords({ lat, lng });
+    setShowNewPost(true);
+  }, []);
+
   const handleCreateTrip = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -275,7 +226,7 @@ export default function UnifiedMap() {
       });
       
       if (res.ok) {
-        toast({ title: "Viaggio creato!", description: "Ora puoi aggiungere le tappe" });
+        toast({ title: "Viaggio creato!", description: "Vai al Diario di Viaggio per aggiungere le tappe" });
         setShowNewTrip(false);
         fetchData();
       }
@@ -285,26 +236,34 @@ export default function UnifiedMap() {
   };
 
   const postsWithCoords = useMemo(() => 
-    posts.filter(p => p.latitude && p.longitude),
-    [posts]
+    filters.showPosts ? posts.filter(p => p.latitude && p.longitude) : [],
+    [posts, filters.showPosts]
   );
 
-  const tripsWithStops = useMemo(() => {
-    const allTrips: (Trip & { isOwn: boolean })[] = [];
+  const tripsToShow = useMemo(() => {
+    const result: (Trip & { isOwn: boolean; color: string })[] = [];
     
     if (filters.showMyTrips) {
-      myTrips.forEach(t => allTrips.push({ ...t, isOwn: true }));
+      myTrips.forEach(t => {
+        if (t.stops && t.stops.length > 0) {
+          result.push({ ...t, isOwn: true, color: filters.ecoMode ? "#22c55e" : "#f59e0b" });
+        }
+      });
     }
     
     if (filters.showFollowingTrips) {
-      followingTrips.forEach(t => allTrips.push({ ...t, isOwn: false }));
+      followingTrips.forEach(t => {
+        if (t.stops && t.stops.length > 0) {
+          result.push({ ...t, isOwn: false, color: filters.ecoMode ? "#22c55e" : "#3b82f6" });
+        }
+      });
     }
     
-    return allTrips.filter(t => t.stops && t.stops.length > 0);
-  }, [myTrips, followingTrips, filters.showMyTrips, filters.showFollowingTrips]);
+    return result;
+  }, [myTrips, followingTrips, filters]);
 
   const mapCenter: [number, number] = useMemo(() => {
-    const allStops = tripsWithStops.flatMap(t => t.stops);
+    const allStops = tripsToShow.flatMap(t => t.stops);
     if (allStops.length > 0) {
       const validStops = allStops.filter(s => s.latitude && s.longitude);
       if (validStops.length > 0) {
@@ -314,11 +273,11 @@ export default function UnifiedMap() {
       }
     }
     return [20, 100];
-  }, [tripsWithStops]);
+  }, [tripsToShow]);
 
   if (authLoading || loading) {
     return (
-      <Layout fullWidth>
+      <Layout>
         <div className="flex items-center justify-center h-screen bg-slate-900">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -329,126 +288,107 @@ export default function UnifiedMap() {
   return (
     <Layout>
       <div className="flex flex-col h-full">
-        <div className="relative h-[50vh] w-full">
+        <div className="relative h-[50vh] min-h-[300px]">
           <MapContainer
             center={mapCenter}
             zoom={4}
             className="h-full w-full z-0"
             style={{ background: "#1a1a2e" }}
           >
-          <TileLayer
-            attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          />
-          
-          {filters.showPosts && postsWithCoords.map((post) => (
-            <Marker
-              key={`post-${post.id}`}
-              position={[post.latitude!, post.longitude!]}
-              icon={createPostMarkerIcon()}
-            >
-              <Popup className="custom-popup">
-                <div className="p-2 min-w-[200px]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <img 
-                      src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
-                      className="w-8 h-8 rounded-full"
-                      alt={post.user.name}
-                    />
-                    <div>
-                      <p className="font-semibold text-sm">{post.user.name}</p>
-                      <p className="text-xs text-gray-500">@{post.user.username}</p>
+            <TileLayer
+              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            />
+            <MapClickHandler onMapClick={handleMapClick} />
+            
+            {postsWithCoords.map((post) => (
+              <Marker
+                key={`post-${post.id}`}
+                position={[post.latitude!, post.longitude!]}
+                icon={createPostMarkerIcon(post.imageUrl)}
+              >
+                <Popup className="custom-popup">
+                  <div className="p-2 min-w-[200px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img 
+                        src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
+                        className="w-8 h-8 rounded-full"
+                        alt={post.user.name}
+                      />
+                      <div>
+                        <p className="font-semibold text-sm">{post.user.name}</p>
+                        <p className="text-xs text-gray-500">@{post.user.username}</p>
+                      </div>
+                    </div>
+                    {post.imageUrl && (
+                      <img src={post.imageUrl} className="w-full h-24 object-cover rounded mb-2" alt="" />
+                    )}
+                    <p className="text-sm">{post.content.substring(0, 100)}...</p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                      <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {post.likes}</span>
+                      <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
                     </div>
                   </div>
-                  {post.imageUrl && (
-                    <img src={post.imageUrl} className="w-full h-24 object-cover rounded mb-2" alt="" />
-                  )}
-                  <p className="text-sm">{post.content.substring(0, 100)}...</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                    <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {post.likes}</span>
-                    <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-          
-          {tripsWithStops.map((trip) => {
-            const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
-            const positions: [number, number][] = validStops.map(s => [s.latitude!, s.longitude!]);
+                </Popup>
+              </Marker>
+            ))}
             
-            return (
-              <div key={`trip-${trip.id}`}>
-                {positions.length >= 2 && (
-                  <CurvedPolyline 
-                    positions={positions} 
-                    color={trip.isOwn ? "#f59e0b" : "#3b82f6"}
-                    isEco={filters.ecoMode}
-                  />
-                )}
-                
-                {validStops.map((stop) => (
-                  <Marker
-                    key={`stop-${stop.id}`}
-                    position={[stop.latitude!, stop.longitude!]}
-                    icon={createStopMarkerIcon(stop.orderIndex, filters.ecoMode)}
-                  >
-                    <Popup className="custom-popup">
-                      <div className="p-3 min-w-[220px]">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${filters.ecoMode ? "bg-green-500" : "bg-blue-500"}`}>
-                            {stop.orderIndex + 1}
+            {tripsToShow.map((trip) => {
+              const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
+              const positions: [number, number][] = validStops.map(s => [s.latitude!, s.longitude!]);
+              
+              return (
+                <div key={`trip-${trip.id}`}>
+                  {positions.length >= 2 && (
+                    <CurvedPolyline 
+                      positions={positions} 
+                      color={trip.color}
+                      dashed={filters.ecoMode}
+                    />
+                  )}
+                  
+                  {validStops.map((stop) => (
+                    <Marker
+                      key={`stop-${stop.id}`}
+                      position={[stop.latitude!, stop.longitude!]}
+                      icon={createStopMarkerIcon(stop.orderIndex, trip.color)}
+                    >
+                      <Popup className="custom-popup">
+                        <div className="p-3 min-w-[200px]">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div style={{ background: trip.color }} className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {stop.orderIndex + 1}
+                            </div>
+                            <div>
+                              <p className="font-bold">{stop.city}</p>
+                              <p className="text-xs text-gray-500">{stop.country}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-bold">{stop.city}</p>
-                            <p className="text-xs text-gray-500">{stop.country}</p>
+                          <p className="text-xs text-slate-600 mb-1">{trip.title}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <Calendar className="w-3 h-3" />
+                            <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
                           </div>
-                        </div>
-                        
-                        <div className="bg-slate-100 rounded p-2 mb-2">
-                          <p className="text-xs font-medium text-slate-600">{trip.title}</p>
-                          <p className="text-xs text-slate-500">di {trip.user?.name || "Anonimo"}</p>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                          <Calendar className="w-3 h-3" />
-                          <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
-                          {stop.departureDate && (
-                            <>
-                              <span>→</span>
-                              <span>{new Date(stop.departureDate).toLocaleDateString("it-IT")}</span>
-                            </>
+                          {stop.notes && (
+                            <p className="text-xs text-gray-600 mt-2 italic">{stop.notes}</p>
                           )}
                         </div>
-                        
-                        {stop.notes && (
-                          <p className="text-xs text-gray-600 italic">{stop.notes}</p>
-                        )}
-                        
-                        {filters.ecoMode && (
-                          <div className="mt-2 flex items-center gap-1 text-green-600 text-xs">
-                            <Leaf className="w-3 h-3" />
-                            <span>Viaggio eco-friendly</span>
-                          </div>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </div>
-            );
-          })}
-        </MapContainer>
-        
-        <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between">
-          <div className="bg-card/90 backdrop-blur-md rounded-2xl px-4 py-3 shadow-lg border border-border/50">
+                      </Popup>
+                    </Marker>
+                  ))}
+                </div>
+              );
+            })}
+          </MapContainer>
+          
+          <div className="absolute top-4 left-4 z-[1000] bg-card/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg border border-border/50">
             <h1 className="text-lg font-display font-bold flex items-center gap-2">
               <Compass className="w-5 h-5 text-primary" />
-              NomadLife Map
+              NomadLife
             </h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
             <Button
               variant={filters.ecoMode ? "default" : "outline"}
               size="sm"
@@ -457,7 +397,7 @@ export default function UnifiedMap() {
               data-testid="button-eco-mode"
             >
               <Leaf className="w-4 h-4 mr-1" />
-              {filters.ecoMode ? "Eco ON" : "Eco Mode"}
+              Eco
             </Button>
             
             <Button
@@ -467,114 +407,121 @@ export default function UnifiedMap() {
               className="bg-card/90 backdrop-blur-md"
               data-testid="button-filters"
             >
-              <Filter className="w-4 h-4 mr-1" />
-              Filtri
-            </Button>
-            
-            <Button
-              onClick={() => setShowNewTrip(true)}
-              size="sm"
-              className="bg-primary hover:bg-primary/90"
-              data-testid="button-new-trip"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Nuovo Diario
+              <Filter className="w-4 h-4" />
             </Button>
           </div>
-        </div>
-        
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="absolute top-20 right-4 z-[1000] bg-card/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-border/50 w-64"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Filtri Mappa</h3>
-                <button onClick={() => setShowFilters(false)}>
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Heart className="w-4 h-4 text-red-400" />
-                    Post Feed
-                  </label>
-                  <Switch
-                    checked={filters.showPosts}
-                    onCheckedChange={(v) => setFilters(f => ({ ...f, showPosts: v }))}
-                  />
+          
+          <button
+            onClick={() => {
+              setClickedCoords(null);
+              setShowNewPost(true);
+            }}
+            className="absolute bottom-4 right-4 z-[1000] w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+            data-testid="button-new-post"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+          
+          <Button
+            onClick={() => setShowNewTrip(true)}
+            size="sm"
+            className="absolute bottom-4 left-4 z-[1000] bg-amber-500 hover:bg-amber-600"
+            data-testid="button-new-trip"
+          >
+            <Plane className="w-4 h-4 mr-1" />
+            Nuovo Viaggio
+          </Button>
+          
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-16 right-4 z-[1000] bg-card/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-border/50 w-56"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-sm">Filtri</h3>
+                  <button onClick={() => setShowFilters(false)}>
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Plane className="w-4 h-4 text-amber-400" />
-                    I Miei Viaggi
-                  </label>
-                  <Switch
-                    checked={filters.showMyTrips}
-                    onCheckedChange={(v) => setFilters(f => ({ ...f, showMyTrips: v }))}
-                  />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Heart className="w-4 h-4 text-red-400" />
+                      Post
+                    </label>
+                    <Switch
+                      checked={filters.showPosts}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showPosts: v }))}
+                      data-testid="switch-posts"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Plane className="w-4 h-4 text-amber-400" />
+                      Miei Viaggi
+                    </label>
+                    <Switch
+                      checked={filters.showMyTrips}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showMyTrips: v }))}
+                      data-testid="switch-my-trips"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-blue-400" />
+                      Seguiti
+                    </label>
+                    <Switch
+                      checked={filters.showFollowingTrips}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showFollowingTrips: v }))}
+                      data-testid="switch-following"
+                    />
+                  </div>
+                  
+                  <hr className="border-border" />
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Leaf className="w-4 h-4 text-green-500" />
+                      Eco Mode
+                    </label>
+                    <Switch
+                      checked={filters.ecoMode}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, ecoMode: v }))}
+                      data-testid="switch-eco"
+                    />
+                  </div>
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Users className="w-4 h-4 text-blue-400" />
-                    Viaggi Seguiti
-                  </label>
-                  <Switch
-                    checked={filters.showFollowingTrips}
-                    onCheckedChange={(v) => setFilters(f => ({ ...f, showFollowingTrips: v }))}
-                  />
-                </div>
-                
-                <hr className="border-border" />
-                
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Leaf className="w-4 h-4 text-green-500" />
-                    Bassa CO2
-                  </label>
-                  <Switch
-                    checked={filters.ecoMode}
-                    onCheckedChange={(v) => setFilters(f => ({ ...f, ecoMode: v }))}
-                  />
-                </div>
-              </div>
-              
-              {filters.ecoMode && (
-                <div className="mt-4 p-3 bg-green-500/10 rounded-xl border border-green-500/30">
-                  <p className="text-xs text-green-400">
-                    Modalità Eco attiva: i percorsi sono ottimizzati per viaggi a basse emissioni di CO2
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        <div className="absolute bottom-4 left-4 z-[1000] bg-card/90 backdrop-blur-md rounded-2xl p-3 shadow-lg border border-border/50">
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] bg-card/90 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-border/50">
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-2 h-2 rounded-full bg-red-400" />
                 <span>Post</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-amber-400" />
-                <span>Miei Viaggi</span>
+                <div className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Miei</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-blue-400" />
+                <div className="w-2 h-2 rounded-full bg-blue-400" />
                 <span>Seguiti</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span>Eco</span>
-              </div>
+              {filters.ecoMode && (
+                <div className="flex items-center gap-1 text-green-400">
+                  <Leaf className="w-3 h-3" />
+                  <span>Eco</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -586,7 +533,7 @@ export default function UnifiedMap() {
           </h2>
           
           {posts.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nessun post ancora</p>
+            <p className="text-muted-foreground text-center py-8">Nessun post ancora. Clicca sulla mappa per crearne uno!</p>
           ) : (
             posts.map((post) => (
               <motion.div
@@ -645,122 +592,311 @@ export default function UnifiedMap() {
           )}
         </div>
       </div>
-        
+      
+      <CreatePostModal
+        open={showNewPost}
+        coords={clickedCoords}
+        onClose={() => {
+          setShowNewPost(false);
+          setClickedCoords(null);
+        }}
+        onPostCreated={() => {
+          fetchData();
+          setShowNewPost(false);
+          setClickedCoords(null);
+        }}
+      />
+      
       <Dialog open={showNewTrip} onOpenChange={setShowNewTrip}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Plane className="w-5 h-5 text-primary" />
-              Nuovo Diario di Viaggio
+              <Plane className="w-5 h-5 text-amber-500" />
+              Nuovo Viaggio
             </DialogTitle>
           </DialogHeader>
-            
+          
           <form onSubmit={handleCreateTrip} className="space-y-4">
-          <div>
-            <Label htmlFor="title">Titolo del Viaggio</Label>
-            <Input
-              id="title"
-              name="title"
-              placeholder="Es: Avventura Sud-Est Asiatico"
-              required
-              className="mt-1"
-              data-testid="input-trip-title"
-            />
-          </div>
-          <div>
-            <Label htmlFor="description">Descrizione</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Racconta il tuo viaggio..."
-              className="mt-1"
-              rows={3}
-              data-testid="input-trip-description"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="startLocation">Partenza</Label>
+              <Label htmlFor="title">Titolo</Label>
               <Input
-                id="startLocation"
-                name="startLocation"
-                placeholder="Es: Milano"
+                id="title"
+                name="title"
+                placeholder="Es: Avventura Sud-Est Asiatico"
+                required
                 className="mt-1"
+                data-testid="input-trip-title"
               />
             </div>
             <div>
-              <Label htmlFor="endLocation">Destinazione</Label>
-              <Input
-                id="endLocation"
-                name="endLocation"
-                placeholder="Es: Bali"
+              <Label htmlFor="description">Descrizione</Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Racconta il tuo viaggio..."
                 className="mt-1"
+                rows={2}
+                data-testid="input-trip-description"
               />
             </div>
-          </div>
-          <div>
-            <Label htmlFor="startDate">Data Inizio</Label>
-            <Input
-              id="startDate"
-              name="startDate"
-              type="date"
-              required
-              className="mt-1"
-              data-testid="input-start-date"
-            />
-          </div>
-          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-            <div>
-              <Label htmlFor="isPublic" className="text-sm font-medium">Viaggio Pubblico</Label>
-              <p className="text-xs text-muted-foreground">Altri utenti potranno vedere il tuo viaggio sulla mappa</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="startLocation">Partenza</Label>
+                <Input id="startLocation" name="startLocation" placeholder="Es: Milano" className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="endLocation">Destinazione</Label>
+                <Input id="endLocation" name="endLocation" placeholder="Es: Bali" className="mt-1" />
+              </div>
             </div>
-            <Switch id="isPublic" name="isPublic" data-testid="switch-public" />
-          </div>
-          <Button type="submit" className="w-full" data-testid="button-create-trip">
-            <Plus className="w-4 h-4 mr-2" />
-            Crea Diario di Viaggio
-          </Button>
-        </form>
+            <div>
+              <Label htmlFor="startDate">Data Inizio</Label>
+              <Input id="startDate" name="startDate" type="date" required className="mt-1" data-testid="input-start-date" />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
+              <div>
+                <Label htmlFor="isPublic" className="text-sm font-medium">Pubblico</Label>
+                <p className="text-xs text-muted-foreground">Visibile sulla mappa</p>
+              </div>
+              <Switch id="isPublic" name="isPublic" data-testid="switch-public" />
+            </div>
+            <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600" data-testid="button-create-trip">
+              <Plane className="w-4 h-4 mr-2" />
+              Crea Viaggio
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Dopo la creazione, vai alla sezione Profilo per aggiungere le tappe
+            </p>
+          </form>
         </DialogContent>
       </Dialog>
       
       <style>{`
-        .custom-post-marker {
-          background: transparent !important;
-          border: none !important;
-        }
+        .custom-post-marker { background: transparent !important; border: none !important; }
         .post-marker {
-          width: 36px;
-          height: 36px;
+          width: 40px; height: 40px; border-radius: 50% 50% 50% 0;
           background: linear-gradient(135deg, #ef4444, #f97316);
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-          border: 2px solid white;
+          border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+          overflow: hidden; transform: rotate(-45deg);
+          display: flex; align-items: center; justify-content: center;
         }
-        .post-marker svg {
-          transform: rotate(45deg);
-          color: white;
-        }
-        .custom-stop-marker {
-          background: transparent !important;
-          border: none !important;
-        }
-        .custom-popup .leaflet-popup-content-wrapper {
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .custom-popup .leaflet-popup-tip {
-          background: white;
-        }
-        .leaflet-container {
-          font-family: inherit;
-        }
+        .post-marker img { width: 100%; height: 100%; object-fit: cover; transform: rotate(45deg) scale(1.4); }
+        .post-marker-text svg { transform: rotate(45deg); color: white; width: 16px; height: 16px; }
+        .custom-stop-marker { background: transparent !important; border: none !important; }
+        .custom-popup .leaflet-popup-content-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .custom-popup .leaflet-popup-tip { background: white; }
+        .leaflet-container { font-family: inherit; }
       `}</style>
     </Layout>
+  );
+}
+
+function CreatePostModal({
+  open,
+  coords,
+  onClose,
+  onPostCreated,
+}: {
+  open: boolean;
+  coords: { lat: number; lng: number } | null;
+  onClose: () => void;
+  onPostCreated: () => void;
+}) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [content, setContent] = useState("");
+  const [location, setLocationName] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
+
+  const { uploadFile, isUploading, progress } = useUpload({
+    onSuccess: (response) => {
+      setImageUrl(response.objectPath);
+      toast({ title: "Foto caricata!" });
+    },
+    onError: (error) => {
+      toast({ title: "Errore upload", description: error.message, variant: "destructive" });
+    },
+  });
+
+  useEffect(() => {
+    if (coords && open) {
+      setLatitude(coords.lat);
+      setLongitude(coords.lng);
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`)
+        .then((res) => res.json())
+        .then((data) => {
+          const city = data.address?.city || data.address?.town || data.address?.village || "";
+          const country = data.address?.country || "";
+          setLocationName(city && country ? `${city}, ${country}` : data.display_name?.split(",").slice(0, 2).join(",") || "");
+        })
+        .catch(() => {});
+    }
+  }, [coords, open]);
+
+  useEffect(() => {
+    if (!open) {
+      setContent("");
+      setLocationName("");
+      setImageUrl("");
+      setLatitude(null);
+      setLongitude(null);
+    }
+  }, [open]);
+
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) return;
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        setLatitude(lat);
+        setLongitude(lng);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || "";
+          const country = data.address?.country || "";
+          setLocationName(city && country ? `${city}, ${country}` : "");
+        } catch {}
+        setGettingLocation(false);
+      },
+      () => {
+        toast({ title: "Accesso alla posizione negato", variant: "destructive" });
+        setGettingLocation(false);
+      }
+    );
+  };
+
+  const handleSubmit = async () => {
+    if (!content.trim() || !user) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          content: content.trim(),
+          imageUrl: imageUrl || null,
+          location: location.trim() || null,
+          latitude,
+          longitude,
+        }),
+      });
+      if (res.ok) {
+        toast({ title: "Post pubblicato!" });
+        onPostCreated();
+      } else {
+        throw new Error("Failed");
+      }
+    } catch {
+      toast({ title: "Errore", description: "Impossibile pubblicare", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center p-4"
+      onClick={onClose}
+      data-testid="overlay-create-post"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-card rounded-2xl max-w-md w-full p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Nuovo Post</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" data-testid="button-close-create">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <Textarea
+          placeholder="Condividi la tua esperienza..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="mb-4 min-h-[100px]"
+          data-testid="input-new-post-content"
+        />
+
+        {imageUrl && (
+          <div className="relative mb-4 rounded-xl overflow-hidden">
+            <img src={imageUrl} alt="Preview" className="w-full h-40 object-cover" />
+            <button onClick={() => setImageUrl("")} className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {isUploading && (
+          <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Caricamento... {progress}%
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Posizione"
+            value={location}
+            onChange={(e) => setLocationName(e.target.value)}
+            className="flex-1"
+            data-testid="input-new-post-location"
+          />
+          <Button type="button" variant="outline" size="sm" onClick={handleGetCurrentLocation} disabled={gettingLocation}>
+            {gettingLocation ? <Loader2 className="w-4 h-4 animate-spin" /> : "Auto"}
+          </Button>
+        </div>
+
+        {latitude && longitude ? (
+          <p className="text-xs text-green-500 mb-4">
+            Il tuo post apparirà sulla mappa
+          </p>
+        ) : (
+          <p className="text-xs text-amber-500 mb-4">
+            Clicca "Auto" o sulla mappa per aggiungere la posizione
+          </p>
+        )}
+
+        <div className="flex items-center justify-between">
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
+              className="hidden"
+              disabled={isUploading}
+            />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
+              <Image className="w-4 h-4 text-primary" />
+              <span className="text-sm">Foto</span>
+            </div>
+          </label>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={!content.trim() || isSubmitting || isUploading}
+            data-testid="button-submit-new-post"
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Pubblica</>}
+          </Button>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }
