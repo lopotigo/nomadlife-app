@@ -269,7 +269,7 @@ export default function UnifiedMap() {
     return result;
   }, [myTrips, followingTrips, filters]);
 
-  const mapCenter: [number, number] = useMemo(() => {
+  const { mapCenter, mapZoom } = useMemo(() => {
     const allPoints: { lat: number; lng: number }[] = [];
     
     postsWithCoords.forEach(p => {
@@ -286,12 +286,27 @@ export default function UnifiedMap() {
       });
     });
     
-    if (allPoints.length > 0) {
-      const avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
-      const avgLng = allPoints.reduce((sum, p) => sum + p.lng, 0) / allPoints.length;
-      return [avgLat, avgLng];
+    if (allPoints.length === 0) {
+      return { mapCenter: [20, 50] as [number, number], mapZoom: 2 };
     }
-    return [41, 12];
+    
+    const avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
+    const avgLng = allPoints.reduce((sum, p) => sum + p.lng, 0) / allPoints.length;
+    
+    const latitudes = allPoints.map(p => p.lat);
+    const longitudes = allPoints.map(p => p.lng);
+    const latSpan = Math.max(...latitudes) - Math.min(...latitudes);
+    const lngSpan = Math.max(...longitudes) - Math.min(...longitudes);
+    const maxSpan = Math.max(latSpan, lngSpan);
+    
+    let zoom = 3;
+    if (maxSpan > 100) zoom = 2;
+    else if (maxSpan > 50) zoom = 3;
+    else if (maxSpan > 20) zoom = 4;
+    else if (maxSpan > 5) zoom = 6;
+    else zoom = 8;
+    
+    return { mapCenter: [avgLat, avgLng] as [number, number], mapZoom: zoom };
   }, [postsWithCoords, tripsToShow]);
 
   if (authLoading || loading) {
@@ -310,7 +325,7 @@ export default function UnifiedMap() {
         <div className="relative h-[50vh] min-h-[300px]">
           <MapContainer
             center={mapCenter}
-            zoom={4}
+            zoom={mapZoom}
             className="h-full w-full z-0"
             style={{ background: "#1a1a2e" }}
           >
