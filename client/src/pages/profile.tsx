@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
+import { ShareQRModal } from "@/components/share-qr-modal";
 
 export default function Profile() {
   const { user, loading: authLoading, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showShareQR, setShowShareQR] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -76,7 +78,23 @@ export default function Profile() {
             <button className="p-2 rounded-2xl border border-border hover:bg-muted transition-colors">
               <Mail className="w-5 h-5 text-muted-foreground" />
             </button>
+            <button 
+              onClick={() => setShowShareQR(true)}
+              className="p-2 rounded-2xl border border-primary bg-primary/10 hover:bg-primary/20 transition-colors"
+              data-testid="button-share-profile"
+            >
+              <QrCode className="w-5 h-5 text-primary" />
+            </button>
           </div>
+          
+          <button
+            onClick={() => setShowShareQR(true)}
+            className="mt-4 flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-bold hover:bg-primary/90 transition-colors"
+            data-testid="button-share-profile-main"
+          >
+            <Share2 className="w-4 h-4" />
+            Condividi Profilo
+          </button>
 
           {user.bio && (
             <p className="mt-6 text-center text-sm leading-relaxed text-muted-foreground max-w-sm" data-testid="text-profile-bio">
@@ -137,6 +155,16 @@ export default function Profile() {
           </div>
         </div>
       </header>
+      
+      {showShareQR && (
+        <ShareQRModal
+          open={showShareQR}
+          onClose={() => setShowShareQR(false)}
+          type="profile"
+          id={user.id}
+          title={`${user.name} (@${user.username})`}
+        />
+      )}
     </Layout>
   );
 }
