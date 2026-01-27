@@ -138,7 +138,7 @@ function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { posi
 
 export default function UnifiedMap() {
   const { user, loading: authLoading } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [myTrips, setMyTrips] = useState<Trip[]>([]);
   const [followingTrips, setFollowingTrips] = useState<Trip[]>([]);
@@ -148,7 +148,14 @@ export default function UnifiedMap() {
   const [showNewPost, setShowNewPost] = useState(false);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite"; id: string; title: string } | null>(null);
+  const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tripId = params.get("trip");
+    setHighlightedTripId(tripId || null);
+  }, [location]);
   
   const [filters, setFilters] = useState({
     showPosts: true,
@@ -274,6 +281,28 @@ export default function UnifiedMap() {
   }, [myTrips, followingTrips, filters]);
 
   const { mapCenter, mapZoom } = useMemo(() => {
+    if (highlightedTripId) {
+      const trip = tripsToShow.find(t => t.id === highlightedTripId);
+      if (trip && trip.stops.length > 0) {
+        const tripPoints = trip.stops.filter(s => s.latitude && s.longitude);
+        if (tripPoints.length > 0) {
+          const avgLat = tripPoints.reduce((sum, p) => sum + (p.latitude || 0), 0) / tripPoints.length;
+          const avgLng = tripPoints.reduce((sum, p) => sum + (p.longitude || 0), 0) / tripPoints.length;
+          const latitudes = tripPoints.map(p => p.latitude || 0);
+          const longitudes = tripPoints.map(p => p.longitude || 0);
+          const latSpan = Math.max(...latitudes) - Math.min(...latitudes);
+          const lngSpan = Math.max(...longitudes) - Math.min(...longitudes);
+          const maxSpan = Math.max(latSpan, lngSpan);
+          let zoom = 5;
+          if (maxSpan > 50) zoom = 3;
+          else if (maxSpan > 20) zoom = 4;
+          else if (maxSpan > 5) zoom = 5;
+          else zoom = 7;
+          return { mapCenter: [avgLat, avgLng] as [number, number], mapZoom: zoom };
+        }
+      }
+    }
+    
     const allPoints: { lat: number; lng: number }[] = [];
     
     postsWithCoords.forEach(p => {
@@ -311,7 +340,7 @@ export default function UnifiedMap() {
     else zoom = 8;
     
     return { mapCenter: [avgLat, avgLng] as [number, number], mapZoom: zoom };
-  }, [postsWithCoords, tripsToShow]);
+  }, [postsWithCoords, tripsToShow, highlightedTripId]);
 
   if (authLoading || loading) {
     return (

@@ -5,8 +5,9 @@ import { useLocation, Link } from "wouter";
 import { 
   Plus, MapPin, Calendar, Wallet, Star, ChevronRight, 
   Loader2, Plane, Hotel, Coffee, Utensils, Car, MoreHorizontal,
-  Globe, X, Check, Edit, Trash2, Eye, Users
+  Globe, X, Check, Edit, Trash2, Eye, Users, Image, Video
 } from "lucide-react";
+import { useUpload } from "@/hooks/use-upload";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,7 +106,18 @@ export default function TravelDiary() {
   const [showNewStop, setShowNewStop] = useState(false);
   const [showNewExpense, setShowNewExpense] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"my-trips" | "explore">("my-trips");
+  const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  const { uploadFile, isUploading: isUploadingStopMedia, progress: uploadProgress } = useUpload({
+    onSuccess: (response) => {
+      setStopImageUrl(response.objectPath);
+      toast({ title: "Media caricato!" });
+    },
+    onError: (error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
 
   const fetchTrips = useCallback(async () => {
     try {
@@ -206,6 +218,7 @@ export default function TravelDiary() {
           arrivalDate: formData.get("arrivalDate"),
           departureDate: formData.get("departureDate") || undefined,
           notes: formData.get("notes") || undefined,
+          imageUrl: stopImageUrl || undefined,
           orderIndex: nextOrderIndex,
         }),
       });
@@ -213,6 +226,7 @@ export default function TravelDiary() {
       if (res.ok) {
         toast({ title: "Tappa aggiunta!" });
         setShowNewStop(false);
+        setStopImageUrl(null);
         fetchTripDetails(selectedTrip.id);
       } else {
         const error = await res.json();
@@ -220,6 +234,13 @@ export default function TravelDiary() {
       }
     } catch (error) {
       toast({ title: "Errore", description: "Impossibile aggiungere la tappa", variant: "destructive" });
+    }
+  };
+  
+  const handleStopMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadFile(file);
     }
   };
 
@@ -479,7 +500,8 @@ export default function TravelDiary() {
           ) : (
             <TripsList 
               trips={trips} 
-              onSelectTrip={(tripId) => fetchTripDetails(tripId)} 
+              onSelectTrip={(tripId) => fetchTripDetails(tripId)}
+              onViewOnMap={(tripId) => setLocation(`/?trip=${tripId}`)}
             />
           )}
         </div>
@@ -493,7 +515,7 @@ export default function TravelDiary() {
           />
         )}
 
-        <Dialog open={showNewStop} onOpenChange={setShowNewStop}>
+        <Dialog open={showNewStop} onOpenChange={(open) => { setShowNewStop(open); if (!open) setStopImageUrl(null); }}>
           <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -559,10 +581,67 @@ export default function TravelDiary() {
                   data-testid="input-stop-notes"
                 />
               </div>
+              
+              <div>
+                <Label>Foto/Video (opzionale)</Label>
+                <div className="mt-2">
+                  {stopImageUrl ? (
+                    <div className="relative">
+                      {stopImageUrl.match(/\.(mp4|webm|mov)$/i) ? (
+                        <video 
+                          src={stopImageUrl} 
+                          className="w-full h-32 object-cover rounded-lg"
+                          controls
+                        />
+                      ) : (
+                        <img 
+                          src={stopImageUrl} 
+                          alt="Anteprima" 
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setStopImageUrl(null)}
+                        className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={handleStopMediaUpload}
+                        className="hidden"
+                        disabled={isUploadingStopMedia}
+                        data-testid="input-stop-media"
+                      />
+                      {isUploadingStopMedia ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
+                          <span className="text-xs text-slate-400">{uploadProgress}%</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="flex gap-2">
+                            <Image className="w-5 h-5 text-slate-400" />
+                            <Video className="w-5 h-5 text-slate-400" />
+                          </div>
+                          <span className="text-xs text-slate-400">Carica foto o video</span>
+                        </div>
+                      )}
+                    </label>
+                  )}
+                </div>
+              </div>
+              
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
                 data-testid="button-submit-stop"
+                disabled={isUploadingStopMedia}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Aggiungi Tappa
@@ -678,7 +757,7 @@ export default function TravelDiary() {
   );
 }
 
-function TripsList({ trips, onSelectTrip }: { trips: Trip[]; onSelectTrip: (id: string) => void }) {
+function TripsList({ trips, onSelectTrip, onViewOnMap }: { trips: Trip[]; onSelectTrip: (id: string) => void; onViewOnMap: (id: string) => void }) {
   if (trips.length === 0) {
     return (
       <motion.div 
@@ -704,11 +783,13 @@ function TripsList({ trips, onSelectTrip }: { trips: Trip[]; onSelectTrip: (id: 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}
-          onClick={() => onSelectTrip(trip.id)}
-          className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-all"
+          className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50"
           data-testid={`trip-card-${trip.id}`}
         >
-          <div className="flex items-center justify-between">
+          <div 
+            onClick={() => onSelectTrip(trip.id)}
+            className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-all"
+          >
             <div className="flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                 trip.isActive ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-slate-700'
@@ -733,6 +814,24 @@ function TripsList({ trips, onSelectTrip }: { trips: Trip[]; onSelectTrip: (id: 
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-slate-500" />
+          </div>
+          <div className="mt-3 pt-3 border-t border-slate-700/50 flex gap-2">
+            <button
+              onClick={() => onSelectTrip(trip.id)}
+              className="flex-1 py-2 px-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              data-testid={`button-trip-details-${trip.id}`}
+            >
+              <Edit className="w-4 h-4" />
+              Dettagli
+            </button>
+            <button
+              onClick={() => onViewOnMap(trip.id)}
+              className="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              data-testid={`button-view-on-map-${trip.id}`}
+            >
+              <Globe className="w-4 h-4" />
+              Vedi su Mappa
+            </button>
           </div>
         </motion.div>
       ))}
