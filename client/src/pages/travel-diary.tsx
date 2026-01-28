@@ -49,6 +49,7 @@ interface Trip {
   endDate?: string;
   isPublic: boolean;
   isActive: boolean;
+  status: "planned" | "in_progress" | "completed";
   totalBudget: number;
   currency: string;
   imageUrl?: string;
@@ -67,6 +68,9 @@ interface TripStop {
   departureDate?: string;
   notes?: string;
   imageUrl?: string;
+  placeId?: string;
+  sourceTripId?: string;
+  place?: { id: string; name: string; type: string; imageUrl?: string };
   expenses?: TripExpense[];
 }
 
@@ -184,6 +188,7 @@ export default function TravelDiary() {
           startDate: formData.get("startDate"),
           isPublic: formData.get("isPublic") === "true",
           currency: formData.get("currency") || "EUR",
+          status: formData.get("status") || "planned",
         }),
       });
 
@@ -292,6 +297,42 @@ export default function TravelDiary() {
       }
     } catch (error) {
       toast({ title: "Errore", description: "Impossibile eliminare il viaggio", variant: "destructive" });
+    }
+  };
+
+  const handleCopyStop = async (stop: TripStop, targetTripId: string) => {
+    try {
+      const targetTrip = trips.find(t => t.id === targetTripId);
+      if (!targetTrip) return;
+      
+      const res = await fetch(`/api/trips/${targetTripId}/stops`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          city: stop.city,
+          country: stop.country,
+          arrivalDate: stop.arrivalDate,
+          departureDate: stop.departureDate,
+          notes: stop.notes ? `Copiato da altro viaggio: ${stop.notes}` : "Copiato da altro viaggio",
+          imageUrl: stop.imageUrl,
+          sourceTripId: stop.tripId,
+          orderIndex: 999,
+        }),
+      });
+
+      if (res.ok) {
+        toast({ 
+          title: "Tappa aggiunta!", 
+          description: `"${stop.city}" aggiunta al viaggio "${targetTrip.title}"` 
+        });
+        fetchTrips();
+      } else {
+        const error = await res.json();
+        toast({ title: "Errore", description: error.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Errore", description: "Impossibile copiare la tappa", variant: "destructive" });
     }
   };
 
@@ -430,6 +471,19 @@ export default function TravelDiary() {
                       </Select>
                     </div>
                   </div>
+                  <div>
+                    <Label>Tipo di viaggio</Label>
+                    <Select name="status" defaultValue="planned">
+                      <SelectTrigger className="bg-slate-700 border-slate-600" data-testid="select-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        <SelectItem value="planned">📝 Pianificato (futuro)</SelectItem>
+                        <SelectItem value="in_progress">✈️ In corso</SelectItem>
+                        <SelectItem value="completed">✅ Completato</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="flex items-center gap-3">
                     <input 
                       type="checkbox" 
@@ -512,6 +566,8 @@ export default function TravelDiary() {
               fetchTripDetails(tripId);
               setActiveTab("my-trips");
             }}
+            onCopyStop={handleCopyStop}
+            userTrips={trips}
           />
         )}
 
@@ -758,6 +814,26 @@ export default function TravelDiary() {
 }
 
 function TripsList({ trips, onSelectTrip, onViewOnMap }: { trips: Trip[]; onSelectTrip: (id: string) => void; onViewOnMap: (id: string) => void }) {
+  const [statusFilter, setStatusFilter] = useState<"all" | "planned" | "in_progress" | "completed">("all");
+  
+  const filteredTrips = trips.filter(trip => {
+    if (statusFilter === "all") return true;
+    return trip.status === statusFilter;
+  });
+  
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "planned":
+        return <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px]">📝 Pianificato</span>;
+      case "in_progress":
+        return <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px]">✈️ In corso</span>;
+      case "completed":
+        return <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[10px]">✅ Completato</span>;
+      default:
+        return null;
+    }
+  };
+
   if (trips.length === 0) {
     return (
       <motion.div 
@@ -776,45 +852,73 @@ function TripsList({ trips, onSelectTrip, onViewOnMap }: { trips: Trip[]; onSele
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-white mb-4">I Tuoi Viaggi</h2>
-      {trips.map((trip, index) => (
-        <motion.div
-          key={trip.id}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.1 }}
-          className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50"
-          data-testid={`trip-card-${trip.id}`}
-        >
-          <div 
-            onClick={() => onSelectTrip(trip.id)}
-            className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-all"
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-white">I Tuoi Viaggi</h2>
+      </div>
+      
+      <div className="flex gap-2 flex-wrap mb-4">
+        {[
+          { value: "all", label: "Tutti", count: trips.length },
+          { value: "planned", label: "📝 Pianificati", count: trips.filter(t => t.status === "planned").length },
+          { value: "in_progress", label: "✈️ In corso", count: trips.filter(t => t.status === "in_progress").length },
+          { value: "completed", label: "✅ Completati", count: trips.filter(t => t.status === "completed").length },
+        ].map(tab => (
+          <button
+            key={tab.value}
+            onClick={() => setStatusFilter(tab.value as typeof statusFilter)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              statusFilter === tab.value
+                ? "bg-emerald-500 text-white"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+            }`}
+            data-testid={`filter-${tab.value}`}
           >
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                trip.isActive ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-slate-700'
-              }`}>
-                <Plane className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white">{trip.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-slate-400">
-                  <MapPin className="w-3 h-3" />
-                  <span>{trip.startLocation} → {trip.endLocation}</span>
+            {tab.label} ({tab.count})
+          </button>
+        ))}
+      </div>
+      
+      {filteredTrips.length === 0 ? (
+        <div className="text-center py-8 text-slate-400">
+          Nessun viaggio in questa categoria
+        </div>
+      ) : (
+        filteredTrips.map((trip, index) => (
+          <motion.div
+            key={trip.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50"
+            data-testid={`trip-card-${trip.id}`}
+          >
+            <div 
+              onClick={() => onSelectTrip(trip.id)}
+              className="flex items-center justify-between cursor-pointer hover:opacity-80 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  trip.status === "in_progress" ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 
+                  trip.status === "planned" ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
+                  'bg-gradient-to-br from-purple-500 to-pink-600'
+                }`}>
+                  <Plane className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                  <Calendar className="w-3 h-3" />
-                  <span>{new Date(trip.startDate).toLocaleDateString("it-IT")}</span>
-                  {trip.isActive && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px]">
-                      In corso
-                    </span>
-                  )}
+                <div>
+                  <h3 className="font-semibold text-white">{trip.title}</h3>
+                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <MapPin className="w-3 h-3" />
+                    <span>{trip.startLocation} → {trip.endLocation}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{new Date(trip.startDate).toLocaleDateString("it-IT")}</span>
+                    {getStatusBadge(trip.status)}
+                  </div>
                 </div>
               </div>
+              <ChevronRight className="w-5 h-5 text-slate-500" />
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-500" />
-          </div>
           <div className="mt-3 pt-3 border-t border-slate-700/50 flex gap-2">
             <button
               onClick={() => onSelectTrip(trip.id)}
@@ -834,7 +938,8 @@ function TripsList({ trips, onSelectTrip, onViewOnMap }: { trips: Trip[]; onSele
             </button>
           </div>
         </motion.div>
-      ))}
+        ))
+      )}
     </div>
   );
 }
@@ -1084,11 +1189,16 @@ const tripColors = [
 
 function ExploreTripsMap({ 
   trips, 
-  onSelectTrip 
+  onSelectTrip,
+  onCopyStop,
+  userTrips 
 }: { 
   trips: TripWithDetails[]; 
   onSelectTrip: (tripId: string) => void;
+  onCopyStop: (stop: TripStop, targetTripId: string) => void;
+  userTrips: Trip[];
 }) {
+  const [copyingStopId, setCopyingStopId] = useState<string | null>(null);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   
   const allStopsWithCoords = trips.flatMap((trip, tripIndex) => 
@@ -1172,12 +1282,42 @@ function ExploreTripsMap({
                 {stop.notes && (
                   <p className="text-xs text-slate-300 mt-2 italic">"{stop.notes}"</p>
                 )}
-                <button
-                  onClick={() => onSelectTrip(stop.trip.id)}
-                  className="mt-3 w-full bg-emerald-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-emerald-600"
-                >
-                  Vedi dettagli
-                </button>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => onSelectTrip(stop.trip.id)}
+                    className="flex-1 bg-slate-600 text-white text-xs py-1.5 px-2 rounded-lg hover:bg-slate-500"
+                  >
+                    Vedi dettagli
+                  </button>
+                  {userTrips.length > 0 && (
+                    copyingStopId === stop.id ? (
+                      <div className="flex-1">
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              onCopyStop(stop, e.target.value);
+                              setCopyingStopId(null);
+                            }
+                          }}
+                          className="w-full bg-slate-700 text-white text-xs py-1.5 px-2 rounded-lg"
+                          autoFocus
+                        >
+                          <option value="">Scegli viaggio...</option>
+                          {userTrips.filter(t => t.status === "planned").map(trip => (
+                            <option key={trip.id} value={trip.id}>{trip.title}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setCopyingStopId(stop.id)}
+                        className="flex-1 bg-blue-500 text-white text-xs py-1.5 px-2 rounded-lg hover:bg-blue-600"
+                      >
+                        + Aggiungi al mio viaggio
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
             </Popup>
           </Marker>

@@ -216,6 +216,7 @@ export const trips = pgTable("trips", {
   endDate: timestamp("end_date"),
   isPublic: boolean("is_public").default(true).notNull(),
   isActive: boolean("is_active").default(true).notNull(), // viaggio in corso
+  status: text("status").default("planned").notNull(), // "planned", "in_progress", "completed"
   totalBudget: integer("total_budget").default(0),
   currency: text("currency").default("EUR"),
   imageUrl: text("image_url"),
@@ -243,6 +244,8 @@ export const tripStops = pgTable("trip_stops", {
   departureDate: timestamp("departure_date"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  placeId: varchar("place_id").references(() => places.id, { onDelete: "set null" }), // hotel/coworking collegato
+  sourceTripId: varchar("source_trip_id"), // se copiata da un altro viaggio
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
