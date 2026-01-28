@@ -5,7 +5,7 @@ import { useLocation, Link } from "wouter";
 import { 
   Plus, MapPin, Calendar, Wallet, Star, ChevronRight, 
   Loader2, Plane, Hotel, Coffee, Utensils, Car, MoreHorizontal,
-  Globe, X, Check, Edit, Trash2, Eye, Users, Image, Video
+  Globe, X, Check, Edit, Trash2, Eye, Users, Image, Video, LocateFixed
 } from "lucide-react";
 import { useUpload } from "@/hooks/use-upload";
 import { motion, AnimatePresence } from "framer-motion";
@@ -113,6 +113,7 @@ export default function TravelDiary() {
   const [activeTab, setActiveTab] = useState<"my-trips" | "explore">("my-trips");
   const [showPlannerMap, setShowPlannerMap] = useState(false);
   const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
   
   const { uploadFile, isUploading: isUploadingStopMedia, progress: uploadProgress } = useUpload({
@@ -150,6 +151,57 @@ export default function TravelDiary() {
       console.error("Failed to fetch public trips:", error);
     }
   }, []);
+
+  const getCurrentLocation = useCallback(async () => {
+    if (!navigator.geolocation) {
+      toast({ title: "Errore", description: "Geolocalizzazione non supportata dal browser", variant: "destructive" });
+      return;
+    }
+    
+    setIsGettingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`,
+            { headers: { 'Accept-Language': 'it' } }
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || "Posizione attuale";
+            const country = data.address?.country || "Paese sconosciuto";
+            
+            const cityInput = document.getElementById('city') as HTMLInputElement;
+            const countryInput = document.getElementById('country') as HTMLInputElement;
+            
+            if (cityInput) cityInput.value = city;
+            if (countryInput) countryInput.value = country;
+            
+            toast({ title: "Posizione rilevata!", description: `${city}, ${country}` });
+          }
+        } catch (error) {
+          console.error("Geocoding error:", error);
+          toast({ title: "Errore", description: "Impossibile determinare la località", variant: "destructive" });
+        }
+        
+        setIsGettingLocation(false);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        let message = "Impossibile ottenere la posizione";
+        if (error.code === 1) message = "Permesso negato. Abilita la geolocalizzazione.";
+        if (error.code === 2) message = "Posizione non disponibile";
+        if (error.code === 3) message = "Timeout richiesta";
+        toast({ title: "Errore GPS", description: message, variant: "destructive" });
+        setIsGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [toast]);
 
   const fetchTripDetails = useCallback(async (tripId: string) => {
     try {
@@ -652,6 +704,22 @@ export default function TravelDiary() {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleAddStop} className="space-y-4">
+              <Button
+                type="button"
+                onClick={getCurrentLocation}
+                disabled={isGettingLocation}
+                variant="outline"
+                className="w-full border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+                data-testid="button-get-location"
+              >
+                {isGettingLocation ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <LocateFixed className="w-4 h-4 mr-2" />
+                )}
+                {isGettingLocation ? "Rilevamento posizione..." : "Usa posizione attuale"}
+              </Button>
+              
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="city">Città</Label>
