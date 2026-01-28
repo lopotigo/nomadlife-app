@@ -78,6 +78,11 @@ Preferred communication style: Simple, everyday language.
 - Created dedicated pages for viewing individual posts (`/post/:id`) and trips (`/trip/:id`)
 - Added share buttons to post and trip popups on the map
 - ShareQRModal component with download, copy and native share functionality
+- **Trip Planning System**: New trip status field (planned/in_progress/completed) with filter tabs
+- **Copy Stops from Public Trips**: Users can copy interesting stops from public trips to their planned trips
+- **Photo/Video Upload for Stops**: Trip stops now support media upload with progress indicator
+- **View on Map**: Click any trip to see it highlighted on the main map
+- **Hotel Search from Stops**: Each stop has a "Cerca alloggio" button linking to hotel search for that city
 
 ## External Dependencies
 

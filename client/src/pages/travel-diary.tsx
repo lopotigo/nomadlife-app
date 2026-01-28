@@ -305,6 +305,10 @@ export default function TravelDiary() {
       const targetTrip = trips.find(t => t.id === targetTripId);
       if (!targetTrip) return;
       
+      const tripDetailsRes = await fetch(`/api/trips/${targetTripId}`, { credentials: "include" });
+      const tripDetails = await tripDetailsRes.json();
+      const nextOrderIndex = tripDetails.stops ? tripDetails.stops.length : 0;
+      
       const res = await fetch(`/api/trips/${targetTripId}/stops`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -317,7 +321,7 @@ export default function TravelDiary() {
           notes: stop.notes ? `Copiato da altro viaggio: ${stop.notes}` : "Copiato da altro viaggio",
           imageUrl: stop.imageUrl,
           sourceTripId: stop.tripId,
-          orderIndex: 999,
+          orderIndex: nextOrderIndex,
         }),
       });
 
@@ -1161,19 +1165,33 @@ function StopCard({
                 </div>
               )}
               
-              <Button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddExpense();
-                }}
-                variant="outline"
-                size="sm"
-                className="w-full border-dashed border-slate-600 text-slate-400 hover:text-white"
-                data-testid={`button-add-expense-${stop.id}`}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Aggiungi spesa
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddExpense();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-dashed border-slate-600 text-slate-400 hover:text-white"
+                  data-testid={`button-add-expense-${stop.id}`}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Aggiungi spesa
+                </Button>
+                <Link href={`/hotels?city=${encodeURIComponent(stop.city)}`}>
+                  <Button 
+                    onClick={(e) => e.stopPropagation()}
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                    data-testid={`button-find-hotel-${stop.id}`}
+                  >
+                    <Hotel className="w-4 h-4 mr-2" />
+                    Cerca alloggio
+                  </Button>
+                </Link>
+              </div>
             </div>
           </motion.div>
         )}
