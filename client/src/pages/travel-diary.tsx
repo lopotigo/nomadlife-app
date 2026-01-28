@@ -615,7 +615,10 @@ export default function TravelDiary() {
             <TripsList 
               trips={trips} 
               onSelectTrip={(tripId) => fetchTripDetails(tripId)}
-              onViewOnMap={(tripId) => setLocation(`/?trip=${tripId}`)}
+              onViewOnMap={(tripId) => {
+                fetchTripDetails(tripId);
+                setActiveTab("explore");
+              }}
               onPlanRoute={(tripId) => {
                 fetchTripDetails(tripId);
                 setTimeout(() => setShowPlannerMap(true), 300);
@@ -625,7 +628,10 @@ export default function TravelDiary() {
         </div>
         ) : (
           <ExploreTripsMap 
-            trips={publicTrips} 
+            trips={selectedTrip && !publicTrips.find(t => t.id === selectedTrip.id) 
+              ? [...publicTrips, { ...selectedTrip, stops: selectedTrip.stops || [] }] 
+              : publicTrips
+            } 
             onSelectTrip={(tripId) => {
               fetchTripDetails(tripId);
               setActiveTab("my-trips");
@@ -633,6 +639,7 @@ export default function TravelDiary() {
             onCopyStop={handleCopyStop}
             userTrips={trips}
             onBack={() => setActiveTab("my-trips")}
+            highlightedTripId={selectedTrip?.id}
           />
         )}
 
@@ -1299,16 +1306,18 @@ function ExploreTripsMap({
   onSelectTrip,
   onCopyStop,
   userTrips,
-  onBack
+  onBack,
+  highlightedTripId
 }: { 
   trips: TripWithDetails[]; 
   onSelectTrip: (tripId: string) => void;
   onCopyStop: (stop: TripStop, targetTripId: string) => void;
   userTrips: Trip[];
   onBack: () => void;
+  highlightedTripId?: string;
 }) {
   const [copyingStopId, setCopyingStopId] = useState<string | null>(null);
-  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(highlightedTripId || null);
   
   const allStopsWithCoords = trips.flatMap((trip, tripIndex) => 
     trip.stops
