@@ -17,9 +17,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Navigation, Route, Play } from "lucide-react";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -110,6 +111,7 @@ export default function TravelDiary() {
   const [showNewStop, setShowNewStop] = useState(false);
   const [showNewExpense, setShowNewExpense] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"my-trips" | "explore">("my-trips");
+  const [showPlannerMap, setShowPlannerMap] = useState(false);
   const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
   
@@ -246,6 +248,39 @@ export default function TravelDiary() {
     const file = e.target.files?.[0];
     if (file) {
       await uploadFile(file);
+    }
+  };
+
+  const handleAddStopFromMap = async (lat: number, lng: number, city: string, country: string) => {
+    if (!selectedTrip) return;
+    
+    const nextOrderIndex = selectedTrip.stops.length;
+    const today = new Date().toISOString().split('T')[0];
+    
+    try {
+      const res = await fetch(`/api/trips/${selectedTrip.id}/stops`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          city,
+          country,
+          latitude: lat,
+          longitude: lng,
+          arrivalDate: today,
+          orderIndex: nextOrderIndex,
+          notes: "Aggiunta dalla mappa",
+        }),
+      });
+
+      if (res.ok) {
+        fetchTripDetails(selectedTrip.id);
+      } else {
+        const error = await res.json();
+        toast({ title: "Errore", description: error.error, variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Errore", description: "Impossibile aggiungere la tappa", variant: "destructive" });
     }
   };
 
@@ -553,6 +588,7 @@ export default function TravelDiary() {
               onAddStop={() => setShowNewStop(true)}
               onAddExpense={(stopId) => setShowNewExpense(stopId)}
               onDelete={() => handleDeleteTrip(selectedTrip.id)}
+              onOpenPlannerMap={() => setShowPlannerMap(true)}
               calculateTotal={calculateTotalExpenses}
             />
           ) : (
@@ -812,6 +848,14 @@ export default function TravelDiary() {
             </form>
           </DialogContent>
         </Dialog>
+        
+        {showPlannerMap && selectedTrip && (
+          <TripPlannerMap
+            trip={selectedTrip}
+            onAddStopFromMap={handleAddStopFromMap}
+            onClose={() => setShowPlannerMap(false)}
+          />
+        )}
       </div>
     </Layout>
   );
@@ -954,6 +998,7 @@ function TripDetails({
   onAddStop, 
   onAddExpense,
   onDelete,
+  onOpenPlannerMap,
   calculateTotal 
 }: { 
   trip: TripWithDetails; 
@@ -961,6 +1006,7 @@ function TripDetails({
   onAddStop: () => void;
   onAddExpense: (stopId: string) => void;
   onDelete: () => void;
+  onOpenPlannerMap: () => void;
   calculateTotal: (trip: TripWithDetails) => number;
 }) {
   const totalExpenses = calculateTotal(trip);
@@ -982,6 +1028,16 @@ function TripDetails({
           Indietro
         </button>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onOpenPlannerMap}
+            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+            data-testid="button-plan-on-map"
+          >
+            <Route className="w-4 h-4 mr-1" />
+            Crea percorso
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -1389,6 +1445,270 @@ function ExploreTripsMap({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
+function UserLocationMarker({ position }: { position: [number, number] | null }) {
+  if (!position) return null;
+  
+  const userIcon = L.divIcon({
+    html: `<div class="user-location-marker">
+      <div class="user-location-pulse"></div>
+      <div class="user-location-dot"></div>
+    </div>`,
+    className: "user-location-icon",
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+  
+  return <Marker position={position} icon={userIcon} />;
+}
+
+function TripPlannerMap({ 
+  trip, 
+  onAddStopFromMap,
+  onClose 
+}: { 
+  trip: TripWithDetails;
+  onAddStopFromMap: (lat: number, lng: number, city: string, country: string) => void;
+  onClose: () => void;
+}) {
+  const [pendingLocation, setPendingLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [cityName, setCityName] = useState("");
+  const [countryName, setCountryName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const { toast } = useToast();
+  
+  const stopsWithCoords = trip.stops
+    .filter(stop => stop.latitude && stop.longitude)
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+  
+  const polylinePositions: [number, number][] = stopsWithCoords.map(
+    stop => [stop.latitude!, stop.longitude!]
+  );
+  
+  const defaultCenter: [number, number] = stopsWithCoords.length > 0
+    ? [stopsWithCoords[0].latitude!, stopsWithCoords[0].longitude!]
+    : userLocation || [45.4642, 9.1900];
+
+  const handleMapClick = async (lat: number, lng: number) => {
+    setPendingLocation({ lat, lng });
+    setIsLoading(true);
+    
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`
+      );
+      const data = await res.json();
+      
+      const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || "Città sconosciuta";
+      const country = data.address?.country || "Paese sconosciuto";
+      
+      setCityName(city);
+      setCountryName(country);
+    } catch (error) {
+      setCityName("Città sconosciuta");
+      setCountryName("Paese sconosciuto");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleConfirmStop = () => {
+    if (pendingLocation && cityName) {
+      onAddStopFromMap(pendingLocation.lat, pendingLocation.lng, cityName, countryName);
+      setPendingLocation(null);
+      setCityName("");
+      setCountryName("");
+      toast({ title: "Tappa aggiunta!", description: `${cityName}, ${countryName}` });
+    }
+  };
+
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
+          toast({ title: "Posizione trovata!" });
+        },
+        () => {
+          toast({ title: "Errore", description: "Impossibile ottenere la posizione", variant: "destructive" });
+        }
+      );
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-900">
+      <style>{`
+        .user-location-icon { background: transparent !important; border: none !important; }
+        .user-location-marker { position: relative; width: 24px; height: 24px; }
+        .user-location-dot { 
+          position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+          width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; 
+          border: 3px solid white; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .user-location-pulse {
+          position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+          width: 24px; height: 24px; background: rgba(59, 130, 246, 0.3); border-radius: 50%;
+          animation: pulse 2s ease-out infinite;
+        }
+        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2); opacity: 0; } }
+        .pending-marker { 
+          width: 32px; height: 32px; background: #ef4444; border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+      `}</style>
+      
+      <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between">
+        <div className="bg-slate-800/90 backdrop-blur-sm rounded-xl p-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Route className="w-5 h-5 text-emerald-500" />
+            Pianifica: {trip.title}
+          </h2>
+          <p className="text-sm text-slate-400">Clicca sulla mappa per aggiungere tappe</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleGetLocation}
+            variant="outline"
+            className="bg-slate-800/90 border-blue-500/50 text-blue-400"
+          >
+            <Navigation className="w-4 h-4 mr-2" />
+            La mia posizione
+          </Button>
+          <Button
+            onClick={onClose}
+            variant="outline"
+            className="bg-slate-800/90 border-slate-600"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Chiudi
+          </Button>
+        </div>
+      </div>
+
+      <MapContainer
+        center={defaultCenter}
+        zoom={stopsWithCoords.length > 0 ? 6 : 4}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        />
+        <MapClickHandler onMapClick={handleMapClick} />
+        <UserLocationMarker position={userLocation} />
+        
+        {polylinePositions.length > 1 && (
+          <Polyline
+            positions={polylinePositions}
+            pathOptions={{ color: "#10b981", weight: 4, opacity: 0.8, dashArray: "10, 5" }}
+          />
+        )}
+        
+        {stopsWithCoords.map((stop, index) => (
+          <Marker
+            key={stop.id}
+            position={[stop.latitude!, stop.longitude!]}
+            icon={createStopMarkerIcon(index)}
+          >
+            <Popup>
+              <div className="min-w-[150px]">
+                <h3 className="font-bold">{stop.city}, {stop.country}</h3>
+                <p className="text-xs text-slate-400">Tappa {index + 1}</p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+        
+        {pendingLocation && (
+          <Marker
+            position={[pendingLocation.lat, pendingLocation.lng]}
+            icon={L.divIcon({
+              html: `<div class="pending-marker"></div>`,
+              className: "pending-marker-icon",
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+            })}
+          />
+        )}
+      </MapContainer>
+      
+      {pendingLocation && (
+        <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-4">
+          <h3 className="text-white font-semibold mb-3">Aggiungi questa tappa?</h3>
+          {isLoading ? (
+            <div className="flex items-center gap-2 text-slate-400">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Cercando la posizione...
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-slate-400 text-xs">Città</Label>
+                  <Input
+                    value={cityName}
+                    onChange={(e) => setCityName(e.target.value)}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-slate-400 text-xs">Paese</Label>
+                  <Input
+                    value={countryName}
+                    onChange={(e) => setCountryName(e.target.value)}
+                    className="bg-slate-700 border-slate-600"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setPendingLocation(null)}
+                  variant="outline"
+                  className="flex-1 border-slate-600"
+                >
+                  Annulla
+                </Button>
+                <Button
+                  onClick={handleConfirmStop}
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Aggiungi Tappa
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="absolute bottom-4 right-4 z-[1000] bg-slate-800/90 backdrop-blur-sm rounded-xl p-3">
+        <div className="flex items-center gap-3 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <span className="text-slate-300">{stopsWithCoords.length} tappe</span>
+          </div>
+          {userLocation && (
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500" />
+              <span className="text-slate-300">Tu sei qui</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
