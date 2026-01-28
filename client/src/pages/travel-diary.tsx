@@ -632,6 +632,7 @@ export default function TravelDiary() {
             }}
             onCopyStop={handleCopyStop}
             userTrips={trips}
+            onBack={() => setActiveTab("my-trips")}
           />
         )}
 
@@ -1297,12 +1298,14 @@ function ExploreTripsMap({
   trips, 
   onSelectTrip,
   onCopyStop,
-  userTrips 
+  userTrips,
+  onBack
 }: { 
   trips: TripWithDetails[]; 
   onSelectTrip: (tripId: string) => void;
   onCopyStop: (stop: TripStop, targetTripId: string) => void;
   userTrips: Trip[];
+  onBack: () => void;
 }) {
   const [copyingStopId, setCopyingStopId] = useState<string | null>(null);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
@@ -1337,6 +1340,14 @@ function ExploreTripsMap({
 
   return (
     <div className="h-[calc(100vh-180px)] relative">
+      <button
+        onClick={onBack}
+        className="absolute top-4 left-4 z-[1000] bg-slate-800/90 backdrop-blur-sm text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-slate-700 transition-colors shadow-lg"
+        data-testid="button-back-from-explore"
+      >
+        <ChevronRight className="w-4 h-4 rotate-180" />
+        I Miei Viaggi
+      </button>
       <MapContainer
         center={defaultCenter}
         zoom={allStopsWithCoords.length > 0 ? 4 : 2}
