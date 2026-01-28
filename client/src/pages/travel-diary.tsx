@@ -213,6 +213,24 @@ export default function TravelDiary() {
     
     const formData = new FormData(e.currentTarget);
     const nextOrderIndex = selectedTrip.stops.length;
+    const city = formData.get("city") as string;
+    const country = formData.get("country") as string;
+    
+    let latitude: number | undefined;
+    let longitude: number | undefined;
+    
+    try {
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city + ", " + country)}&limit=1`
+      );
+      const geoData = await geoRes.json();
+      if (geoData.length > 0) {
+        latitude = parseFloat(geoData[0].lat);
+        longitude = parseFloat(geoData[0].lon);
+      }
+    } catch (geoError) {
+      console.log("Geocoding failed, saving without coordinates");
+    }
     
     try {
       const res = await fetch(`/api/trips/${selectedTrip.id}/stops`, {
@@ -220,8 +238,10 @@ export default function TravelDiary() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          city: formData.get("city"),
-          country: formData.get("country"),
+          city,
+          country,
+          latitude,
+          longitude,
           arrivalDate: formData.get("arrivalDate"),
           departureDate: formData.get("departureDate") || undefined,
           notes: formData.get("notes") || undefined,
@@ -596,6 +616,10 @@ export default function TravelDiary() {
               trips={trips} 
               onSelectTrip={(tripId) => fetchTripDetails(tripId)}
               onViewOnMap={(tripId) => setLocation(`/?trip=${tripId}`)}
+              onPlanRoute={(tripId) => {
+                fetchTripDetails(tripId);
+                setTimeout(() => setShowPlannerMap(true), 300);
+              }}
             />
           )}
         </div>
@@ -861,7 +885,7 @@ export default function TravelDiary() {
   );
 }
 
-function TripsList({ trips, onSelectTrip, onViewOnMap }: { trips: Trip[]; onSelectTrip: (id: string) => void; onViewOnMap: (id: string) => void }) {
+function TripsList({ trips, onSelectTrip, onViewOnMap, onPlanRoute }: { trips: Trip[]; onSelectTrip: (id: string) => void; onViewOnMap: (id: string) => void; onPlanRoute: (id: string) => void }) {
   const [statusFilter, setStatusFilter] = useState<"all" | "planned" | "in_progress" | "completed">("all");
   
   const filteredTrips = trips.filter(trip => {
@@ -978,11 +1002,19 @@ function TripsList({ trips, onSelectTrip, onViewOnMap }: { trips: Trip[]; onSele
             </button>
             <button
               onClick={() => onViewOnMap(trip.id)}
-              className="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2 px-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
               data-testid={`button-view-on-map-${trip.id}`}
             >
               <Globe className="w-4 h-4" />
-              Vedi su Mappa
+              Vedi Mappa
+            </button>
+            <button
+              onClick={() => onPlanRoute(trip.id)}
+              className="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              data-testid={`button-plan-route-${trip.id}`}
+            >
+              <Route className="w-4 h-4" />
+              Crea Percorso
             </button>
           </div>
         </motion.div>
