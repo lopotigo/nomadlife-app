@@ -34,6 +34,8 @@ const pgPool = new pg.Pool({
 
 app.set("trust proxy", 1);
 
+const isProduction = process.env.NODE_ENV === "production";
+
 app.use(
   session({
     store: new PgSession({
@@ -44,11 +46,12 @@ app.use(
     secret: process.env.SESSION_SECRET || "nomadlife-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Refresh session on each request
     cookie: {
-      secure: true,
+      secure: isProduction,
       httpOnly: true,
-      sameSite: "none" as const,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      sameSite: isProduction ? "none" as const : "lax" as const,
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     },
   })
 );

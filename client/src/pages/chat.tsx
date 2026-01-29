@@ -75,18 +75,34 @@ export default function Chat() {
 
   useEffect(() => {
     if (!selectedGroup) return;
-    fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setGroupMessages(Array.isArray(data) ? data : []))
-      .catch(console.error);
+    
+    const fetchGroupMessages = () => {
+      fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
+        .then(res => res.json())
+        .then(data => setGroupMessages(Array.isArray(data) ? data : []))
+        .catch(console.error);
+    };
+    
+    fetchGroupMessages();
+    const interval = setInterval(fetchGroupMessages, 3000); // Refresh every 3 seconds
+    
+    return () => clearInterval(interval);
   }, [selectedGroup]);
 
   useEffect(() => {
     if (!selectedPrivateUser || !user) return;
-    fetch(`/api/messages/private/${selectedPrivateUser.id}`, { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setPrivateMessages(Array.isArray(data) ? data : []))
-      .catch(console.error);
+    
+    const fetchPrivateMessages = () => {
+      fetch(`/api/messages/private/${selectedPrivateUser.id}`, { credentials: "include" })
+        .then(res => res.json())
+        .then(data => setPrivateMessages(Array.isArray(data) ? data : []))
+        .catch(console.error);
+    };
+    
+    fetchPrivateMessages();
+    const interval = setInterval(fetchPrivateMessages, 3000); // Refresh every 3 seconds
+    
+    return () => clearInterval(interval);
   }, [selectedPrivateUser, user]);
 
   useEffect(() => {
