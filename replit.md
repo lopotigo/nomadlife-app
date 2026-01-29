@@ -86,6 +86,15 @@ Preferred communication style: Simple, everyday language.
 - **Comments System**: Full commenting on posts with create/delete functionality, real-time count updates
 - **Search System**: Search for nomads by name/location and trips by destination (city/country)
 - **Notifications UI**: Dropdown with unread count badge, mark as read, notifications list
+- **Inline Comments in Feed**: Expandable comments section in post cards (both home feed and map feed)
+- **PWA (Progressive Web App)**: App is installable on mobile/desktop, with offline caching support
+
+### PWA Configuration
+
+- **Manifest**: `client/public/manifest.json` - App name, icons, theme colors, shortcuts
+- **Service Worker**: `client/public/sw.js` - Caches static assets, images, and API responses for offline use
+- **Icons**: 8 sizes (72x72 to 512x512) in `client/public/icons/`
+- **Installation**: Users can install NomadLife from the browser menu ("Add to Home Screen" on mobile, "Install app" on desktop)
 
 ## External Dependencies
 
