@@ -149,6 +149,8 @@ export default function UnifiedMap() {
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite"; id: string; title: string } | null>(null);
   const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [pulsingPosts, setPulsingPosts] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   
   useEffect(() => {
@@ -163,6 +165,36 @@ export default function UnifiedMap() {
     showFollowingTrips: true,
     ecoMode: false,
   });
+
+  const handleLike = useCallback(async (postId: string) => {
+    if (likedPosts.has(postId)) return;
+    
+    try {
+      const res = await fetch(`/api/posts/${postId}/like`, {
+        method: "POST",
+        credentials: "include",
+      });
+      
+      if (res.ok) {
+        const updatedPost = await res.json();
+        
+        setLikedPosts(prev => new Set(Array.from(prev).concat(postId)));
+        setPulsingPosts(prev => new Set(Array.from(prev).concat(postId)));
+        
+        setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: updatedPost.likes } : p));
+        
+        setTimeout(() => {
+          setPulsingPosts(prev => {
+            const next = new Set(prev);
+            next.delete(postId);
+            return next;
+          });
+        }, 5000);
+      }
+    } catch (error) {
+      console.error("Failed to like post:", error);
+    }
+  }, [likedPosts]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -393,7 +425,13 @@ export default function UnifiedMap() {
                     <p className="text-sm">{post.content.substring(0, 100)}...</p>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-3 text-xs text-gray-500">
-                        <span className="flex items-center gap-1"><Heart className="w-3 h-3" /> {post.likes}</span>
+                        <button 
+                          onClick={() => handleLike(post.id)}
+                          className={`flex items-center gap-1 ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
+                        >
+                          <Heart className={`w-3 h-3 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500' : ''}`} /> 
+                          {post.likes}
+                        </button>
                         <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
                       </div>
                       <button
@@ -641,8 +679,14 @@ export default function UnifiedMap() {
                 )}
                 
                 <div className="flex items-center gap-4 mt-3 text-muted-foreground">
-                  <button className="flex items-center gap-1 text-sm hover:text-red-400 transition-colors">
-                    <Heart className="w-4 h-4" />
+                  <button 
+                    onClick={() => handleLike(post.id)}
+                    className={`flex items-center gap-1 text-sm transition-colors ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
+                    data-testid={`button-like-${post.id}`}
+                  >
+                    <Heart 
+                      className={`w-4 h-4 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} 
+                    />
                     <span>{post.likes}</span>
                   </button>
                   <button className="flex items-center gap-1 text-sm hover:text-primary transition-colors">

@@ -204,6 +204,41 @@ export async function registerRoutes(
     }
   });
 
+  // ========== COMMENT ROUTES ==========
+  app.get("/api/posts/:id/comments", async (req, res) => {
+    try {
+      const comments = await storage.getComments(req.params.id);
+      res.send(comments);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/posts/:id/comments", requireAuth, async (req, res) => {
+    try {
+      const comment = await storage.createComment({
+        postId: req.params.id,
+        userId: req.user!.id,
+        content: req.body.content,
+      });
+      res.status(201).send(comment);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/comments/:id", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteComment(req.params.id, req.user!.id);
+      if (!success) {
+        return res.status(403).send({ error: "Not authorized" });
+      }
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== PLACE ROUTES ==========
   app.get("/api/places", async (req, res) => {
     try {

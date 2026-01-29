@@ -42,7 +42,7 @@ Preferred communication style: Simple, everyday language.
 - **Database**: PostgreSQL (Neon-backed)
 - **ORM**: Drizzle ORM with drizzle-zod
 - **Schema**: Defined in `shared/schema.ts`
-- **Core Tables**: `users`, `posts`, `places`, `events`, `event_registrations`, `bookings`, `chatGroups`, `messages`, `subscriptions`, `trips`, `trip_stops`, `trip_expenses`, `followers`, `notifications`.
+- **Core Tables**: `users`, `posts`, `comments`, `places`, `events`, `event_registrations`, `bookings`, `chatGroups`, `messages`, `subscriptions`, `trips`, `trip_stops`, `trip_expenses`, `followers`, `notifications`.
 - **Storage Interface**: `server/storage.ts` provides comprehensive CRUD operations.
 
 ### Authentication Flow
@@ -83,6 +83,7 @@ Preferred communication style: Simple, everyday language.
 - **Photo/Video Upload for Stops**: Trip stops now support media upload with progress indicator
 - **View on Map**: Click any trip to see it highlighted on the main map
 - **Hotel Search from Stops**: Each stop has a "Cerca alloggio" button linking to hotel search for that city
+- **Comments System**: Full commenting on posts with create/delete functionality, real-time count updates
 
 ## External Dependencies
 

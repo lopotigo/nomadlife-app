@@ -8,6 +8,8 @@ import type {
   InsertUser,
   Post,
   InsertPost,
+  Comment,
+  InsertComment,
   Place,
   InsertPlace,
   Booking,
@@ -49,6 +51,11 @@ export interface IStorage {
   getPostById(id: string): Promise<(Post & { user: User }) | undefined>;
   createPost(post: InsertPost): Promise<Post>;
   likePost(postId: string): Promise<Post | undefined>;
+
+  // Comments
+  getComments(postId: string): Promise<(Comment & { user: User })[]>;
+  createComment(comment: InsertComment): Promise<Comment>;
+  deleteComment(id: string, userId: string): Promise<boolean>;
 
   // Places
   getPlaces(filters?: { city?: string; type?: string }): Promise<Place[]>;
@@ -218,6 +225,46 @@ export class DrizzleStorage implements IStorage {
       .where(eq(schema.posts.id, postId))
       .returning();
     return result[0];
+  }
+
+  // Comments
+  async getComments(postId: string): Promise<(Comment & { user: User })[]> {
+    const result = await this.db
+      .select()
+      .from(schema.comments)
+      .leftJoin(schema.users, eq(schema.comments.userId, schema.users.id))
+      .where(eq(schema.comments.postId, postId))
+      .orderBy(desc(schema.comments.createdAt));
+    
+    return result.map(r => ({
+      ...r.comments,
+      user: r.users!,
+    }));
+  }
+
+  async createComment(comment: InsertComment): Promise<Comment> {
+    const result = await this.db.insert(schema.comments).values(comment).returning();
+    
+    await this.db
+      .update(schema.posts)
+      .set({ commentsCount: sql`${schema.posts.commentsCount} + 1` })
+      .where(eq(schema.posts.id, comment.postId));
+    
+    return result[0];
+  }
+
+  async deleteComment(id: string, userId: string): Promise<boolean> {
+    const comment = await this.db.select().from(schema.comments).where(eq(schema.comments.id, id));
+    if (!comment[0] || comment[0].userId !== userId) return false;
+    
+    await this.db.delete(schema.comments).where(eq(schema.comments.id, id));
+    
+    await this.db
+      .update(schema.posts)
+      .set({ commentsCount: sql`${schema.posts.commentsCount} - 1` })
+      .where(eq(schema.posts.id, comment[0].postId));
+    
+    return true;
   }
 
   // Places

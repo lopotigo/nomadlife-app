@@ -1,35 +1,86 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
-import { Heart, MessageCircle, MapPin, ArrowLeft, Share2, Calendar, Video, Link as LinkIcon, Plane } from "lucide-react";
+import { Heart, MessageCircle, MapPin, ArrowLeft, Share2, Calendar, Video, Link as LinkIcon, Plane, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareQRModal } from "@/components/share-qr-modal";
-import type { Post, User } from "@shared/schema";
+import { Input } from "@/components/ui/input";
+import type { Post, User, Comment } from "@shared/schema";
 
 type PostWithUser = Post & { user: User };
+type CommentWithUser = Comment & { user: User };
 
 export default function PostDetail() {
   const [, params] = useRoute("/post/:id");
   const [post, setPost] = useState<PostWithUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [showShare, setShowShare] = useState(false);
+  const [comments, setComments] = useState<CommentWithUser[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
       if (!params?.id) return;
       try {
-        const res = await fetch(`/api/posts/${params.id}`, { credentials: "include" });
-        if (res.ok) {
-          setPost(await res.json());
-        }
+        const [postRes, commentsRes, userRes] = await Promise.all([
+          fetch(`/api/posts/${params.id}`, { credentials: "include" }),
+          fetch(`/api/posts/${params.id}/comments`, { credentials: "include" }),
+          fetch("/api/auth/me", { credentials: "include" })
+        ]);
+        if (postRes.ok) setPost(await postRes.json());
+        if (commentsRes.ok) setComments(await commentsRes.json());
+        if (userRes.ok) setCurrentUser(await userRes.json());
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchPost();
+    fetchData();
   }, [params?.id]);
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || submitting || !post) return;
+    
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: newComment.trim() })
+      });
+      if (res.ok) {
+        const comment = await res.json();
+        const commentsRes = await fetch(`/api/posts/${post.id}/comments`, { credentials: "include" });
+        if (commentsRes.ok) setComments(await commentsRes.json());
+        setNewComment("");
+        setPost({ ...post, commentsCount: post.commentsCount + 1 });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        setComments(comments.filter(c => c.id !== commentId));
+        if (post) setPost({ ...post, commentsCount: Math.max(0, post.commentsCount - 1) });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading) {
     return (
@@ -144,6 +195,70 @@ export default function PostDetail() {
                 <span className="font-semibold">{post.commentsCount}</span>
               </span>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-6 bg-card rounded-2xl overflow-hidden shadow-lg">
+          <div className="p-4 border-b border-border">
+            <h3 className="font-semibold flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Commenti ({comments.length})
+            </h3>
+          </div>
+
+          {currentUser && (
+            <form onSubmit={handleSubmitComment} className="p-4 border-b border-border">
+              <div className="flex gap-2">
+                <Input
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Scrivi un commento..."
+                  className="flex-1"
+                  data-testid="input-comment"
+                />
+                <Button type="submit" disabled={submitting || !newComment.trim()} data-testid="button-submit-comment">
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+          )}
+
+          <div className="divide-y divide-border">
+            {comments.length === 0 ? (
+              <div className="p-6 text-center text-muted-foreground">
+                Nessun commento ancora. Sii il primo a commentare!
+              </div>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.id} className="p-4" data-testid={`comment-${comment.id}`}>
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={comment.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`}
+                      className="w-8 h-8 rounded-full"
+                      alt={comment.user.name}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm">{comment.user.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(comment.createdAt).toLocaleDateString("it-IT")}
+                        </span>
+                        {currentUser?.id === comment.userId && (
+                          <button
+                            onClick={() => handleDeleteComment(comment.id)}
+                            className="ml-auto text-red-500 hover:text-red-600 p-1"
+                            data-testid={`button-delete-comment-${comment.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-sm mt-1">{comment.content}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
