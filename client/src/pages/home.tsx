@@ -2,12 +2,13 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Post, User } from "@shared/schema";
+import type { Post, User, Comment } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
 
 type PostWithUser = Post & { user: User };
+type CommentWithUser = Comment & { user: User };
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
@@ -80,7 +81,7 @@ export default function Home() {
             </div>
           ) : (
             posts.map((post) => (
-              <PostCard key={post.id} post={post} onLike={handleLike} />
+              <PostCard key={post.id} post={post} onLike={handleLike} currentUser={user} />
             ))
           )}
         </div>
@@ -385,11 +386,79 @@ function StoryRail() {
   );
 }
 
-function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) => void }) {
+function PostCard({ post, onLike, currentUser }: { post: PostWithUser; onLike: (id: string) => void; currentUser: User | null }) {
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<CommentWithUser[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+
   const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
+
+  const fetchComments = async () => {
+    setLoadingComments(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/comments`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleToggleComments = () => {
+    if (!showComments && comments.length === 0) {
+      fetchComments();
+    }
+    setShowComments(!showComments);
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || submitting) return;
+    
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: newComment.trim() })
+      });
+      if (res.ok) {
+        await fetchComments();
+        setNewComment("");
+        setCommentsCount(c => c + 1);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        setComments(comments.filter(c => c.id !== commentId));
+        setCommentsCount(c => Math.max(0, c - 1));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <motion.article 
@@ -450,9 +519,13 @@ function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) =
             <Heart className="w-6 h-6" />
             <span className="text-sm font-bold" data-testid={`text-likes-${post.id}`}>{post.likes}</span>
           </button>
-          <button className="flex items-center gap-1.5 text-foreground hover:text-primary transition-colors">
+          <button 
+            onClick={handleToggleComments}
+            className="flex items-center gap-1.5 text-foreground hover:text-primary transition-colors"
+            data-testid={`button-comments-${post.id}`}
+          >
             <MessageCircle className="w-6 h-6" />
-            <span className="text-sm font-bold">{post.commentsCount}</span>
+            <span className="text-sm font-bold">{commentsCount}</span>
           </button>
           <button className="ml-auto text-foreground hover:text-primary transition-colors">
             <Share2 className="w-6 h-6" />
@@ -463,6 +536,75 @@ function PostCard({ post, onLike }: { post: PostWithUser; onLike: (id: string) =
           <span className="font-bold mr-2">{post.user.username}</span>
           {post.content}
         </p>
+
+        <AnimatePresence>
+          {showComments && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mt-4 pt-4 border-t border-border overflow-hidden"
+            >
+              {currentUser && (
+                <form onSubmit={handleSubmitComment} className="flex gap-2 mb-4">
+                  <input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Scrivi un commento..."
+                    className="flex-1 bg-muted rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                    data-testid={`input-comment-${post.id}`}
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={submitting || !newComment.trim()}
+                    className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center disabled:opacity-50"
+                    data-testid={`button-submit-comment-${post.id}`}
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+
+              {loadingComments ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : comments.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-2">Nessun commento ancora</p>
+              ) : (
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="flex items-start gap-2" data-testid={`feed-comment-${comment.id}`}>
+                      <img
+                        src={comment.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`}
+                        className="w-7 h-7 rounded-full"
+                        alt={comment.user.name}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">
+                          <span className="font-semibold mr-1">{comment.user.username}</span>
+                          {comment.content}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {new Date(comment.createdAt).toLocaleDateString("it-IT")}
+                        </p>
+                      </div>
+                      {currentUser?.id === comment.userId && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="text-red-500 hover:text-red-600 p-1"
+                          data-testid={`button-delete-feed-comment-${comment.id}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.article>
   );
