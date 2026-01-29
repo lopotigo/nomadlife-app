@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2 } from "lucide-react";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -1594,6 +1594,32 @@ function UserLocationMarker({ position }: { position: [number, number] | null })
   return <Marker position={position} icon={userIcon} />;
 }
 
+const CO2_PER_KM = { walk: 0, bike: 0, train: 0.041, car: 0.171, plane: 0.255 };
+const SPEED_KMH = { walk: 5, bike: 20, train: 80, car: 90, plane: 800 };
+
+type TransportMode = "walk" | "bike" | "train" | "car" | "plane";
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return Math.round(R * c);
+}
+
+function getTransportOptions(distance: number) {
+  return [
+    { mode: "walk" as TransportMode, label: "A piedi", icon: Footprints, available: distance <= 30, co2: 0, color: "#22c55e" },
+    { mode: "bike" as TransportMode, label: "Bici", icon: Bike, available: distance <= 100, co2: 0, color: "#10b981" },
+    { mode: "train" as TransportMode, label: "Treno", icon: Train, available: true, co2: Math.round(distance * CO2_PER_KM.train), color: "#3b82f6" },
+    { mode: "car" as TransportMode, label: "Auto", icon: Car, available: distance <= 2000, co2: Math.round(distance * CO2_PER_KM.car), color: "#f59e0b" },
+    { mode: "plane" as TransportMode, label: "Aereo", icon: Plane, available: distance > 200, co2: Math.round(distance * CO2_PER_KM.plane), color: "#6366f1" },
+  ].filter(o => o.available);
+}
+
 function TripPlannerMap({ 
   trip, 
   onAddStopFromMap,
@@ -1608,6 +1634,8 @@ function TripPlannerMap({
   const [countryName, setCountryName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [showCO2Panel, setShowCO2Panel] = useState(false);
+  const [selectedTransports, setSelectedTransports] = useState<Record<string, TransportMode>>({});
   const { toast } = useToast();
   
   const stopsWithCoords = trip.stops
@@ -1617,6 +1645,22 @@ function TripPlannerMap({
   const polylinePositions: [number, number][] = stopsWithCoords.map(
     stop => [stop.latitude!, stop.longitude!]
   );
+
+  const legs = stopsWithCoords.slice(0, -1).map((stop, i) => {
+    const nextStop = stopsWithCoords[i + 1];
+    const distance = calculateDistance(stop.latitude!, stop.longitude!, nextStop.latitude!, nextStop.longitude!);
+    const options = getTransportOptions(distance);
+    const legId = `${stop.id}-${nextStop.id}`;
+    const selected = selectedTransports[legId] || options.find(o => o.co2 === Math.min(...options.map(x => x.co2)))?.mode || "train";
+    return { from: stop, to: nextStop, distance, options, legId, selected };
+  });
+
+  const totalCO2 = legs.reduce((sum, leg) => {
+    const opt = leg.options.find(o => o.mode === leg.selected);
+    return sum + (opt?.co2 || 0);
+  }, 0);
+
+  const totalDistance = legs.reduce((sum, leg) => sum + leg.distance, 0);
   
   const defaultCenter: [number, number] = stopsWithCoords.length > 0
     ? [stopsWithCoords[0].latitude!, stopsWithCoords[0].longitude!]
@@ -1700,6 +1744,17 @@ function TripPlannerMap({
           <p className="text-sm text-slate-400">Clicca sulla mappa per aggiungere tappe</p>
         </div>
         <div className="flex gap-2">
+          {legs.length > 0 && (
+            <Button
+              onClick={() => setShowCO2Panel(!showCO2Panel)}
+              variant="outline"
+              className={`bg-slate-800/90 ${showCO2Panel ? 'border-emerald-500 text-emerald-400' : 'border-emerald-500/50 text-emerald-400'}`}
+              data-testid="button-toggle-co2"
+            >
+              <Leaf className="w-4 h-4 mr-2" />
+              CO2 {totalCO2} kg
+            </Button>
+          )}
           <Button
             onClick={handleGetLocation}
             variant="outline"
@@ -1718,6 +1773,109 @@ function TripPlannerMap({
           </Button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showCO2Panel && legs.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, x: 300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 300 }}
+            className="absolute top-20 right-4 bottom-20 w-80 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-4 overflow-y-auto"
+            data-testid="co2-panel"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Leaf className="w-5 h-5 text-emerald-500" />
+                Emissioni CO2
+              </h3>
+              <button onClick={() => setShowCO2Panel(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-emerald-500/20 rounded-lg p-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-emerald-300">Distanza totale</span>
+                <span className="text-white font-bold">{totalDistance} km</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-emerald-300">Emissioni totali</span>
+                <span className="text-white font-bold">{totalCO2} kg CO2</span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {legs.map((leg, index) => {
+                const selectedOpt = leg.options.find(o => o.mode === leg.selected);
+                const greenest = leg.options.reduce((a, b) => a.co2 <= b.co2 ? a : b);
+                
+                return (
+                  <div key={leg.legId} className="bg-slate-700/50 rounded-lg p-3" data-testid={`leg-${index}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-full bg-emerald-500 text-white text-xs flex items-center justify-center font-bold">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 text-sm">
+                        <span className="text-white font-medium">{leg.from.city}</span>
+                        <span className="text-slate-400 mx-1">→</span>
+                        <span className="text-white font-medium">{leg.to.city}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-slate-400 mb-2">{leg.distance} km</div>
+                    
+                    <div className="flex flex-wrap gap-1">
+                      {leg.options.map((opt) => {
+                        const Icon = opt.icon;
+                        const isSelected = leg.selected === opt.mode;
+                        const isGreen = opt.mode === greenest.mode;
+                        
+                        return (
+                          <button
+                            key={opt.mode}
+                            onClick={() => setSelectedTransports(prev => ({ ...prev, [leg.legId]: opt.mode }))}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all ${
+                              isSelected 
+                                ? 'bg-emerald-500 text-white' 
+                                : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                            }`}
+                            data-testid={`transport-${index}-${opt.mode}`}
+                          >
+                            <Icon className="w-3 h-3" />
+                            <span>{opt.co2}kg</span>
+                            {isGreen && <Leaf className="w-3 h-3 text-green-300" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    {selectedOpt && (
+                      <div className="mt-2 flex items-center justify-between text-xs">
+                        <span className="text-slate-400">
+                          {selectedOpt.label}
+                        </span>
+                        <span className={selectedOpt.co2 === 0 ? "text-green-400" : "text-slate-300"}>
+                          {selectedOpt.co2 === 0 ? "Zero emissioni!" : `${selectedOpt.co2} kg CO2`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 p-3 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-lg border border-emerald-500/30">
+              <div className="flex items-center gap-2 text-emerald-400 text-sm font-medium">
+                <CheckCircle2 className="w-4 h-4" />
+                Suggerimento Green
+              </div>
+              <p className="text-xs text-slate-300 mt-1">
+                Scegli treno o bici per ridurre le emissioni del tuo viaggio!
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <MapContainer
         center={defaultCenter}
