@@ -104,6 +104,20 @@ export async function registerRoutes(
   });
 
   // ========== USER ROUTES ==========
+  app.get("/api/users/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.send([]);
+      }
+      const users = await storage.searchUsers(query);
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.send(usersWithoutPasswords);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/users", requireAuth, async (req, res) => {
     try {
       const users = await storage.getAllUsers();
@@ -525,6 +539,19 @@ export async function registerRoutes(
   });
 
   // ========== TRIP ROUTES (TRAVEL DIARY) ==========
+  app.get("/api/trips/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query || query.length < 2) {
+        return res.send([]);
+      }
+      const trips = await storage.searchTripsByDestination(query);
+      res.send(trips);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/trips", async (req, res) => {
     try {
       const userId = req.isAuthenticated() ? (req.user as User).id : null;

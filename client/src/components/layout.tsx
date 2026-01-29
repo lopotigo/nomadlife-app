@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search } from "lucide-react";
+import { NotificationsDropdown } from "./notifications-dropdown";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,15 +23,19 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
       {/* Desktop Sidebar (hidden on mobile) */}
       <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-64 border-r border-border bg-card p-6">
-        <div className="flex items-center gap-2 mb-10 px-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-display font-bold text-xl">
-            N
+        <div className="flex items-center justify-between mb-10 px-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-display font-bold text-xl">
+              N
+            </div>
+            <span className="font-display font-bold text-xl tracking-tight">NomadLife</span>
           </div>
-          <span className="font-display font-bold text-xl tracking-tight">NomadLife</span>
+          <NotificationsDropdown />
         </div>
         
         <nav className="flex flex-col gap-2">
           <NavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
+          <NavItem href="/search" icon={Search} label="Cerca" active={location === "/search"} />
           <NavItem href="/travel-diary" icon={Plane} label="Diario di Viaggio" active={location === "/travel-diary"} />
           <NavItem href="/chat" icon={MessageSquare} label="Messaggi" active={location === "/chat"} />
           <NavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
@@ -51,9 +56,9 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-2 z-50">
         <MobileNavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
+        <MobileNavItem href="/search" icon={Search} label="Cerca" active={location === "/search"} />
         <MobileNavItem href="/travel-diary" icon={Plane} label="Viaggi" active={location === "/travel-diary"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label="Chat" active={location === "/chat"} />
-        <MobileNavItem href="/coworking" icon={Briefcase} label="Spazi" active={location === "/coworking"} />
         <MobileNavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
       </nav>
     </div>

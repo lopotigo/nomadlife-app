@@ -44,6 +44,7 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
+  searchUsers(query: string): Promise<User[]>;
 
   // Posts
   getPosts(limit?: number): Promise<(Post & { user: User })[]>;
@@ -107,6 +108,7 @@ export interface IStorage {
   createTrip(trip: InsertTrip): Promise<Trip>;
   updateTrip(id: string, updates: Partial<Trip>): Promise<Trip | undefined>;
   deleteTrip(id: string): Promise<boolean>;
+  searchTripsByDestination(query: string): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
 
   // Trip Stops
   getTripStop(id: string): Promise<TripStop | undefined>;
@@ -177,6 +179,21 @@ export class DrizzleStorage implements IStorage {
   async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
     const result = await this.db.update(schema.users).set(updates).where(eq(schema.users.id, id)).returning();
     return result[0];
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    return await this.db
+      .select()
+      .from(schema.users)
+      .where(
+        or(
+          sql`LOWER(${schema.users.name}) LIKE ${searchTerm}`,
+          sql`LOWER(${schema.users.username}) LIKE ${searchTerm}`,
+          sql`LOWER(${schema.users.location}) LIKE ${searchTerm}`
+        )
+      )
+      .limit(20);
   }
 
   // Posts
@@ -594,6 +611,45 @@ export class DrizzleStorage implements IStorage {
   async deleteTrip(id: string): Promise<boolean> {
     const result = await this.db.delete(schema.trips).where(eq(schema.trips.id, id)).returning();
     return result.length > 0;
+  }
+
+  async searchTripsByDestination(query: string): Promise<(Trip & { user: User; stops: TripStop[] })[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    
+    const tripsWithStops = await this.db
+      .select()
+      .from(schema.trips)
+      .leftJoin(schema.users, eq(schema.trips.userId, schema.users.id))
+      .leftJoin(schema.tripStops, eq(schema.trips.id, schema.tripStops.tripId))
+      .where(
+        and(
+          eq(schema.trips.isPublic, true),
+          or(
+            sql`LOWER(${schema.trips.startLocation}) LIKE ${searchTerm}`,
+            sql`LOWER(${schema.trips.endLocation}) LIKE ${searchTerm}`,
+            sql`LOWER(${schema.tripStops.city}) LIKE ${searchTerm}`,
+            sql`LOWER(${schema.tripStops.country}) LIKE ${searchTerm}`
+          )
+        )
+      )
+      .orderBy(desc(schema.trips.createdAt));
+
+    const tripsMap = new Map<string, Trip & { user: User; stops: TripStop[] }>();
+    
+    for (const row of tripsWithStops) {
+      if (!tripsMap.has(row.trips.id)) {
+        tripsMap.set(row.trips.id, {
+          ...row.trips,
+          user: row.users!,
+          stops: [],
+        });
+      }
+      if (row.trip_stops) {
+        tripsMap.get(row.trips.id)!.stops.push(row.trip_stops);
+      }
+    }
+
+    return Array.from(tripsMap.values());
   }
 
   // Trip Stops

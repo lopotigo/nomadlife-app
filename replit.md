@@ -84,6 +84,8 @@ Preferred communication style: Simple, everyday language.
 - **View on Map**: Click any trip to see it highlighted on the main map
 - **Hotel Search from Stops**: Each stop has a "Cerca alloggio" button linking to hotel search for that city
 - **Comments System**: Full commenting on posts with create/delete functionality, real-time count updates
+- **Search System**: Search for nomads by name/location and trips by destination (city/country)
+- **Notifications UI**: Dropdown with unread count badge, mark as read, notifications list
 
 ## External Dependencies
 
