@@ -356,6 +356,23 @@ export default function TravelDiary() {
     }
   };
 
+  const handleClearAllStops = async () => {
+    if (!selectedTrip || selectedTrip.stops.length === 0) return;
+    
+    try {
+      for (const stop of selectedTrip.stops) {
+        await fetch(`/api/stops/${stop.id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+      }
+      fetchTripDetails(selectedTrip.id);
+      toast({ title: "Percorso azzerato", description: "Tutte le tappe sono state rimosse" });
+    } catch (error) {
+      toast({ title: "Errore", description: "Impossibile azzerare il percorso", variant: "destructive" });
+    }
+  };
+
   const handleAddExpense = async (e: React.FormEvent<HTMLFormElement>, stopId: string) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -953,6 +970,7 @@ export default function TravelDiary() {
           <TripPlannerMap
             trip={selectedTrip}
             onAddStopFromMap={handleAddStopFromMap}
+            onClearAllStops={handleClearAllStops}
             onClose={() => setShowPlannerMap(false)}
           />
         )}
@@ -1623,10 +1641,12 @@ function getTransportOptions(distance: number) {
 function TripPlannerMap({ 
   trip, 
   onAddStopFromMap,
+  onClearAllStops,
   onClose 
 }: { 
   trip: TripWithDetails;
   onAddStopFromMap: (lat: number, lng: number, city: string, country: string) => void;
+  onClearAllStops: () => void;
   onClose: () => void;
 }) {
   const [pendingLocation, setPendingLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -1753,6 +1773,17 @@ function TripPlannerMap({
             >
               <Leaf className="w-4 h-4 mr-2" />
               CO2 {totalCO2} kg
+            </Button>
+          )}
+          {stopsWithCoords.length > 0 && (
+            <Button
+              onClick={onClearAllStops}
+              variant="outline"
+              className="bg-slate-800/90 border-red-500/50 text-red-400 hover:bg-red-500/10"
+              data-testid="button-clear-route"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Azzera
             </Button>
           )}
           <Button
