@@ -1628,13 +1628,21 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return Math.round(R * c);
 }
 
+function formatDuration(hours: number): string {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}min`;
+}
+
 function getTransportOptions(distance: number) {
   return [
-    { mode: "walk" as TransportMode, label: "A piedi", icon: Footprints, available: distance <= 30, co2: 0, color: "#22c55e" },
-    { mode: "bike" as TransportMode, label: "Bici", icon: Bike, available: distance <= 100, co2: 0, color: "#10b981" },
-    { mode: "train" as TransportMode, label: "Treno", icon: Train, available: true, co2: Math.round(distance * CO2_PER_KM.train), color: "#3b82f6" },
-    { mode: "car" as TransportMode, label: "Auto", icon: Car, available: distance <= 2000, co2: Math.round(distance * CO2_PER_KM.car), color: "#f59e0b" },
-    { mode: "plane" as TransportMode, label: "Aereo", icon: Plane, available: distance > 200, co2: Math.round(distance * CO2_PER_KM.plane), color: "#6366f1" },
+    { mode: "walk" as TransportMode, label: "A piedi", icon: Footprints, available: distance <= 30, co2: 0, color: "#22c55e", duration: formatDuration(distance / SPEED_KMH.walk) },
+    { mode: "bike" as TransportMode, label: "Bici", icon: Bike, available: distance <= 100, co2: 0, color: "#10b981", duration: formatDuration(distance / SPEED_KMH.bike) },
+    { mode: "train" as TransportMode, label: "Treno", icon: Train, available: true, co2: Math.round(distance * CO2_PER_KM.train), color: "#3b82f6", duration: formatDuration(distance / SPEED_KMH.train) },
+    { mode: "car" as TransportMode, label: "Auto", icon: Car, available: distance <= 2000, co2: Math.round(distance * CO2_PER_KM.car), color: "#f59e0b", duration: formatDuration(distance / SPEED_KMH.car) },
+    { mode: "plane" as TransportMode, label: "Aereo", icon: Plane, available: distance > 200, co2: Math.round(distance * CO2_PER_KM.plane), color: "#6366f1", duration: formatDuration(distance / SPEED_KMH.plane + 2) },
   ].filter(o => o.available);
 }
 
@@ -1881,13 +1889,21 @@ function TripPlannerMap({
                     </div>
                     
                     {selectedOpt && (
-                      <div className="mt-2 flex items-center justify-between text-xs">
-                        <span className="text-slate-400">
-                          {selectedOpt.label}
-                        </span>
-                        <span className={selectedOpt.co2 === 0 ? "text-green-400" : "text-slate-300"}>
-                          {selectedOpt.co2 === 0 ? "Zero emissioni!" : `${selectedOpt.co2} kg CO2`}
-                        </span>
+                      <div className="mt-2 p-2 rounded-lg" style={{ backgroundColor: `${selectedOpt.color}20` }}>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium" style={{ color: selectedOpt.color }}>
+                            {selectedOpt.label}
+                          </span>
+                          <span className="text-white font-bold">
+                            {selectedOpt.duration}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mt-1">
+                          <span className="text-slate-400">Emissioni</span>
+                          <span className={selectedOpt.co2 === 0 ? "text-green-400 font-medium" : "text-slate-300"}>
+                            {selectedOpt.co2 === 0 ? "Zero emissioni!" : `${selectedOpt.co2} kg CO2`}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1920,12 +1936,25 @@ function TripPlannerMap({
         <MapClickHandler onMapClick={handleMapClick} />
         <UserLocationMarker position={userLocation} />
         
-        {polylinePositions.length > 1 && (
-          <Polyline
-            positions={polylinePositions}
-            pathOptions={{ color: "#10b981", weight: 4, opacity: 0.8, dashArray: "10, 5" }}
-          />
-        )}
+        {legs.map((leg, index) => {
+          const selectedOpt = leg.options.find(o => o.mode === leg.selected);
+          const color = selectedOpt?.color || "#10b981";
+          return (
+            <Polyline
+              key={leg.legId}
+              positions={[
+                [leg.from.latitude!, leg.from.longitude!],
+                [leg.to.latitude!, leg.to.longitude!]
+              ]}
+              pathOptions={{ 
+                color, 
+                weight: 5, 
+                opacity: 0.9,
+                dashArray: leg.selected === "plane" ? "10, 10" : undefined
+              }}
+            />
+          );
+        })}
         
         {stopsWithCoords.map((stop, index) => (
           <Marker
