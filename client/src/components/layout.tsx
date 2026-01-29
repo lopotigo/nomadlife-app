@@ -54,10 +54,11 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-2 z-50">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-1 z-50">
         <MobileNavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
         <MobileNavItem href="/search" icon={Search} label="Cerca" active={location === "/search"} />
         <MobileNavItem href="/travel-diary" icon={Plane} label="Viaggi" active={location === "/travel-diary"} />
+        <MobileNavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label="Chat" active={location === "/chat"} />
         <MobileNavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
       </nav>
