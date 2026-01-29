@@ -1985,7 +1985,7 @@ function TripPlannerMap({
       </MapContainer>
       
       {pendingLocation && (
-        <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-4">
+        <div className="absolute bottom-20 md:bottom-4 left-4 right-4 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-4">
           <h3 className="text-white font-semibold mb-3">Aggiungi questa tappa?</h3>
           {isLoading ? (
             <div className="flex items-center gap-2 text-slate-400">
