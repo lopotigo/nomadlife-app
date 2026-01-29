@@ -5,11 +5,11 @@ import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Leaf, Users, Compass, 
   Filter, X, Plane, MessageCircle, Calendar, Send, Image,
-  Video, Link as LinkIcon, Share2
+  Video, Link as LinkIcon, Share2, Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Post, User } from "@shared/schema";
+import type { Post, User, Comment } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ L.Icon.Default.mergeOptions({
 });
 
 type PostWithUser = Post & { user: User };
+type CommentWithUser = Comment & { user: User };
 
 interface TripStop {
   id: string;
@@ -637,64 +638,15 @@ export default function UnifiedMap() {
             <p className="text-muted-foreground text-center py-8">Nessun post ancora. Clicca sulla mappa per crearne uno!</p>
           ) : (
             posts.map((post) => (
-              <motion.div
+              <FeedPostCard
                 key={post.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-card rounded-xl p-4 border border-border shadow-sm"
-                data-testid={`post-card-${post.id}`}
-              >
-                <div className="flex items-start gap-3">
-                  <Link href={`/user/${post.userId}`}>
-                    <img
-                      src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
-                      alt={post.user.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  </Link>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/user/${post.userId}`}>
-                        <span className="font-semibold hover:underline">{post.user.name}</span>
-                      </Link>
-                      <span className="text-muted-foreground text-sm">@{post.user.username}</span>
-                    </div>
-                    {post.location && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                        <MapPin className="w-3 h-3" />
-                        <span>{post.location}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <p className="mt-3 text-sm">{post.content}</p>
-                
-                {post.imageUrl && (
-                  <img
-                    src={post.imageUrl}
-                    alt=""
-                    className="mt-3 rounded-xl w-full max-h-64 object-cover"
-                  />
-                )}
-                
-                <div className="flex items-center gap-4 mt-3 text-muted-foreground">
-                  <button 
-                    onClick={() => handleLike(post.id)}
-                    className={`flex items-center gap-1 text-sm transition-colors ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
-                    data-testid={`button-like-${post.id}`}
-                  >
-                    <Heart 
-                      className={`w-4 h-4 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} 
-                    />
-                    <span>{post.likes}</span>
-                  </button>
-                  <button className="flex items-center gap-1 text-sm hover:text-primary transition-colors">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>{post.commentsCount}</span>
-                  </button>
-                </div>
-              </motion.div>
+                post={post}
+                currentUser={user}
+                likedPosts={likedPosts}
+                pulsingPosts={pulsingPosts}
+                onLike={handleLike}
+                onShare={(p) => setShareModal({ open: true, type: "post", id: p.id, title: p.content.substring(0, 50) + "..." })}
+              />
             ))
           )}
         </div>
@@ -1113,6 +1065,229 @@ function CreatePostModal({
           </Button>
         </div>
       </motion.div>
+    </motion.div>
+  );
+}
+
+function FeedPostCard({ 
+  post, 
+  currentUser, 
+  likedPosts, 
+  pulsingPosts, 
+  onLike,
+  onShare 
+}: { 
+  post: PostWithUser; 
+  currentUser: User | null;
+  likedPosts: Set<string>;
+  pulsingPosts: Set<string>;
+  onLike: (id: string) => void;
+  onShare: (post: PostWithUser) => void;
+}) {
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<CommentWithUser[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+
+  const fetchComments = async () => {
+    setLoadingComments(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/comments`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleToggleComments = () => {
+    if (!showComments && comments.length === 0) {
+      fetchComments();
+    }
+    setShowComments(!showComments);
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || submitting) return;
+    
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: newComment.trim() })
+      });
+      if (res.ok) {
+        await fetchComments();
+        setNewComment("");
+        setCommentsCount(c => c + 1);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        setComments(comments.filter(c => c.id !== commentId));
+        setCommentsCount(c => Math.max(0, c - 1));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-xl p-4 border border-border shadow-sm"
+      data-testid={`post-card-${post.id}`}
+    >
+      <div className="flex items-start gap-3">
+        <Link href={`/user/${post.userId}`}>
+          <img
+            src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
+            alt={post.user.name}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        </Link>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <Link href={`/user/${post.userId}`}>
+              <span className="font-semibold hover:underline">{post.user.name}</span>
+            </Link>
+            <span className="text-muted-foreground text-sm">@{post.user.username}</span>
+          </div>
+          {post.location && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+              <MapPin className="w-3 h-3" />
+              <span>{post.location}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <p className="mt-3 text-sm">{post.content}</p>
+      
+      {post.imageUrl && (
+        <img
+          src={post.imageUrl}
+          alt=""
+          className="mt-3 rounded-xl w-full max-h-64 object-cover"
+        />
+      )}
+      
+      <div className="flex items-center gap-4 mt-3 text-muted-foreground">
+        <button 
+          onClick={() => onLike(post.id)}
+          className={`flex items-center gap-1 text-sm transition-colors ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
+          data-testid={`button-like-${post.id}`}
+        >
+          <Heart 
+            className={`w-4 h-4 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} 
+          />
+          <span>{post.likes}</span>
+        </button>
+        <button 
+          onClick={handleToggleComments}
+          className="flex items-center gap-1 text-sm hover:text-primary transition-colors"
+          data-testid={`button-comments-${post.id}`}
+        >
+          <MessageCircle className="w-4 h-4" />
+          <span>{commentsCount}</span>
+        </button>
+        <button 
+          onClick={() => onShare(post)}
+          className="ml-auto p-1 hover:text-primary transition-colors"
+        >
+          <Share2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mt-4 pt-4 border-t border-border overflow-hidden"
+          >
+            {currentUser && (
+              <form onSubmit={handleSubmitComment} className="flex gap-2 mb-4">
+                <input
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Scrivi un commento..."
+                  className="flex-1 bg-muted rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                  data-testid={`input-comment-${post.id}`}
+                />
+                <button 
+                  type="submit" 
+                  disabled={submitting || !newComment.trim()}
+                  className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center disabled:opacity-50"
+                  data-testid={`button-submit-comment-${post.id}`}
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {loadingComments ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : comments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-2">Nessun commento ancora</p>
+            ) : (
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="flex items-start gap-2" data-testid={`feed-comment-${comment.id}`}>
+                    <img
+                      src={comment.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`}
+                      className="w-7 h-7 rounded-full"
+                      alt={comment.user.name}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">
+                        <span className="font-semibold mr-1">{comment.user.username}</span>
+                        {comment.content}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(comment.createdAt).toLocaleDateString("it-IT")}
+                      </p>
+                    </div>
+                    {currentUser?.id === comment.userId && (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="text-red-500 hover:text-red-600 p-1"
+                        data-testid={`button-delete-feed-comment-${comment.id}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
