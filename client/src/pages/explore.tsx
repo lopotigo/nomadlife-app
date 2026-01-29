@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, CheckCircle2, Loader2, ArrowRight, Train, Plane } from "lucide-react";
+import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, CheckCircle2, Loader2, ArrowRight, Train, Plane, Car, Bike, Footprints } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Fix Leaflet default marker icon issue
@@ -198,23 +198,27 @@ const CITIES = [
   },
 ];
 
+type TransportMode = "car" | "walk" | "bike" | "train" | "plane";
+
+interface TransportOption {
+  mode: TransportMode;
+  label: string;
+  icon: any;
+  duration: string;
+  co2: number;
+  available: boolean;
+  color: string;
+}
+
 interface RouteResult {
   from: string;
   to: string;
   fromCity: typeof CITIES[0] | null;
   toCity: typeof CITIES[0] | null;
   distance: number;
-  ecoRoute: {
-    mode: string;
-    duration: string;
-    co2: number;
-    savings: number;
-  };
-  fastRoute: {
-    mode: string;
-    duration: string;
-    co2: number;
-  };
+  options: TransportOption[];
+  greenestOption: TransportMode;
+  fastestOption: TransportMode;
 }
 
 function findCity(name: string): typeof CITIES[0] | null {
@@ -237,6 +241,29 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return Math.round(R * c);
 }
 
+const CO2_PER_KM = {
+  walk: 0,
+  bike: 0,
+  train: 0.041,
+  car: 0.171,
+  plane: 0.255,
+};
+
+const SPEED_KMH = {
+  walk: 5,
+  bike: 20,
+  train: 80,
+  car: 90,
+  plane: 800,
+};
+
+function formatDuration(hours: number): string {
+  const h = Math.floor(hours);
+  const m = Math.floor((hours - h) * 60);
+  if (h === 0) return `${m}min`;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
 function calculateRoute(from: string, to: string): RouteResult | null {
   if (!from.trim() || !to.trim()) return null;
   
@@ -250,18 +277,61 @@ function calculateRoute(from: string, to: string): RouteResult | null {
     distance = Math.floor(Math.random() * 2000) + 500;
   }
   
-  const ecoRoute = {
-    mode: distance > 1000 ? "Train + Bus" : "Train",
-    duration: `${Math.floor(distance / 80)}h ${Math.floor((distance % 80) / 1.3)}m`,
-    co2: Math.floor(distance * 0.041),
-    savings: Math.floor(distance * 0.255 * 0.84),
-  };
+  const options: TransportOption[] = [
+    {
+      mode: "walk",
+      label: "A piedi",
+      icon: Footprints,
+      duration: formatDuration(distance / SPEED_KMH.walk),
+      co2: 0,
+      available: distance <= 30,
+      color: "#22c55e",
+    },
+    {
+      mode: "bike",
+      label: "Bicicletta",
+      icon: Bike,
+      duration: formatDuration(distance / SPEED_KMH.bike),
+      co2: 0,
+      available: distance <= 100,
+      color: "#10b981",
+    },
+    {
+      mode: "train",
+      label: "Treno",
+      icon: Train,
+      duration: formatDuration(distance / SPEED_KMH.train),
+      co2: Math.round(distance * CO2_PER_KM.train),
+      available: true,
+      color: "#3b82f6",
+    },
+    {
+      mode: "car",
+      label: "Auto",
+      icon: Car,
+      duration: formatDuration(distance / SPEED_KMH.car),
+      co2: Math.round(distance * CO2_PER_KM.car),
+      available: distance <= 2000,
+      color: "#f59e0b",
+    },
+    {
+      mode: "plane",
+      label: "Aereo",
+      icon: Plane,
+      duration: formatDuration(distance / SPEED_KMH.plane + 2),
+      co2: Math.round(distance * CO2_PER_KM.plane),
+      available: distance > 200,
+      color: "#6366f1",
+    },
+  ];
 
-  const fastRoute = {
-    mode: "Flight",
-    duration: `${Math.floor(distance / 800)}h ${Math.floor((distance % 800) / 13)}m`,
-    co2: Math.floor(distance * 0.255),
-  };
+  const availableOptions = options.filter(o => o.available);
+  const greenestOption = availableOptions.reduce((a, b) => a.co2 <= b.co2 ? a : b).mode;
+  const fastestOption = availableOptions.reduce((a, b) => {
+    const aHours = distance / SPEED_KMH[a.mode] + (a.mode === "plane" ? 2 : 0);
+    const bHours = distance / SPEED_KMH[b.mode] + (b.mode === "plane" ? 2 : 0);
+    return aHours <= bHours ? a : b;
+  }).mode;
 
   return {
     from,
@@ -269,8 +339,9 @@ function calculateRoute(from: string, to: string): RouteResult | null {
     fromCity,
     toCity,
     distance,
-    ecoRoute,
-    fastRoute,
+    options,
+    greenestOption,
+    fastestOption,
   };
 }
 
@@ -279,7 +350,8 @@ export default function Explore() {
   const [, setLocation] = useLocation();
   const [selectedCity, setSelectedCity] = useState<typeof CITIES[0] | null>(null);
   const [showRoute, setShowRoute] = useState(false);
-  const [transportMode, setTransportMode] = useState<"eco" | "fast">("eco");
+  const [selectedTransport, setSelectedTransport] = useState<TransportMode | null>(null);
+  const [showGreenRoute, setShowGreenRoute] = useState(false);
   const [fromCity, setFromCity] = useState("");
   const [toCity, setToCity] = useState("");
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
@@ -296,6 +368,8 @@ export default function Explore() {
     if (!fromCity.trim() || !toCity.trim()) return;
     
     setCalculating(true);
+    setSelectedTransport(null);
+    setShowGreenRoute(false);
     setTimeout(() => {
       const result = calculateRoute(fromCity, toCity);
       setRouteResult(result);
@@ -387,70 +461,114 @@ export default function Explore() {
                     className="space-y-3 pt-3 border-t border-border"
                   >
                     <div className="text-center">
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Route</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Percorso</p>
                       <p className="text-sm font-bold">{routeResult.from} → {routeResult.to}</p>
                       <p className="text-lg font-bold text-primary">{routeResult.distance} km</p>
                     </div>
 
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => setTransportMode("eco")}
-                        className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${transportMode === "eco" ? "bg-green-500 text-white shadow-lg shadow-green-500/20" : "bg-muted text-muted-foreground"}`}
-                        data-testid="button-eco-mode"
-                      >
-                        <Leaf className="w-3 h-3" />
-                        Eco-Route
-                      </button>
-                      <button 
-                        onClick={() => setTransportMode("fast")}
-                        className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all ${transportMode === "fast" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-muted text-muted-foreground"}`}
-                        data-testid="button-fast-mode"
-                      >
-                        <Plane className="w-3 h-3" />
-                        Fastest
-                      </button>
+                    <button 
+                      onClick={() => {
+                        setShowGreenRoute(!showGreenRoute);
+                        if (!showGreenRoute) {
+                          setSelectedTransport(routeResult.greenestOption);
+                        }
+                      }}
+                      className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${showGreenRoute ? "bg-green-500 text-white shadow-lg shadow-green-500/20" : "bg-green-100 text-green-700 hover:bg-green-200"}`}
+                      data-testid="button-green-route"
+                    >
+                      <Leaf className="w-4 h-4" />
+                      {showGreenRoute ? "Percorso Green Attivo" : "Attiva Percorso Green"}
+                    </button>
+
+                    <p className="text-[10px] text-muted-foreground text-center">Scegli modalità di trasporto:</p>
+                    
+                    <div className="flex gap-1 flex-wrap justify-center">
+                      {routeResult.options.filter(o => o.available).map((option) => {
+                        const Icon = option.icon;
+                        const isSelected = selectedTransport === option.mode;
+                        const isGreenest = option.mode === routeResult.greenestOption;
+                        const isFastest = option.mode === routeResult.fastestOption;
+                        return (
+                          <button 
+                            key={option.mode}
+                            onClick={() => {
+                              setSelectedTransport(option.mode);
+                              setShowGreenRoute(false);
+                            }}
+                            className={`relative flex flex-col items-center p-2 rounded-xl text-[10px] font-bold transition-all min-w-[52px] ${isSelected ? "text-white shadow-lg" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                            style={isSelected ? { backgroundColor: option.color } : {}}
+                            data-testid={`button-transport-${option.mode}`}
+                          >
+                            {isGreenest && (
+                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <Leaf className="w-2.5 h-2.5 text-white" />
+                              </span>
+                            )}
+                            {isFastest && !isGreenest && (
+                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-[8px] text-white">
+                                1°
+                              </span>
+                            )}
+                            <Icon className="w-4 h-4 mb-1" />
+                            <span>{option.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
 
-                    {transportMode === "eco" ? (
-                      <div className="p-3 bg-green-50 rounded-xl border border-green-200 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Train className="w-5 h-5 text-green-600" />
-                          <div>
-                            <p className="text-sm font-bold text-green-900">{routeResult.ecoRoute.mode}</p>
-                            <p className="text-xs text-green-700">{routeResult.ecoRoute.duration}</p>
+                    {(selectedTransport || showGreenRoute) && (() => {
+                      const activeMode = showGreenRoute ? routeResult.greenestOption : selectedTransport;
+                      const option = routeResult.options.find(o => o.mode === activeMode);
+                      if (!option) return null;
+                      const Icon = option.icon;
+                      const planeOption = routeResult.options.find(o => o.mode === "plane" && o.available);
+                      const co2Saved = planeOption && option.mode !== "plane" ? planeOption.co2 - option.co2 : 0;
+                      const isGreen = option.co2 === 0 || option.mode === routeResult.greenestOption;
+                      
+                      return (
+                        <motion.div
+                          key={activeMode}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`p-3 rounded-xl border space-y-2 ${isGreen ? "bg-green-50 border-green-200" : "bg-muted border-border"}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${option.color}20` }}>
+                              <Icon className="w-5 h-5" style={{ color: option.color }} />
+                            </div>
+                            <div className="flex-1">
+                              <p className={`text-sm font-bold ${isGreen ? "text-green-900" : ""}`}>{option.label}</p>
+                              <p className={`text-xs ${isGreen ? "text-green-700" : "text-muted-foreground"}`}>{option.duration}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-sm font-bold ${option.co2 === 0 ? "text-green-600" : isGreen ? "text-green-900" : ""}`}>
+                                {option.co2 === 0 ? "0" : option.co2} kg
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">CO2</p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <Leaf className="w-4 h-4 text-green-600" />
-                            <span className="text-sm font-bold text-green-900">{routeResult.ecoRoute.co2} kg CO2</span>
-                          </div>
-                          <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                            -{routeResult.ecoRoute.savings} kg saved!
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-green-700 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Reduces CO2 emissions by 84% vs flying
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="p-3 bg-muted rounded-xl space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Plane className="w-5 h-5 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm font-bold">{routeResult.fastRoute.mode}</p>
-                            <p className="text-xs text-muted-foreground">{routeResult.fastRoute.duration}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 text-orange-600">
-                          <span className="text-sm font-bold">{routeResult.fastRoute.co2} kg CO2</span>
-                        </div>
-                        <p className="text-[10px] text-orange-600">
-                          Consider the eco-route to reduce your carbon footprint!
-                        </p>
-                      </div>
-                    )}
+                          
+                          {co2Saved > 0 && planeOption && (
+                            <div className={`flex items-center justify-between text-xs ${isGreen ? "text-green-700" : "text-muted-foreground"}`}>
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Rispetto all'aereo risparmi:
+                              </span>
+                              <span className="font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                                -{co2Saved} kg CO2
+                              </span>
+                            </div>
+                          )}
+                          
+                          {option.co2 === 0 && (
+                            <p className="text-[10px] text-green-600 flex items-center gap-1">
+                              <Leaf className="w-3 h-3" />
+                              Zero emissioni! La scelta più ecologica
+                            </p>
+                          )}
+                        </motion.div>
+                      );
+                    })()}
                   </motion.div>
                 )}
               </motion.div>
@@ -520,17 +638,22 @@ export default function Explore() {
             ))}
 
             {/* Route Line */}
-            {routeResult && routeResult.fromCity && routeResult.toCity && (
-              <Polyline
-                positions={[
-                  [routeResult.fromCity.lat, routeResult.fromCity.lng],
-                  [routeResult.toCity.lat, routeResult.toCity.lng],
-                ]}
-                color={transportMode === "eco" ? "#22c55e" : "#6366f1"}
-                weight={4}
-                dashArray="10, 10"
-              />
-            )}
+            {routeResult && routeResult.fromCity && routeResult.toCity && (() => {
+              const activeMode = showGreenRoute ? routeResult.greenestOption : selectedTransport;
+              const option = routeResult.options.find(o => o.mode === activeMode);
+              const lineColor = option?.color || "#22c55e";
+              return (
+                <Polyline
+                  positions={[
+                    [routeResult.fromCity.lat, routeResult.fromCity.lng],
+                    [routeResult.toCity.lat, routeResult.toCity.lng],
+                  ]}
+                  color={lineColor}
+                  weight={4}
+                  dashArray={activeMode === "walk" || activeMode === "bike" ? "5, 10" : "10, 10"}
+                />
+              );
+            })()}
           </MapContainer>
         </div>
 
