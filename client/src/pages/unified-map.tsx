@@ -433,7 +433,7 @@ export default function UnifiedMap() {
                           <Heart className={`w-3 h-3 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500' : ''}`} /> 
                           {post.likes}
                         </button>
-                        <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
+                        <Link href={`/post/${post.id}`} className="flex items-center gap-1 hover:text-primary transition-colors"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</Link>
                       </div>
                       <button
                         onClick={() => setShareModal({ open: true, type: "post", id: post.id, title: post.content.substring(0, 50) + "..." })}
