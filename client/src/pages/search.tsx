@@ -1,148 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, User as UserIcon, Plane, MapPin, Calendar, Home, Coffee, Utensils, Bus, Users, X, Sparkles } from "lucide-react";
+import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import type { User, Trip, TripStop } from "@shared/schema";
+import type { User, Trip, TripStop, City } from "@shared/schema";
 
 type TripWithUser = Trip & { user: User; stops: TripStop[] };
-
-interface CityData {
-  name: string;
-  country: string;
-  emoji: string;
-  nomads: number;
-  costs: {
-    accommodation: { min: number; max: number };
-    food: { min: number; max: number };
-    coworking: { min: number; max: number };
-    transport: { min: number; max: number };
-  };
-  rating: number;
-  weather: string;
-  internet: string;
-}
-
-const CITIES_DATA: CityData[] = [
-  {
-    name: "Bali",
-    country: "Indonesia",
-    emoji: "🏝️",
-    nomads: 4250,
-    costs: { accommodation: { min: 25, max: 60 }, food: { min: 8, max: 20 }, coworking: { min: 8, max: 15 }, transport: { min: 3, max: 8 } },
-    rating: 4.8,
-    weather: "☀️ 28°C",
-    internet: "⚡ 25 Mbps"
-  },
-  {
-    name: "Lisbona",
-    country: "Portogallo",
-    emoji: "🇵🇹",
-    nomads: 3800,
-    costs: { accommodation: { min: 40, max: 90 }, food: { min: 12, max: 25 }, coworking: { min: 12, max: 25 }, transport: { min: 4, max: 8 } },
-    rating: 4.7,
-    weather: "🌤️ 22°C",
-    internet: "⚡ 100 Mbps"
-  },
-  {
-    name: "Bangkok",
-    country: "Thailandia",
-    emoji: "🇹🇭",
-    nomads: 5100,
-    costs: { accommodation: { min: 20, max: 50 }, food: { min: 5, max: 15 }, coworking: { min: 6, max: 12 }, transport: { min: 2, max: 5 } },
-    rating: 4.5,
-    weather: "🌡️ 32°C",
-    internet: "⚡ 35 Mbps"
-  },
-  {
-    name: "Barcellona",
-    country: "Spagna",
-    emoji: "🇪🇸",
-    nomads: 2900,
-    costs: { accommodation: { min: 45, max: 100 }, food: { min: 15, max: 30 }, coworking: { min: 15, max: 30 }, transport: { min: 5, max: 10 } },
-    rating: 4.6,
-    weather: "☀️ 24°C",
-    internet: "⚡ 150 Mbps"
-  },
-  {
-    name: "Città del Messico",
-    country: "Messico",
-    emoji: "🇲🇽",
-    nomads: 3200,
-    costs: { accommodation: { min: 25, max: 55 }, food: { min: 8, max: 18 }, coworking: { min: 8, max: 18 }, transport: { min: 2, max: 5 } },
-    rating: 4.4,
-    weather: "🌤️ 22°C",
-    internet: "⚡ 45 Mbps"
-  },
-  {
-    name: "Chiang Mai",
-    country: "Thailandia",
-    emoji: "🏯",
-    nomads: 3500,
-    costs: { accommodation: { min: 15, max: 40 }, food: { min: 4, max: 12 }, coworking: { min: 5, max: 10 }, transport: { min: 2, max: 4 } },
-    rating: 4.7,
-    weather: "🌤️ 30°C",
-    internet: "⚡ 30 Mbps"
-  },
-  {
-    name: "Berlino",
-    country: "Germania",
-    emoji: "🇩🇪",
-    nomads: 2100,
-    costs: { accommodation: { min: 50, max: 110 }, food: { min: 12, max: 25 }, coworking: { min: 15, max: 35 }, transport: { min: 5, max: 10 } },
-    rating: 4.5,
-    weather: "🌧️ 15°C",
-    internet: "⚡ 80 Mbps"
-  },
-  {
-    name: "Medellin",
-    country: "Colombia",
-    emoji: "🇨🇴",
-    nomads: 2800,
-    costs: { accommodation: { min: 20, max: 50 }, food: { min: 6, max: 15 }, coworking: { min: 8, max: 15 }, transport: { min: 1, max: 3 } },
-    rating: 4.6,
-    weather: "🌤️ 24°C",
-    internet: "⚡ 40 Mbps"
-  },
-  {
-    name: "Milano",
-    country: "Italia",
-    emoji: "🇮🇹",
-    nomads: 1500,
-    costs: { accommodation: { min: 55, max: 120 }, food: { min: 15, max: 35 }, coworking: { min: 18, max: 40 }, transport: { min: 5, max: 10 } },
-    rating: 4.3,
-    weather: "🌤️ 20°C",
-    internet: "⚡ 100 Mbps"
-  },
-  {
-    name: "Ho Chi Minh",
-    country: "Vietnam",
-    emoji: "🇻🇳",
-    nomads: 2400,
-    costs: { accommodation: { min: 18, max: 45 }, food: { min: 4, max: 12 }, coworking: { min: 5, max: 12 }, transport: { min: 2, max: 4 } },
-    rating: 4.4,
-    weather: "🌡️ 30°C",
-    internet: "⚡ 35 Mbps"
-  },
-];
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [trips, setTrips] = useState<TripWithUser[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("cities");
-  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+
+  useEffect(() => {
+    fetch("/api/cities")
+      .then(res => res.json())
+      .then(data => setCities(data))
+      .catch(console.error);
+  }, []);
 
   const filteredCities = query.length >= 2 
-    ? CITIES_DATA.filter(c => 
+    ? cities.filter(c => 
         c.name.toLowerCase().includes(query.toLowerCase()) || 
         c.country.toLowerCase().includes(query.toLowerCase())
       )
-    : CITIES_DATA;
+    : cities;
 
   const handleSearch = async () => {
     if (query.length < 2) return;
@@ -165,10 +54,9 @@ export default function SearchPage() {
     if (e.key === "Enter") handleSearch();
   };
 
-  const getTotalCost = (city: CityData) => {
-    const { accommodation, food, coworking, transport } = city.costs;
-    const min = accommodation.min + food.min + coworking.min + transport.min;
-    const max = accommodation.max + food.max + coworking.max + transport.max;
+  const getTotalCost = (city: City) => {
+    const min = (city.costAccommodationMin || 0) + (city.costFoodMin || 0) + (city.costCoworkingMin || 0) + (city.costTransportMin || 0);
+    const max = (city.costAccommodationMax || 0) + (city.costFoodMax || 0) + (city.costCoworkingMax || 0) + (city.costTransportMax || 0);
     return { min, max };
   };
 
@@ -213,19 +101,19 @@ export default function SearchPage() {
                 const total = getTotalCost(city);
                 return (
                   <motion.div
-                    key={city.name}
+                    key={city.id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCity(city)}
                     className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-4 cursor-pointer border-2 border-transparent hover:border-primary/30 transition-all"
                     data-testid={`city-card-${city.name}`}
                   >
-                    <div className="text-3xl mb-2">{city.emoji}</div>
+                    <div className="text-3xl mb-2">{city.emoji || "🌍"}</div>
                     <h3 className="font-bold text-lg">{city.name}</h3>
                     <p className="text-sm text-muted-foreground">{city.country}</p>
                     <div className="mt-3 flex items-center gap-2">
                       <Users className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">{city.nomads.toLocaleString()} nomadi</span>
+                      <span className="text-sm font-medium">{(city.nomadsCount || 0).toLocaleString()} nomadi</span>
                     </div>
                     <div className="mt-1 text-sm text-muted-foreground">
                       €{total.min}-{total.max}/giorno
@@ -351,7 +239,7 @@ export default function SearchPage() {
               data-testid="city-popup"
             >
               {/* Decorative elements */}
-              <div className="absolute -top-6 -right-6 text-8xl opacity-20">{selectedCity.emoji}</div>
+              <div className="absolute -top-6 -right-6 text-8xl opacity-20">{selectedCity.emoji || "🌍"}</div>
               <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary/10 rounded-full blur-xl" />
               
               {/* Close button */}
@@ -370,7 +258,7 @@ export default function SearchPage() {
                   animate={{ rotate: [0, -10, 10, -10, 0] }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  {selectedCity.emoji}
+                  {selectedCity.emoji || "🌍"}
                 </motion.div>
                 <h2 className="text-2xl font-black text-slate-800 dark:text-white">{selectedCity.name}</h2>
                 <p className="text-slate-600 dark:text-slate-400 font-medium">{selectedCity.country}</p>
@@ -387,7 +275,7 @@ export default function SearchPage() {
                   <Users className="w-6 h-6" />
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <div className="text-3xl font-black">{selectedCity.nomads.toLocaleString()}</div>
+                <div className="text-3xl font-black">{(selectedCity.nomadsCount || 0).toLocaleString()}</div>
                 <div className="text-sm opacity-90">nomadi digitali qui!</div>
               </motion.div>
 
@@ -399,8 +287,8 @@ export default function SearchPage() {
                   transition={{ delay: 0.2 }}
                   className="flex-1 bg-white dark:bg-slate-700 rounded-xl p-3 text-center shadow-md"
                 >
-                  <div className="text-2xl">{selectedCity.weather.split(' ')[0]}</div>
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.weather.split(' ')[1]}</div>
+                  <div className="text-2xl">{selectedCity.weather?.split(' ')[0] || "🌤️"}</div>
+                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.weather?.split(' ')[1] || "N/A"}</div>
                 </motion.div>
                 <motion.div 
                   initial={{ y: 20, opacity: 0 }}
@@ -408,8 +296,8 @@ export default function SearchPage() {
                   transition={{ delay: 0.25 }}
                   className="flex-1 bg-white dark:bg-slate-700 rounded-xl p-3 text-center shadow-md"
                 >
-                  <div className="text-2xl">{selectedCity.internet.split(' ')[0]}</div>
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.internet.split(' ')[1]}</div>
+                  <div className="text-2xl">⚡</div>
+                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.internetSpeed || 50} Mbps</div>
                 </motion.div>
                 <motion.div 
                   initial={{ y: 20, opacity: 0 }}
@@ -418,7 +306,7 @@ export default function SearchPage() {
                   className="flex-1 bg-white dark:bg-slate-700 rounded-xl p-3 text-center shadow-md"
                 >
                   <div className="text-2xl">⭐</div>
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.rating}</div>
+                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.rating?.toFixed(1) || "4.0"}</div>
                 </motion.div>
               </div>
 
@@ -427,10 +315,10 @@ export default function SearchPage() {
                 <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide">Costo giornaliero</h3>
                 
                 {[
-                  { icon: Home, label: "Alloggio", costs: selectedCity.costs.accommodation, color: "from-blue-400 to-blue-500" },
-                  { icon: Utensils, label: "Cibo", costs: selectedCity.costs.food, color: "from-orange-400 to-red-500" },
-                  { icon: Coffee, label: "Coworking", costs: selectedCity.costs.coworking, color: "from-amber-400 to-yellow-500" },
-                  { icon: Bus, label: "Trasporti", costs: selectedCity.costs.transport, color: "from-green-400 to-emerald-500" },
+                  { icon: Home, label: "Alloggio", min: selectedCity.costAccommodationMin, max: selectedCity.costAccommodationMax, color: "from-blue-400 to-blue-500" },
+                  { icon: Utensils, label: "Cibo", min: selectedCity.costFoodMin, max: selectedCity.costFoodMax, color: "from-orange-400 to-red-500" },
+                  { icon: Coffee, label: "Coworking", min: selectedCity.costCoworkingMin, max: selectedCity.costCoworkingMax, color: "from-amber-400 to-yellow-500" },
+                  { icon: Bus, label: "Trasporti", min: selectedCity.costTransportMin, max: selectedCity.costTransportMax, color: "from-green-400 to-emerald-500" },
                 ].map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -446,7 +334,7 @@ export default function SearchPage() {
                       <div className="font-medium text-slate-700 dark:text-slate-300">{item.label}</div>
                     </div>
                     <div className="text-right">
-                      <span className="font-bold text-slate-800 dark:text-white">€{item.costs.min}-{item.costs.max}</span>
+                      <span className="font-bold text-slate-800 dark:text-white">€{item.min || 0}-{item.max || 0}</span>
                     </div>
                   </motion.div>
                 ))}

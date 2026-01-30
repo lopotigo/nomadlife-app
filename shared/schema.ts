@@ -327,3 +327,67 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 });
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+// Cities table - Cost of living data
+export const cities = pgTable("cities", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  country: text("country").notNull(),
+  teleportSlug: text("teleport_slug"), // es. "bali" per API Teleport
+  emoji: text("emoji").default("🌍"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  // Costi giornalieri (in EUR)
+  costAccommodationMin: integer("cost_accommodation_min").default(30),
+  costAccommodationMax: integer("cost_accommodation_max").default(80),
+  costFoodMin: integer("cost_food_min").default(10),
+  costFoodMax: integer("cost_food_max").default(25),
+  costCoworkingMin: integer("cost_coworking_min").default(8),
+  costCoworkingMax: integer("cost_coworking_max").default(20),
+  costTransportMin: integer("cost_transport_min").default(3),
+  costTransportMax: integer("cost_transport_max").default(10),
+  // Dati community
+  nomadsCount: integer("nomads_count").default(0),
+  rating: doublePrecision("rating").default(4.0),
+  internetSpeed: integer("internet_speed").default(50), // Mbps
+  weather: text("weather"), // es. "☀️ 28°C"
+  // Statistiche feedback
+  feedbackCount: integer("feedback_count").default(0),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCitySchema = createInsertSchema(cities).omit({
+  id: true,
+  feedbackCount: true,
+  lastUpdated: true,
+  createdAt: true,
+});
+export type InsertCity = z.infer<typeof insertCitySchema>;
+export type City = typeof cities.$inferSelect;
+
+// City Feedback - Aggiorna costi dalle esperienze reali
+export const cityFeedback = pgTable("city_feedback", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cityId: varchar("city_id").notNull().references(() => cities.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // Costi giornalieri riportati
+  accommodationCost: integer("accommodation_cost"), // per notte
+  foodCost: integer("food_cost"), // per giorno
+  coworkingCost: integer("coworking_cost"), // per giorno
+  transportCost: integer("transport_cost"), // per giorno
+  // Valutazioni
+  internetRating: integer("internet_rating"), // 1-5
+  safetyRating: integer("safety_rating"), // 1-5
+  overallRating: integer("overall_rating"), // 1-5
+  review: text("review"),
+  stayDuration: integer("stay_duration"), // giorni
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCityFeedbackSchema = createInsertSchema(cityFeedback).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCityFeedback = z.infer<typeof insertCityFeedbackSchema>;
+export type CityFeedback = typeof cityFeedback.$inferSelect;

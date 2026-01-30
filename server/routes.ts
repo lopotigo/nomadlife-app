@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema } from "@shared/schema";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { createRepository, pushFile, getGitHubUser } from "./github";
@@ -1084,6 +1084,82 @@ export async function registerRoutes(
         repository: repo.html_url,
         message: "Repository created at " + repo.html_url
       });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ============ CITIES API ============
+  
+  // Get all cities with cost of living data
+  app.get("/api/cities", async (req, res) => {
+    try {
+      const cities = await storage.getAllCities();
+      res.send(cities);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Search cities by name or country
+  app.get("/api/cities/search", async (req, res) => {
+    try {
+      const query = (req.query.q as string) || "";
+      if (query.length < 2) {
+        return res.send([]);
+      }
+      const cities = await storage.searchCities(query);
+      res.send(cities);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Get single city by ID
+  app.get("/api/cities/:id", async (req, res) => {
+    try {
+      const city = await storage.getCity(req.params.id);
+      if (!city) {
+        return res.status(404).send({ error: "City not found" });
+      }
+      res.send(city);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Submit feedback for a city (updates cost averages)
+  app.post("/api/cities/:id/feedback", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      const cityId = req.params.id;
+      
+      const parsed = insertCityFeedbackSchema.safeParse({
+        ...req.body,
+        cityId,
+        userId,
+      });
+      
+      if (!parsed.success) {
+        return res.status(400).send({ error: parsed.error.message });
+      }
+      
+      const feedback = await storage.createCityFeedback(parsed.data);
+      
+      // Update city costs based on new feedback
+      await storage.updateCityCostsFromFeedback(cityId);
+      
+      res.send(feedback);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Get feedback for a city
+  app.get("/api/cities/:id/feedback", async (req, res) => {
+    try {
+      const feedback = await storage.getCityFeedback(req.params.id);
+      res.send(feedback);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

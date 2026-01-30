@@ -34,6 +34,10 @@ import type {
   InsertFollower,
   Notification,
   InsertNotification,
+  City,
+  InsertCity,
+  CityFeedback,
+  InsertCityFeedback,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -139,6 +143,18 @@ export interface IStorage {
   markNotificationAsRead(id: string): Promise<Notification | undefined>;
   markAllNotificationsAsRead(userId: string): Promise<void>;
   getUnreadNotificationsCount(userId: string): Promise<number>;
+
+  // Cities
+  getAllCities(): Promise<City[]>;
+  getCity(id: string): Promise<City | undefined>;
+  searchCities(query: string): Promise<City[]>;
+  createCity(city: InsertCity): Promise<City>;
+  updateCity(id: string, updates: Partial<City>): Promise<City | undefined>;
+  
+  // City Feedback
+  getCityFeedback(cityId: string): Promise<CityFeedback[]>;
+  createCityFeedback(feedback: InsertCityFeedback): Promise<CityFeedback>;
+  updateCityCostsFromFeedback(cityId: string): Promise<void>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -897,6 +913,93 @@ export class DrizzleStorage implements IStorage {
       bookingsByStatus: bookingsByStatus.map(r => ({ status: r.status, count: Number(r.count) })),
       recentActivity,
     };
+  }
+
+  // Cities
+  async getAllCities(): Promise<City[]> {
+    return await this.db.select().from(schema.cities).orderBy(desc(schema.cities.nomadsCount));
+  }
+
+  async getCity(id: string): Promise<City | undefined> {
+    const result = await this.db.select().from(schema.cities).where(eq(schema.cities.id, id));
+    return result[0];
+  }
+
+  async searchCities(query: string): Promise<City[]> {
+    const lowerQuery = `%${query.toLowerCase()}%`;
+    return await this.db.select().from(schema.cities).where(
+      or(
+        sql`lower(${schema.cities.name}) like ${lowerQuery}`,
+        sql`lower(${schema.cities.country}) like ${lowerQuery}`
+      )
+    );
+  }
+
+  async createCity(city: InsertCity): Promise<City> {
+    const result = await this.db.insert(schema.cities).values(city).returning();
+    return result[0];
+  }
+
+  async updateCity(id: string, updates: Partial<City>): Promise<City | undefined> {
+    const result = await this.db.update(schema.cities).set(updates).where(eq(schema.cities.id, id)).returning();
+    return result[0];
+  }
+
+  // City Feedback
+  async getCityFeedback(cityId: string): Promise<CityFeedback[]> {
+    return await this.db.select().from(schema.cityFeedback)
+      .where(eq(schema.cityFeedback.cityId, cityId))
+      .orderBy(desc(schema.cityFeedback.createdAt));
+  }
+
+  async createCityFeedback(feedback: InsertCityFeedback): Promise<CityFeedback> {
+    const result = await this.db.insert(schema.cityFeedback).values(feedback).returning();
+    
+    // Increment feedback count
+    await this.db.update(schema.cities)
+      .set({ feedbackCount: sql`${schema.cities.feedbackCount} + 1` })
+      .where(eq(schema.cities.id, feedback.cityId));
+    
+    return result[0];
+  }
+
+  async updateCityCostsFromFeedback(cityId: string): Promise<void> {
+    // Get all feedback for this city
+    const feedback = await this.db.select().from(schema.cityFeedback)
+      .where(eq(schema.cityFeedback.cityId, cityId));
+    
+    if (feedback.length === 0) return;
+
+    // Calculate averages for each cost type
+    const avgAccommodation = feedback.reduce((sum, f) => sum + (f.accommodationCost || 0), 0) / feedback.filter(f => f.accommodationCost).length || 0;
+    const avgFood = feedback.reduce((sum, f) => sum + (f.foodCost || 0), 0) / feedback.filter(f => f.foodCost).length || 0;
+    const avgCoworking = feedback.reduce((sum, f) => sum + (f.coworkingCost || 0), 0) / feedback.filter(f => f.coworkingCost).length || 0;
+    const avgTransport = feedback.reduce((sum, f) => sum + (f.transportCost || 0), 0) / feedback.filter(f => f.transportCost).length || 0;
+    const avgRating = feedback.reduce((sum, f) => sum + (f.overallRating || 0), 0) / feedback.filter(f => f.overallRating).length || 0;
+
+    // Update city with averaged costs (create ranges around average)
+    if (avgAccommodation > 0 || avgFood > 0 || avgCoworking > 0 || avgTransport > 0) {
+      await this.db.update(schema.cities).set({
+        ...(avgAccommodation > 0 && { 
+          costAccommodationMin: Math.round(avgAccommodation * 0.7),
+          costAccommodationMax: Math.round(avgAccommodation * 1.3)
+        }),
+        ...(avgFood > 0 && { 
+          costFoodMin: Math.round(avgFood * 0.7),
+          costFoodMax: Math.round(avgFood * 1.3)
+        }),
+        ...(avgCoworking > 0 && { 
+          costCoworkingMin: Math.round(avgCoworking * 0.7),
+          costCoworkingMax: Math.round(avgCoworking * 1.3)
+        }),
+        ...(avgTransport > 0 && { 
+          costTransportMin: Math.round(avgTransport * 0.7),
+          costTransportMax: Math.round(avgTransport * 1.3)
+        }),
+        ...(avgRating > 0 && { rating: avgRating }),
+        lastUpdated: new Date(),
+      }).where(eq(schema.cities.id, cityId));
+    }
   }
 }
 
