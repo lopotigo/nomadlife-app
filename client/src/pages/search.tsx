@@ -138,8 +138,8 @@ export default function SearchPage() {
                         <div className="mt-1 text-sm text-muted-foreground">
                           €{total.min}-{total.max}/giorno
                         </div>
-                        {(city as any).fromTeleport && (
-                          <div className="mt-2 text-xs text-primary/70">🌐 da Teleport</div>
+                        {(city as any).fromAPI && (
+                          <div className="mt-2 text-xs text-primary/70">🌐 dati stimati</div>
                         )}
                       </motion.div>
                     );

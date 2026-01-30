@@ -1101,7 +1101,7 @@ export async function registerRoutes(
     }
   });
 
-  // Search cities by name or country - combines local DB + Teleport API
+  // Search cities by name or country - combines local DB + OpenStreetMap
   app.get("/api/cities/search", async (req, res) => {
     try {
       const query = (req.query.q as string) || "";
@@ -1112,89 +1112,85 @@ export async function registerRoutes(
       // Search local database first
       const localCities = await storage.searchCities(query);
       
-      // Also search Teleport API for cities not in our database
-      let teleportCities: any[] = [];
+      // Also search OpenStreetMap Nominatim for cities not in our database
+      let externalCities: any[] = [];
       try {
-        const teleportRes = await fetch(`https://api.teleport.org/api/cities/?search=${encodeURIComponent(query)}&limit=10`);
-        if (teleportRes.ok) {
-          const data = await teleportRes.json();
-          const results = data._embedded?.["city:search-results"] || [];
+        const nominatimRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`,
+          { headers: { "User-Agent": "NomadLife/1.0" } }
+        );
+        
+        if (nominatimRes.ok) {
+          const results = await nominatimRes.json();
           
-          // Get details for each city
-          for (const result of results.slice(0, 5)) {
-            try {
-              const cityUrl = result._links?.["city:item"]?.href;
-              if (!cityUrl) continue;
-              
-              const cityRes = await fetch(cityUrl);
-              if (!cityRes.ok) continue;
-              const cityData = await cityRes.json();
-              
-              const fullName = cityData.full_name || result.matching_full_name || "";
-              const parts = fullName.split(", ");
-              const cityName = parts[0] || cityData.name;
-              const country = parts[parts.length - 1] || "";
-              
-              // Skip if already in local results
-              if (localCities.some(c => c.name.toLowerCase() === cityName.toLowerCase())) {
-                continue;
-              }
-              
-              // Get urban area for cost data if available
-              let costs = { accommodation: 40, food: 15, coworking: 12, transport: 5 };
-              const urbanAreaLink = cityData._links?.["city:urban_area"]?.href;
-              if (urbanAreaLink) {
-                try {
-                  const urbanRes = await fetch(urbanAreaLink + "details/");
-                  if (urbanRes.ok) {
-                    const urbanData = await urbanRes.json();
-                    const categories = urbanData.categories || [];
-                    const costCategory = categories.find((c: any) => c.id === "COST-OF-LIVING");
-                    if (costCategory) {
-                      const rentData = costCategory.data?.find((d: any) => d.id === "COST-APARTMENT-RENT-MEDIUM");
-                      if (rentData) {
-                        costs.accommodation = Math.round(rentData.currency_dollar_value / 30) || 40;
-                      }
-                      const mealData = costCategory.data?.find((d: any) => d.id === "COST-RESTAURANT-MEAL");
-                      if (mealData) {
-                        costs.food = Math.round(mealData.currency_dollar_value * 2) || 15;
-                      }
-                    }
-                  }
-                } catch {}
-              }
-              
-              teleportCities.push({
-                id: `teleport-${cityData.geoname_id}`,
-                name: cityName,
-                country: country,
-                emoji: "🌍",
-                latitude: cityData.location?.latlon?.latitude,
-                longitude: cityData.location?.latlon?.longitude,
-                costAccommodationMin: Math.round(costs.accommodation * 0.7),
-                costAccommodationMax: Math.round(costs.accommodation * 1.3),
-                costFoodMin: Math.round(costs.food * 0.7),
-                costFoodMax: Math.round(costs.food * 1.3),
-                costCoworkingMin: Math.round(costs.coworking * 0.7),
-                costCoworkingMax: Math.round(costs.coworking * 1.3),
-                costTransportMin: Math.round(costs.transport * 0.7),
-                costTransportMax: Math.round(costs.transport * 1.3),
-                nomadsCount: 0,
-                rating: 4.0,
-                internetSpeed: 50,
-                weather: null,
-                feedbackCount: 0,
-                fromTeleport: true,
-              });
-            } catch {}
+          for (const result of results) {
+            if (result.type !== "city" && result.type !== "administrative" && result.addresstype !== "city") continue;
+            
+            const cityName = result.name || result.address?.city || "";
+            const country = result.address?.country || "";
+            
+            // Skip if already in local results
+            if (localCities.some(c => c.name.toLowerCase() === cityName.toLowerCase())) {
+              continue;
+            }
+            
+            // Skip duplicates in external results
+            if (externalCities.some(c => c.name.toLowerCase() === cityName.toLowerCase())) {
+              continue;
+            }
+            
+            // Estimate costs based on region (simplified)
+            let baseCost = 40; // Default daily cost
+            const lat = parseFloat(result.lat);
+            
+            // Higher costs for Western Europe, US, Australia
+            if (country.includes("United States") || country.includes("Australia") || 
+                country.includes("United Kingdom") || country.includes("Switzerland") ||
+                country.includes("Norway") || country.includes("Denmark")) {
+              baseCost = 80;
+            } else if (country.includes("Germany") || country.includes("France") || 
+                       country.includes("Italy") || country.includes("Spain") ||
+                       country.includes("Japan") || country.includes("Singapore")) {
+              baseCost = 55;
+            } else if (country.includes("Thailand") || country.includes("Vietnam") ||
+                       country.includes("Indonesia") || country.includes("Philippines") ||
+                       country.includes("Mexico") || country.includes("Colombia")) {
+              baseCost = 25;
+            } else if (country.includes("Russia") || country.includes("Poland") ||
+                       country.includes("Portugal") || country.includes("Greece")) {
+              baseCost = 40;
+            }
+            
+            externalCities.push({
+              id: `osm-${result.place_id}`,
+              name: cityName,
+              country: country,
+              emoji: "🌍",
+              latitude: parseFloat(result.lat),
+              longitude: parseFloat(result.lon),
+              costAccommodationMin: Math.round(baseCost * 0.8),
+              costAccommodationMax: Math.round(baseCost * 1.5),
+              costFoodMin: Math.round(baseCost * 0.25),
+              costFoodMax: Math.round(baseCost * 0.5),
+              costCoworkingMin: Math.round(baseCost * 0.2),
+              costCoworkingMax: Math.round(baseCost * 0.4),
+              costTransportMin: Math.round(baseCost * 0.08),
+              costTransportMax: Math.round(baseCost * 0.15),
+              nomadsCount: 0,
+              rating: 4.0,
+              internetSpeed: 50,
+              weather: null,
+              feedbackCount: 0,
+              fromAPI: true,
+            });
           }
         }
-      } catch (teleportError) {
-        console.error("Teleport API error:", teleportError);
+      } catch (apiError) {
+        console.error("Nominatim API error:", apiError);
       }
       
-      // Combine results: local first, then teleport
-      res.send([...localCities, ...teleportCities]);
+      // Combine results: local first, then external
+      res.send([...localCities, ...externalCities]);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }
