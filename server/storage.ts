@@ -147,6 +147,7 @@ export interface IStorage {
   // Cities
   getAllCities(): Promise<City[]>;
   getCity(id: string): Promise<City | undefined>;
+  findCityByName(name: string): Promise<City | undefined>;
   searchCities(query: string): Promise<City[]>;
   createCity(city: InsertCity): Promise<City>;
   updateCity(id: string, updates: Partial<City>): Promise<City | undefined>;
@@ -922,6 +923,13 @@ export class DrizzleStorage implements IStorage {
 
   async getCity(id: string): Promise<City | undefined> {
     const result = await this.db.select().from(schema.cities).where(eq(schema.cities.id, id));
+    return result[0];
+  }
+
+  async findCityByName(name: string): Promise<City | undefined> {
+    const result = await this.db.select().from(schema.cities).where(
+      sql`lower(${schema.cities.name}) = ${name.toLowerCase()}`
+    );
     return result[0];
   }
 

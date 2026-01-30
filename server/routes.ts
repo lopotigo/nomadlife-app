@@ -810,6 +810,46 @@ export async function registerRoutes(
         stopId: req.params.stopId,
       });
       const expense = await storage.createTripExpense(data);
+      
+      // Update city costs with this real expense data
+      if (stop.city && expense.cost) {
+        try {
+          // Find or create the city
+          let city = await storage.findCityByName(stop.city);
+          if (!city) {
+            // Create city if it doesn't exist
+            city = await storage.createCity({
+              name: stop.city,
+              country: stop.country,
+              latitude: stop.latitude || undefined,
+              longitude: stop.longitude || undefined,
+              emoji: "🌍",
+            });
+          }
+          
+          // Create feedback entry based on expense type
+          const costInEuros = Math.round(expense.cost / 100); // Convert cents to euros
+          const feedbackData: any = {
+            cityId: city.id,
+            userId: (req.user as User).id,
+          };
+          
+          // Map expense type to feedback field
+          if (expense.type === "hotel") feedbackData.accommodationCost = costInEuros;
+          else if (expense.type === "food") feedbackData.foodCost = costInEuros;
+          else if (expense.type === "coworking") feedbackData.coworkingCost = costInEuros;
+          else if (expense.type === "transport") feedbackData.transportCost = costInEuros;
+          
+          if (Object.keys(feedbackData).length > 2) {
+            await storage.createCityFeedback(feedbackData);
+            await storage.updateCityCostsFromFeedback(city.id);
+          }
+        } catch (cityError) {
+          console.error("Error updating city costs:", cityError);
+          // Don't fail the expense creation
+        }
+      }
+      
       res.status(201).send(expense);
     } catch (error: any) {
       res.status(400).send({ error: error.message });
