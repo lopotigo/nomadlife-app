@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal } from "@/components/share-qr-modal";
@@ -140,6 +140,15 @@ export default function Profile() {
               )}
             </button>
           </motion.div>
+          
+          <button
+            onClick={() => setLocation("/avatar-builder")}
+            className="mt-3 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+            data-testid="button-create-avatar"
+          >
+            <Sparkles className="w-4 h-4" />
+            Crea Avatar
+          </button>
           
           <div className="text-center mt-4 space-y-1">
             <h1 className="text-3xl font-display font-bold tracking-tight" data-testid="text-profile-name">{user.name}</h1>

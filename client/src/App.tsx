@@ -22,6 +22,7 @@ import UnifiedMap from "@/pages/unified-map";
 import PostDetail from "@/pages/post-detail";
 import TripDetail from "@/pages/trip-detail";
 import SearchPage from "@/pages/search";
+import AvatarBuilder from "@/pages/avatar-builder";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/design-preview" component={DesignPreview} />
       <Route path="/mobile-preview" component={MobilePreview} />
       <Route path="/travel-diary" component={TravelDiary} />
+      <Route path="/avatar-builder" component={AvatarBuilder} />
       <Route component={NotFound} />
     </Switch>
   );
