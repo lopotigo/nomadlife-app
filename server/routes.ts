@@ -1101,15 +1101,100 @@ export async function registerRoutes(
     }
   });
 
-  // Search cities by name or country
+  // Search cities by name or country - combines local DB + Teleport API
   app.get("/api/cities/search", async (req, res) => {
     try {
       const query = (req.query.q as string) || "";
       if (query.length < 2) {
         return res.send([]);
       }
-      const cities = await storage.searchCities(query);
-      res.send(cities);
+      
+      // Search local database first
+      const localCities = await storage.searchCities(query);
+      
+      // Also search Teleport API for cities not in our database
+      let teleportCities: any[] = [];
+      try {
+        const teleportRes = await fetch(`https://api.teleport.org/api/cities/?search=${encodeURIComponent(query)}&limit=10`);
+        if (teleportRes.ok) {
+          const data = await teleportRes.json();
+          const results = data._embedded?.["city:search-results"] || [];
+          
+          // Get details for each city
+          for (const result of results.slice(0, 5)) {
+            try {
+              const cityUrl = result._links?.["city:item"]?.href;
+              if (!cityUrl) continue;
+              
+              const cityRes = await fetch(cityUrl);
+              if (!cityRes.ok) continue;
+              const cityData = await cityRes.json();
+              
+              const fullName = cityData.full_name || result.matching_full_name || "";
+              const parts = fullName.split(", ");
+              const cityName = parts[0] || cityData.name;
+              const country = parts[parts.length - 1] || "";
+              
+              // Skip if already in local results
+              if (localCities.some(c => c.name.toLowerCase() === cityName.toLowerCase())) {
+                continue;
+              }
+              
+              // Get urban area for cost data if available
+              let costs = { accommodation: 40, food: 15, coworking: 12, transport: 5 };
+              const urbanAreaLink = cityData._links?.["city:urban_area"]?.href;
+              if (urbanAreaLink) {
+                try {
+                  const urbanRes = await fetch(urbanAreaLink + "details/");
+                  if (urbanRes.ok) {
+                    const urbanData = await urbanRes.json();
+                    const categories = urbanData.categories || [];
+                    const costCategory = categories.find((c: any) => c.id === "COST-OF-LIVING");
+                    if (costCategory) {
+                      const rentData = costCategory.data?.find((d: any) => d.id === "COST-APARTMENT-RENT-MEDIUM");
+                      if (rentData) {
+                        costs.accommodation = Math.round(rentData.currency_dollar_value / 30) || 40;
+                      }
+                      const mealData = costCategory.data?.find((d: any) => d.id === "COST-RESTAURANT-MEAL");
+                      if (mealData) {
+                        costs.food = Math.round(mealData.currency_dollar_value * 2) || 15;
+                      }
+                    }
+                  }
+                } catch {}
+              }
+              
+              teleportCities.push({
+                id: `teleport-${cityData.geoname_id}`,
+                name: cityName,
+                country: country,
+                emoji: "🌍",
+                latitude: cityData.location?.latlon?.latitude,
+                longitude: cityData.location?.latlon?.longitude,
+                costAccommodationMin: Math.round(costs.accommodation * 0.7),
+                costAccommodationMax: Math.round(costs.accommodation * 1.3),
+                costFoodMin: Math.round(costs.food * 0.7),
+                costFoodMax: Math.round(costs.food * 1.3),
+                costCoworkingMin: Math.round(costs.coworking * 0.7),
+                costCoworkingMax: Math.round(costs.coworking * 1.3),
+                costTransportMin: Math.round(costs.transport * 0.7),
+                costTransportMax: Math.round(costs.transport * 1.3),
+                nomadsCount: 0,
+                rating: 4.0,
+                internetSpeed: 50,
+                weather: null,
+                feedbackCount: 0,
+                fromTeleport: true,
+              });
+            } catch {}
+          }
+        }
+      } catch (teleportError) {
+        console.error("Teleport API error:", teleportError);
+      }
+      
+      // Combine results: local first, then teleport
+      res.send([...localCities, ...teleportCities]);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

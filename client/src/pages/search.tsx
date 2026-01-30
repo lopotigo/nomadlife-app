@@ -19,6 +19,9 @@ export default function SearchPage() {
   const [activeTab, setActiveTab] = useState("cities");
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
+  const [searchedCities, setSearchedCities] = useState<City[]>([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+
   useEffect(() => {
     fetch("/api/cities")
       .then(res => res.json())
@@ -26,12 +29,23 @@ export default function SearchPage() {
       .catch(console.error);
   }, []);
 
-  const filteredCities = query.length >= 2 
-    ? cities.filter(c => 
-        c.name.toLowerCase().includes(query.toLowerCase()) || 
-        c.country.toLowerCase().includes(query.toLowerCase())
-      )
-    : cities;
+  // Search cities when query changes (includes Teleport API)
+  useEffect(() => {
+    if (query.length < 2) {
+      setSearchedCities([]);
+      return;
+    }
+    
+    setCitiesLoading(true);
+    fetch(`/api/cities/search?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => setSearchedCities(data))
+      .catch(console.error)
+      .finally(() => setCitiesLoading(false));
+  }, [query]);
+
+  // Show searched cities if query exists, otherwise show all cities
+  const displayedCities = query.length >= 2 ? searchedCities : cities;
 
   const handleSearch = async () => {
     if (query.length < 2) return;
@@ -96,36 +110,47 @@ export default function SearchPage() {
           </TabsList>
 
           <TabsContent value="cities">
-            <div className="grid grid-cols-2 gap-3">
-              {filteredCities.map((city) => {
-                const total = getTotalCost(city);
-                return (
-                  <motion.div
-                    key={city.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedCity(city)}
-                    className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-4 cursor-pointer border-2 border-transparent hover:border-primary/30 transition-all"
-                    data-testid={`city-card-${city.name}`}
-                  >
-                    <div className="text-3xl mb-2">{city.emoji || "🌍"}</div>
-                    <h3 className="font-bold text-lg">{city.name}</h3>
-                    <p className="text-sm text-muted-foreground">{city.country}</p>
-                    <div className="mt-3 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">{(city.nomadsCount || 0).toLocaleString()} nomadi</span>
-                    </div>
-                    <div className="mt-1 text-sm text-muted-foreground">
-                      €{total.min}-{total.max}/giorno
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-            {filteredCities.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                Nessuna città trovata per "{query}"
+            {citiesLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  {displayedCities.map((city) => {
+                    const total = getTotalCost(city);
+                    return (
+                      <motion.div
+                        key={city.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSelectedCity(city)}
+                        className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-4 cursor-pointer border-2 border-transparent hover:border-primary/30 transition-all"
+                        data-testid={`city-card-${city.name}`}
+                      >
+                        <div className="text-3xl mb-2">{city.emoji || "🌍"}</div>
+                        <h3 className="font-bold text-lg">{city.name}</h3>
+                        <p className="text-sm text-muted-foreground">{city.country}</p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <Users className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-medium">{(city.nomadsCount || 0).toLocaleString()} nomadi</span>
+                        </div>
+                        <div className="mt-1 text-sm text-muted-foreground">
+                          €{total.min}-{total.max}/giorno
+                        </div>
+                        {(city as any).fromTeleport && (
+                          <div className="mt-2 text-xs text-primary/70">🌐 da Teleport</div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+                {displayedCities.length === 0 && query.length >= 2 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nessuna città trovata per "{query}"
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
