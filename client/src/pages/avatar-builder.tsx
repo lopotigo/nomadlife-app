@@ -7,18 +7,18 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
 const AVATAR_STYLES = [
-  { id: "personas", name: "Persona", icon: "🧍", hasBody: true, description: "Corpo intero cartoon" },
-  { id: "lorelei", name: "Artistico", icon: "🎨", hasBody: true, description: "Stile illustrazione" },
-  { id: "notionists", name: "Notion", icon: "📝", hasBody: true, description: "Stile minimal" },
-  { id: "avataaars", name: "Cartoon", icon: "🧑", hasBody: false, description: "Viso cartoon" },
-  { id: "adventurer", name: "Avventuriero", icon: "🗺️", hasBody: false, description: "Stile avventura" },
-  { id: "big-ears", name: "Orecchie", icon: "👂", hasBody: false, description: "Stile buffo" },
-  { id: "bottts", name: "Robot", icon: "🤖", hasBody: false, description: "Robot meccanico" },
-  { id: "fun-emoji", name: "Emoji", icon: "😎", hasBody: false, description: "Faccina emoji" },
-  { id: "micah", name: "Moderno", icon: "✨", hasBody: false, description: "Stile moderno" },
-  { id: "pixel-art", name: "Pixel", icon: "👾", hasBody: false, description: "Retro pixel" },
-  { id: "open-peeps", name: "Peeps", icon: "🙋", hasBody: true, description: "Persone stilizzate" },
-  { id: "big-smile", name: "Sorriso", icon: "😄", hasBody: false, description: "Grande sorriso" },
+  { id: "personas", name: "Persona", icon: "🧍", hasBody: true, hasSkin: false },
+  { id: "lorelei", name: "Artistico", icon: "🎨", hasBody: true, hasSkin: false },
+  { id: "notionists", name: "Notion", icon: "📝", hasBody: true, hasSkin: false },
+  { id: "avataaars", name: "Cartoon", icon: "🧑", hasBody: false, hasSkin: true },
+  { id: "adventurer", name: "Avventuriero", icon: "🗺️", hasBody: false, hasSkin: true },
+  { id: "big-ears", name: "Orecchie", icon: "👂", hasBody: false, hasSkin: true },
+  { id: "bottts", name: "Robot", icon: "🤖", hasBody: false, hasSkin: false },
+  { id: "fun-emoji", name: "Emoji", icon: "😎", hasBody: false, hasSkin: false },
+  { id: "micah", name: "Moderno", icon: "✨", hasBody: false, hasSkin: false },
+  { id: "pixel-art", name: "Pixel", icon: "👾", hasBody: false, hasSkin: false },
+  { id: "open-peeps", name: "Peeps", icon: "🙋", hasBody: true, hasSkin: true },
+  { id: "big-smile", name: "Sorriso", icon: "😄", hasBody: false, hasSkin: true },
 ];
 
 const BACKGROUND_COLORS = [
@@ -36,24 +36,41 @@ const BACKGROUND_COLORS = [
   { id: "14b8a6", name: "Teal", color: "#14b8a6" },
 ];
 
+const SKIN_COLORS = [
+  { id: "f8d5c7", name: "Chiaro 1", color: "#f8d5c7" },
+  { id: "edb98a", name: "Chiaro 2", color: "#edb98a" },
+  { id: "ffdbb4", name: "Chiaro 3", color: "#ffdbb4" },
+  { id: "d08b5b", name: "Medio 1", color: "#d08b5b" },
+  { id: "c68642", name: "Medio 2", color: "#c68642" },
+  { id: "ae5d29", name: "Medio Scuro", color: "#ae5d29" },
+  { id: "8d5524", name: "Scuro 1", color: "#8d5524" },
+  { id: "614335", name: "Scuro 2", color: "#614335" },
+];
+
 export default function AvatarBuilder() {
   const { user, refreshUser } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const [style, setStyle] = useState("personas");
+  const [style, setStyle] = useState("avataaars");
   const [backgroundColor, setBackgroundColor] = useState("b6e3f4");
+  const [skinColor, setSkinColor] = useState("edb98a");
   const [seed, setSeed] = useState(() => Math.random().toString(36).substring(7));
   const [saving, setSaving] = useState(false);
 
   const currentStyle = AVATAR_STYLES.find(s => s.id === style);
   const hasBody = currentStyle?.hasBody || false;
+  const hasSkin = currentStyle?.hasSkin || false;
 
   const generateAvatarUrl = () => {
     let url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
     
     if (backgroundColor !== "transparent") {
       url += `&backgroundColor=${backgroundColor}`;
+    }
+
+    if (hasSkin) {
+      url += `&skinColor=${skinColor}`;
     }
     
     return url;
@@ -67,6 +84,7 @@ export default function AvatarBuilder() {
     setSeed(Math.random().toString(36).substring(7));
     setStyle(AVATAR_STYLES[Math.floor(Math.random() * AVATAR_STYLES.length)].id);
     setBackgroundColor(BACKGROUND_COLORS[Math.floor(Math.random() * BACKGROUND_COLORS.length)].id);
+    setSkinColor(SKIN_COLORS[Math.floor(Math.random() * SKIN_COLORS.length)].id);
   };
 
   const handleSave = async () => {
@@ -182,9 +200,31 @@ export default function AvatarBuilder() {
             </div>
           </section>
 
+          {hasSkin && (
+            <section>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                🎨 Colore Pelle
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {SKIN_COLORS.map((sc) => (
+                  <button
+                    key={sc.id}
+                    onClick={() => setSkinColor(sc.id)}
+                    className={`w-12 h-12 rounded-full border-3 transition-all ${
+                      skinColor === sc.id ? "border-primary scale-110 ring-2 ring-primary/30" : "border-white/30 hover:scale-105"
+                    }`}
+                    style={{ backgroundColor: sc.color }}
+                    title={sc.name}
+                    data-testid={`button-skin-${sc.id}`}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
           <section>
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
-              🎨 Sfondo
+              🖼️ Sfondo
             </h3>
             <div className="flex flex-wrap gap-2">
               {BACKGROUND_COLORS.map((bg) => (
@@ -224,7 +264,7 @@ export default function AvatarBuilder() {
                     data-testid={`button-variant-${i}`}
                   >
                     <img
-                      src={`https://api.dicebear.com/7.x/${style}/svg?seed=${variantSeed}&backgroundColor=${backgroundColor}`}
+                      src={`https://api.dicebear.com/7.x/${style}/svg?seed=${variantSeed}&backgroundColor=${backgroundColor}${hasSkin ? `&skinColor=${skinColor}` : ''}`}
                       alt={`Variant ${i}`}
                       className="w-full h-full object-contain"
                     />
