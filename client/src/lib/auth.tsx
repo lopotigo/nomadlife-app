@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   signup: (data: any) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,8 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    const res = await fetch("/api/auth/me", { credentials: "include" });
+    if (res.ok) {
+      const data = await res.json();
+      setUser(data);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
