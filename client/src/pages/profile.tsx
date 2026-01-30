@@ -9,16 +9,17 @@ import { ShareQRModal } from "@/components/share-qr-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/lib/theme";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { useUpload } from "@/hooks/use-upload";
 
 export default function Profile() {
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { isSupported: pushSupported, isSubscribed: pushSubscribed, isLoading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications();
+  const { uploadFile, isUploading: uploadingPhoto } = useUpload();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [showShareQR, setShowShareQR] = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 });
   const [showFollowModal, setShowFollowModal] = useState<"followers" | "following" | null>(null);
   const [followList, setFollowList] = useState<any[]>([]);
@@ -70,25 +71,15 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    setUploadingPhoto(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-
-      if (!uploadRes.ok) throw new Error("Upload failed");
-      const { url } = await uploadRes.json();
+      const response = await uploadFile(file);
+      if (!response) throw new Error("Upload failed");
 
       const updateRes = await fetch(`/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ avatar: url }),
+        body: JSON.stringify({ avatar: response.objectPath }),
       });
 
       if (!updateRes.ok) throw new Error("Update failed");
@@ -97,8 +88,6 @@ export default function Profile() {
       toast({ title: "Foto aggiornata!", description: "La tua foto profilo è stata cambiata." });
     } catch (error) {
       toast({ title: "Errore", description: "Impossibile caricare la foto.", variant: "destructive" });
-    } finally {
-      setUploadingPhoto(false);
     }
   };
 
