@@ -80,7 +80,10 @@ export interface IStorage {
   // Messages
   getGroupMessages(groupId: string, limit?: number): Promise<(Message & { sender: User })[]>;
   getPrivateMessages(userId1: string, userId2: string, limit?: number): Promise<(Message & { sender: User })[]>;
+  getConversations(userId: string): Promise<{ user: User; lastMessage: Message; unreadCount: number }[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+  markMessageAsRead(messageId: string): Promise<Message | undefined>;
+  markConversationAsRead(userId: string, partnerId: string): Promise<void>;
 
   // Subscriptions
   getUserSubscription(userId: string): Promise<Subscription | undefined>;
@@ -413,9 +416,95 @@ export class DrizzleStorage implements IStorage {
     })).reverse();
   }
 
+  async getConversations(userId: string): Promise<{ user: User; lastMessage: Message; unreadCount: number }[]> {
+    // Get all private messages involving this user
+    const allMessages = await this.db
+      .select()
+      .from(schema.messages)
+      .leftJoin(schema.users, eq(schema.messages.senderId, schema.users.id))
+      .where(
+        and(
+          isNull(schema.messages.groupId),
+          or(
+            eq(schema.messages.senderId, userId),
+            eq(schema.messages.receiverId, userId)
+          )
+        )
+      )
+      .orderBy(desc(schema.messages.createdAt));
+
+    // Group by conversation partner
+    const conversationMap = new Map<string, { user: User; lastMessage: Message; unreadCount: number }>();
+
+    for (const row of allMessages) {
+      const msg = row.messages;
+      const partnerId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+      if (!partnerId) continue;
+
+      if (!conversationMap.has(partnerId)) {
+        // Fetch the partner user
+        const partnerResult = await this.db.select().from(schema.users).where(eq(schema.users.id, partnerId));
+        if (partnerResult[0]) {
+          conversationMap.set(partnerId, {
+            user: partnerResult[0],
+            lastMessage: msg,
+            unreadCount: msg.receiverId === userId && !msg.read ? 1 : 0,
+          });
+        }
+      } else {
+        // Count unread messages
+        if (msg.receiverId === userId && !msg.read) {
+          conversationMap.get(partnerId)!.unreadCount++;
+        }
+      }
+    }
+
+    return Array.from(conversationMap.values());
+  }
+
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const result = await this.db.insert(schema.messages).values(insertMessage).returning();
+    
+    // Create notification for the recipient if this is a private message
+    if (insertMessage.receiverId) {
+      try {
+        const sender = await this.getUser(insertMessage.senderId);
+        await this.createNotification({
+          userId: insertMessage.receiverId,
+          type: "message",
+          title: "Nuovo messaggio",
+          content: `${sender?.name || 'Qualcuno'} ti ha inviato un messaggio`,
+          link: `/chat?user=${insertMessage.senderId}`,
+        });
+      } catch (err) {
+        console.error("Failed to create message notification:", err);
+      }
+    }
+    
     return result[0];
+  }
+
+  async markMessageAsRead(messageId: string): Promise<Message | undefined> {
+    const result = await this.db
+      .update(schema.messages)
+      .set({ read: true })
+      .where(eq(schema.messages.id, messageId))
+      .returning();
+    return result[0];
+  }
+
+  async markConversationAsRead(userId: string, partnerId: string): Promise<void> {
+    await this.db
+      .update(schema.messages)
+      .set({ read: true })
+      .where(
+        and(
+          isNull(schema.messages.groupId),
+          eq(schema.messages.senderId, partnerId),
+          eq(schema.messages.receiverId, userId),
+          eq(schema.messages.read, false)
+        )
+      );
   }
 
   // Subscriptions

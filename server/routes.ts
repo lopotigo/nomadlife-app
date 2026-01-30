@@ -395,6 +395,24 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/conversations", requireAuth, async (req, res) => {
+    try {
+      const conversations = await storage.getConversations((req.user as User).id);
+      res.send(conversations);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.patch("/api/messages/:id/read", requireAuth, async (req, res) => {
+    try {
+      const result = await storage.markMessageAsRead(req.params.id);
+      res.send(result);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.post("/api/messages", requireAuth, async (req, res) => {
     try {
       const data = insertMessageSchema.parse({

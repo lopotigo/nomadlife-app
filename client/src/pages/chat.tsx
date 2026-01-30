@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { ChatGroup, Message, User } from "@shared/schema";
 
 type MessageWithSender = Message & { sender: User };
+type Conversation = { user: User; lastMessage: Message; unreadCount: number };
 
 const GROUP_COLORS = [
   "from-violet-500 to-purple-600",
@@ -28,6 +29,7 @@ export default function Chat() {
 
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
   const [selectedPrivateUser, setSelectedPrivateUser] = useState<User | null>(null);
   const [groupMessages, setGroupMessages] = useState<MessageWithSender[]>([]);
@@ -38,6 +40,13 @@ export default function Chat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const fetchConversations = () => {
+    fetch("/api/conversations", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setConversations(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  };
 
   const fetchGroups = () => {
     fetch("/api/chat-groups", { credentials: "include" })
@@ -55,12 +64,14 @@ export default function Chat() {
 
     Promise.all([
       fetch("/api/chat-groups", { credentials: "include" }).then(res => res.json()),
-      fetch("/api/users", { credentials: "include" }).then(res => res.json())
+      fetch("/api/users", { credentials: "include" }).then(res => res.json()),
+      fetch("/api/conversations", { credentials: "include" }).then(res => res.json())
     ])
-      .then(([groupsData, usersData]) => {
+      .then(([groupsData, usersData, conversationsData]) => {
         setGroups(Array.isArray(groupsData) ? groupsData : []);
         const otherUsers = Array.isArray(usersData) ? usersData.filter((u: User) => u.id !== user.id) : [];
         setAllUsers(otherUsers);
+        setConversations(Array.isArray(conversationsData) ? conversationsData : []);
         
         if (privateUserId) {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
@@ -72,6 +83,13 @@ export default function Chat() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user, authLoading, setLocation, privateUserId]);
+
+  // Refresh conversations periodically
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(fetchConversations, 5000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     if (!selectedGroup) return;
@@ -273,35 +291,54 @@ export default function Chat() {
                 <p className="text-slate-400 font-medium">No contacts found</p>
               </div>
             ) : (
-              filteredUsers.map(u => (
-                <button
-                  key={u.id}
-                  onClick={() => { setSelectedPrivateUser(u); setSelectedGroup(null); }}
-                  className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                    selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
-                  }`}
-                  data-testid={`chat-private-${u.id}`}
-                >
-                  <div className="relative">
-                    {u.avatar ? (
-                      <img src={u.avatar} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                        {u.name.charAt(0)}
+              filteredUsers.map(u => {
+                const conversation = conversations.find(c => c.user.id === u.id);
+                const unreadCount = conversation?.unreadCount || 0;
+                const lastMessage = conversation?.lastMessage;
+                
+                return (
+                  <button
+                    key={u.id}
+                    onClick={() => { setSelectedPrivateUser(u); setSelectedGroup(null); }}
+                    className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
+                      selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
+                    }`}
+                    data-testid={`chat-private-${u.id}`}
+                  >
+                    <div className="relative">
+                      {u.avatar ? (
+                        <img src={u.avatar} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                          {u.name.charAt(0)}
+                        </div>
+                      )}
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className={`font-semibold text-sm truncate ${unreadCount > 0 ? 'text-white' : 'text-slate-300'}`}>{u.name}</p>
+                        {lastMessage && (
+                          <span className="text-[10px] text-slate-500">
+                            {new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-white text-sm truncate">{u.name}</p>
-                    <p className="text-xs text-slate-500 truncate">@{u.username}</p>
-                    {u.location && (
-                      <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3" /> {u.location}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              ))
+                      {lastMessage ? (
+                        <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-slate-300 font-medium' : 'text-slate-500'}`}>
+                          {lastMessage.senderId === user?.id ? "Tu: " : ""}{lastMessage.content}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-500 truncate">@{u.username}</p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })
             )}
           </div>
         </aside>

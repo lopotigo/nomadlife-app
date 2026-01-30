@@ -146,6 +146,7 @@ export const messages = pgTable("messages", {
   groupId: varchar("group_id").references(() => chatGroups.id, { onDelete: "cascade" }),
   receiverId: varchar("receiver_id").references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
+  read: boolean("read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
