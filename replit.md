@@ -92,6 +92,7 @@ Preferred communication style: Simple, everyday language.
 - **Followers/Following UI**: Modal showing lists of followers and following with counts
 - **Dark/Light Mode**: Theme toggle in profile with `ThemeProvider` context and localStorage persistence
 - **Push Notifications**: Web Push API with VAPID keys, service worker push handler, subscribe/unsubscribe from profile
+- **Avatar Builder**: Customizable avatar creation page with DiceBear integration - 12 styles (cartoon, pixel art, robot, etc.), background colors, hair colors, accessories
 
 ### PWA Configuration
 
