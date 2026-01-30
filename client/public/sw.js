@@ -29,6 +29,51 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Handle push notifications
+self.addEventListener('push', (event) => {
+  const options = {
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-72x72.png',
+    vibrate: [100, 50, 100],
+    data: { url: '/' }
+  };
+
+  let data = {};
+  try {
+    data = event.data?.json() || {};
+  } catch (e) {
+    data = { title: 'NomadLife', body: event.data?.text() || 'New notification' };
+  }
+
+  const title = data.title || 'NomadLife';
+  options.body = data.body || '';
+  if (data.url) options.data.url = data.url;
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const url = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((windowClients) => {
+        for (const client of windowClients) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.navigate(url);
+            return client.focus();
+          }
+        }
+        return clients.openWindow(url);
+      })
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   

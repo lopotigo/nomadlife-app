@@ -4,10 +4,20 @@ import { storage } from "./storage";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema } from "@shared/schema";
+import webpush from "web-push";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { createRepository, pushFile, getGitHubUser } from "./github";
+
+// Configure VAPID keys for push notifications
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT || "mailto:nomadlife@replit.app",
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 // Configure Passport Local Strategy
 passport.use(
@@ -237,7 +247,7 @@ export async function registerRoutes(
     try {
       const comment = await storage.createComment({
         postId: req.params.id,
-        userId: req.user!.id,
+        userId: (req.user as User).id,
         content: req.body.content,
       });
       res.status(201).send(comment);
@@ -248,7 +258,7 @@ export async function registerRoutes(
 
   app.delete("/api/comments/:id", requireAuth, async (req, res) => {
     try {
-      const success = await storage.deleteComment(req.params.id, req.user!.id);
+      const success = await storage.deleteComment(req.params.id, (req.user as User).id);
       if (!success) {
         return res.status(403).send({ error: "Not authorized" });
       }
@@ -1321,6 +1331,59 @@ export async function registerRoutes(
       res.status(500).send({ error: error.message });
     }
   });
+
+  // ===== PUSH NOTIFICATIONS =====
+  
+  // Get VAPID public key
+  app.get("/api/push/vapid-public-key", (req, res) => {
+    res.send({ publicKey: process.env.VAPID_PUBLIC_KEY || "" });
+  });
+
+  // Subscribe to push notifications
+  app.post("/api/push/subscribe", requireAuth, async (req, res) => {
+    try {
+      const { endpoint, keys } = req.body;
+      if (!endpoint || !keys?.p256dh || !keys?.auth) {
+        return res.status(400).send({ error: "Invalid subscription data" });
+      }
+
+      const userId = (req.user as User).id;
+      
+      // Check if already subscribed with this endpoint
+      const existing = await storage.getPushSubscription(userId, endpoint);
+      if (existing) {
+        return res.send({ message: "Already subscribed" });
+      }
+
+      const subscription = await storage.createPushSubscription({
+        userId,
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+      });
+
+      res.status(201).send({ message: "Subscribed successfully", id: subscription.id });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Unsubscribe from push notifications
+  app.post("/api/push/unsubscribe", requireAuth, async (req, res) => {
+    try {
+      const { endpoint } = req.body;
+      if (!endpoint) {
+        return res.status(400).send({ error: "Endpoint required" });
+      }
+
+      const userId = (req.user as User).id;
+      await storage.deletePushSubscription(userId, endpoint);
+      res.send({ message: "Unsubscribed successfully" });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
 
   return httpServer;
 }

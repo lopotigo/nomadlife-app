@@ -159,6 +159,13 @@ export interface IStorage {
   getCityFeedback(cityId: string): Promise<CityFeedback[]>;
   createCityFeedback(feedback: InsertCityFeedback): Promise<CityFeedback>;
   updateCityCostsFromFeedback(cityId: string): Promise<void>;
+  
+  // Push Subscriptions
+  getPushSubscription(userId: string, endpoint: string): Promise<schema.PushSubscription | undefined>;
+  getPushSubscriptionsByUser(userId: string): Promise<schema.PushSubscription[]>;
+  getAllPushSubscriptions(): Promise<schema.PushSubscription[]>;
+  createPushSubscription(subscription: schema.InsertPushSubscription): Promise<schema.PushSubscription>;
+  deletePushSubscription(userId: string, endpoint: string): Promise<boolean>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -472,9 +479,8 @@ export class DrizzleStorage implements IStorage {
         await this.createNotification({
           userId: insertMessage.receiverId,
           type: "message",
-          title: "Nuovo messaggio",
-          content: `${sender?.name || 'Qualcuno'} ti ha inviato un messaggio`,
-          link: `/chat?user=${insertMessage.senderId}`,
+          message: `${sender?.name || 'Qualcuno'} ti ha inviato un messaggio`,
+          relatedUserId: insertMessage.senderId,
         });
       } catch (err) {
         console.error("Failed to create message notification:", err);
@@ -1097,6 +1103,41 @@ export class DrizzleStorage implements IStorage {
         lastUpdated: new Date(),
       }).where(eq(schema.cities.id, cityId));
     }
+  }
+
+  // Push Subscriptions
+  async getPushSubscription(userId: string, endpoint: string): Promise<schema.PushSubscription | undefined> {
+    const result = await this.db.select().from(schema.pushSubscriptions)
+      .where(and(
+        eq(schema.pushSubscriptions.userId, userId),
+        eq(schema.pushSubscriptions.endpoint, endpoint)
+      ))
+      .limit(1);
+    return result[0];
+  }
+
+  async getPushSubscriptionsByUser(userId: string): Promise<schema.PushSubscription[]> {
+    return await this.db.select().from(schema.pushSubscriptions)
+      .where(eq(schema.pushSubscriptions.userId, userId));
+  }
+
+  async getAllPushSubscriptions(): Promise<schema.PushSubscription[]> {
+    return await this.db.select().from(schema.pushSubscriptions);
+  }
+
+  async createPushSubscription(subscription: schema.InsertPushSubscription): Promise<schema.PushSubscription> {
+    const result = await this.db.insert(schema.pushSubscriptions).values(subscription).returning();
+    return result[0];
+  }
+
+  async deletePushSubscription(userId: string, endpoint: string): Promise<boolean> {
+    const result = await this.db.delete(schema.pushSubscriptions)
+      .where(and(
+        eq(schema.pushSubscriptions.userId, userId),
+        eq(schema.pushSubscriptions.endpoint, endpoint)
+      ))
+      .returning();
+    return result.length > 0;
   }
 }
 

@@ -2,16 +2,18 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal } from "@/components/share-qr-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/lib/theme";
+import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 export default function Profile() {
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { isSupported: pushSupported, isSubscribed: pushSubscribed, isLoading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +85,7 @@ export default function Profile() {
       const { url } = await uploadRes.json();
 
       const updateRes = await fetch(`/api/users/${user.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ avatar: url }),
@@ -213,7 +215,7 @@ export default function Profile() {
             <StatCard label="Coworking" value={user.coworkingSpaces} icon={Award} />
           </div>
 
-          <div className="flex items-center gap-3 mt-6">
+          <div className="flex flex-wrap items-center gap-3 mt-6">
             <button
               onClick={toggleTheme}
               className="flex items-center gap-2 px-6 py-3 bg-muted rounded-2xl font-bold hover:bg-muted/80 transition-colors"
@@ -222,6 +224,34 @@ export default function Profile() {
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               {theme === "dark" ? "Light" : "Dark"}
             </button>
+            {pushSupported && (
+              <button
+                onClick={async () => {
+                  const success = pushSubscribed ? await unsubscribePush() : await subscribePush();
+                  if (success) {
+                    toast({ title: pushSubscribed ? "Notifiche disattivate" : "Notifiche attivate" });
+                  } else {
+                    toast({ title: "Errore", description: "Impossibile modificare le notifiche", variant: "destructive" });
+                  }
+                }}
+                disabled={pushLoading}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-colors ${
+                  pushSubscribed 
+                    ? "bg-primary/20 text-primary" 
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+                data-testid="button-toggle-push"
+              >
+                {pushLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : pushSubscribed ? (
+                  <Bell className="w-4 h-4" />
+                ) : (
+                  <BellOff className="w-4 h-4" />
+                )}
+                {pushSubscribed ? "Notifiche ON" : "Notifiche OFF"}
+              </button>
+            )}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-6 py-3 bg-red-500/20 text-red-400 rounded-2xl font-bold hover:bg-red-500/30 transition-colors"
