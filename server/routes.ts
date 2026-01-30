@@ -35,9 +35,14 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser(async (id: string, done) => {
   try {
     const user = await storage.getUser(id);
+    if (!user) {
+      // User was deleted, clear the session
+      return done(null, false);
+    }
     done(null, user);
   } catch (error) {
-    done(error);
+    // If user not found, don't crash - just return false
+    done(null, false);
   }
 });
 
