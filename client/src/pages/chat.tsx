@@ -48,6 +48,22 @@ export default function Chat() {
       .catch(console.error);
   };
 
+  const selectPrivateChat = async (u: User) => {
+    setSelectedPrivateUser(u);
+    setSelectedGroup(null);
+    // Mark messages from this user as read
+    try {
+      await fetch(`/api/messages/conversation/${u.id}/read`, {
+        method: "PATCH",
+        credentials: "include"
+      });
+      // Refresh conversations to update unread count
+      fetchConversations();
+    } catch (error) {
+      console.error("Failed to mark messages as read:", error);
+    }
+  };
+
   const fetchGroups = () => {
     fetch("/api/chat-groups", { credentials: "include" })
       .then(res => res.json())
@@ -77,6 +93,11 @@ export default function Chat() {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
           if (targetUser) {
             setSelectedPrivateUser(targetUser);
+            // Mark messages as read when opening from link
+            fetch(`/api/messages/conversation/${targetUser.id}/read`, {
+              method: "PATCH",
+              credentials: "include"
+            }).then(() => fetchConversations()).catch(console.error);
           }
         }
       })
@@ -324,7 +345,7 @@ export default function Chat() {
                 return (
                   <button
                     key={u.id}
-                    onClick={() => { setSelectedPrivateUser(u); setSelectedGroup(null); }}
+                    onClick={() => selectPrivateChat(u)}
                     className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
                       selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
                     }`}

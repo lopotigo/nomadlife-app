@@ -418,6 +418,19 @@ export async function registerRoutes(
     }
   });
 
+  // Mark all messages from a sender as read
+  app.patch("/api/messages/conversation/:senderId/read", requireAuth, async (req, res) => {
+    try {
+      const currentUserId = (req.user as User).id;
+      const senderId = req.params.senderId;
+      // userId is receiver (current user), partnerId is sender
+      await storage.markConversationAsRead(currentUserId, senderId);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.post("/api/messages", requireAuth, async (req, res) => {
     try {
       const data = insertMessageSchema.parse({
