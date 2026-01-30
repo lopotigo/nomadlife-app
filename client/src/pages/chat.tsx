@@ -199,10 +199,35 @@ export default function Chat() {
   const hasActiveChat = selectedGroup || selectedPrivateUser;
   const currentMessages = selectedGroup ? groupMessages : privateMessages;
 
-  const filteredUsers = allUsers.filter(u => 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Combine conversations with other users, prioritizing conversations with messages
+  const sortedContacts = (() => {
+    const searchLower = searchQuery.toLowerCase();
+    
+    // First, get users from conversations (those who have messaged you or you've messaged)
+    const conversationUserIds = new Set(conversations.map(c => c.user.id));
+    
+    // Sort conversations by last message time (most recent first)
+    const sortedConversations = [...conversations]
+      .sort((a, b) => new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime());
+    
+    // Users with active conversations go first
+    const conversationUsers = sortedConversations
+      .map(c => c.user)
+      .filter(u => 
+        u.name.toLowerCase().includes(searchLower) ||
+        u.username.toLowerCase().includes(searchLower)
+      );
+    
+    // Then add other users without conversations
+    const otherUsers = allUsers
+      .filter(u => !conversationUserIds.has(u.id))
+      .filter(u => 
+        u.name.toLowerCase().includes(searchLower) ||
+        u.username.toLowerCase().includes(searchLower)
+      );
+    
+    return [...conversationUsers, ...otherUsers];
+  })();
 
   if (authLoading || loading) {
     return (
@@ -285,13 +310,13 @@ export default function Chat() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {filteredUsers.length === 0 ? (
+            {sortedContacts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Send className="w-10 h-10 text-slate-600 mb-4" />
                 <p className="text-slate-400 font-medium">No contacts found</p>
               </div>
             ) : (
-              filteredUsers.map(u => {
+              sortedContacts.map(u => {
                 const conversation = conversations.find(c => c.user.id === u.id);
                 const unreadCount = conversation?.unreadCount || 0;
                 const lastMessage = conversation?.lastMessage;
