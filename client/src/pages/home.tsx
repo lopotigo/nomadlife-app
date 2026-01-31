@@ -2,18 +2,20 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Post, User, Comment } from "@shared/schema";
+import type { Post, User, Comment, Trip, TripStop, TripExpense } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
 
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
+type LiveTrip = Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] };
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
+  const [liveTrips, setLiveTrips] = useState<LiveTrip[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPosts = useCallback(() => {
@@ -22,6 +24,18 @@ export default function Home() {
       .then((data) => setPosts(data))
       .catch(console.error)
       .finally(() => setLoading(false));
+  }, []);
+
+  const fetchLiveTrips = useCallback(() => {
+    fetch("/api/trips/live", { credentials: "include" })
+      .then((res) => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) setLiveTrips(data);
+      })
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -33,7 +47,8 @@ export default function Home() {
     }
 
     fetchPosts();
-  }, [user, authLoading, setLocation, fetchPosts]);
+    fetchLiveTrips();
+  }, [user, authLoading, setLocation, fetchPosts, fetchLiveTrips]);
 
   const handleLike = async (postId: string) => {
     try {
@@ -71,6 +86,8 @@ export default function Home() {
 
       <div className="p-4 space-y-6">
         <StoryRail />
+        
+        {liveTrips.length > 0 && <LiveTripsSection trips={liveTrips} />}
         
         <CreatePostForm onPostCreated={fetchPosts} />
         
@@ -607,5 +624,88 @@ function PostCard({ post, onLike, currentUser }: { post: PostWithUser; onLike: (
         </AnimatePresence>
       </div>
     </motion.article>
+  );
+}
+
+function LiveTripsSection({ trips }: { trips: LiveTrip[] }) {
+  const calculateTotalExpenses = (trip: LiveTrip) => {
+    return trip.stops.reduce((total, stop) => {
+      return total + stop.expenses.reduce((sum, exp) => sum + exp.cost, 0);
+    }, 0) / 100;
+  };
+
+  const getLastStop = (trip: LiveTrip) => {
+    const stopsWithCoords = trip.stops.filter(s => s.latitude && s.longitude);
+    return stopsWithCoords[stopsWithCoords.length - 1];
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Navigation className="w-5 h-5 text-emerald-500 animate-pulse" />
+        <h2 className="font-semibold text-lg">Viaggi Live</h2>
+        <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
+          {trips.length} in corso
+        </span>
+      </div>
+      
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        {trips.map((trip) => {
+          const lastStop = getLastStop(trip);
+          const totalExpenses = calculateTotalExpenses(trip);
+          
+          return (
+            <Link key={trip.id} href={`/trip/${trip.id}`}>
+              <motion.div 
+                className="flex-shrink-0 w-64 bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 rounded-xl p-4 cursor-pointer hover:border-emerald-400/50 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                data-testid={`live-trip-card-${trip.id}`}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="relative">
+                    {trip.user.avatar ? (
+                      <img 
+                        src={trip.user.avatar} 
+                        alt={trip.user.name || trip.user.username} 
+                        className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/30 flex items-center justify-center border-2 border-emerald-500">
+                        <span className="text-sm font-bold">{(trip.user.name || trip.user.username || 'N')[0]}</span>
+                      </div>
+                    )}
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background animate-pulse" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{trip.user.name || trip.user.username}</p>
+                    <p className="text-xs text-muted-foreground truncate">{trip.title}</p>
+                  </div>
+                </div>
+                
+                {lastStop && (
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 mb-2">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="truncate">{lastStop.city}, {lastStop.country}</span>
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Route className="w-3.5 h-3.5" />
+                    <span>{trip.stops.length} tappe</span>
+                  </div>
+                  {totalExpenses > 0 && (
+                    <div className="flex items-center gap-1 text-amber-400">
+                      <Wallet className="w-3.5 h-3.5" />
+                      <span>€{totalExpenses.toFixed(0)}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 }

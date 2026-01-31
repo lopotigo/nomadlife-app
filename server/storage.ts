@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";
 const { Pool } = pkg;
-import { eq, desc, and, sql, isNull, or } from "drizzle-orm";
+import { eq, desc, and, sql, isNull, or, inArray } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import type {
   User,
@@ -116,6 +116,7 @@ export interface IStorage {
   updateTrip(id: string, updates: Partial<Trip>): Promise<Trip | undefined>;
   deleteTrip(id: string): Promise<boolean>;
   searchTripsByDestination(query: string): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
+  getFollowingLiveTrips(userId: string): Promise<(Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] })[]>;
 
   // Trip Stops
   getTripStop(id: string): Promise<TripStop | undefined>;
@@ -762,6 +763,78 @@ export class DrizzleStorage implements IStorage {
     }
 
     return Array.from(tripsMap.values());
+  }
+
+  async getFollowingLiveTrips(userId: string): Promise<(Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] })[]> {
+    // Get list of users this person follows
+    const following = await this.db.select({ followingId: schema.followers.followingId })
+      .from(schema.followers)
+      .where(eq(schema.followers.followerId, userId));
+    
+    if (following.length === 0) return [];
+    
+    const followingIds = following.map(f => f.followingId);
+    
+    // Get trips with status 'in_progress' from followed users
+    const liveTrips = await this.db
+      .select()
+      .from(schema.trips)
+      .leftJoin(schema.users, eq(schema.trips.userId, schema.users.id))
+      .where(
+        and(
+          inArray(schema.trips.userId, followingIds),
+          eq(schema.trips.status, 'in_progress'),
+          eq(schema.trips.isPublic, true)
+        )
+      )
+      .orderBy(desc(schema.trips.createdAt));
+    
+    if (liveTrips.length === 0) return [];
+    
+    const tripIds = liveTrips.map(t => t.trips.id);
+    
+    // Batch fetch all stops for these trips
+    const allStops = await this.db.select().from(schema.tripStops)
+      .where(inArray(schema.tripStops.tripId, tripIds))
+      .orderBy(schema.tripStops.orderIndex);
+    
+    const stopIds = allStops.map(s => s.id);
+    
+    // Batch fetch all expenses for these stops
+    const allExpenses = stopIds.length > 0 
+      ? await this.db.select().from(schema.tripExpenses)
+          .where(inArray(schema.tripExpenses.stopId, stopIds))
+      : [];
+    
+    // Group expenses by stopId
+    const expensesByStop = new Map<string, TripExpense[]>();
+    for (const expense of allExpenses) {
+      if (!expensesByStop.has(expense.stopId)) {
+        expensesByStop.set(expense.stopId, []);
+      }
+      expensesByStop.get(expense.stopId)!.push(expense);
+    }
+    
+    // Group stops by tripId with expenses
+    const stopsByTrip = new Map<string, (TripStop & { expenses: TripExpense[] })[]>();
+    for (const stop of allStops) {
+      if (!stopsByTrip.has(stop.tripId)) {
+        stopsByTrip.set(stop.tripId, []);
+      }
+      stopsByTrip.get(stop.tripId)!.push({
+        ...stop,
+        expenses: expensesByStop.get(stop.id) || [],
+      });
+    }
+    
+    // Build final result
+    return liveTrips
+      .filter(row => row.users)
+      .map(row => ({
+        ...row.trips,
+        user: row.users!,
+        stops: stopsByTrip.get(row.trips.id) || [],
+      }));
   }
 
   // Trip Stops

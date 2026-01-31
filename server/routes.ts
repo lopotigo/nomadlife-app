@@ -598,6 +598,17 @@ export async function registerRoutes(
     }
   });
 
+  // Live trips from followed users (in_progress status)
+  app.get("/api/trips/live", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      const liveTrips = await storage.getFollowingLiveTrips(userId);
+      res.send(liveTrips);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/trips", async (req, res) => {
     try {
       const userId = req.isAuthenticated() ? (req.user as User).id : null;
@@ -693,7 +704,38 @@ export async function registerRoutes(
       if (updates.startDate) updates.startDate = new Date(updates.startDate);
       if (updates.endDate) updates.endDate = new Date(updates.endDate);
       
+      // Check if status is changing to 'in_progress' - notify followers
+      const wasNotInProgress = existingTrip.status !== 'in_progress';
+      const isNowInProgress = updates.status === 'in_progress';
+      
       const trip = await storage.updateTrip(req.params.id, updates);
+      
+      // Send notifications to followers when trip starts
+      if (wasNotInProgress && isNowInProgress && existingTrip.isPublic && trip) {
+        try {
+          const currentUser = req.user as User;
+          const followers = await storage.getFollowers(currentUser.id);
+          
+          // Create unique set of follower IDs to avoid duplicates
+          const notifiedIds = new Set<string>();
+          for (const followerRelation of followers) {
+            const followerId = followerRelation.followerId;
+            // Skip if already notified or if it's the trip owner
+            if (notifiedIds.has(followerId) || followerId === currentUser.id) continue;
+            notifiedIds.add(followerId);
+            
+            await storage.createNotification({
+              userId: followerId,
+              type: 'trip_started',
+              message: `${currentUser.name || currentUser.username} ha iniziato il viaggio "${trip.title}"`,
+              relatedTripId: trip.id,
+            });
+          }
+        } catch (notifError) {
+          console.error("Error sending trip start notifications:", notifError);
+        }
+      }
+      
       res.send(trip);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
