@@ -195,12 +195,16 @@ export const events = pgTable("events", {
   placeId: varchar("place_id").references(() => places.id, { onDelete: "set null" }),
   tags: text("tags").array(),
   attendees: integer("attendees").default(0).notNull(),
+  likes: integer("likes").default(0).notNull(),
+  commentsCount: integer("comments_count").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
   attendees: true,
+  likes: true,
+  commentsCount: true,
   createdAt: true,
 });
 export type InsertEvent = z.infer<typeof insertEventSchema>;
@@ -222,6 +226,32 @@ export const insertEventRegistrationSchema = createInsertSchema(eventRegistratio
 });
 export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
+
+// Event Likes table
+export const eventLikes = pgTable("event_likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type EventLike = typeof eventLikes.$inferSelect;
+
+// Event Comments table
+export const eventComments = pgTable("event_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertEventCommentSchema = createInsertSchema(eventComments).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEventComment = z.infer<typeof insertEventCommentSchema>;
+export type EventComment = typeof eventComments.$inferSelect;
 
 // Trips (Travel Diary) table
 export const trips = pgTable("trips", {
