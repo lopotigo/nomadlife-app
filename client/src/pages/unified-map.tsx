@@ -3,9 +3,9 @@ import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
 import { 
-  Heart, MapPin, Loader2, Plus, Leaf, Users, Compass, 
-  Filter, X, Plane, MessageCircle, Calendar, Send, Image,
-  Video, Link as LinkIcon, Share2, Trash2
+  Heart, MapPin, Loader2, Plus, Users, Compass, 
+  Filter, X, MessageCircle, Calendar, Send, Image,
+  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
 import { ShareQRModal } from "@/components/share-qr-modal";
@@ -145,8 +147,8 @@ export default function UnifiedMap() {
   const [followingTrips, setFollowingTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [showNewTrip, setShowNewTrip] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [showNewEvent, setShowNewEvent] = useState(false);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite"; id: string; title: string } | null>(null);
   const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
@@ -255,37 +257,7 @@ export default function UnifiedMap() {
     setShowNewPost(true);
   }, []);
 
-  const handleCreateTrip = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    try {
-      const res = await fetch("/api/trips", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: formData.get("title"),
-          description: formData.get("description"),
-          startDate: formData.get("startDate"),
-          isPublic: formData.get("isPublic") === "on",
-          startLocation: formData.get("startLocation") || "",
-          endLocation: formData.get("endLocation") || "",
-          totalBudget: 0,
-          currency: "EUR",
-        }),
-      });
-      
-      if (res.ok) {
-        toast({ title: "Viaggio creato!", description: "Vai al Diario di Viaggio per aggiungere le tappe" });
-        setShowNewTrip(false);
-        fetchData();
-      }
-    } catch (error) {
-      toast({ title: "Errore", description: "Impossibile creare il viaggio", variant: "destructive" });
-    }
-  };
-
+  
   const postsWithCoords = useMemo(() => 
     filters.showPosts ? posts.filter(p => p.latitude && p.longitude) : [],
     [posts, filters.showPosts]
@@ -529,17 +501,6 @@ export default function UnifiedMap() {
           
           <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
             <Button
-              variant={filters.ecoMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilters(f => ({ ...f, ecoMode: !f.ecoMode }))}
-              className={`backdrop-blur-md ${filters.ecoMode ? "bg-green-500 hover:bg-green-600" : "bg-card/90"}`}
-              data-testid="button-eco-mode"
-            >
-              <Leaf className="w-4 h-4 mr-1" />
-              Eco
-            </Button>
-            
-            <Button
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
@@ -550,26 +511,39 @@ export default function UnifiedMap() {
             </Button>
           </div>
           
-          <button
-            onClick={() => {
-              setClickedCoords(null);
-              setShowNewPost(true);
-            }}
-            className="absolute bottom-4 right-4 z-[1000] w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-            data-testid="button-new-post"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-          
-          <Button
-            onClick={() => setShowNewTrip(true)}
-            size="sm"
-            className="absolute bottom-4 left-4 z-[1000] bg-amber-500 hover:bg-amber-600"
-            data-testid="button-new-trip"
-          >
-            <Plane className="w-4 h-4 mr-1" />
-            Nuovo Viaggio
-          </Button>
+          <div className="absolute bottom-4 right-4 z-[1000]">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                  data-testid="button-create-menu"
+                >
+                  <Plus className="w-6 h-6" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 mb-2">
+                <DropdownMenuItem 
+                  onClick={() => {
+                    setClickedCoords(null);
+                    setShowNewPost(true);
+                  }}
+                  className="cursor-pointer"
+                  data-testid="menu-new-post"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Crea Post
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setShowNewEvent(true)}
+                  className="cursor-pointer"
+                  data-testid="menu-new-event"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Crea Evento
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           
           <AnimatePresence>
             {showFilters && (
@@ -623,20 +597,7 @@ export default function UnifiedMap() {
                     />
                   </div>
                   
-                  <hr className="border-border" />
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Leaf className="w-4 h-4 text-green-500" />
-                      Eco Mode
-                    </label>
-                    <Switch
-                      checked={filters.ecoMode}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, ecoMode: v }))}
-                      data-testid="switch-eco"
-                    />
-                  </div>
-                </div>
+                                  </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -681,69 +642,14 @@ export default function UnifiedMap() {
         }}
       />
       
-      <Dialog open={showNewTrip} onOpenChange={setShowNewTrip}>
-        <DialogContent className="bg-card border-border">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Plane className="w-5 h-5 text-amber-500" />
-              Nuovo Viaggio
-            </DialogTitle>
-          </DialogHeader>
-          
-          <form onSubmit={handleCreateTrip} className="space-y-4">
-            <div>
-              <Label htmlFor="title">Titolo</Label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="Es: Avventura Sud-Est Asiatico"
-                required
-                className="mt-1"
-                data-testid="input-trip-title"
-              />
-            </div>
-            <div>
-              <Label htmlFor="description">Descrizione</Label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder="Racconta il tuo viaggio..."
-                className="mt-1"
-                rows={2}
-                data-testid="input-trip-description"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="startLocation">Partenza</Label>
-                <Input id="startLocation" name="startLocation" placeholder="Es: Milano" className="mt-1" />
-              </div>
-              <div>
-                <Label htmlFor="endLocation">Destinazione</Label>
-                <Input id="endLocation" name="endLocation" placeholder="Es: Bali" className="mt-1" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="startDate">Data Inizio</Label>
-              <Input id="startDate" name="startDate" type="date" required className="mt-1" data-testid="input-start-date" />
-            </div>
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl">
-              <div>
-                <Label htmlFor="isPublic" className="text-sm font-medium">Pubblico</Label>
-                <p className="text-xs text-muted-foreground">Visibile sulla mappa</p>
-              </div>
-              <Switch id="isPublic" name="isPublic" data-testid="switch-public" />
-            </div>
-            <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600" data-testid="button-create-trip">
-              <Plane className="w-4 h-4 mr-2" />
-              Crea Viaggio
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Dopo la creazione, vai alla sezione Profilo per aggiungere le tappe
-            </p>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CreateEventModal
+        open={showNewEvent}
+        onClose={() => setShowNewEvent(false)}
+        onEventCreated={() => {
+          setShowNewEvent(false);
+          toast({ title: "Evento creato!", description: "Il tuo evento è stato pubblicato" });
+        }}
+      />
       
       {shareModal && (
         <ShareQRModal
@@ -1079,6 +985,263 @@ function CreatePostModal({
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Pubblica</>}
           </Button>
         </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function CreateEventModal({
+  open,
+  onClose,
+  onEventCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onEventCreated: () => void;
+}) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const { uploadFile, isUploading, progress, fileUrl } = useUpload();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const formData = new FormData(e.currentTarget);
+    
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: formData.get("title"),
+          description: formData.get("description"),
+          type: formData.get("type") || "public",
+          city: formData.get("city"),
+          country: formData.get("country") || "",
+          location: formData.get("location") || "",
+          startDate: new Date(formData.get("startDate") as string).toISOString(),
+          endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string).toISOString() : null,
+          capacity: formData.get("capacity") ? parseInt(formData.get("capacity") as string) : null,
+          price: formData.get("price") ? parseInt(formData.get("price") as string) : 0,
+          currency: formData.get("currency") || "EUR",
+          imageUrl: fileUrl || null,
+        }),
+      });
+
+      if (res.ok) {
+        onEventCreated();
+      } else {
+        throw new Error("Failed");
+      }
+    } catch {
+      toast({ title: "Errore", description: "Impossibile creare l'evento", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 z-[2000] flex items-center justify-center p-4"
+      onClick={onClose}
+      data-testid="overlay-create-event"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-card rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Nuovo Evento
+          </h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" data-testid="button-close-event">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="event-title">Titolo *</Label>
+            <Input
+              id="event-title"
+              name="title"
+              placeholder="Es: Nomad Meetup Milano"
+              required
+              className="mt-1"
+              data-testid="input-event-title"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="event-description">Descrizione</Label>
+            <Textarea
+              id="event-description"
+              name="description"
+              placeholder="Descrivi il tuo evento..."
+              className="mt-1"
+              rows={3}
+              data-testid="input-event-description"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="event-city">Città *</Label>
+              <Input
+                id="event-city"
+                name="city"
+                placeholder="Es: Milano"
+                required
+                className="mt-1"
+                data-testid="input-event-city"
+              />
+            </div>
+            <div>
+              <Label htmlFor="event-country">Paese</Label>
+              <Input
+                id="event-country"
+                name="country"
+                placeholder="Es: Italia"
+                className="mt-1"
+                data-testid="input-event-country"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="event-location">Indirizzo</Label>
+            <Input
+              id="event-location"
+              name="location"
+              placeholder="Es: Via Roma 123"
+              className="mt-1"
+              data-testid="input-event-location"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="event-start">Data Inizio *</Label>
+              <Input
+                id="event-start"
+                name="startDate"
+                type="datetime-local"
+                required
+                className="mt-1"
+                data-testid="input-event-start"
+              />
+            </div>
+            <div>
+              <Label htmlFor="event-end">Data Fine</Label>
+              <Input
+                id="event-end"
+                name="endDate"
+                type="datetime-local"
+                className="mt-1"
+                data-testid="input-event-end"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label htmlFor="event-type">Tipo</Label>
+              <Select name="type" defaultValue="public">
+                <SelectTrigger className="mt-1" data-testid="select-event-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Pubblico</SelectItem>
+                  <SelectItem value="nomad">Solo Nomadi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="event-capacity">Posti</Label>
+              <Input
+                id="event-capacity"
+                name="capacity"
+                type="number"
+                min="1"
+                placeholder="∞"
+                className="mt-1"
+                data-testid="input-event-capacity"
+              />
+            </div>
+            <div>
+              <Label htmlFor="event-price">Prezzo €</Label>
+              <Input
+                id="event-price"
+                name="price"
+                type="number"
+                min="0"
+                defaultValue="0"
+                className="mt-1"
+                data-testid="input-event-price"
+              />
+            </div>
+          </div>
+          <input type="hidden" name="currency" value="EUR" />
+
+          <div>
+            <Label>Immagine</Label>
+            <div className="mt-1">
+              {fileUrl ? (
+                <div className="relative">
+                  <img src={fileUrl} alt="Event" className="w-full h-32 object-cover rounded-xl" />
+                  <button
+                    type="button"
+                    onClick={() => {}}
+                    className="absolute top-2 right-2 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-muted rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                  {isUploading ? (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {progress}%
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Image className="w-5 h-5" />
+                      <span className="text-sm">Aggiungi immagine</span>
+                    </div>
+                  )}
+                </label>
+              )}
+            </div>
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || isUploading} 
+            className="w-full"
+            data-testid="button-create-event"
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CalendarPlus className="w-4 h-4 mr-2" />Crea Evento</>}
+          </Button>
+        </form>
       </motion.div>
     </motion.div>
   );
