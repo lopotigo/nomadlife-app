@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
-  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane
+  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
 import { ShareQRModal } from "@/components/share-qr-modal";
+import { EventPosterModal } from "@/components/event-poster-modal";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -70,6 +71,19 @@ function createPostMarkerIcon(imageUrl: string | null) {
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40],
+  });
+}
+
+function createEventMarkerIcon(imageUrl: string | null) {
+  const html = imageUrl 
+    ? `<div class="event-marker"><img src="${imageUrl}" alt="event" /></div>`
+    : `<div class="event-marker event-marker-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg></div>`;
+  return L.divIcon({
+    html,
+    className: "custom-event-marker",
+    iconSize: [44, 44],
+    iconAnchor: [22, 44],
+    popupAnchor: [0, -44],
   });
 }
 
@@ -143,6 +157,7 @@ export default function UnifiedMap() {
   const { user, loading: authLoading } = useAuth();
   const [location, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [myTrips, setMyTrips] = useState<Trip[]>([]);
   const [followingTrips, setFollowingTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,6 +166,7 @@ export default function UnifiedMap() {
   const [showNewEvent, setShowNewEvent] = useState(false);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite"; id: string; title: string } | null>(null);
+  const [posterEvent, setPosterEvent] = useState<any | null>(null);
   const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [pulsingPosts, setPulsingPosts] = useState<Set<string>>(new Set());
@@ -164,9 +180,9 @@ export default function UnifiedMap() {
   
   const [filters, setFilters] = useState({
     showPosts: true,
+    showEvents: true,
     showMyTrips: true,
     showFollowingTrips: true,
-    ecoMode: false,
   });
 
   const handleLike = useCallback(async (postId: string) => {
@@ -201,8 +217,9 @@ export default function UnifiedMap() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [postsRes, myTripsRes, publicTripsRes] = await Promise.all([
+      const [postsRes, eventsRes, myTripsRes, publicTripsRes] = await Promise.all([
         fetch("/api/posts", { credentials: "include" }),
+        fetch("/api/events", { credentials: "include" }),
         fetch("/api/my-trips", { credentials: "include" }),
         fetch("/api/trips", { credentials: "include" }),
       ]);
@@ -210,6 +227,11 @@ export default function UnifiedMap() {
       if (postsRes.ok) {
         const postsData = await postsRes.json();
         setPosts(postsData);
+      }
+      
+      if (eventsRes.ok) {
+        const eventsData = await eventsRes.json();
+        setEvents(eventsData);
       }
       
       if (myTripsRes.ok) {
@@ -263,13 +285,18 @@ export default function UnifiedMap() {
     [posts, filters.showPosts]
   );
 
+  const eventsWithCoords = useMemo(() => 
+    filters.showEvents ? events.filter(e => e.latitude && e.longitude) : [],
+    [events, filters.showEvents]
+  );
+
   const tripsToShow = useMemo(() => {
     const result: (Trip & { isOwn: boolean; color: string })[] = [];
     
     if (filters.showMyTrips) {
       myTrips.forEach(t => {
         if (t.stops && t.stops.length > 0) {
-          result.push({ ...t, isOwn: true, color: filters.ecoMode ? "#22c55e" : "#f59e0b" });
+          result.push({ ...t, isOwn: true, color: "#f59e0b" });
         }
       });
     }
@@ -277,7 +304,7 @@ export default function UnifiedMap() {
     if (filters.showFollowingTrips) {
       followingTrips.forEach(t => {
         if (t.stops && t.stops.length > 0) {
-          result.push({ ...t, isOwn: false, color: filters.ecoMode ? "#22c55e" : "#3b82f6" });
+          result.push({ ...t, isOwn: false, color: "#3b82f6" });
         }
       });
     }
@@ -419,6 +446,64 @@ export default function UnifiedMap() {
                 </Popup>
               </Marker>
             ))}
+
+            {eventsWithCoords.map((event) => (
+              <Marker
+                key={`event-${event.id}`}
+                position={[event.latitude!, event.longitude!]}
+                icon={createEventMarkerIcon(event.imageUrl)}
+              >
+                <Popup className="custom-popup">
+                  <div className="p-3 min-w-[220px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">{event.title}</p>
+                        <p className="text-xs text-gray-500">{event.city}, {event.country}</p>
+                      </div>
+                    </div>
+                    {event.imageUrl && (
+                      <img src={event.imageUrl} className="w-full h-28 object-cover rounded-xl mb-2" alt="" />
+                    )}
+                    <p className="text-xs text-gray-600 mb-2">{event.description?.substring(0, 80)}...</p>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-purple-600">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(event.startDate).toLocaleDateString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                      <span className="font-bold text-green-600">
+                        {event.price > 0 ? `€${event.price}` : "Gratis"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
+                      <span className="text-xs text-gray-500">
+                        {event.attendees} partecipanti
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setPosterEvent(event)}
+                          className="p-1.5 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 transition-colors"
+                          data-testid={`button-poster-event-${event.id}`}
+                          title="Crea Manifesto"
+                        >
+                          <FileImage className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setShareModal({ open: true, type: "invite", id: event.id, title: event.title })}
+                          className="p-1.5 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors"
+                          data-testid={`button-share-event-${event.id}`}
+                          title="Condividi"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
             
             {tripsToShow.map((trip) => {
               const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
@@ -430,7 +515,7 @@ export default function UnifiedMap() {
                     <CurvedPolyline 
                       positions={positions} 
                       color={trip.color}
-                      dashed={filters.ecoMode}
+                      dashed={false}
                     />
                   )}
                   
@@ -575,6 +660,18 @@ export default function UnifiedMap() {
                   
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-purple-400" />
+                      Eventi
+                    </label>
+                    <Switch
+                      checked={filters.showEvents}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showEvents: v }))}
+                      data-testid="switch-events"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
                       <Plane className="w-4 h-4 text-amber-400" />
                       Miei Viaggi
                     </label>
@@ -660,6 +757,14 @@ export default function UnifiedMap() {
           title={shareModal.title}
         />
       )}
+
+      {posterEvent && (
+        <EventPosterModal
+          open={true}
+          onClose={() => setPosterEvent(null)}
+          event={posterEvent}
+        />
+      )}
       
       <style>{`
         .custom-post-marker { background: transparent !important; border: none !important; }
@@ -672,6 +777,16 @@ export default function UnifiedMap() {
         }
         .post-marker img { width: 100%; height: 100%; object-fit: cover; transform: rotate(45deg) scale(1.4); }
         .post-marker-text svg { transform: rotate(45deg); color: white; width: 16px; height: 16px; }
+        .custom-event-marker { background: transparent !important; border: none !important; }
+        .event-marker {
+          width: 44px; height: 44px; border-radius: 50% 50% 50% 0;
+          background: linear-gradient(135deg, #a855f7, #ec4899);
+          border: 3px solid white; box-shadow: 0 3px 12px rgba(168,85,247,0.4);
+          overflow: hidden; transform: rotate(-45deg);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .event-marker img { width: 100%; height: 100%; object-fit: cover; transform: rotate(45deg) scale(1.4); }
+        .event-marker-icon svg { transform: rotate(45deg); fill: white; width: 20px; height: 20px; }
         .custom-stop-marker { background: transparent !important; border: none !important; }
         .custom-popup .leaflet-popup-content-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .custom-popup .leaflet-popup-tip { background: white; }
@@ -1001,6 +1116,8 @@ function CreateEventModal({
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geocoding, setGeocoding] = useState(false);
   const { toast } = useToast();
   const { uploadFile, isUploading, progress } = useUpload();
 
@@ -1011,11 +1128,46 @@ function CreateEventModal({
     }
   };
 
+  const geocodeCity = async (city: string, country: string) => {
+    if (!city) return;
+    setGeocoding(true);
+    try {
+      const query = country ? `${city}, ${country}` : city;
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        toast({ title: "Posizione trovata", description: `Coordinate impostate per ${city}` });
+      }
+    } catch (error) {
+      console.error("Geocoding failed:", error);
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
+    const city = formData.get("city") as string;
+    const country = formData.get("country") as string;
+    
+    let latitude = coords?.lat;
+    let longitude = coords?.lng;
+    
+    if (!latitude || !longitude) {
+      try {
+        const query = country ? `${city}, ${country}` : city;
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+        const geoData = await geoRes.json();
+        if (geoData && geoData.length > 0) {
+          latitude = parseFloat(geoData[0].lat);
+          longitude = parseFloat(geoData[0].lon);
+        }
+      } catch {}
+    }
     
     try {
       const res = await fetch("/api/events", {
@@ -1026,9 +1178,11 @@ function CreateEventModal({
           title: formData.get("title"),
           description: formData.get("description"),
           type: formData.get("type") || "public",
-          city: formData.get("city"),
-          country: formData.get("country") || "",
+          city,
+          country: country || "",
           location: formData.get("location") || "",
+          latitude,
+          longitude,
           startDate: new Date(formData.get("startDate") as string).toISOString(),
           endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string).toISOString() : null,
           capacity: formData.get("capacity") ? parseInt(formData.get("capacity") as string) : null,
@@ -1039,6 +1193,8 @@ function CreateEventModal({
       });
 
       if (res.ok) {
+        setImageUrl(null);
+        setCoords(null);
         onEventCreated();
       } else {
         throw new Error("Failed");

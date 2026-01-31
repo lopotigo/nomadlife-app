@@ -93,6 +93,11 @@ Preferred communication style: Simple, everyday language.
 - **Dark/Light Mode**: Theme toggle in profile with `ThemeProvider` context and localStorage persistence
 - **Push Notifications**: Web Push API with VAPID keys, service worker push handler, subscribe/unsubscribe from profile
 - **Avatar Builder**: Customizable avatar creation page with DiceBear integration - 12 styles (cartoon, pixel art, robot, etc.), background colors, hair colors, accessories
+- **Unified Create Menu**: Single "+" button on map opens dropdown to create Post or Event
+- **Events on Map**: Events now appear as purple markers on the map with dedicated popup showing date, location, price, attendees
+- **Event Filtering**: Toggle events visibility in map filters panel
+- **Event Geocoding**: Automatic coordinate detection from city name using OpenStreetMap Nominatim
+- **Event Poster/Manifesto**: Generate downloadable poster image for events with QR code, date, location, and event details (uses html2canvas)
 
 ### PWA Configuration
 
