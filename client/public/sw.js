@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomadlife-v1';
+const CACHE_NAME = 'nomadlife-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
