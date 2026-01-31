@@ -277,11 +277,15 @@ export type TripStop = typeof tripStops.$inferSelect;
 export const tripExpenses = pgTable("trip_expenses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   stopId: varchar("stop_id").notNull().references(() => tripStops.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // "hotel", "coworking", "food", "transport", "other"
+  type: text("type").notNull(), // "hotel", "hostel", "airbnb", "coworking", "food", "groceries", "drinks", "transport", "internet", "entertainment", "health", "other"
   name: text("name").notNull(),
   cost: integer("cost").notNull(), // in centesimi
   currency: text("currency").default("EUR"),
-  rating: integer("rating"), // 1-5 stelle
+  rating: integer("rating"), // 1-5 stelle valutazione generale
+  wifiRating: integer("wifi_rating"), // 1-5 qualità wifi
+  cleanRating: integer("clean_rating"), // 1-5 pulizia
+  locationRating: integer("location_rating"), // 1-5 posizione
+  valueRating: integer("value_rating"), // 1-5 rapporto qualità/prezzo
   review: text("review"),
   imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

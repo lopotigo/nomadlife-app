@@ -396,6 +396,10 @@ export default function TravelDiary() {
           cost: Math.round(parseFloat(formData.get("cost") as string) * 100),
           currency: formData.get("currency") || "EUR",
           rating: formData.get("rating") ? parseInt(formData.get("rating") as string) : undefined,
+          wifiRating: formData.get("wifiRating") ? parseInt(formData.get("wifiRating") as string) : undefined,
+          cleanRating: formData.get("cleanRating") ? parseInt(formData.get("cleanRating") as string) : undefined,
+          locationRating: formData.get("locationRating") ? parseInt(formData.get("locationRating") as string) : undefined,
+          valueRating: formData.get("valueRating") ? parseInt(formData.get("valueRating") as string) : undefined,
           review: formData.get("review") || undefined,
         }),
       });
@@ -879,14 +883,14 @@ export default function TravelDiary() {
                 Aggiungi Spesa
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={(e) => showNewExpense && handleAddExpense(e, showNewExpense)} className="space-y-4">
+            <form onSubmit={(e) => showNewExpense && handleAddExpense(e, showNewExpense)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
               <div>
-                <Label htmlFor="type">Tipo</Label>
-                <Select name="type" defaultValue="hotel">
+                <Label htmlFor="type">Tipo Spesa</Label>
+                <Select name="type" required>
                   <SelectTrigger className="bg-slate-700 border-slate-600" data-testid="select-expense-type">
-                    <SelectValue />
+                    <SelectValue placeholder="Seleziona tipo..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-600">
+                  <SelectContent className="bg-slate-700 border-slate-600 max-h-60">
                     {expenseTypes.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex items-center gap-2">
@@ -903,7 +907,7 @@ export default function TravelDiary() {
                 <Input 
                   id="name"
                   name="name" 
-                  placeholder="Es: Hotel Paradise" 
+                  placeholder="Es: Ostello Central, Café Roma..." 
                   required 
                   className="bg-slate-700 border-slate-600"
                   data-testid="input-expense-name"
@@ -932,33 +936,105 @@ export default function TravelDiary() {
                     <SelectContent className="bg-slate-700 border-slate-600">
                       <SelectItem value="EUR">€ EUR</SelectItem>
                       <SelectItem value="USD">$ USD</SelectItem>
+                      <SelectItem value="GBP">£ GBP</SelectItem>
                       <SelectItem value="THB">฿ THB</SelectItem>
+                      <SelectItem value="IDR">Rp IDR</SelectItem>
+                      <SelectItem value="MXN">$ MXN</SelectItem>
+                      <SelectItem value="BRL">R$ BRL</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div>
-                <Label htmlFor="rating">Valutazione (1-5)</Label>
-                <Select name="rating">
-                  <SelectTrigger className="bg-slate-700 border-slate-600" data-testid="select-rating">
-                    <SelectValue placeholder="Opzionale" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-600">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <SelectItem key={n} value={n.toString()}>
-                        {"⭐".repeat(n)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              
+              <div className="p-3 bg-slate-700/50 rounded-lg space-y-3">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Valutazioni Qualità</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="rating" className="text-xs">⭐ Generale</Label>
+                    <Select name="rating">
+                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-rating">
+                        <SelectValue placeholder="--" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {"⭐".repeat(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="wifiRating" className="text-xs">📶 WiFi</Label>
+                    <Select name="wifiRating">
+                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-wifi-rating">
+                        <SelectValue placeholder="--" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {"⭐".repeat(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="cleanRating" className="text-xs">🧹 Pulizia</Label>
+                    <Select name="cleanRating">
+                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-clean-rating">
+                        <SelectValue placeholder="--" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {"⭐".repeat(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="locationRating" className="text-xs">📍 Posizione</Label>
+                    <Select name="locationRating">
+                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-location-rating">
+                        <SelectValue placeholder="--" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {"⭐".repeat(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2">
+                    <Label htmlFor="valueRating" className="text-xs">💰 Rapporto Qualità/Prezzo</Label>
+                    <Select name="valueRating">
+                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-value-rating">
+                        <SelectValue placeholder="--" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-700 border-slate-600">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {"⭐".repeat(n)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
+
               <div>
                 <Label htmlFor="review">Recensione (opzionale)</Label>
                 <Textarea 
                   id="review"
                   name="review" 
-                  placeholder="La tua esperienza..." 
+                  placeholder="La tua esperienza, consigli per altri nomadi..." 
                   className="bg-slate-700 border-slate-600"
+                  rows={3}
                   data-testid="input-expense-review"
                 />
               </div>
