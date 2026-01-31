@@ -11,11 +11,11 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
   const [location] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0 font-sans">
-      <main className="md:pl-64 min-h-screen">
+    <div className="h-screen bg-background pb-20 md:pb-0 font-sans overflow-hidden">
+      <main className="md:pl-64 h-full">
         <div className={fullWidth 
-          ? "min-h-screen bg-card" 
-          : "max-w-2xl mx-auto min-h-screen border-x border-border/40 bg-card shadow-sm"
+          ? "h-full bg-card overflow-hidden" 
+          : "max-w-2xl mx-auto h-full border-x border-border/40 bg-card shadow-sm overflow-hidden"
         }>
           {children}
         </div>
