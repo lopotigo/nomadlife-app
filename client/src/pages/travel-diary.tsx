@@ -5,7 +5,8 @@ import { useLocation, Link } from "wouter";
 import { 
   Plus, MapPin, Calendar, Wallet, Star, ChevronRight, 
   Loader2, Plane, Hotel, Coffee, Utensils, Car, MoreHorizontal,
-  Globe, X, Check, Edit, Trash2, Eye, Users, Image, Video, LocateFixed
+  Globe, X, Check, Edit, Trash2, Eye, Users, Image, Video, LocateFixed,
+  Home, Building2, ShoppingCart, Beer, Ticket, Wifi, Heart, Briefcase
 } from "lucide-react";
 import { useUpload } from "@/hooks/use-upload";
 import { motion, AnimatePresence } from "framer-motion";
@@ -94,9 +95,16 @@ interface TripWithDetails extends Trip {
 
 const expenseTypes = [
   { value: "hotel", label: "Hotel", icon: Hotel },
-  { value: "coworking", label: "Coworking", icon: Coffee },
+  { value: "hostel", label: "Ostello", icon: Building2 },
+  { value: "airbnb", label: "Airbnb/Affitto", icon: Home },
+  { value: "coworking", label: "Coworking", icon: Briefcase },
   { value: "food", label: "Ristorante", icon: Utensils },
+  { value: "groceries", label: "Spesa/Market", icon: ShoppingCart },
+  { value: "drinks", label: "Bar/Drink", icon: Beer },
   { value: "transport", label: "Trasporto", icon: Car },
+  { value: "internet", label: "Internet/SIM", icon: Wifi },
+  { value: "entertainment", label: "Svago/Cultura", icon: Ticket },
+  { value: "health", label: "Salute", icon: Heart },
   { value: "other", label: "Altro", icon: MoreHorizontal },
 ];
 
