@@ -470,8 +470,19 @@ export default function UnifiedMap() {
                     >
                       <Popup className="custom-popup">
                         <div className="p-3 min-w-[200px]">
+                          <div className="flex items-center gap-2 mb-3">
+                            <img 
+                              src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
+                              className="w-8 h-8 rounded-full object-cover"
+                              alt={trip.user?.name || "User"}
+                            />
+                            <div>
+                              <p className="font-semibold text-sm">{trip.user?.name || trip.user?.username || "Utente"}</p>
+                              {trip.user?.username && <p className="text-xs text-gray-500">@{trip.user.username}</p>}
+                            </div>
+                          </div>
                           <div className="flex items-center gap-2 mb-2">
-                            <div style={{ background: trip.color }} className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            <div style={{ background: trip.color }} className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs">
                               {stop.orderIndex + 1}
                             </div>
                             <div>
