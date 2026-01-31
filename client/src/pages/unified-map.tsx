@@ -394,8 +394,8 @@ export default function UnifiedMap() {
 
   return (
     <Layout>
-      <div className="flex flex-col h-full">
-        <div className="relative h-[50vh] min-h-[300px]">
+      <div className="h-full overflow-y-auto">
+        <div className="sticky top-0 z-10 h-[45vh] min-h-[280px]">
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
@@ -709,8 +709,8 @@ export default function UnifiedMap() {
           
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
+        <div className="p-4 space-y-4 pb-20 bg-background min-h-[60vh]">
+          <h2 className="text-lg font-semibold flex items-center gap-2 sticky top-[45vh] bg-background/95 backdrop-blur-sm py-2 -mx-4 px-4 z-[5]">
             <Heart className="w-5 h-5 text-red-400" />
             Feed
           </h2>
