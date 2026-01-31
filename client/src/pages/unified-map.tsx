@@ -471,7 +471,7 @@ export default function UnifiedMap() {
                       <Popup className="custom-popup">
                         <div className="p-3 min-w-[200px]">
                           <a 
-                            href={`/profile/${trip.user?.id || trip.userId}`}
+                            href={`/user/${trip.user?.id || trip.userId}`}
                             className="flex items-center gap-2 mb-3 hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                           >
