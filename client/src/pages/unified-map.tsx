@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
-  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus
+  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -1000,8 +1000,16 @@ function CreateEventModal({
   onEventCreated: () => void;
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
-  const { uploadFile, isUploading, progress, fileUrl } = useUpload();
+  const { uploadFile, isUploading, progress } = useUpload();
+
+  const handleImageUpload = async (file: File) => {
+    const result = await uploadFile(file);
+    if (result?.objectPath) {
+      setImageUrl(result.objectPath);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -1026,7 +1034,7 @@ function CreateEventModal({
           capacity: formData.get("capacity") ? parseInt(formData.get("capacity") as string) : null,
           price: formData.get("price") ? parseInt(formData.get("price") as string) : 0,
           currency: formData.get("currency") || "EUR",
-          imageUrl: fileUrl || null,
+          imageUrl: imageUrl || null,
         }),
       });
 
@@ -1197,12 +1205,12 @@ function CreateEventModal({
           <div>
             <Label>Immagine</Label>
             <div className="mt-1">
-              {fileUrl ? (
+              {imageUrl ? (
                 <div className="relative">
-                  <img src={fileUrl} alt="Event" className="w-full h-32 object-cover rounded-xl" />
+                  <img src={imageUrl} alt="Event" className="w-full h-32 object-cover rounded-xl" />
                   <button
                     type="button"
-                    onClick={() => {}}
+                    onClick={() => setImageUrl(null)}
                     className="absolute top-2 right-2 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center"
                   >
                     <X className="w-4 h-4 text-white" />
@@ -1213,7 +1221,7 @@ function CreateEventModal({
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])}
+                    onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])}
                     className="hidden"
                     disabled={isUploading}
                   />
