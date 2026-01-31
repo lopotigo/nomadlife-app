@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, UserPlus, Users } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Post, User, Comment, Trip, TripStop, TripExpense } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
@@ -16,59 +16,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [liveTrips, setLiveTrips] = useState<LiveTrip[]>([]);
-  const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
-  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-
-  const fetchSuggestedUsers = useCallback(async () => {
-    if (!user) return;
-    try {
-      const [usersRes, followingRes] = await Promise.all([
-        fetch("/api/users", { credentials: "include" }),
-        fetch(`/api/users/${user.id}/following`, { credentials: "include" })
-      ]);
-      
-      if (usersRes.ok) {
-        const allUsers = await usersRes.json();
-        const filtered = allUsers.filter((u: User) => u.id !== user.id);
-        setSuggestedUsers(filtered.slice(0, 10));
-      }
-      
-      if (followingRes.ok) {
-        const following = await followingRes.json();
-        setFollowingIds(new Set(following.map((f: any) => f.followingId)));
-      }
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    }
-  }, [user]);
-
-  const handleFollow = async (targetUserId: string) => {
-    try {
-      const isFollowing = followingIds.has(targetUserId);
-      const method = isFollowing ? "DELETE" : "POST";
-      const res = await fetch(`/api/users/${targetUserId}/follow`, { 
-        method, 
-        credentials: "include" 
-      });
-      
-      if (res.ok) {
-        setFollowingIds(prev => {
-          const next = new Set(prev);
-          if (isFollowing) {
-            next.delete(targetUserId);
-          } else {
-            next.add(targetUserId);
-          }
-          return next;
-        });
-        // Refresh live trips when following changes
-        fetchLiveTrips();
-      }
-    } catch (error) {
-      console.error("Failed to follow user:", error);
-    }
-  };
 
   const fetchPosts = useCallback(() => {
     fetch("/api/posts", { credentials: "include" })
@@ -100,8 +48,7 @@ export default function Home() {
 
     fetchPosts();
     fetchLiveTrips();
-    fetchSuggestedUsers();
-  }, [user, authLoading, setLocation, fetchPosts, fetchLiveTrips, fetchSuggestedUsers]);
+  }, [user, authLoading, setLocation, fetchPosts, fetchLiveTrips]);
 
   const handleLike = async (postId: string) => {
     try {
