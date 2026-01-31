@@ -741,7 +741,7 @@ export default function UnifiedMap() {
                 );
               }
               if (item.type === "event") {
-                return <FeedEventCard key={`event-${item.data.id}`} event={item.data} />;
+                return <FeedEventCard key={`event-${item.data.id}`} event={item.data} currentUser={user} />;
               }
               if (item.type === "trip") {
                 return <FeedTripCard key={`trip-${item.data.id}`} trip={item.data} />;
@@ -1661,7 +1661,111 @@ function FeedPostCard({
   );
 }
 
-function FeedEventCard({ event }: { event: EventWithHost }) {
+type EventCommentWithUser = { id: string; eventId: string; userId: string; content: string; createdAt: Date; user: User };
+
+function FeedEventCard({ event, currentUser }: { event: EventWithHost; currentUser: User | null }) {
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(event.likes || 0);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<EventCommentWithUser[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [commentsCount, setCommentsCount] = useState(event.commentsCount || 0);
+  const [pulsing, setPulsing] = useState(false);
+
+  // Check if user has liked this event
+  useEffect(() => {
+    if (currentUser) {
+      fetch(`/api/events/${event.id}/liked`, { credentials: "include" })
+        .then(res => res.json())
+        .then(data => setLiked(data.liked))
+        .catch(console.error);
+    }
+  }, [event.id, currentUser]);
+
+  const handleLike = async () => {
+    if (!currentUser) return;
+    
+    setPulsing(true);
+    setTimeout(() => setPulsing(false), 300);
+    
+    try {
+      if (liked) {
+        await fetch(`/api/events/${event.id}/like`, { method: "DELETE", credentials: "include" });
+        setLikes(l => Math.max(0, l - 1));
+        setLiked(false);
+      } else {
+        await fetch(`/api/events/${event.id}/like`, { method: "POST", credentials: "include" });
+        setLikes(l => l + 1);
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchComments = async () => {
+    setLoadingComments(true);
+    try {
+      const res = await fetch(`/api/events/${event.id}/comments`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleToggleComments = () => {
+    if (!showComments && comments.length === 0) {
+      fetchComments();
+    }
+    setShowComments(!showComments);
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || submitting) return;
+    
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/events/${event.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: newComment.trim() })
+      });
+      if (res.ok) {
+        await fetchComments();
+        setNewComment("");
+        setCommentsCount(c => c + 1);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const res = await fetch(`/api/events/${event.id}/comments/${commentId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        setComments(comments.filter(c => c.id !== commentId));
+        setCommentsCount(c => Math.max(0, c - 1));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const formatDate = (date: Date | string) => {
     const d = new Date(date);
     return d.toLocaleDateString("it-IT", { 
@@ -1745,8 +1849,99 @@ function FeedEventCard({ event }: { event: EventWithHost }) {
               <span className="text-xs">Organizzato da <strong>{event.host.name || event.host.username}</strong></span>
             </div>
           )}
+
+          {/* Like and Comment buttons */}
+          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/20">
+            <button 
+              onClick={handleLike}
+              className={`flex items-center gap-1 text-sm transition-colors ${liked ? 'text-white' : 'text-white/70 hover:text-white'}`}
+              data-testid={`button-like-event-${event.id}`}
+              disabled={!currentUser}
+            >
+              <Heart className={`w-4 h-4 ${pulsing ? 'animate-pulse' : ''} ${liked ? 'fill-white text-white' : ''}`} />
+              <span>{likes}</span>
+            </button>
+            <button 
+              onClick={handleToggleComments}
+              className="flex items-center gap-1 text-sm text-white/70 hover:text-white transition-colors"
+              data-testid={`button-comments-event-${event.id}`}
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>{commentsCount}</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Comments section */}
+      <AnimatePresence>
+        {showComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-card p-4 border-t border-border overflow-hidden"
+          >
+            {currentUser && (
+              <form onSubmit={handleSubmitComment} className="flex gap-2 mb-4">
+                <input
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Scrivi un commento..."
+                  className="flex-1 bg-muted rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                  data-testid={`input-comment-event-${event.id}`}
+                />
+                <button 
+                  type="submit" 
+                  disabled={submitting || !newComment.trim()}
+                  className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center disabled:opacity-50"
+                  data-testid={`button-submit-comment-event-${event.id}`}
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
+            )}
+
+            {loadingComments ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : comments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-2">Nessun commento ancora</p>
+            ) : (
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="flex items-start gap-2" data-testid={`event-comment-${comment.id}`}>
+                    <img
+                      src={comment.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user.username}`}
+                      className="w-7 h-7 rounded-full"
+                      alt={comment.user.name || ""}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">
+                        <span className="font-semibold mr-1">{comment.user.username}</span>
+                        {comment.content}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(comment.createdAt).toLocaleDateString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                    {currentUser && comment.userId === currentUser.id && (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                        data-testid={`button-delete-event-comment-${comment.id}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
