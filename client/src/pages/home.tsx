@@ -2,19 +2,29 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Post, User, Comment, Trip, TripStop, TripExpense } from "@shared/schema";
+import type { Post, User, Comment, Trip, TripStop, TripExpense, Event } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
+import { QRCodeSVG } from "qrcode.react";
 
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
 type LiveTrip = Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] };
+type EventWithHost = Event & { host: User };
+type PublicTrip = Trip & { user: User; stops: TripStop[] };
+
+type FeedItem = 
+  | { type: "post"; data: PostWithUser; createdAt: Date }
+  | { type: "event"; data: EventWithHost; createdAt: Date }
+  | { type: "trip"; data: PublicTrip; createdAt: Date };
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
+  const [events, setEvents] = useState<EventWithHost[]>([]);
+  const [publicTrips, setPublicTrips] = useState<PublicTrip[]>([]);
   const [liveTrips, setLiveTrips] = useState<LiveTrip[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +34,27 @@ export default function Home() {
       .then((data) => setPosts(data))
       .catch(console.error)
       .finally(() => setLoading(false));
+  }, []);
+
+  const fetchEvents = useCallback(() => {
+    fetch("/api/events", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setEvents(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  const fetchPublicTrips = useCallback(() => {
+    fetch("/api/trips/public", { credentials: "include" })
+      .then((res) => {
+        if (!res.ok) return [];
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) setPublicTrips(data);
+      })
+      .catch(console.error);
   }, []);
 
   const fetchLiveTrips = useCallback(() => {
@@ -47,8 +78,16 @@ export default function Home() {
     }
 
     fetchPosts();
+    fetchEvents();
+    fetchPublicTrips();
     fetchLiveTrips();
-  }, [user, authLoading, setLocation, fetchPosts, fetchLiveTrips]);
+  }, [user, authLoading, setLocation, fetchPosts, fetchEvents, fetchPublicTrips, fetchLiveTrips]);
+
+  const feedItems: FeedItem[] = [
+    ...posts.map((p) => ({ type: "post" as const, data: p, createdAt: new Date(p.createdAt) })),
+    ...events.map((e) => ({ type: "event" as const, data: e, createdAt: new Date(e.createdAt) })),
+    ...publicTrips.map((t) => ({ type: "trip" as const, data: t, createdAt: new Date(t.createdAt) })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   const handleLike = async (postId: string) => {
     try {
@@ -92,14 +131,23 @@ export default function Home() {
         <CreatePostForm onPostCreated={fetchPosts} />
         
         <div className="space-y-6">
-          {posts.length === 0 ? (
+          {feedItems.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No posts yet. Start exploring!</p>
             </div>
           ) : (
-            posts.map((post) => (
-              <PostCard key={post.id} post={post} onLike={handleLike} currentUser={user} />
-            ))
+            feedItems.map((item) => {
+              if (item.type === "post") {
+                return <PostCard key={`post-${item.data.id}`} post={item.data} onLike={handleLike} currentUser={user} />;
+              }
+              if (item.type === "event") {
+                return <EventManifestoCard key={`event-${item.data.id}`} event={item.data} />;
+              }
+              if (item.type === "trip") {
+                return <TripFeedCard key={`trip-${item.data.id}`} trip={item.data} />;
+              }
+              return null;
+            })
           )}
         </div>
       </div>
@@ -707,5 +755,193 @@ function LiveTripsSection({ trips }: { trips: LiveTrip[] }) {
         })}
       </div>
     </div>
+  );
+}
+
+function EventManifestoCard({ event }: { event: EventWithHost }) {
+  const formatDate = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("it-IT", { 
+      weekday: "long",
+      day: "numeric", 
+      month: "long",
+      year: "numeric"
+    });
+  };
+
+  const formatTime = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const shareUrl = `${window.location.origin}/event/${event.id}`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl overflow-hidden shadow-xl"
+      data-testid={`event-manifesto-${event.id}`}
+    >
+      <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-6 text-white">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute top-4 right-4 w-32 h-32 rounded-full bg-white/20 blur-2xl" />
+          <div className="absolute bottom-4 left-4 w-24 h-24 rounded-full bg-white/20 blur-xl" />
+        </div>
+        
+        <div className="relative z-10">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              <span className="text-sm font-medium opacity-90">Evento</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2">
+              <QRCodeSVG value={shareUrl} size={60} bgColor="transparent" fgColor="white" />
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold mb-2">{event.title}</h2>
+          
+          {event.description && (
+            <p className="text-sm opacity-80 mb-4 line-clamp-2">{event.description}</p>
+          )}
+
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 opacity-70" />
+              <span className="text-sm">{formatDate(event.startDate)}</span>
+              <span className="text-sm opacity-70">ore {formatTime(event.startDate)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 opacity-70" />
+              <span className="text-sm">{event.city}, {event.country}</span>
+            </div>
+            {event.location && (
+              <div className="flex items-center gap-2">
+                <MapPinned className="w-4 h-4 opacity-70" />
+                <span className="text-sm opacity-80">{event.location}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-white/20">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 opacity-70" />
+              <span className="text-sm">{event.attendees} partecipanti</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+              <span className="font-bold">
+                {(event.price ?? 0) > 0 ? `€${event.price}` : "Gratis"}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            {event.host?.avatar ? (
+              <img src={event.host.avatar} alt={event.host.name || ""} className="w-8 h-8 rounded-full border-2 border-white/50" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold">
+                {(event.host?.name || event.host?.username || "?")[0]}
+              </div>
+            )}
+            <span className="text-sm">Organizzato da <strong>{event.host?.name || event.host?.username}</strong></span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function TripFeedCard({ trip }: { trip: PublicTrip }) {
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+  };
+
+  const stops = trip.stops || [];
+  const cities = stops.map(s => s.city).filter(Boolean);
+  const countries = Array.from(new Set(stops.map(s => s.country).filter(Boolean)));
+  
+  const tripDays = stops.length > 1 
+    ? Math.ceil((new Date(stops[stops.length - 1].arrivalDate).getTime() - new Date(stops[0].arrivalDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
+    : 1;
+
+  const coverImage = stops.find(s => s.imageUrl)?.imageUrl;
+
+  return (
+    <Link href={`/trip/${trip.id}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border border-border/40 rounded-2xl overflow-hidden cursor-pointer hover:border-primary/30 transition-colors"
+        data-testid={`trip-feed-card-${trip.id}`}
+      >
+        {coverImage && (
+          <div className="h-40 overflow-hidden">
+            <img src={coverImage} alt={trip.title} className="w-full h-full object-cover" />
+          </div>
+        )}
+        
+        <div className="p-4">
+          <div className="flex items-center gap-3 mb-3">
+            {trip.user?.avatar ? (
+              <img src={trip.user.avatar} alt={trip.user.name || ""} className="w-10 h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-sm font-bold">{(trip.user?.name || trip.user?.username || "?")[0]}</span>
+              </div>
+            )}
+            <div>
+              <p className="font-medium text-sm">{trip.user?.name || trip.user?.username}</p>
+              <p className="text-xs text-muted-foreground">ha condiviso un viaggio</p>
+            </div>
+          </div>
+
+          <h3 className="font-bold text-lg mb-2">{trip.title}</h3>
+          
+          {trip.description && (
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{trip.description}</p>
+          )}
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            {cities.slice(0, 4).map((city, i) => (
+              <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-full text-xs">
+                <MapPin className="w-3 h-3" />
+                {city}
+              </span>
+            ))}
+            {cities.length > 4 && (
+              <span className="px-2 py-1 bg-muted rounded-full text-xs">+{cities.length - 4}</span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <Route className="w-4 h-4" />
+                {stops.length} tappe
+              </span>
+              <span>{tripDays} giorni</span>
+            </div>
+            {countries.length > 0 && (
+              <span className="text-xs">{countries.join(", ")}</span>
+            )}
+          </div>
+
+          {stops.length > 1 && (
+            <div className="mt-4 pt-3 border-t border-border/40">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium">{stops[0].city}</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent relative">
+                  {stops.slice(1, -1).map((_, i) => (
+                    <div key={i} className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full" style={{ left: `${((i + 1) / stops.length) * 100}%` }} />
+                  ))}
+                </div>
+                <span className="font-medium">{stops[stops.length - 1].city}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </Link>
   );
 }

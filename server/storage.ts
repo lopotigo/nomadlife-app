@@ -109,7 +109,7 @@ export interface IStorage {
   }): Promise<Place[]>;
 
   // Trips (Travel Diary)
-  getTrips(filters?: { userId?: string; isPublic?: boolean }): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
+  getTrips(filters?: { userId?: string; isPublic?: boolean; status?: string }): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
   getTrip(id: string): Promise<(Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] }) | undefined>;
   getUserTrips(userId: string): Promise<Trip[]>;
   createTrip(trip: InsertTrip): Promise<Trip>;
@@ -647,10 +647,11 @@ export class DrizzleStorage implements IStorage {
   }
 
   // Trips (Travel Diary)
-  async getTrips(filters?: { userId?: string; isPublic?: boolean }): Promise<(Trip & { user: User; stops: TripStop[] })[]> {
+  async getTrips(filters?: { userId?: string; isPublic?: boolean; status?: string }): Promise<(Trip & { user: User; stops: TripStop[] })[]> {
     const conditions = [];
     if (filters?.userId) conditions.push(eq(schema.trips.userId, filters.userId));
     if (filters?.isPublic !== undefined) conditions.push(eq(schema.trips.isPublic, filters.isPublic));
+    if (filters?.status) conditions.push(eq(schema.trips.status, filters.status));
 
     const tripsQuery = conditions.length > 0
       ? this.db.select().from(schema.trips)

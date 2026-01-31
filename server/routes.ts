@@ -609,6 +609,16 @@ export async function registerRoutes(
     }
   });
 
+  // Public trips for feed (completed trips that are public)
+  app.get("/api/trips/public", async (req, res) => {
+    try {
+      const trips = await storage.getTrips({ isPublic: true, status: "completed" });
+      res.send(trips);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/trips", async (req, res) => {
     try {
       const userId = req.isAuthenticated() ? (req.user as User).id : null;
