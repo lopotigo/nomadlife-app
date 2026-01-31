@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Post, User, Comment } from "@shared/schema";
+import type { Post, User, Comment, Event } from "@shared/schema";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,12 @@ L.Icon.Default.mergeOptions({
 
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
+type EventWithHost = Event & { host: User };
+
+type FeedItem = 
+  | { type: "post"; data: PostWithUser; createdAt: Date }
+  | { type: "event"; data: EventWithHost; createdAt: Date }
+  | { type: "trip"; data: Trip; createdAt: Date };
 
 interface TripStop {
   id: string;
@@ -57,6 +64,7 @@ interface Trip {
   startDate: string;
   endDate?: string;
   isPublic: boolean;
+  createdAt?: string;
   user: { id: string; name: string; username: string; avatar?: string };
   stops: TripStop[];
 }
@@ -707,21 +715,40 @@ export default function UnifiedMap() {
             Feed
           </h2>
           
-          {posts.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nessun post ancora. Clicca sulla mappa per crearne uno!</p>
-          ) : (
-            posts.map((post) => (
-              <FeedPostCard
-                key={post.id}
-                post={post}
-                currentUser={user}
-                likedPosts={likedPosts}
-                pulsingPosts={pulsingPosts}
-                onLike={handleLike}
-                onShare={(p) => setShareModal({ open: true, type: "post", id: p.id, title: p.content.substring(0, 50) + "..." })}
-              />
-            ))
-          )}
+          {(() => {
+            const feedItems: FeedItem[] = [
+              ...posts.map((p) => ({ type: "post" as const, data: p, createdAt: new Date(p.createdAt) })),
+              ...events.map((e) => ({ type: "event" as const, data: e as EventWithHost, createdAt: new Date(e.createdAt) })),
+              ...followingTrips.map((t) => ({ type: "trip" as const, data: t, createdAt: new Date(t.createdAt || Date.now()) })),
+            ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+            if (feedItems.length === 0) {
+              return <p className="text-muted-foreground text-center py-8">Nessun contenuto ancora. Clicca sulla mappa per crearne uno!</p>;
+            }
+
+            return feedItems.map((item) => {
+              if (item.type === "post") {
+                return (
+                  <FeedPostCard
+                    key={`post-${item.data.id}`}
+                    post={item.data}
+                    currentUser={user}
+                    likedPosts={likedPosts}
+                    pulsingPosts={pulsingPosts}
+                    onLike={handleLike}
+                    onShare={(p) => setShareModal({ open: true, type: "post", id: p.id, title: p.content.substring(0, 50) + "..." })}
+                  />
+                );
+              }
+              if (item.type === "event") {
+                return <FeedEventCard key={`event-${item.data.id}`} event={item.data} />;
+              }
+              if (item.type === "trip") {
+                return <FeedTripCard key={`trip-${item.data.id}`} trip={item.data} />;
+              }
+              return null;
+            });
+          })()}
         </div>
       </div>
       
@@ -1631,5 +1658,177 @@ function FeedPostCard({
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+function FeedEventCard({ event }: { event: EventWithHost }) {
+  const formatDate = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("it-IT", { 
+      weekday: "long",
+      day: "numeric", 
+      month: "long",
+      year: "numeric"
+    });
+  };
+
+  const formatTime = (date: Date | string) => {
+    const d = new Date(date);
+    return d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const shareUrl = `${window.location.origin}/event/${event.id}`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl overflow-hidden shadow-xl"
+      data-testid={`event-manifesto-${event.id}`}
+    >
+      <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-5 text-white">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute top-4 right-4 w-24 h-24 rounded-full bg-white/20 blur-2xl" />
+          <div className="absolute bottom-4 left-4 w-20 h-20 rounded-full bg-white/20 blur-xl" />
+        </div>
+        
+        <div className="relative z-10">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span className="text-xs font-medium opacity-90">Evento</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-1.5">
+              <QRCodeSVG value={shareUrl} size={48} bgColor="transparent" fgColor="white" />
+            </div>
+          </div>
+
+          <h2 className="text-xl font-bold mb-1">{event.title}</h2>
+          
+          {event.description && (
+            <p className="text-xs opacity-80 mb-3 line-clamp-2">{event.description}</p>
+          )}
+
+          <div className="space-y-1.5 mb-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-3.5 h-3.5 opacity-70" />
+              <span>{formatDate(event.startDate)}</span>
+              <span className="opacity-70">ore {formatTime(event.startDate)}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="w-3.5 h-3.5 opacity-70" />
+              <span>{event.city}, {event.country}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-white/20">
+            <div className="flex items-center gap-2 text-sm">
+              <Users className="w-3.5 h-3.5 opacity-70" />
+              <span>{event.attendees} partecipanti</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <span className="font-bold text-sm">
+                {(event.price ?? 0) > 0 ? `€${event.price}` : "Gratis"}
+              </span>
+            </div>
+          </div>
+
+          {event.host && (
+            <div className="mt-3 flex items-center gap-2">
+              {event.host.avatar ? (
+                <img src={event.host.avatar} alt={event.host.name || ""} className="w-6 h-6 rounded-full border border-white/50" />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold">
+                  {(event.host.name || event.host.username || "?")[0]}
+                </div>
+              )}
+              <span className="text-xs">Organizzato da <strong>{event.host.name || event.host.username}</strong></span>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FeedTripCard({ trip }: { trip: Trip }) {
+  const stops = trip.stops || [];
+  const cities = stops.map(s => s.city).filter(Boolean);
+  const countries = Array.from(new Set(stops.map(s => s.country).filter(Boolean)));
+  
+  const tripDays = stops.length > 1 
+    ? Math.ceil((new Date(stops[stops.length - 1].arrivalDate).getTime() - new Date(stops[0].arrivalDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
+    : 1;
+
+  return (
+    <Link href={`/trip/${trip.id}`}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border border-border/40 rounded-2xl overflow-hidden cursor-pointer hover:border-primary/30 transition-colors"
+        data-testid={`trip-feed-card-${trip.id}`}
+      >
+        <div className="p-4">
+          <div className="flex items-center gap-3 mb-3">
+            {trip.user?.avatar ? (
+              <img src={trip.user.avatar} alt={trip.user.name || ""} className="w-10 h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-sm font-bold">{(trip.user?.name || trip.user?.username || "?")[0]}</span>
+              </div>
+            )}
+            <div>
+              <p className="font-medium text-sm">{trip.user?.name || trip.user?.username}</p>
+              <p className="text-xs text-muted-foreground">ha condiviso un viaggio</p>
+            </div>
+          </div>
+
+          <h3 className="font-bold text-lg mb-2">{trip.title}</h3>
+          
+          {trip.description && (
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{trip.description}</p>
+          )}
+
+          <div className="flex flex-wrap gap-2 mb-3">
+            {cities.slice(0, 4).map((city, i) => (
+              <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-full text-xs">
+                <MapPin className="w-3 h-3" />
+                {city}
+              </span>
+            ))}
+            {cities.length > 4 && (
+              <span className="px-2 py-1 bg-muted rounded-full text-xs">+{cities.length - 4}</span>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <Plane className="w-4 h-4" />
+                {stops.length} tappe
+              </span>
+              <span>{tripDays} giorni</span>
+            </div>
+            {countries.length > 0 && (
+              <span className="text-xs">{countries.join(", ")}</span>
+            )}
+          </div>
+
+          {stops.length > 1 && (
+            <div className="mt-3 pt-3 border-t border-border/40">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium">{stops[0].city}</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent relative">
+                  {stops.slice(1, -1).map((_, i) => (
+                    <div key={i} className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full" style={{ left: `${((i + 1) / stops.length) * 100}%` }} />
+                  ))}
+                </div>
+                <span className="font-medium">{stops[stops.length - 1].city}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </Link>
   );
 }
