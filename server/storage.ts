@@ -97,6 +97,16 @@ export interface IStorage {
   registerForEvent(registration: InsertEventRegistration): Promise<EventRegistration>;
   cancelEventRegistration(eventId: string, userId: string): Promise<EventRegistration | undefined>;
   getUserEventRegistrations(userId: string): Promise<(EventRegistration & { event: Event })[]>;
+  
+  // Event Likes
+  likeEvent(eventId: string, userId: string): Promise<Event | undefined>;
+  unlikeEvent(eventId: string, userId: string): Promise<Event | undefined>;
+  hasUserLikedEvent(eventId: string, userId: string): Promise<boolean>;
+  
+  // Event Comments
+  getEventComments(eventId: string): Promise<(schema.EventComment & { user: User })[]>;
+  createEventComment(comment: schema.InsertEventComment): Promise<schema.EventComment>;
+  deleteEventComment(id: string, userId: string): Promise<boolean>;
 
   // Advanced Search
   searchPlaces(filters: {
@@ -607,6 +617,109 @@ export class DrizzleStorage implements IStorage {
       ...row.event_registrations,
       event: row.events!,
     }));
+  }
+
+  // Event Likes
+  async likeEvent(eventId: string, userId: string): Promise<Event | undefined> {
+    const existing = await this.db
+      .select()
+      .from(schema.eventLikes)
+      .where(and(
+        eq(schema.eventLikes.eventId, eventId),
+        eq(schema.eventLikes.userId, userId)
+      ));
+    
+    if (existing.length > 0) {
+      return await this.getEvent(eventId).then(e => e as Event | undefined);
+    }
+    
+    await this.db.insert(schema.eventLikes).values({ eventId, userId });
+    
+    const result = await this.db
+      .update(schema.events)
+      .set({ likes: sql`${schema.events.likes} + 1` })
+      .where(eq(schema.events.id, eventId))
+      .returning();
+    return result[0];
+  }
+
+  async unlikeEvent(eventId: string, userId: string): Promise<Event | undefined> {
+    const existing = await this.db
+      .select()
+      .from(schema.eventLikes)
+      .where(and(
+        eq(schema.eventLikes.eventId, eventId),
+        eq(schema.eventLikes.userId, userId)
+      ));
+    
+    if (existing.length === 0) {
+      return await this.getEvent(eventId).then(e => e as Event | undefined);
+    }
+    
+    await this.db
+      .delete(schema.eventLikes)
+      .where(and(
+        eq(schema.eventLikes.eventId, eventId),
+        eq(schema.eventLikes.userId, userId)
+      ));
+    
+    const result = await this.db
+      .update(schema.events)
+      .set({ likes: sql`${schema.events.likes} - 1` })
+      .where(eq(schema.events.id, eventId))
+      .returning();
+    return result[0];
+  }
+
+  async hasUserLikedEvent(eventId: string, userId: string): Promise<boolean> {
+    const result = await this.db
+      .select()
+      .from(schema.eventLikes)
+      .where(and(
+        eq(schema.eventLikes.eventId, eventId),
+        eq(schema.eventLikes.userId, userId)
+      ));
+    return result.length > 0;
+  }
+
+  // Event Comments
+  async getEventComments(eventId: string): Promise<(schema.EventComment & { user: User })[]> {
+    const result = await this.db
+      .select()
+      .from(schema.eventComments)
+      .leftJoin(schema.users, eq(schema.eventComments.userId, schema.users.id))
+      .where(eq(schema.eventComments.eventId, eventId))
+      .orderBy(desc(schema.eventComments.createdAt));
+    
+    return result.map(r => ({
+      ...r.event_comments,
+      user: r.users!,
+    }));
+  }
+
+  async createEventComment(comment: schema.InsertEventComment): Promise<schema.EventComment> {
+    const result = await this.db.insert(schema.eventComments).values(comment).returning();
+    
+    await this.db
+      .update(schema.events)
+      .set({ commentsCount: sql`${schema.events.commentsCount} + 1` })
+      .where(eq(schema.events.id, comment.eventId));
+    
+    return result[0];
+  }
+
+  async deleteEventComment(id: string, userId: string): Promise<boolean> {
+    const comment = await this.db.select().from(schema.eventComments).where(eq(schema.eventComments.id, id));
+    if (!comment[0] || comment[0].userId !== userId) return false;
+    
+    await this.db.delete(schema.eventComments).where(eq(schema.eventComments.id, id));
+    
+    await this.db
+      .update(schema.events)
+      .set({ commentsCount: sql`${schema.events.commentsCount} - 1` })
+      .where(eq(schema.events.id, comment[0].eventId));
+    
+    return true;
   }
 
   // Advanced Search

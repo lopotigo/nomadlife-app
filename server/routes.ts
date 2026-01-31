@@ -574,6 +574,79 @@ export async function registerRoutes(
     }
   });
 
+  // ========== EVENT LIKES ==========
+  app.post("/api/events/:id/like", requireAuth, async (req, res) => {
+    try {
+      const event = await storage.likeEvent(req.params.id, (req.user as User).id);
+      if (!event) {
+        return res.status(404).send({ error: "Event not found" });
+      }
+      res.send(event);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/events/:id/like", requireAuth, async (req, res) => {
+    try {
+      const event = await storage.unlikeEvent(req.params.id, (req.user as User).id);
+      if (!event) {
+        return res.status(404).send({ error: "Event not found" });
+      }
+      res.send(event);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/events/:id/liked", requireAuth, async (req, res) => {
+    try {
+      const liked = await storage.hasUserLikedEvent(req.params.id, (req.user as User).id);
+      res.send({ liked });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== EVENT COMMENTS ==========
+  app.get("/api/events/:id/comments", async (req, res) => {
+    try {
+      const comments = await storage.getEventComments(req.params.id);
+      res.send(comments);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/events/:id/comments", requireAuth, async (req, res) => {
+    try {
+      const { content } = req.body;
+      if (!content || typeof content !== 'string' || content.trim().length === 0) {
+        return res.status(400).send({ error: "Comment content is required" });
+      }
+      const comment = await storage.createEventComment({
+        eventId: req.params.id,
+        userId: (req.user as User).id,
+        content: content.trim(),
+      });
+      res.status(201).send(comment);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/events/:id/comments/:commentId", requireAuth, async (req, res) => {
+    try {
+      const deleted = await storage.deleteEventComment(req.params.commentId, (req.user as User).id);
+      if (!deleted) {
+        return res.status(404).send({ error: "Comment not found or not authorized" });
+      }
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== ANALYTICS ROUTES ==========
   app.get("/api/analytics", requireAuth, async (req, res) => {
     try {
