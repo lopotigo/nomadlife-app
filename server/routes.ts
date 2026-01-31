@@ -881,10 +881,19 @@ export async function registerRoutes(
           };
           
           // Map expense type to feedback field
-          if (expense.type === "hotel") feedbackData.accommodationCost = costInEuros;
-          else if (expense.type === "food") feedbackData.foodCost = costInEuros;
-          else if (expense.type === "coworking") feedbackData.coworkingCost = costInEuros;
-          else if (expense.type === "transport") feedbackData.transportCost = costInEuros;
+          if (expense.type === "hotel" || expense.type === "hostel" || expense.type === "airbnb") {
+            feedbackData.accommodationCost = costInEuros;
+          } else if (expense.type === "food" || expense.type === "groceries" || expense.type === "drinks") {
+            feedbackData.foodCost = costInEuros;
+          } else if (expense.type === "coworking") {
+            feedbackData.coworkingCost = costInEuros;
+          } else if (expense.type === "transport") {
+            feedbackData.transportCost = costInEuros;
+          }
+          
+          // Add ratings if provided
+          if (expense.wifiRating) feedbackData.internetRating = expense.wifiRating;
+          if (expense.rating) feedbackData.overallRating = expense.rating;
           
           if (Object.keys(feedbackData).length > 2) {
             await storage.createCityFeedback(feedbackData);

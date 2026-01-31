@@ -118,6 +118,7 @@ export default function TravelDiary() {
   const [showNewTrip, setShowNewTrip] = useState(false);
   const [showNewStop, setShowNewStop] = useState(false);
   const [showNewExpense, setShowNewExpense] = useState<string | null>(null);
+  const [expenseType, setExpenseType] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"my-trips" | "explore">("my-trips");
   const [showPlannerMap, setShowPlannerMap] = useState(false);
   const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
@@ -383,6 +384,12 @@ export default function TravelDiary() {
 
   const handleAddExpense = async (e: React.FormEvent<HTMLFormElement>, stopId: string) => {
     e.preventDefault();
+    
+    if (!expenseType) {
+      toast({ title: "Seleziona un tipo di spesa", variant: "destructive" });
+      return;
+    }
+    
     const formData = new FormData(e.currentTarget);
     
     try {
@@ -391,7 +398,7 @@ export default function TravelDiary() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          type: formData.get("type"),
+          type: expenseType,
           name: formData.get("name"),
           cost: Math.round(parseFloat(formData.get("cost") as string) * 100),
           currency: formData.get("currency") || "EUR",
@@ -407,6 +414,7 @@ export default function TravelDiary() {
       if (res.ok) {
         toast({ title: "Spesa aggiunta!" });
         setShowNewExpense(null);
+        setExpenseType("");
         if (selectedTrip) fetchTripDetails(selectedTrip.id);
       } else {
         const error = await res.json();
@@ -875,7 +883,7 @@ export default function TravelDiary() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={!!showNewExpense} onOpenChange={() => setShowNewExpense(null)}>
+        <Dialog open={!!showNewExpense} onOpenChange={() => { setShowNewExpense(null); setExpenseType(""); }}>
           <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -885,9 +893,9 @@ export default function TravelDiary() {
             </DialogHeader>
             <form onSubmit={(e) => showNewExpense && handleAddExpense(e, showNewExpense)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
               <div>
-                <Label htmlFor="type">Tipo Spesa</Label>
-                <Select name="type" required>
-                  <SelectTrigger className="bg-slate-700 border-slate-600" data-testid="select-expense-type">
+                <Label htmlFor="type">Tipo Spesa *</Label>
+                <Select value={expenseType} onValueChange={setExpenseType}>
+                  <SelectTrigger className={`bg-slate-700 border-slate-600 ${!expenseType ? 'text-slate-400' : ''}`} data-testid="select-expense-type">
                     <SelectValue placeholder="Seleziona tipo..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-700 border-slate-600 max-h-60">
