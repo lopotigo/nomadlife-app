@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
 import { ShareQRModal } from "@/components/share-qr-modal";
 import { EventPosterModal } from "@/components/event-poster-modal";
+import { WeatherWidget } from "@/components/weather-widget";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -508,6 +509,7 @@ export default function UnifiedMap() {
                         </button>
                       </div>
                     </div>
+                    <WeatherWidget latitude={event.latitude!} longitude={event.longitude!} />
                   </div>
                 </Popup>
               </Marker>
@@ -576,6 +578,7 @@ export default function UnifiedMap() {
                           {stop.notes && (
                             <p className="text-xs text-gray-600 mt-2 italic">{stop.notes}</p>
                           )}
+                          <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
                         </div>
                       </Popup>
                     </Marker>

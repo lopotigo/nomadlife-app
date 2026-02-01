@@ -647,6 +647,63 @@ export async function registerRoutes(
     }
   });
 
+  // ========== WEATHER API ==========
+  app.get("/api/weather", async (req, res) => {
+    try {
+      const { lat, lon } = req.query;
+      if (!lat || !lon) {
+        return res.status(400).send({ error: "lat and lon are required" });
+      }
+      
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`
+      );
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch weather data");
+      }
+      
+      const data = await response.json();
+      
+      const weatherCodes: Record<number, { description: string; icon: string }> = {
+        0: { description: "Sereno", icon: "☀️" },
+        1: { description: "Prevalentemente sereno", icon: "🌤️" },
+        2: { description: "Parzialmente nuvoloso", icon: "⛅" },
+        3: { description: "Nuvoloso", icon: "☁️" },
+        45: { description: "Nebbia", icon: "🌫️" },
+        48: { description: "Nebbia gelata", icon: "🌫️" },
+        51: { description: "Pioggerella leggera", icon: "🌦️" },
+        53: { description: "Pioggerella", icon: "🌦️" },
+        55: { description: "Pioggerella intensa", icon: "🌧️" },
+        61: { description: "Pioggia leggera", icon: "🌧️" },
+        63: { description: "Pioggia", icon: "🌧️" },
+        65: { description: "Pioggia intensa", icon: "🌧️" },
+        71: { description: "Neve leggera", icon: "🌨️" },
+        73: { description: "Neve", icon: "🌨️" },
+        75: { description: "Neve intensa", icon: "❄️" },
+        80: { description: "Rovesci leggeri", icon: "🌦️" },
+        81: { description: "Rovesci", icon: "🌧️" },
+        82: { description: "Rovesci intensi", icon: "⛈️" },
+        95: { description: "Temporale", icon: "⛈️" },
+        96: { description: "Temporale con grandine", icon: "⛈️" },
+        99: { description: "Temporale con grandine intensa", icon: "⛈️" },
+      };
+      
+      const code = data.current?.weather_code || 0;
+      const weather = weatherCodes[code] || { description: "Sconosciuto", icon: "🌡️" };
+      
+      res.send({
+        temperature: Math.round(data.current?.temperature_2m || 0),
+        humidity: data.current?.relative_humidity_2m || 0,
+        windSpeed: Math.round(data.current?.wind_speed_10m || 0),
+        description: weather.description,
+        icon: weather.icon,
+      });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== ANALYTICS ROUTES ==========
   app.get("/api/analytics", requireAuth, async (req, res) => {
     try {

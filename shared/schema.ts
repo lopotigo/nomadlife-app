@@ -102,6 +102,27 @@ export const insertPlaceSchema = createInsertSchema(places).omit({
 export type InsertPlace = z.infer<typeof insertPlaceSchema>;
 export type Place = typeof places.$inferSelect;
 
+// Place Reviews table
+export const placeReviews = pgTable("place_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  placeId: varchar("place_id").notNull().references(() => places.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  wifiRating: integer("wifi_rating").notNull(), // 1-5
+  noiseRating: integer("noise_rating").notNull(), // 1-5 (5 = quiet)
+  priceRating: integer("price_rating").notNull(), // 1-5 (5 = good value)
+  cleanRating: integer("clean_rating").notNull(), // 1-5
+  overallRating: integer("overall_rating").notNull(), // 1-5
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertPlaceReviewSchema = createInsertSchema(placeReviews).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPlaceReview = z.infer<typeof insertPlaceReviewSchema>;
+export type PlaceReview = typeof placeReviews.$inferSelect;
+
 // Bookings table
 export const bookings = pgTable("bookings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
