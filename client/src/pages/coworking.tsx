@@ -334,7 +334,7 @@ export default function Coworking() {
                         {place.rating > 0 && (
                           <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1">
                             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                            {(place.rating / 10).toFixed(1)}
+                            {place.rating.toFixed(1)}
                           </div>
                         )}
                         <UserRatingBadge placeId={place.id} />
