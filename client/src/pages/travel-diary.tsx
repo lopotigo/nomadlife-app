@@ -30,13 +30,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-function createStopMarkerIcon(orderIndex: number) {
+function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6", avatarUrl?: string | null, stopMediaUrl?: string | null) {
+  const imageUrl = stopMediaUrl || avatarUrl;
+  
+  if (imageUrl) {
+    return L.divIcon({
+      html: `<div style="width:36px;height:36px;border-radius:50%;border:3px solid ${color};box-shadow:0 2px 8px rgba(0,0,0,0.4);overflow:hidden;background:white;">
+        <img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;" />
+        <div style="position:absolute;bottom:-2px;right:-2px;background:${color};color:white;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:9px;border:1px solid white;">${orderIndex + 1}</div>
+      </div>`,
+      className: "custom-stop-marker",
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -18],
+    });
+  }
+  
   return L.divIcon({
-    html: `<div class="stop-marker">${orderIndex + 1}</div>`,
+    html: `<div style="background:${color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${orderIndex + 1}</div>`,
     className: "custom-stop-marker",
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14],
   });
 }
 
@@ -1109,6 +1124,7 @@ export default function TravelDiary() {
             onAddStopFromMap={handleAddStopFromMap}
             onClearAllStops={handleClearAllStops}
             onClose={() => setShowPlannerMap(false)}
+            userAvatar={user?.avatar}
           />
         )}
       </div>
@@ -1903,12 +1919,14 @@ function TripPlannerMap({
   trip, 
   onAddStopFromMap,
   onClearAllStops,
-  onClose 
+  onClose,
+  userAvatar
 }: { 
   trip: TripWithDetails;
   onAddStopFromMap: (lat: number, lng: number, city: string, country: string) => void;
   onClearAllStops: () => void;
   onClose: () => void;
+  userAvatar?: string | null;
 }) {
   const [pendingLocation, setPendingLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [cityName, setCityName] = useState("");
@@ -2213,7 +2231,7 @@ function TripPlannerMap({
           <Marker
             key={stop.id}
             position={[stop.latitude!, stop.longitude!]}
-            icon={createStopMarkerIcon(index)}
+            icon={createStopMarkerIcon(index, "#f97316", userAvatar, stop.imageUrl)}
           >
             <Popup>
               <div className="min-w-[150px]">
