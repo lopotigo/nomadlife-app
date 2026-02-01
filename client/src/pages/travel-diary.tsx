@@ -1388,6 +1388,14 @@ function TripDetails({
         </div>
       ) : (
         <div className="space-y-2">
+          {trip.stops.length >= 2 && !trip.stops.some(s => s.transportMode) && (
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg mb-3">
+              <p className="text-sm text-blue-400 flex items-center gap-2">
+                <Leaf className="w-4 h-4" />
+                Scegli come viaggiare tra le tappe per calcolare il CO2
+              </p>
+            </div>
+          )}
           {trip.stops.map((stop, index) => (
             <div key={stop.id}>
               {index > 0 && (
@@ -1446,51 +1454,48 @@ function TransportSelector({
   const co2 = selected ? Math.round(distance * (CO2_PER_KM[selected] || 0)) : 0;
 
   return (
-    <div className="py-3 px-4 flex items-center gap-3">
-      <div className="flex-1 h-px bg-slate-700" />
-      <div className="flex items-center gap-2 bg-slate-800/80 rounded-full px-3 py-1.5 border border-slate-700">
-        {TRANSPORT_OPTIONS.map((option) => {
-          const Icon = option.icon;
-          const isSelected = selected === option.value;
-          return (
-            <button
-              key={option.value}
-              onClick={() => handleSelect(option.value)}
-              className={`p-1.5 rounded-full transition-all ${
-                isSelected 
-                  ? "text-white" 
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-              style={{ backgroundColor: isSelected ? option.color : "transparent" }}
-              title={option.label}
-              data-testid={`transport-${option.value}`}
-            >
-              <Icon className="w-4 h-4" />
-            </button>
-          );
-        })}
-      </div>
-      {selected && (
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <span>{distance} km</span>
-          <span>•</span>
-          <span>{duration}</span>
-          {co2 > 0 ? (
-            <>
-              <span>•</span>
-              <span className="text-amber-400">{co2} kg CO₂</span>
-            </>
-          ) : (
-            <>
-              <span>•</span>
-              <span className="text-green-400 flex items-center gap-1">
-                <Leaf className="w-3 h-3" /> Zero emissioni
-              </span>
-            </>
-          )}
+    <div className="py-4 px-2">
+      <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
+        <p className="text-xs text-slate-500 text-center mb-2">Come arrivi qui?</p>
+        <div className="flex justify-center gap-1">
+          {TRANSPORT_OPTIONS.map((option) => {
+            const Icon = option.icon;
+            const isSelected = selected === option.value;
+            return (
+              <button
+                key={option.value}
+                onClick={() => handleSelect(option.value)}
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+                  isSelected 
+                    ? "text-white scale-105" 
+                    : "text-slate-500 hover:text-slate-300 hover:bg-slate-700/50"
+                }`}
+                style={{ backgroundColor: isSelected ? option.color : "transparent" }}
+                title={option.label}
+                data-testid={`transport-${option.value}`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px]">{option.label}</span>
+              </button>
+            );
+          })}
         </div>
-      )}
-      <div className="flex-1 h-px bg-slate-700" />
+        {selected && (
+          <div className="flex justify-center items-center gap-3 mt-3 pt-2 border-t border-slate-700/50">
+            <span className="text-sm text-slate-300">{distance} km</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-sm text-slate-400">{duration}</span>
+            <span className="text-slate-600">•</span>
+            {co2 > 0 ? (
+              <span className="text-sm text-amber-400 font-medium">{co2} kg CO₂</span>
+            ) : (
+              <span className="text-sm text-green-400 flex items-center gap-1 font-medium">
+                <Leaf className="w-3 h-3" /> Eco!
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
