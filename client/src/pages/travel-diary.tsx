@@ -2140,52 +2140,53 @@ function TripPlannerMap({
         }
       `}</style>
       
-      <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between">
-        <div className="bg-slate-800/90 backdrop-blur-sm rounded-xl p-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Route className="w-5 h-5 text-emerald-500" />
-            Pianifica: {trip.title}
+      <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+        <div className="bg-slate-800/90 backdrop-blur-sm rounded-xl p-3 md:p-4">
+          <h2 className="text-sm md:text-lg font-bold text-white flex items-center gap-2">
+            <Route className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
+            {trip.title}
           </h2>
-          <p className="text-sm text-slate-400">Clicca sulla mappa per aggiungere tappe</p>
+          <p className="text-xs text-slate-400 hidden md:block">Clicca sulla mappa per aggiungere tappe</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {legs.length > 0 && (
             <Button
               onClick={() => setShowCO2Panel(!showCO2Panel)}
               variant="outline"
+              size="sm"
               className={`bg-slate-800/90 ${showCO2Panel ? 'border-emerald-500 text-emerald-400' : 'border-emerald-500/50 text-emerald-400'}`}
               data-testid="button-toggle-co2"
             >
-              <Leaf className="w-4 h-4 mr-2" />
-              CO2 {totalCO2} kg
+              <Leaf className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">CO2</span> {totalCO2} kg
             </Button>
           )}
           {stopsWithCoords.length > 0 && (
             <Button
               onClick={onClearAllStops}
               variant="outline"
+              size="sm"
               className="bg-slate-800/90 border-red-500/50 text-red-400 hover:bg-red-500/10"
               data-testid="button-clear-route"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Azzera
+              <Trash2 className="w-4 h-4" />
             </Button>
           )}
           <Button
             onClick={handleGetLocation}
             variant="outline"
+            size="sm"
             className="bg-slate-800/90 border-blue-500/50 text-blue-400"
           >
-            <Navigation className="w-4 h-4 mr-2" />
-            La mia posizione
+            <Navigation className="w-4 h-4" />
           </Button>
           <Button
             onClick={onClose}
             variant="outline"
+            size="sm"
             className="bg-slate-800/90 border-slate-600"
           >
-            <X className="w-4 h-4 mr-2" />
-            Chiudi
+            <X className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -2193,10 +2194,10 @@ function TripPlannerMap({
       <AnimatePresence>
         {legs.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, x: 300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-            className="absolute top-20 right-4 bottom-20 w-80 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-4 overflow-y-auto"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="absolute left-2 right-2 bottom-20 max-h-[40vh] md:left-auto md:right-4 md:top-20 md:bottom-20 md:max-h-none md:w-80 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-3 md:p-4 overflow-y-auto"
             data-testid="co2-panel"
           >
             <div className="flex items-center justify-between mb-4">

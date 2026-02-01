@@ -422,8 +422,8 @@ export default function UnifiedMap() {
 
   return (
     <Layout>
-      <div className="flex flex-col h-full">
-        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0">
+      <div className="flex flex-col h-full overflow-hidden">
+        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0 sticky top-0 z-10">
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
