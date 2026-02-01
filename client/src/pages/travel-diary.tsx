@@ -2140,7 +2140,7 @@ function TripPlannerMap({
                     
                     <div className="text-xs text-slate-400 mb-2">{leg.distance} km</div>
                     
-                    <div className="flex flex-wrap gap-1">
+                    <div className="grid grid-cols-2 gap-2">
                       {leg.options.map((opt) => {
                         const Icon = opt.icon;
                         const isSelected = leg.selected === opt.mode;
@@ -2150,16 +2150,18 @@ function TripPlannerMap({
                           <button
                             key={opt.mode}
                             onClick={() => setSelectedTransports(prev => ({ ...prev, [leg.legId]: opt.mode }))}
-                            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all ${
+                            className={`flex flex-col items-center gap-1 p-2 rounded-lg text-xs transition-all border ${
                               isSelected 
-                                ? 'bg-emerald-500 text-white' 
-                                : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                ? 'border-emerald-500 bg-emerald-500/20 text-white' 
+                                : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:bg-slate-600'
                             }`}
                             data-testid={`transport-${index}-${opt.mode}`}
                           >
-                            <Icon className="w-3 h-3" />
-                            <span>{opt.co2}kg</span>
-                            {isGreen && <Leaf className="w-3 h-3 text-green-300" />}
+                            <Icon className="w-5 h-5" />
+                            <span className="font-medium">{opt.label}</span>
+                            <span className={`text-[10px] ${opt.co2 === 0 ? 'text-green-400' : 'text-amber-400'}`}>
+                              {opt.co2 === 0 ? 'Eco!' : `${opt.co2}kg CO2`}
+                            </span>
                           </button>
                         );
                       })}
