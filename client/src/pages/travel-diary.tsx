@@ -70,6 +70,9 @@ interface TripStop {
   departureDate?: string;
   notes?: string;
   imageUrl?: string;
+  transportMode?: string;
+  distanceKm?: number;
+  co2Kg?: number;
   placeId?: string;
   sourceTripId?: string;
   place?: { id: string; name: string; type: string; imageUrl?: string };
@@ -107,6 +110,48 @@ const expenseTypes = [
   { value: "health", label: "Salute", icon: Heart },
   { value: "other", label: "Altro", icon: MoreHorizontal },
 ];
+
+const CO2_PER_KM: Record<string, number> = {
+  walk: 0,
+  bike: 0,
+  train: 0.041,
+  car: 0.171,
+  plane: 0.255,
+};
+
+const SPEED_KMH: Record<string, number> = {
+  walk: 5,
+  bike: 20,
+  train: 80,
+  car: 90,
+  plane: 800,
+};
+
+const TRANSPORT_OPTIONS = [
+  { value: "walk", label: "A piedi", icon: Footprints, color: "#22c55e" },
+  { value: "bike", label: "Bici", icon: Bike, color: "#10b981" },
+  { value: "train", label: "Treno", icon: Train, color: "#3b82f6" },
+  { value: "car", label: "Auto", icon: Car, color: "#f59e0b" },
+  { value: "plane", label: "Aereo", icon: Plane, color: "#6366f1" },
+];
+
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return Math.round(R * c);
+}
+
+function formatDuration(hours: number): string {
+  const h = Math.floor(hours);
+  const m = Math.floor((hours - h) * 60);
+  if (h === 0) return `${m}min`;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
 
 export default function TravelDiary() {
   const { user, loading: authLoading } = useAuth();
@@ -1326,18 +1371,156 @@ function TripDetails({
           <p className="text-sm text-slate-500">Aggiungi la tua prima destinazione</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {trip.stops.map((stop, index) => (
-            <StopCard 
-              key={stop.id} 
-              stop={stop} 
-              index={index}
-              currency={trip.currency}
-              onAddExpense={() => onAddExpense(stop.id)}
-            />
+            <div key={stop.id}>
+              {index > 0 && (
+                <TransportSelector 
+                  stop={stop}
+                  prevStop={trip.stops[index - 1]}
+                  onUpdate={(transportMode, distanceKm, co2Kg) => {
+                    fetch(`/api/trips/${trip.id}/stops/${stop.id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({ transportMode, distanceKm, co2Kg })
+                    });
+                  }}
+                />
+              )}
+              <StopCard 
+                stop={stop} 
+                index={index}
+                currency={trip.currency}
+                onAddExpense={() => onAddExpense(stop.id)}
+              />
+            </div>
           ))}
+          
+          <TripCO2Summary stops={trip.stops} />
         </div>
       )}
+    </motion.div>
+  );
+}
+
+function TransportSelector({ 
+  stop, 
+  prevStop,
+  onUpdate 
+}: { 
+  stop: TripStop; 
+  prevStop: TripStop;
+  onUpdate: (transportMode: string, distanceKm: number, co2Kg: number) => void;
+}) {
+  const [selected, setSelected] = useState(stop.transportMode || "");
+  
+  const distance = (prevStop.latitude && prevStop.longitude && stop.latitude && stop.longitude)
+    ? calculateDistance(prevStop.latitude, prevStop.longitude, stop.latitude, stop.longitude)
+    : 500;
+  
+  const handleSelect = (mode: string) => {
+    setSelected(mode);
+    const co2 = Math.round(distance * (CO2_PER_KM[mode] || 0));
+    onUpdate(mode, distance, co2);
+  };
+
+  const selectedOption = TRANSPORT_OPTIONS.find(o => o.value === selected);
+  const duration = selected ? formatDuration(distance / SPEED_KMH[selected] + (selected === "plane" ? 2 : 0)) : null;
+  const co2 = selected ? Math.round(distance * (CO2_PER_KM[selected] || 0)) : 0;
+
+  return (
+    <div className="py-3 px-4 flex items-center gap-3">
+      <div className="flex-1 h-px bg-slate-700" />
+      <div className="flex items-center gap-2 bg-slate-800/80 rounded-full px-3 py-1.5 border border-slate-700">
+        {TRANSPORT_OPTIONS.map((option) => {
+          const Icon = option.icon;
+          const isSelected = selected === option.value;
+          return (
+            <button
+              key={option.value}
+              onClick={() => handleSelect(option.value)}
+              className={`p-1.5 rounded-full transition-all ${
+                isSelected 
+                  ? "text-white" 
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+              style={{ backgroundColor: isSelected ? option.color : "transparent" }}
+              title={option.label}
+              data-testid={`transport-${option.value}`}
+            >
+              <Icon className="w-4 h-4" />
+            </button>
+          );
+        })}
+      </div>
+      {selected && (
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span>{distance} km</span>
+          <span>•</span>
+          <span>{duration}</span>
+          {co2 > 0 ? (
+            <>
+              <span>•</span>
+              <span className="text-amber-400">{co2} kg CO₂</span>
+            </>
+          ) : (
+            <>
+              <span>•</span>
+              <span className="text-green-400 flex items-center gap-1">
+                <Leaf className="w-3 h-3" /> Zero emissioni
+              </span>
+            </>
+          )}
+        </div>
+      )}
+      <div className="flex-1 h-px bg-slate-700" />
+    </div>
+  );
+}
+
+function TripCO2Summary({ stops }: { stops: TripStop[] }) {
+  const totalCO2 = stops.reduce((sum, stop) => sum + (stop.co2Kg || 0), 0);
+  const totalDistance = stops.reduce((sum, stop) => sum + (stop.distanceKm || 0), 0);
+  const stopsWithTransport = stops.filter(s => s.transportMode).length;
+  
+  if (stopsWithTransport === 0) return null;
+  
+  const isEcoFriendly = totalCO2 < totalDistance * 0.1;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`mt-4 p-4 rounded-xl border ${
+        isEcoFriendly 
+          ? "bg-green-500/10 border-green-500/30" 
+          : "bg-slate-800/50 border-slate-700/50"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+            isEcoFriendly ? "bg-green-500/20 text-green-400" : "bg-slate-700 text-slate-400"
+          }`}>
+            <Leaf className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white">Impatto Ambientale</p>
+            <p className="text-xs text-slate-400">{totalDistance} km totali</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className={`text-lg font-bold ${isEcoFriendly ? "text-green-400" : "text-amber-400"}`}>
+            {totalCO2} kg CO₂
+          </p>
+          {isEcoFriendly && (
+            <p className="text-xs text-green-400 flex items-center gap-1 justify-end">
+              <CheckCircle2 className="w-3 h-3" /> Viaggio eco-friendly!
+            </p>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -1704,29 +1887,7 @@ function UserLocationMarker({ position }: { position: [number, number] | null })
   return <Marker position={position} icon={userIcon} />;
 }
 
-const CO2_PER_KM = { walk: 0, bike: 0, train: 0.041, car: 0.171, plane: 0.255 };
-const SPEED_KMH = { walk: 5, bike: 20, train: 80, car: 90, plane: 800 };
-
 type TransportMode = "walk" | "bike" | "train" | "car" | "plane";
-
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return Math.round(R * c);
-}
-
-function formatDuration(hours: number): string {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  if (h === 0) return `${m} min`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}min`;
-}
 
 function getTransportOptions(distance: number) {
   return [

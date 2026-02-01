@@ -1043,6 +1043,31 @@ export async function registerRoutes(
     }
   });
 
+  // PATCH stop (update transport mode, etc.)
+  app.patch("/api/trips/:tripId/stops/:stopId", requireAuth, async (req, res) => {
+    try {
+      const trip = await storage.getTrip(req.params.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const stop = await storage.getTripStop(req.params.stopId);
+      if (!stop || stop.tripId !== req.params.tripId) {
+        return res.status(404).send({ error: "Stop not found" });
+      }
+      
+      const { transportMode, distanceKm, co2Kg } = req.body;
+      const updated = await storage.updateTripStop(req.params.stopId, {
+        transportMode,
+        distanceKm,
+        co2Kg
+      });
+      res.send(updated);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== TRIP EXPENSE ROUTES ==========
   app.get("/api/stops/:stopId/expenses", async (req, res) => {
     try {

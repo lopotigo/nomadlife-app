@@ -321,6 +321,9 @@ export const tripStops = pgTable("trip_stops", {
   departureDate: timestamp("departure_date"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  transportMode: text("transport_mode"), // mezzo per arrivare: walk, bike, train, car, plane
+  distanceKm: integer("distance_km"), // distanza dalla tappa precedente
+  co2Kg: integer("co2_kg"), // emissioni CO2 in grammi
   placeId: varchar("place_id").references(() => places.id, { onDelete: "set null" }), // hotel/coworking collegato
   sourceTripId: varchar("source_trip_id"), // se copiata da un altro viaggio
   createdAt: timestamp("created_at").defaultNow().notNull(),
