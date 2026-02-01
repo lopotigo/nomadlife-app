@@ -2,13 +2,44 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket } from "lucide-react";
+import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare } from "lucide-react";
 import { PlaceReviews } from "@/components/place-reviews";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Place, Event } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+
+function UserRatingBadge({ placeId }: { placeId: string }) {
+  const { data: ratings } = useQuery({
+    queryKey: ["place-ratings", placeId],
+    queryFn: async () => {
+      const res = await fetch(`/api/places/${placeId}/ratings`, { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+
+  if (!ratings || ratings.reviewCount === 0) return null;
+
+  const avgRating = ratings.overall || 0;
+  const getBadgeColor = (rating: number) => {
+    if (rating >= 4.5) return "bg-green-500";
+    if (rating >= 3.5) return "bg-teal-500";
+    if (rating >= 2.5) return "bg-yellow-500";
+    return "bg-orange-500";
+  };
+
+  return (
+    <div className={`absolute bottom-3 right-3 ${getBadgeColor(avgRating)} text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg`}>
+      <MessageSquare className="w-3 h-3" />
+      {avgRating.toFixed(1)}
+      <span className="text-[10px] opacity-80">({ratings.reviewCount})</span>
+    </div>
+  );
+}
 
 const PLACE_TYPES = [
   { value: "all", label: "All", icon: Building2 },
@@ -306,6 +337,7 @@ export default function Coworking() {
                             {(place.rating / 10).toFixed(1)}
                           </div>
                         )}
+                        <UserRatingBadge placeId={place.id} />
                       </div>
                       <div className="p-4">
                         <h3 className="font-bold text-lg text-white" data-testid={`text-place-name-${place.id}`}>{place.name}</h3>
