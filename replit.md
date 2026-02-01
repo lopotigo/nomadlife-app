@@ -98,6 +98,14 @@ Preferred communication style: Simple, everyday language.
 - **Event Filtering**: Toggle events visibility in map filters panel
 - **Event Geocoding**: Automatic coordinate detection from city name using OpenStreetMap Nominatim
 - **Event Poster/Manifesto**: Generate downloadable poster image for events with QR code, date, location, and event details (uses html2canvas)
+- **Transport Mode Selection**: Two interfaces for selecting transport between trip stops:
+  - Manual: TransportSelector dropdown in trip stop list with CO2/distance display
+  - Map: Auto-showing transport panel in TripPlannerMap with large 2x2 grid buttons (walk/bike/train/car/plane)
+  - CO2 rates: walk/bike 0, train 0.041, car 0.171, plane 0.255 kg/km
+  - Distance filtering: walk ≤30km, bike ≤100km, car ≤2000km, plane >200km
+- **Trip Status & Visibility Controls**: Toggle buttons in TripDetails for:
+  - Status: Pianificato (planned), In corso (in_progress), Completato (completed)
+  - Visibility: Pubblico/Privato with instant save via PATCH /api/trips/:tripId
 
 ### PWA Configuration
 
