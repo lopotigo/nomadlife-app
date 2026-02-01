@@ -426,13 +426,13 @@ export default function Coworking() {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
-                className="bg-slate-900 w-full max-w-lg rounded-t-[2rem] md:rounded-[2rem] overflow-hidden border border-slate-700"
+                className="bg-slate-900 w-full max-w-lg max-h-[90vh] rounded-t-[2rem] md:rounded-[2rem] overflow-hidden border border-slate-700 flex flex-col"
                 onClick={e => e.stopPropagation()}
               >
                 {selectedPlace.imageUrl && (
-                  <img src={selectedPlace.imageUrl} className="w-full h-48 object-cover" />
+                  <img src={selectedPlace.imageUrl} className="w-full h-48 object-cover flex-shrink-0" />
                 )}
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto flex-1">
                   {step === 1 && (
                     <div className="space-y-6">
                       <div className="flex justify-between items-start">
