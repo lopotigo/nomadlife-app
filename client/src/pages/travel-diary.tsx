@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2 } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock } from "lucide-react";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -759,6 +759,7 @@ export default function TravelDiary() {
               onDelete={() => handleDeleteTrip(selectedTrip.id)}
               onOpenPlannerMap={() => setShowPlannerMap(true)}
               calculateTotal={calculateTotalExpenses}
+              onRefresh={() => fetchTripDetails(selectedTrip.id)}
             />
           ) : (
             <TripsList 
@@ -1278,7 +1279,8 @@ function TripDetails({
   onAddExpense,
   onDelete,
   onOpenPlannerMap,
-  calculateTotal 
+  calculateTotal,
+  onRefresh
 }: { 
   trip: TripWithDetails; 
   onBack: () => void;
@@ -1287,9 +1289,48 @@ function TripDetails({
   onDelete: () => void;
   onOpenPlannerMap: () => void;
   calculateTotal: (trip: TripWithDetails) => number;
+  onRefresh: () => void;
 }) {
+  const [isPublic, setIsPublic] = useState(trip.isPublic);
+  const [status, setStatus] = useState(trip.status);
+  const { toast } = useToast();
   const totalExpenses = calculateTotal(trip);
   const currencySymbol = trip.currency === "EUR" ? "€" : trip.currency === "USD" ? "$" : trip.currency;
+  
+  const handleTogglePublic = async () => {
+    const newValue = !isPublic;
+    setIsPublic(newValue);
+    try {
+      await fetch(`/api/trips/${trip.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ isPublic: newValue })
+      });
+      toast({ title: newValue ? "Viaggio ora pubblico" : "Viaggio ora privato" });
+      onRefresh();
+    } catch (error) {
+      setIsPublic(!newValue);
+      toast({ title: "Errore", variant: "destructive" });
+    }
+  };
+  
+  const handleChangeStatus = async (newStatus: string) => {
+    setStatus(newStatus as "planned" | "in_progress" | "completed");
+    try {
+      await fetch(`/api/trips/${trip.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status: newStatus })
+      });
+      const statusLabels: Record<string, string> = { planned: "Pianificato", in_progress: "In corso", completed: "Completato" };
+      toast({ title: `Stato: ${statusLabels[newStatus]}` });
+      onRefresh();
+    } catch (error) {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+  };
 
   return (
     <motion.div
@@ -1363,6 +1404,49 @@ function TripDetails({
           <div>
             <p className="text-sm text-slate-400">Tappe</p>
             <p className="text-2xl font-bold text-white">{trip.stops.length}</p>
+          </div>
+        </div>
+        
+        {/* Controlli stato e visibilità */}
+        <div className="mt-4 pt-4 border-t border-emerald-500/30 grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-slate-400 mb-2">Stato viaggio</p>
+            <div className="flex gap-1">
+              {[
+                { value: "planned", label: "Pianificato", icon: Calendar },
+                { value: "in_progress", label: "In corso", icon: Play },
+                { value: "completed", label: "Completato", icon: CheckCircle2 }
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleChangeStatus(opt.value)}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
+                    status === opt.value 
+                      ? "bg-emerald-500 text-white" 
+                      : "bg-slate-700/50 text-slate-400 hover:bg-slate-600"
+                  }`}
+                  data-testid={`status-${opt.value}`}
+                >
+                  <opt.icon className="w-3 h-3" />
+                  {opt.label.split(" ")[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 mb-2">Visibilità</p>
+            <button
+              onClick={handleTogglePublic}
+              className={`w-full py-2 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                isPublic 
+                  ? "bg-blue-500 text-white" 
+                  : "bg-slate-700/50 text-slate-400"
+              }`}
+              data-testid="toggle-public"
+            >
+              {isPublic ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+              {isPublic ? "Pubblico" : "Privato"}
+            </button>
           </div>
         </div>
       </div>
@@ -1942,6 +2026,23 @@ function TripPlannerMap({
   const [selectedTransports, setSelectedTransports] = useState<Record<string, TransportMode>>({});
   const { toast } = useToast();
   
+  // Salva il trasporto nel database
+  const handleSelectTransport = async (legId: string, mode: TransportMode, stopId: string, distance: number) => {
+    setSelectedTransports(prev => ({ ...prev, [legId]: mode }));
+    const co2 = Math.round(distance * CO2_PER_KM[mode]);
+    
+    try {
+      await fetch(`/api/trips/${trip.id}/stops/${stopId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ transportMode: mode, distanceKm: distance, co2Kg: co2 })
+      });
+    } catch (error) {
+      console.error("Errore salvataggio trasporto:", error);
+    }
+  };
+  
   const stopsWithCoords = trip.stops
     .filter(stop => stop.latitude && stop.longitude)
     .sort((a, b) => a.orderIndex - b.orderIndex);
@@ -2149,7 +2250,7 @@ function TripPlannerMap({
                         return (
                           <button
                             key={opt.mode}
-                            onClick={() => setSelectedTransports(prev => ({ ...prev, [leg.legId]: opt.mode }))}
+                            onClick={() => handleSelectTransport(leg.legId, opt.mode as TransportMode, leg.to.id, leg.distance)}
                             className={`flex flex-col items-center gap-1 p-2 rounded-lg text-xs transition-all border ${
                               isSelected 
                                 ? 'border-emerald-500 bg-emerald-500/20 text-white' 

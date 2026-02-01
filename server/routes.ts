@@ -944,6 +944,39 @@ export async function registerRoutes(
     }
   });
 
+  // PATCH trip (status, visibility)
+  app.patch("/api/trips/:tripId", requireAuth, async (req, res) => {
+    try {
+      const tripId = req.params.tripId;
+      const existingTrip = await storage.getTrip(tripId);
+      if (!existingTrip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      if (existingTrip.userId !== (req.user as User).id) {
+        return res.status(403).send({ error: "Forbidden" });
+      }
+      
+      const { status, isPublic } = req.body;
+      const updates: any = {};
+      if (status !== undefined && ["planned", "in_progress", "completed"].includes(status)) {
+        updates.status = status;
+        if (status === "in_progress") {
+          updates.isActive = true;
+        } else if (status === "completed") {
+          updates.isActive = false;
+        }
+      }
+      if (isPublic !== undefined) {
+        updates.isPublic = isPublic;
+      }
+      
+      const updatedTrip = await storage.updateTrip(tripId, updates);
+      res.json(updatedTrip);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== TRIP STOP ROUTES ==========
   app.get("/api/trips/:tripId/stops", async (req, res) => {
     try {
