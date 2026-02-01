@@ -25,18 +25,12 @@ function UserRatingBadge({ placeId }: { placeId: string }) {
   if (!ratings || ratings.reviewCount === 0) return null;
 
   const avgRating = ratings.overall || 0;
-  const getBadgeColor = (rating: number) => {
-    if (rating >= 4.5) return "bg-green-500";
-    if (rating >= 3.5) return "bg-teal-500";
-    if (rating >= 2.5) return "bg-yellow-500";
-    return "bg-orange-500";
-  };
 
   return (
-    <div className={`absolute bottom-3 right-3 ${getBadgeColor(avgRating)} text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg`}>
-      <MessageSquare className="w-3 h-3" />
+    <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+      <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
       {avgRating.toFixed(1)}
-      <span className="text-[10px] opacity-80">({ratings.reviewCount})</span>
+      <span className="text-[10px] opacity-70">({ratings.reviewCount})</span>
     </div>
   );
 }
@@ -331,12 +325,6 @@ export default function Coworking() {
                         <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase">
                           {place.type}
                         </div>
-                        {place.rating > 0 && (
-                          <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                            {place.rating.toFixed(1)}
-                          </div>
-                        )}
                         <UserRatingBadge placeId={place.id} />
                       </div>
                       <div className="p-4">
