@@ -1056,7 +1056,18 @@ export async function registerRoutes(
         return res.status(404).send({ error: "Stop not found" });
       }
       
+      // Validate request body
       const { transportMode, distanceKm, co2Kg } = req.body;
+      if (transportMode && !["walk", "bike", "train", "car", "plane"].includes(transportMode)) {
+        return res.status(400).send({ error: "Invalid transport mode" });
+      }
+      if (distanceKm !== undefined && (typeof distanceKm !== "number" || distanceKm < 0)) {
+        return res.status(400).send({ error: "Invalid distance" });
+      }
+      if (co2Kg !== undefined && (typeof co2Kg !== "number" || co2Kg < 0)) {
+        return res.status(400).send({ error: "Invalid CO2 value" });
+      }
+      
       const updated = await storage.updateTripStop(req.params.stopId, {
         transportMode,
         distanceKm,

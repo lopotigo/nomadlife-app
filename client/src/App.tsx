@@ -8,7 +8,6 @@ import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
 
 import MapFeed from "@/pages/map-feed";
-import Explore from "@/pages/explore";
 import Profile from "@/pages/profile";
 import UserProfile from "@/pages/user-profile";
 import Chat from "@/pages/chat";
@@ -30,7 +29,6 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/" component={UnifiedMap} />
       <Route path="/feed" component={MapFeed} />
-      <Route path="/explore" component={Explore} />
       <Route path="/coworking" component={Coworking} />
       <Route path="/chat" component={Chat} />
       <Route path="/subscription" component={Subscription} />
