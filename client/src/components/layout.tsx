@@ -12,10 +12,10 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
   return (
     <div className="h-screen bg-background pb-20 md:pb-0 font-sans overflow-hidden">
-      <main className="md:pl-64 h-full">
+      <main className="md:pl-64 h-full overflow-y-auto">
         <div className={fullWidth 
           ? "h-full bg-card overflow-hidden" 
-          : "max-w-2xl mx-auto h-full border-x border-border/40 bg-card shadow-sm overflow-hidden"
+          : "max-w-2xl mx-auto min-h-full border-x border-border/40 bg-card shadow-sm"
         }>
           {children}
         </div>
