@@ -2024,11 +2024,13 @@ function TripPlannerMap({
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [showCO2Panel, setShowCO2Panel] = useState(true);
   const [selectedTransports, setSelectedTransports] = useState<Record<string, TransportMode>>({});
+  const [savedLegs, setSavedLegs] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   
   // Salva il trasporto nel database
   const handleSelectTransport = async (legId: string, mode: TransportMode, stopId: string, distance: number) => {
     setSelectedTransports(prev => ({ ...prev, [legId]: mode }));
+    setSavedLegs(prev => ({ ...prev, [legId]: false }));
     const co2 = Math.round(distance * CO2_PER_KM[mode]);
     
     try {
@@ -2038,6 +2040,8 @@ function TripPlannerMap({
         credentials: "include",
         body: JSON.stringify({ transportMode: mode, distanceKm: distance, co2Kg: co2 })
       });
+      setSavedLegs(prev => ({ ...prev, [legId]: true }));
+      setTimeout(() => setSavedLegs(prev => ({ ...prev, [legId]: false })), 2000);
     } catch (error) {
       console.error("Errore salvataggio trasporto:", error);
     }
@@ -2286,9 +2290,15 @@ function TripPlannerMap({
                           <span className="font-medium" style={{ color: selectedOpt.color }}>
                             {selectedOpt.label}
                           </span>
-                          <span className="text-white font-bold">
-                            {selectedOpt.duration}
-                          </span>
+                          {savedLegs[leg.legId] ? (
+                            <span className="text-green-400 font-bold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> Salvato!
+                            </span>
+                          ) : (
+                            <span className="text-white font-bold">
+                              {selectedOpt.duration}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center justify-between text-xs mt-1">
                           <span className="text-slate-400">Emissioni</span>
@@ -2331,6 +2341,17 @@ function TripPlannerMap({
         {legs.map((leg, index) => {
           const selectedOpt = leg.options.find(o => o.mode === leg.selected);
           const color = selectedOpt?.color || "#10b981";
+          const getLineStyle = (mode: string) => {
+            switch(mode) {
+              case "walk": return { weight: 3, dashArray: "4, 8", lineCap: "round" as const };
+              case "bike": return { weight: 4, dashArray: "8, 6", lineCap: "round" as const };
+              case "train": return { weight: 6, dashArray: undefined, lineCap: "round" as const };
+              case "car": return { weight: 5, dashArray: undefined, lineCap: "round" as const };
+              case "plane": return { weight: 3, dashArray: "12, 12", lineCap: "butt" as const };
+              default: return { weight: 4, dashArray: undefined, lineCap: "round" as const };
+            }
+          };
+          const lineStyle = getLineStyle(leg.selected);
           return (
             <Polyline
               key={leg.legId}
@@ -2340,9 +2361,10 @@ function TripPlannerMap({
               ]}
               pathOptions={{ 
                 color, 
-                weight: 5, 
+                weight: lineStyle.weight, 
                 opacity: 0.9,
-                dashArray: leg.selected === "plane" ? "10, 10" : undefined
+                dashArray: lineStyle.dashArray,
+                lineCap: lineStyle.lineCap
               }}
             />
           );
