@@ -2192,7 +2192,7 @@ function TripPlannerMap({
       </div>
 
       <AnimatePresence>
-        {legs.length > 0 && (
+        {legs.length > 0 && showCO2Panel && (
           <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
@@ -2205,6 +2205,13 @@ function TripPlannerMap({
                 <Leaf className="w-5 h-5 text-emerald-500" />
                 Come viaggi?
               </h3>
+              <button
+                onClick={() => setShowCO2Panel(false)}
+                className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-600 text-slate-400 hover:text-white transition-colors"
+                data-testid="button-close-co2-panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
             
             <div className="p-2 bg-blue-500/20 rounded-lg mb-4 text-center">
