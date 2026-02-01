@@ -116,9 +116,16 @@ export const placeReviews = pgTable("place_reviews", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+const ratingValidation = z.number().int().min(1).max(5);
 export const insertPlaceReviewSchema = createInsertSchema(placeReviews).omit({
   id: true,
   createdAt: true,
+}).extend({
+  wifiRating: ratingValidation,
+  noiseRating: ratingValidation,
+  priceRating: ratingValidation,
+  cleanRating: ratingValidation,
+  overallRating: ratingValidation,
 });
 export type InsertPlaceReview = z.infer<typeof insertPlaceReviewSchema>;
 export type PlaceReview = typeof placeReviews.$inferSelect;

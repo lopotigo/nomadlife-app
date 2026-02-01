@@ -5,7 +5,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import webpush from "web-push";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema } from "@shared/schema";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema, insertPlaceReviewSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { createRepository, pushFile, getGitHubUser } from "./github";
@@ -318,6 +318,51 @@ export async function registerRoutes(
       res.status(201).send(place);
     } catch (error: any) {
       res.status(400).send({ error: error.message });
+    }
+  });
+
+  // ========== PLACE REVIEWS ==========
+  app.get("/api/places/:id/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getPlaceReviews(req.params.id);
+      res.send(reviews);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/places/:id/ratings", async (req, res) => {
+    try {
+      const ratings = await storage.getPlaceAverageRatings(req.params.id);
+      res.send(ratings);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/places/:id/reviews", requireAuth, async (req, res) => {
+    try {
+      const data = insertPlaceReviewSchema.parse({
+        ...req.body,
+        placeId: req.params.id,
+        userId: (req.user as User).id,
+      });
+      const review = await storage.createPlaceReview(data);
+      res.status(201).send(review);
+    } catch (error: any) {
+      res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/reviews/:id", requireAuth, async (req, res) => {
+    try {
+      const deleted = await storage.deletePlaceReview(req.params.id, (req.user as User).id);
+      if (!deleted) {
+        return res.status(404).send({ error: "Review not found or not authorized" });
+      }
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
     }
   });
 

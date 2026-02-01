@@ -177,6 +177,12 @@ export interface IStorage {
   getAllPushSubscriptions(): Promise<schema.PushSubscription[]>;
   createPushSubscription(subscription: schema.InsertPushSubscription): Promise<schema.PushSubscription>;
   deletePushSubscription(userId: string, endpoint: string): Promise<boolean>;
+  
+  // Place Reviews
+  getPlaceReviews(placeId: string): Promise<(schema.PlaceReview & { user: User })[]>;
+  createPlaceReview(review: schema.InsertPlaceReview): Promise<schema.PlaceReview>;
+  deletePlaceReview(id: string, userId: string): Promise<boolean>;
+  getPlaceAverageRatings(placeId: string): Promise<{ wifi: number; noise: number; price: number; clean: number; overall: number; count: number }>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1325,6 +1331,63 @@ export class DrizzleStorage implements IStorage {
       ))
       .returning();
     return result.length > 0;
+  }
+
+  async getPlaceReviews(placeId: string): Promise<(schema.PlaceReview & { user: User })[]> {
+    const reviews = await this.db.select()
+      .from(schema.placeReviews)
+      .where(eq(schema.placeReviews.placeId, placeId))
+      .orderBy(desc(schema.placeReviews.createdAt));
+    
+    const withUsers = await Promise.all(
+      reviews.map(async (review) => {
+        const user = await this.getUser(review.userId);
+        return { ...review, user: user! };
+      })
+    );
+    return withUsers;
+  }
+
+  async createPlaceReview(review: schema.InsertPlaceReview): Promise<schema.PlaceReview> {
+    const result = await this.db.insert(schema.placeReviews).values(review).returning();
+    await this.updatePlaceRating(review.placeId);
+    return result[0];
+  }
+
+  async deletePlaceReview(id: string, userId: string): Promise<boolean> {
+    const review = await this.db.select().from(schema.placeReviews).where(eq(schema.placeReviews.id, id)).limit(1);
+    if (review.length === 0 || review[0].userId !== userId) return false;
+    
+    const placeId = review[0].placeId;
+    await this.db.delete(schema.placeReviews).where(eq(schema.placeReviews.id, id));
+    await this.updatePlaceRating(placeId);
+    return true;
+  }
+
+  async getPlaceAverageRatings(placeId: string): Promise<{ wifi: number; noise: number; price: number; clean: number; overall: number; count: number }> {
+    const reviews = await this.db.select().from(schema.placeReviews).where(eq(schema.placeReviews.placeId, placeId));
+    
+    if (reviews.length === 0) {
+      return { wifi: 0, noise: 0, price: 0, clean: 0, overall: 0, count: 0 };
+    }
+    
+    const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+    
+    return {
+      wifi: Math.round(avg(reviews.map(r => r.wifiRating)) * 10) / 10,
+      noise: Math.round(avg(reviews.map(r => r.noiseRating)) * 10) / 10,
+      price: Math.round(avg(reviews.map(r => r.priceRating)) * 10) / 10,
+      clean: Math.round(avg(reviews.map(r => r.cleanRating)) * 10) / 10,
+      overall: Math.round(avg(reviews.map(r => r.overallRating)) * 10) / 10,
+      count: reviews.length,
+    };
+  }
+
+  private async updatePlaceRating(placeId: string): Promise<void> {
+    const ratings = await this.getPlaceAverageRatings(placeId);
+    await this.db.update(schema.places)
+      .set({ rating: Math.round(ratings.overall), reviews: ratings.count })
+      .where(eq(schema.places.id, placeId));
   }
 }
 

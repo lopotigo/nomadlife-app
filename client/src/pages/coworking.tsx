@@ -3,6 +3,7 @@ import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket } from "lucide-react";
+import { PlaceReviews } from "@/components/place-reviews";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -484,6 +485,8 @@ export default function Coworking() {
                           </div>
                         </div>
                       </div>
+
+                      <PlaceReviews placeId={selectedPlace.id} currentUserId={user?.id} />
 
                       <div className="flex justify-between items-center pt-4 border-t border-slate-700">
                         <div>

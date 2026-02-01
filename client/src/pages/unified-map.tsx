@@ -192,6 +192,10 @@ export default function UnifiedMap() {
     showEvents: true,
     showMyTrips: true,
     showFollowingTrips: true,
+    maxBudget: 500,
+    dateFrom: "",
+    dateTo: "",
+    maxDistance: 0,
   });
 
   const handleLike = useCallback(async (postId: string) => {
@@ -294,10 +298,17 @@ export default function UnifiedMap() {
     [posts, filters.showPosts]
   );
 
-  const eventsWithCoords = useMemo(() => 
-    filters.showEvents ? events.filter(e => e.latitude && e.longitude) : [],
-    [events, filters.showEvents]
-  );
+  const eventsWithCoords = useMemo(() => {
+    if (!filters.showEvents) return [];
+    
+    return events.filter(e => {
+      if (!e.latitude || !e.longitude) return false;
+      if (filters.maxBudget < 500 && e.price > filters.maxBudget) return false;
+      if (filters.dateFrom && new Date(e.startDate) < new Date(filters.dateFrom)) return false;
+      if (filters.dateTo && new Date(e.startDate) > new Date(filters.dateTo)) return false;
+      return true;
+    });
+  }, [events, filters.showEvents, filters.maxBudget, filters.dateFrom, filters.dateTo]);
 
   const tripsToShow = useMemo(() => {
     const result: (Trip & { isOwn: boolean; color: string })[] = [];
@@ -705,7 +716,60 @@ export default function UnifiedMap() {
                     />
                   </div>
                   
-                                  </div>
+                  <div className="border-t border-border/50 pt-3 mt-3 space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase">Filtri avanzati</p>
+                    
+                    <div>
+                      <label className="text-xs text-muted-foreground flex items-center justify-between mb-1">
+                        <span>Budget max eventi</span>
+                        <span className="font-medium text-foreground">
+                          {filters.maxBudget >= 500 ? "Tutti" : `€${filters.maxBudget}`}
+                        </span>
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="500"
+                        step="10"
+                        value={filters.maxBudget}
+                        onChange={(e) => setFilters(f => ({ ...f, maxBudget: parseInt(e.target.value) }))}
+                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        data-testid="filter-budget"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Da</label>
+                        <input
+                          type="date"
+                          value={filters.dateFrom}
+                          onChange={(e) => setFilters(f => ({ ...f, dateFrom: e.target.value }))}
+                          className="w-full px-2 py-1.5 text-xs bg-muted border border-border rounded-lg"
+                          data-testid="filter-date-from"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">A</label>
+                        <input
+                          type="date"
+                          value={filters.dateTo}
+                          onChange={(e) => setFilters(f => ({ ...f, dateTo: e.target.value }))}
+                          className="w-full px-2 py-1.5 text-xs bg-muted border border-border rounded-lg"
+                          data-testid="filter-date-to"
+                        />
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => setFilters(f => ({ ...f, maxBudget: 500, dateFrom: "", dateTo: "", maxDistance: 0 }))}
+                      className="text-xs text-primary hover:underline"
+                      data-testid="button-reset-filters"
+                    >
+                      Resetta filtri
+                    </button>
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
