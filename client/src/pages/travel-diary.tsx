@@ -2157,9 +2157,9 @@ function TripPlannerMap({
               className={`bg-slate-800/90 ${showCO2Panel ? 'border-emerald-500 text-emerald-400' : 'border-emerald-500 text-emerald-400 animate-pulse'}`}
               data-testid="button-toggle-co2"
             >
-              <Leaf className="w-4 h-4 md:mr-2" />
+              <Route className="w-4 h-4 md:mr-2" />
               {showCO2Panel ? (
-                <><span className="hidden md:inline">CO2</span> {totalCO2} kg</>
+                <span className="hidden md:inline">Percorso</span>
               ) : (
                 <>Trasporti</>
               )}
