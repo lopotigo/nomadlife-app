@@ -1938,7 +1938,7 @@ function TripPlannerMap({
   const [countryName, setCountryName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [showCO2Panel, setShowCO2Panel] = useState(false);
+  const [showCO2Panel, setShowCO2Panel] = useState(true);
   const [selectedTransports, setSelectedTransports] = useState<Record<string, TransportMode>>({});
   const { toast } = useToast();
   
@@ -2090,7 +2090,7 @@ function TripPlannerMap({
       </div>
 
       <AnimatePresence>
-        {showCO2Panel && legs.length > 0 && (
+        {legs.length > 0 && (
           <motion.div
             initial={{ opacity: 0, x: 300 }}
             animate={{ opacity: 1, x: 0 }}
@@ -2101,11 +2101,12 @@ function TripPlannerMap({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Leaf className="w-5 h-5 text-emerald-500" />
-                Emissioni CO2
+                Come viaggi?
               </h3>
-              <button onClick={() => setShowCO2Panel(false)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
-              </button>
+            </div>
+            
+            <div className="p-2 bg-blue-500/20 rounded-lg mb-4 text-center">
+              <p className="text-xs text-blue-300">Scegli il mezzo per ogni tratta</p>
             </div>
 
             <div className="bg-emerald-500/20 rounded-lg p-3 mb-4">
