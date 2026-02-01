@@ -5,7 +5,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import webpush from "web-push";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema, insertPlaceReviewSchema } from "@shared/schema";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema, insertPlaceReviewSchema, updateTripStopSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { createRepository, pushFile, getGitHubUser } from "./github";
@@ -1056,23 +1056,13 @@ export async function registerRoutes(
         return res.status(404).send({ error: "Stop not found" });
       }
       
-      // Validate request body
-      const { transportMode, distanceKm, co2Kg } = req.body;
-      if (transportMode && !["walk", "bike", "train", "car", "plane"].includes(transportMode)) {
-        return res.status(400).send({ error: "Invalid transport mode" });
-      }
-      if (distanceKm !== undefined && (typeof distanceKm !== "number" || distanceKm < 0)) {
-        return res.status(400).send({ error: "Invalid distance" });
-      }
-      if (co2Kg !== undefined && (typeof co2Kg !== "number" || co2Kg < 0)) {
-        return res.status(400).send({ error: "Invalid CO2 value" });
+      // Validate request body with Zod
+      const parseResult = updateTripStopSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).send({ error: parseResult.error.errors[0]?.message || "Invalid data" });
       }
       
-      const updated = await storage.updateTripStop(req.params.stopId, {
-        transportMode,
-        distanceKm,
-        co2Kg
-      });
+      const updated = await storage.updateTripStop(req.params.stopId, parseResult.data);
       res.send(updated);
     } catch (error: any) {
       res.status(500).send({ error: error.message });

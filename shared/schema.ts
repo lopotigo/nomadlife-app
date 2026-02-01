@@ -333,7 +333,13 @@ export const insertTripStopSchema = createInsertSchema(tripStops).omit({
   id: true,
   createdAt: true,
 });
+export const updateTripStopSchema = z.object({
+  transportMode: z.enum(["walk", "bike", "train", "car", "plane"]).optional(),
+  distanceKm: z.number().min(0).optional(),
+  co2Kg: z.number().min(0).optional(),
+});
 export type InsertTripStop = z.infer<typeof insertTripStopSchema>;
+export type UpdateTripStop = z.infer<typeof updateTripStopSchema>;
 export type TripStop = typeof tripStops.$inferSelect;
 
 // Trip Expenses (Spese per tappa) table
