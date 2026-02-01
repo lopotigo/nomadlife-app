@@ -55,6 +55,7 @@ interface TripStop {
   arrivalDate: string;
   departureDate?: string;
   notes?: string;
+  imageUrl?: string | null;
 }
 
 interface Trip {
@@ -96,7 +97,22 @@ function createEventMarkerIcon(imageUrl: string | null) {
   });
 }
 
-function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6") {
+function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6", avatarUrl?: string | null, stopMediaUrl?: string | null) {
+  const imageUrl = stopMediaUrl || avatarUrl;
+  
+  if (imageUrl) {
+    return L.divIcon({
+      html: `<div style="width:36px;height:36px;border-radius:50%;border:3px solid ${color};box-shadow:0 2px 8px rgba(0,0,0,0.4);overflow:hidden;background:white;">
+        <img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;" />
+        <div style="position:absolute;bottom:-2px;right:-2px;background:${color};color:white;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:9px;border:1px solid white;">${orderIndex + 1}</div>
+      </div>`,
+      className: "custom-stop-marker",
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -18],
+    });
+  }
+  
   return L.divIcon({
     html: `<div style="background:${color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${orderIndex + 1}</div>`,
     className: "custom-stop-marker",
@@ -544,7 +560,7 @@ export default function UnifiedMap() {
                     <Marker
                       key={`stop-${stop.id}`}
                       position={[stop.latitude!, stop.longitude!]}
-                      icon={createStopMarkerIcon(stop.orderIndex, trip.color)}
+                      icon={createStopMarkerIcon(stop.orderIndex, trip.color, trip.user?.avatar, stop.imageUrl)}
                     >
                       <Popup className="custom-popup">
                         <div className="p-3 min-w-[200px]">
