@@ -483,3 +483,56 @@ export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions
 });
 export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+
+// Marketplace - Vendors table
+export const vendors = pgTable("vendors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  logo: text("logo"),
+  website: text("website"),
+  email: text("email"),
+  category: text("category").notNull(), // "esim", "bags", "clothing", "insurance", "tech", "software"
+  isVerified: boolean("is_verified").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertVendorSchema = createInsertSchema(vendors).omit({
+  id: true,
+  isVerified: true,
+  isActive: true,
+  createdAt: true,
+});
+export type InsertVendor = z.infer<typeof insertVendorSchema>;
+export type Vendor = typeof vendors.$inferSelect;
+
+// Marketplace - Products table
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vendorId: varchar("vendor_id").notNull().references(() => vendors.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  price: doublePrecision("price"),
+  currency: text("currency").default("EUR"),
+  originalPrice: doublePrecision("original_price"),
+  discountPercent: integer("discount_percent"),
+  category: text("category").notNull(), // "esim", "bags", "clothing", "insurance", "tech", "software"
+  affiliateUrl: text("affiliate_url"),
+  tags: text("tags").array(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  clicks: integer("clicks").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+  isFeatured: true,
+  isActive: true,
+  clicks: true,
+  createdAt: true,
+});
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;
