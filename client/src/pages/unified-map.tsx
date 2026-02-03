@@ -1929,7 +1929,7 @@ function FeedEventCard({ event, currentUser }: { event: EventWithHost; currentUs
       className="rounded-2xl overflow-hidden shadow-xl"
       data-testid={`event-manifesto-${event.id}`}
     >
-      <div className="relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-5 text-white">
+      <div className="relative p-5 text-white" style={{ background: `linear-gradient(135deg, ${event.color || "#a855f7"}, ${adjustColor(event.color || "#a855f7", -30)})` }}>
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
           <div className="absolute top-4 right-4 w-24 h-24 rounded-full bg-white/20 blur-2xl" />
           <div className="absolute bottom-4 left-4 w-20 h-20 rounded-full bg-white/20 blur-xl" />
