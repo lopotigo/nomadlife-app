@@ -85,9 +85,10 @@ function createPostMarkerIcon(imageUrl: string | null) {
 }
 
 function createEventMarkerIcon(imageUrl: string | null, color: string = "#a855f7") {
+  const gradientBg = `linear-gradient(135deg, ${color}, ${adjustColor(color, -30)})`;
   const html = imageUrl 
-    ? `<div class="event-marker" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});"><img src="${imageUrl}" alt="event" /></div>`
-    : `<div class="event-marker event-marker-icon" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg></div>`;
+    ? `<div class="event-marker" style="background: ${gradientBg} !important;"><img src="${imageUrl}" alt="event" /></div>`
+    : `<div class="event-marker event-marker-icon" style="background: ${gradientBg} !important;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg></div>`;
   return L.divIcon({
     html,
     className: "custom-event-marker",
@@ -434,7 +435,7 @@ export default function UnifiedMap() {
   return (
     <Layout>
       <div className="flex flex-col h-full overflow-hidden">
-        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0 sticky top-0 z-10">
+        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0 z-10">
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
