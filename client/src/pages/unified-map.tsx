@@ -504,15 +504,15 @@ export default function UnifiedMap() {
               >
                 <Popup className="custom-popup">
                   <div className="p-3 min-w-[220px]">
-                    <div className="flex items-center gap-2 mb-2">
+                    <Link href={`/event/${event.id}`} className="flex items-center gap-2 mb-2 hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors cursor-pointer">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                         <Calendar className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-bold text-sm">{event.title}</p>
+                        <p className="font-bold text-sm hover:underline">{event.title}</p>
                         <p className="text-xs text-gray-500">{event.city}, {event.country}</p>
                       </div>
-                    </div>
+                    </Link>
                     {event.imageUrl && (
                       <img src={event.imageUrl} className="w-full h-28 object-cover rounded-xl mb-2" alt="" />
                     )}
@@ -1963,37 +1963,37 @@ function FeedEventCard({ event, currentUser }: { event: EventWithHost; currentUs
             </div>
           </div>
 
-          <Link href={`/event/${event.id}`} className="block group">
+          <Link href={`/event/${event.id}`} className="block group cursor-pointer">
             <h2 className="text-xl font-bold mb-1 group-hover:underline">{event.title}</h2>
             
             {event.description && (
               <p className="text-xs opacity-80 mb-3 line-clamp-2">{event.description}</p>
             )}
+
+            <div className="space-y-1.5 mb-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="w-3.5 h-3.5 opacity-70" />
+                <span>{formatDate(event.startDate)}</span>
+                <span className="opacity-70">ore {formatTime(event.startDate)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="w-3.5 h-3.5 opacity-70" />
+                <span>{event.city}, {event.country}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-white/20">
+              <div className="flex items-center gap-2 text-sm">
+                <Users className="w-3.5 h-3.5 opacity-70" />
+                <span>{event.attendees} partecipanti</span>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <span className="font-bold text-sm">
+                  {(event.price ?? 0) > 0 ? `€${event.price}` : "Gratis"}
+                </span>
+              </div>
+            </div>
           </Link>
-
-          <div className="space-y-1.5 mb-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="w-3.5 h-3.5 opacity-70" />
-              <span>{formatDate(event.startDate)}</span>
-              <span className="opacity-70">ore {formatTime(event.startDate)}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="w-3.5 h-3.5 opacity-70" />
-              <span>{event.city}, {event.country}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-3 border-t border-white/20">
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="w-3.5 h-3.5 opacity-70" />
-              <span>{event.attendees} partecipanti</span>
-            </div>
-            <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <span className="font-bold text-sm">
-                {(event.price ?? 0) > 0 ? `€${event.price}` : "Gratis"}
-              </span>
-            </div>
-          </div>
 
           {event.host && (
             <div className="mt-3 flex items-center gap-2">
