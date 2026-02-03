@@ -3,7 +3,8 @@ import Layout from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles } from "lucide-react";
+import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles, UserPlus, UserCheck, Eye } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import type { User, Trip, TripStop, City } from "@shared/schema";
@@ -11,6 +12,7 @@ import type { User, Trip, TripStop, City } from "@shared/schema";
 type TripWithUser = Trip & { user: User; stops: TripStop[] };
 
 export default function SearchPage() {
+  const { user: currentUser } = useAuth();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [trips, setTrips] = useState<TripWithUser[]>([]);
@@ -18,9 +20,40 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("cities");
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
 
   const [searchedCities, setSearchedCities] = useState<City[]>([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
+
+  // Check following status for trip authors
+  useEffect(() => {
+    if (!currentUser || trips.length === 0) return;
+    const userIds = Array.from(new Set(trips.map(t => t.user.id).filter(id => id !== currentUser.id)));
+    userIds.forEach(userId => {
+      fetch(`/api/users/${userId}/is-following`)
+        .then(res => res.json())
+        .then(data => setFollowingMap(prev => ({ ...prev, [userId]: data.isFollowing })))
+        .catch(() => {});
+    });
+  }, [trips, currentUser]);
+
+  const handleFollow = async (userId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!currentUser) return;
+    
+    const isFollowing = followingMap[userId];
+    const method = isFollowing ? "DELETE" : "POST";
+    
+    try {
+      const res = await fetch(`/api/users/${userId}/follow`, { method });
+      if (res.ok) {
+        setFollowingMap(prev => ({ ...prev, [userId]: !isFollowing }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/cities")
@@ -165,18 +198,25 @@ export default function SearchPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {trips.map((trip) => (
-                  <Link key={trip.id} href={`/trip/${trip.id}`}>
-                    <div className="bg-card rounded-xl p-4 hover:shadow-lg transition-shadow cursor-pointer" data-testid={`trip-${trip.id}`}>
+                {trips.map((trip) => {
+                  const isOwnTrip = currentUser?.id === trip.user.id;
+                  const isFollowing = followingMap[trip.user.id];
+                  
+                  return (
+                    <div key={trip.id} className="bg-card rounded-xl p-4 hover:shadow-lg transition-shadow" data-testid={`trip-${trip.id}`}>
                       <div className="flex items-start gap-3">
-                        <img
-                          src={trip.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user.username}`}
-                          className="w-10 h-10 rounded-full"
-                          alt={trip.user.name}
-                        />
+                        <Link href={`/user/${trip.user.id}`}>
+                          <img
+                            src={trip.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user.username}`}
+                            className="w-10 h-10 rounded-full cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                            alt={trip.user.name}
+                          />
+                        </Link>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold truncate">{trip.title}</h3>
-                          <p className="text-sm text-muted-foreground">di {trip.user.name}</p>
+                          <Link href={`/user/${trip.user.id}`}>
+                            <p className="text-sm text-muted-foreground hover:text-primary cursor-pointer">di {trip.user.name}</p>
+                          </Link>
                           <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                             <MapPin className="w-4 h-4" />
                             <span>{trip.startLocation} → {trip.endLocation}</span>
@@ -193,11 +233,42 @@ export default function SearchPage() {
                               )}
                             </div>
                           )}
+                          
+                          {/* Action buttons */}
+                          <div className="flex gap-2 mt-3">
+                            <Link href={`/trip/${trip.id}`}>
+                              <Button size="sm" variant="default" className="gap-1" data-testid={`view-trip-${trip.id}`}>
+                                <Eye className="w-4 h-4" />
+                                Visualizza
+                              </Button>
+                            </Link>
+                            {!isOwnTrip && currentUser && (
+                              <Button
+                                size="sm"
+                                variant={isFollowing ? "secondary" : "outline"}
+                                className="gap-1"
+                                onClick={(e) => handleFollow(trip.user.id, e)}
+                                data-testid={`follow-user-${trip.user.id}`}
+                              >
+                                {isFollowing ? (
+                                  <>
+                                    <UserCheck className="w-4 h-4" />
+                                    Seguito
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserPlus className="w-4 h-4" />
+                                    Segui
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
           </TabsContent>
