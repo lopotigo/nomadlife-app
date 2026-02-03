@@ -12,7 +12,20 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
   return (
     <div className="h-screen bg-background pb-20 md:pb-0 font-sans overflow-hidden">
-      <main className="md:pl-64 h-full overflow-y-auto">
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 inset-x-0 bg-card/95 backdrop-blur-lg border-b border-border flex justify-between items-center h-14 px-4 z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-display font-bold text-lg">
+            N
+          </div>
+          <span className="font-display font-bold text-lg tracking-tight">NomadLife</span>
+        </div>
+        <div className="relative">
+          <NotificationsDropdown />
+        </div>
+      </header>
+      
+      <main className="md:pl-64 h-full overflow-y-auto pt-14 md:pt-0">
         <div className={fullWidth 
           ? "h-full bg-card overflow-hidden" 
           : "max-w-2xl mx-auto min-h-full border-x border-border/40 bg-card shadow-sm"
@@ -30,7 +43,9 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
             </div>
             <span className="font-display font-bold text-xl tracking-tight">NomadLife</span>
           </div>
-          <NotificationsDropdown />
+          <div className="relative">
+            <NotificationsDropdown />
+          </div>
         </div>
         
         <nav className="flex flex-col gap-2">
