@@ -84,10 +84,10 @@ function createPostMarkerIcon(imageUrl: string | null) {
   });
 }
 
-function createEventMarkerIcon(imageUrl: string | null) {
+function createEventMarkerIcon(imageUrl: string | null, color: string = "#a855f7") {
   const html = imageUrl 
-    ? `<div class="event-marker"><img src="${imageUrl}" alt="event" /></div>`
-    : `<div class="event-marker event-marker-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg></div>`;
+    ? `<div class="event-marker" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});"><img src="${imageUrl}" alt="event" /></div>`
+    : `<div class="event-marker event-marker-icon" style="background: linear-gradient(135deg, ${color}, ${adjustColor(color, -30)});"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg></div>`;
   return L.divIcon({
     html,
     className: "custom-event-marker",
@@ -95,6 +95,17 @@ function createEventMarkerIcon(imageUrl: string | null) {
     iconAnchor: [22, 44],
     popupAnchor: [0, -44],
   });
+}
+
+function adjustColor(hex: string, amount: number): string {
+  const clamp = (val: number) => Math.min(255, Math.max(0, val));
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c.split('').map(x => x + x).join('');
+  const num = parseInt(c, 16);
+  const r = clamp(((num >> 16) & 0xff) + amount);
+  const g = clamp(((num >> 8) & 0xff) + amount);
+  const b = clamp((num & 0xff) + amount);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
 function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6", avatarUrl?: string | null, stopMediaUrl?: string | null) {
@@ -487,7 +498,7 @@ export default function UnifiedMap() {
               <Marker
                 key={`event-${event.id}`}
                 position={[event.latitude!, event.longitude!]}
-                icon={createEventMarkerIcon(event.imageUrl)}
+                icon={createEventMarkerIcon(event.imageUrl, event.color || "#a855f7")}
               >
                 <Popup className="custom-popup">
                   <div className="p-3 min-w-[220px]">
@@ -890,8 +901,7 @@ export default function UnifiedMap() {
         .custom-event-marker { background: transparent !important; border: none !important; }
         .event-marker {
           width: 44px; height: 44px; border-radius: 50% 50% 50% 0;
-          background: linear-gradient(135deg, #a855f7, #ec4899);
-          border: 3px solid white; box-shadow: 0 3px 12px rgba(168,85,247,0.4);
+          border: 3px solid white; box-shadow: 0 3px 12px rgba(0,0,0,0.3);
           overflow: hidden; transform: rotate(-45deg);
           display: flex; align-items: center; justify-content: center;
         }
@@ -1226,6 +1236,7 @@ function CreateEventModal({
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [eventColor, setEventColor] = useState("#a855f7");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const { toast } = useToast();
@@ -1299,12 +1310,14 @@ function CreateEventModal({
           price: formData.get("price") ? parseInt(formData.get("price") as string) : 0,
           currency: formData.get("currency") || "EUR",
           imageUrl: imageUrl || null,
+          color: eventColor,
         }),
       });
 
       if (res.ok) {
         setImageUrl(null);
         setCoords(null);
+        setEventColor("#a855f7");
         onEventCreated();
       } else {
         throw new Error("Failed");
@@ -1504,6 +1517,38 @@ function CreateEventModal({
                   )}
                 </label>
               )}
+            </div>
+          </div>
+
+          <div>
+            <Label>Colore Marker</Label>
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {["#a855f7", "#ec4899", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"].map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setEventColor(color)}
+                  className={`w-8 h-8 rounded-full transition-all ${eventColor === color ? 'ring-2 ring-offset-2 ring-white scale-110' : 'hover:scale-105'}`}
+                  style={{ backgroundColor: color }}
+                  data-testid={`color-${color.replace('#', '')}`}
+                />
+              ))}
+              <label className="w-8 h-8 rounded-full border-2 border-dashed border-muted flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors overflow-hidden">
+                <input
+                  type="color"
+                  value={eventColor}
+                  onChange={(e) => setEventColor(e.target.value)}
+                  className="opacity-0 absolute w-8 h-8 cursor-pointer"
+                />
+                <span className="text-xs text-muted-foreground">+</span>
+              </label>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <div 
+                className="w-6 h-6 rounded-full" 
+                style={{ background: `linear-gradient(135deg, ${eventColor}, ${adjustColor(eventColor, -30)})` }}
+              />
+              <span className="text-xs text-muted-foreground">Anteprima colore</span>
             </div>
           </div>
 

@@ -225,6 +225,7 @@ export const events = pgTable("events", {
   attendees: integer("attendees").default(0).notNull(),
   likes: integer("likes").default(0).notNull(),
   commentsCount: integer("comments_count").default(0).notNull(),
+  color: text("color").default("#a855f7"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
