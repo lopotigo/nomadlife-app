@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
+import { I18nProvider } from "@/lib/i18n";
 
 import MapFeed from "@/pages/map-feed";
 import Profile from "@/pages/profile";
@@ -22,6 +23,7 @@ import PostDetail from "@/pages/post-detail";
 import TripDetail from "@/pages/trip-detail";
 import SearchPage from "@/pages/search";
 import AvatarBuilder from "@/pages/avatar-builder";
+import EventsCalendar from "@/pages/events-calendar";
 
 function Router() {
   return (
@@ -41,6 +43,7 @@ function Router() {
       <Route path="/mobile-preview" component={MobilePreview} />
       <Route path="/travel-diary" component={TravelDiary} />
       <Route path="/avatar-builder" component={AvatarBuilder} />
+      <Route path="/events-calendar" component={EventsCalendar} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -50,12 +53,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </AuthProvider>
+        </I18nProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

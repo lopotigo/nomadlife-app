@@ -106,6 +106,23 @@ Preferred communication style: Simple, everyday language.
 - **Trip Status & Visibility Controls**: Toggle buttons in TripDetails for:
   - Status: Pianificato (planned), In corso (in_progress), Completato (completed)
   - Visibility: Pubblico/Privato with instant save via PATCH /api/trips/:tripId
+- **Personal Travel Statistics**: Dashboard component (`PersonalStats`) showing:
+  - Total km traveled, countries/cities visited, trips completed
+  - CO2 emitted vs CO2 saved (compared to car travel)
+  - Eco-transport percentage
+  - Displayed in both Profile and Travel Diary pages
+- **Events Calendar**: Monthly calendar view (`/events-calendar`) with:
+  - Navigate between months
+  - See events you're registered for and events you organized
+  - Click any date to see events on that day
+  - Quick stats showing registered vs organized events
+- **Multi-language Support (i18n)**: 
+  - Italian (default), English, Spanish
+  - Language selector in Profile page
+  - All navigation labels and common UI elements translated
+  - Persisted to localStorage
+- **Mobile Header**: Fixed header on mobile with NomadLife branding and notifications bell
+- **Enhanced Search**: Trips searchable by title, description, and author name/username
 
 ### PWA Configuration
 

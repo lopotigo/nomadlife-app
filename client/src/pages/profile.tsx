@@ -10,10 +10,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/lib/theme";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
 import { useUpload } from "@/hooks/use-upload";
+import { PersonalStats } from "@/components/personal-stats";
+import { useI18n, languageNames, languageFlags, Language } from "@/lib/i18n";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Languages } from "lucide-react";
 
 export default function Profile() {
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useI18n();
   const { isSupported: pushSupported, isSubscribed: pushSubscribed, isLoading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications();
   const { uploadFile, isUploading: uploadingPhoto } = useUpload();
   const [, setLocation] = useLocation();
@@ -250,22 +255,42 @@ export default function Profile() {
                 {pushSubscribed ? "Notifiche ON" : "Notifiche OFF"}
               </button>
             )}
+            <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-2xl">
+              <Languages className="w-4 h-4 text-muted-foreground" />
+              <Select value={language} onValueChange={(val) => setLanguage(val as Language)}>
+                <SelectTrigger className="border-0 bg-transparent p-0 h-auto min-w-[100px]" data-testid="select-language">
+                  <SelectValue>
+                    {languageFlags[language]} {languageNames[language]}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="it">{languageFlags.it} {languageNames.it}</SelectItem>
+                  <SelectItem value="en">{languageFlags.en} {languageNames.en}</SelectItem>
+                  <SelectItem value="es">{languageFlags.es} {languageNames.es}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-6 py-3 bg-red-500/20 text-red-400 rounded-2xl font-bold hover:bg-red-500/30 transition-colors"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              {t("profile.logout")}
             </button>
           </div>
+
+          <div className="w-full mt-8">
+              <h3 className="text-lg font-display font-bold mb-4">{t("profile.my_travel_stats")}</h3>
+              <PersonalStats userId={user.id} />
+            </div>
 
           <div className="w-full mt-10 space-y-8">
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-display font-bold">My Journey</h2>
+                <h2 className="text-xl font-display font-bold">{t("profile.my_journey")}</h2>
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                  {posts.length} Posts
+                  {posts.length} {t("profile.posts")}
                 </span>
               </div>
               {posts.length === 0 ? (

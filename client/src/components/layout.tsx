@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
+import { useI18n } from "@/lib/i18n";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface LayoutProps {
 
 export default function Layout({ children, fullWidth = false }: LayoutProps) {
   const [location] = useLocation();
+  const { t } = useI18n();
 
   return (
     <div className="h-screen bg-background pb-20 md:pb-0 font-sans overflow-hidden">
@@ -49,20 +51,21 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         </div>
         
         <nav className="flex flex-col gap-2">
-          <NavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
-          <NavItem href="/search" icon={Search} label="Cerca" active={location === "/search"} />
-          <NavItem href="/travel-diary" icon={Plane} label="Diario di Viaggio" active={location === "/travel-diary"} />
-          <NavItem href="/chat" icon={MessageSquare} label="Messaggi" active={location === "/chat"} />
-          <NavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
-          <NavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
+          <NavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
+          <NavItem href="/search" icon={Search} label={t("nav.search")} active={location === "/search"} />
+          <NavItem href="/travel-diary" icon={Plane} label={t("nav.travel_diary")} active={location === "/travel-diary"} />
+          <NavItem href="/events-calendar" icon={Calendar} label={t("nav.events_calendar")} active={location === "/events-calendar"} />
+          <NavItem href="/chat" icon={MessageSquare} label={t("nav.messages")} active={location === "/chat"} />
+          <NavItem href="/coworking" icon={Briefcase} label={t("nav.coworking")} active={location === "/coworking"} />
+          <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
         </nav>
 
         <div className="mt-auto p-4 bg-secondary/50 rounded-xl">
-          <p className="text-xs font-medium text-secondary-foreground mb-1">Nomad Premium</p>
-          <p className="text-xs text-muted-foreground mb-3">Unlock global perks & insurance.</p>
+          <p className="text-xs font-medium text-secondary-foreground mb-1">{t("premium.title")}</p>
+          <p className="text-xs text-muted-foreground mb-3">{t("premium.subtitle")}</p>
           <Link href="/subscription">
             <button className="w-full py-2 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
-              Upgrade
+              {t("premium.upgrade")}
             </button>
           </Link>
         </div>
@@ -70,11 +73,11 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-1 z-50">
-        <MobileNavItem href="/" icon={Map} label="Mappa" active={location === "/"} />
-        <MobileNavItem href="/travel-diary" icon={Plane} label="Viaggi" active={location === "/travel-diary"} />
-        <MobileNavItem href="/coworking" icon={Briefcase} label="Coworking" active={location === "/coworking"} />
-        <MobileNavItem href="/chat" icon={MessageSquare} label="Chat" active={location === "/chat"} />
-        <MobileNavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
+        <MobileNavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
+        <MobileNavItem href="/travel-diary" icon={Plane} label={t("nav.trips")} active={location === "/travel-diary"} />
+        <MobileNavItem href="/coworking" icon={Briefcase} label={t("nav.coworking")} active={location === "/coworking"} />
+        <MobileNavItem href="/chat" icon={MessageSquare} label={t("nav.chat")} active={location === "/chat"} />
+        <MobileNavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
       </nav>
     </div>
   );

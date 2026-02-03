@@ -21,7 +21,9 @@ import { useToast } from "@/hooks/use-toast";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3 } from "lucide-react";
+import { PersonalStats } from "@/components/personal-stats";
+import { useI18n } from "@/lib/i18n";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -170,6 +172,7 @@ function formatDuration(hours: number): string {
 
 export default function TravelDiary() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useI18n();
   const [, setLocation] = useLocation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [publicTrips, setPublicTrips] = useState<TripWithDetails[]>([]);
@@ -762,6 +765,16 @@ export default function TravelDiary() {
               onRefresh={() => fetchTripDetails(selectedTrip.id)}
             />
           ) : (
+            <>
+            {user && (
+              <div className="mb-6 bg-slate-800/50 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="w-5 h-5 text-emerald-400" />
+                  <h3 className="font-semibold text-white">{t("diary.your_stats")}</h3>
+                </div>
+                <PersonalStats userId={user.id} compact />
+              </div>
+            )}
             <TripsList 
               trips={trips} 
               onSelectTrip={(tripId) => fetchTripDetails(tripId)}
@@ -774,6 +787,7 @@ export default function TravelDiary() {
                 setTimeout(() => setShowPlannerMap(true), 300);
               }}
             />
+            </>
           )}
         </div>
         ) : (
