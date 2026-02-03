@@ -24,6 +24,7 @@ import "leaflet/dist/leaflet.css";
 import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3 } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { useI18n } from "@/lib/i18n";
+import { FloatingTip } from "@/components/contextual-tip";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -1143,6 +1144,13 @@ export default function TravelDiary() {
           />
         )}
       </div>
+
+      <FloatingTip
+        tipKey="hasSeenTravelDiaryTip"
+        title="Crea il tuo diario di viaggio"
+        description="Premi 'Nuovo Viaggio' per iniziare a pianificare. Aggiungi tappe, spese e traccia le tue statistiche CO2!"
+        delay={2000}
+      />
     </Layout>
   );
 }

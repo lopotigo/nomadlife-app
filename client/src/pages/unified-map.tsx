@@ -24,6 +24,7 @@ import { useUpload } from "@/hooks/use-upload";
 import { ShareQRModal } from "@/components/share-qr-modal";
 import { EventPosterModal } from "@/components/event-poster-modal";
 import { WeatherWidget } from "@/components/weather-widget";
+import { FloatingTip } from "@/components/contextual-tip";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -923,6 +924,20 @@ export default function UnifiedMap() {
         .custom-popup .leaflet-popup-tip { background: white; }
         .leaflet-container { font-family: inherit; }
       `}</style>
+
+      <FloatingTip
+        tipKey="hasSeenMapTip"
+        title="Clicca sulla mappa!"
+        description="Tocca un punto qualsiasi sulla mappa per creare un post o un evento in quella posizione."
+        delay={3000}
+      />
+
+      <FloatingTip
+        tipKey="hasSeenFeedTip"
+        title="Scorri per vedere il feed"
+        description="Sotto la mappa trovi tutti i post, eventi e viaggi della community. Clicca su un contenuto per vederlo in dettaglio!"
+        delay={8000}
+      />
     </Layout>
   );
 }

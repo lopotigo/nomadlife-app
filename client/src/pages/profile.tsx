@@ -14,6 +14,7 @@ import { PersonalStats } from "@/components/personal-stats";
 import { useI18n, languageNames, languageFlags, Language } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Languages } from "lucide-react";
+import { FloatingTip } from "@/components/contextual-tip";
 
 export default function Profile() {
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
@@ -385,6 +386,13 @@ export default function Profile() {
           </motion.div>
         </div>
       )}
+
+      <FloatingTip
+        tipKey="hasSeenProfileTip"
+        title="Personalizza il tuo profilo"
+        description="Clicca sulla foto per cambiarla, modifica la bio e le impostazioni. Attiva le notifiche push per non perderti nulla!"
+        delay={2000}
+      />
     </Layout>
   );
 }
