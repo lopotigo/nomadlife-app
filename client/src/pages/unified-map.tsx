@@ -1691,15 +1691,17 @@ function FeedPostCard({
         </div>
       </div>
       
-      <p className="mt-3 text-sm">{post.content}</p>
-      
-      {post.imageUrl && (
-        <img
-          src={post.imageUrl}
-          alt=""
-          className="mt-3 rounded-xl w-full max-h-64 object-cover"
-        />
-      )}
+      <Link href={`/post/${post.id}`} className="block cursor-pointer group">
+        <p className="mt-3 text-sm group-hover:text-primary/90 transition-colors">{post.content}</p>
+        
+        {post.imageUrl && (
+          <img
+            src={post.imageUrl}
+            alt=""
+            className="mt-3 rounded-xl w-full max-h-64 object-cover group-hover:opacity-95 transition-opacity"
+          />
+        )}
+      </Link>
       
       <div className="flex items-center gap-4 mt-3 text-muted-foreground">
         <button 
@@ -1946,11 +1948,13 @@ function FeedEventCard({ event, currentUser }: { event: EventWithHost; currentUs
             </div>
           </div>
 
-          <h2 className="text-xl font-bold mb-1">{event.title}</h2>
-          
-          {event.description && (
-            <p className="text-xs opacity-80 mb-3 line-clamp-2">{event.description}</p>
-          )}
+          <Link href={`/event/${event.id}`} className="block group">
+            <h2 className="text-xl font-bold mb-1 group-hover:underline">{event.title}</h2>
+            
+            {event.description && (
+              <p className="text-xs opacity-80 mb-3 line-clamp-2">{event.description}</p>
+            )}
+          </Link>
 
           <div className="space-y-1.5 mb-3">
             <div className="flex items-center gap-2 text-sm">
