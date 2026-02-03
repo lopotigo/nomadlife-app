@@ -24,6 +24,7 @@ import TripDetail from "@/pages/trip-detail";
 import SearchPage from "@/pages/search";
 import AvatarBuilder from "@/pages/avatar-builder";
 import EventsCalendar from "@/pages/events-calendar";
+import EventDetail from "@/pages/event-detail";
 
 function Router() {
   return (
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/travel-diary" component={TravelDiary} />
       <Route path="/avatar-builder" component={AvatarBuilder} />
       <Route path="/events-calendar" component={EventsCalendar} />
+      <Route path="/event/:id" component={EventDetail} />
       <Route component={NotFound} />
     </Switch>
   );

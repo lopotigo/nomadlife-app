@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ShareQRModalProps {
   open: boolean;
   onClose: () => void;
-  type: "post" | "profile" | "trip" | "invite";
+  type: "post" | "profile" | "trip" | "invite" | "event";
   id: string;
   title: string;
 }
@@ -24,6 +24,7 @@ export function ShareQRModal({ open, onClose, type, id, title }: ShareQRModalPro
       case "post": return `${baseUrl}/post/${id}`;
       case "profile": return `${baseUrl}/user/${id}`;
       case "trip": return `${baseUrl}/trip/${id}`;
+      case "event": return `${baseUrl}/event/${id}`;
       case "invite": return `${baseUrl}/auth`;
       default: return baseUrl;
     }
