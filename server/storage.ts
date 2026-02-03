@@ -183,6 +183,14 @@ export interface IStorage {
   createPlaceReview(review: schema.InsertPlaceReview): Promise<schema.PlaceReview>;
   deletePlaceReview(id: string, userId: string): Promise<boolean>;
   getPlaceAverageRatings(placeId: string): Promise<{ wifi: number; noise: number; price: number; clean: number; overall: number; count: number }>;
+
+  // Marketplace
+  getProducts(category?: string): Promise<(schema.Product & { vendor: schema.Vendor })[]>;
+  getFeaturedProducts(): Promise<(schema.Product & { vendor: schema.Vendor })[]>;
+  trackProductClick(productId: string): Promise<void>;
+  getVendors(): Promise<schema.Vendor[]>;
+  createVendor(vendor: schema.InsertVendor): Promise<schema.Vendor>;
+  createProduct(product: schema.InsertProduct): Promise<schema.Product>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1392,6 +1400,62 @@ export class DrizzleStorage implements IStorage {
     await this.db.update(schema.places)
       .set({ rating: Math.round(ratings.overall), reviews: ratings.count })
       .where(eq(schema.places.id, placeId));
+  }
+
+  // Marketplace
+  async getProducts(category?: string): Promise<(schema.Product & { vendor: schema.Vendor })[]> {
+    const products = category
+      ? await this.db.select().from(schema.products)
+          .where(and(eq(schema.products.isActive, true), eq(schema.products.category, category)))
+          .orderBy(desc(schema.products.isFeatured), desc(schema.products.createdAt))
+      : await this.db.select().from(schema.products)
+          .where(eq(schema.products.isActive, true))
+          .orderBy(desc(schema.products.isFeatured), desc(schema.products.createdAt));
+
+    const withVendors = await Promise.all(
+      products.map(async (product) => {
+        const vendor = await this.db.select().from(schema.vendors).where(eq(schema.vendors.id, product.vendorId)).limit(1);
+        return { ...product, vendor: vendor[0] };
+      })
+    );
+    return withVendors;
+  }
+
+  async getFeaturedProducts(): Promise<(schema.Product & { vendor: schema.Vendor })[]> {
+    const products = await this.db.select().from(schema.products)
+      .where(and(eq(schema.products.isActive, true), eq(schema.products.isFeatured, true)))
+      .orderBy(desc(schema.products.createdAt))
+      .limit(10);
+
+    const withVendors = await Promise.all(
+      products.map(async (product) => {
+        const vendor = await this.db.select().from(schema.vendors).where(eq(schema.vendors.id, product.vendorId)).limit(1);
+        return { ...product, vendor: vendor[0] };
+      })
+    );
+    return withVendors;
+  }
+
+  async trackProductClick(productId: string): Promise<void> {
+    await this.db.update(schema.products)
+      .set({ clicks: sql`${schema.products.clicks} + 1` })
+      .where(eq(schema.products.id, productId));
+  }
+
+  async getVendors(): Promise<schema.Vendor[]> {
+    return await this.db.select().from(schema.vendors)
+      .where(eq(schema.vendors.isActive, true))
+      .orderBy(desc(schema.vendors.isVerified), desc(schema.vendors.createdAt));
+  }
+
+  async createVendor(vendor: schema.InsertVendor): Promise<schema.Vendor> {
+    const result = await this.db.insert(schema.vendors).values(vendor).returning();
+    return result[0];
+  }
+
+  async createProduct(product: schema.InsertProduct): Promise<schema.Product> {
+    const result = await this.db.insert(schema.products).values(product).returning();
+    return result[0];
   }
 }
 

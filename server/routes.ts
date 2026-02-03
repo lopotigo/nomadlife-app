@@ -1679,6 +1679,50 @@ export async function registerRoutes(
     }
   });
 
+  // ========== MARKETPLACE ROUTES ==========
+
+  // Get all products (with optional category filter)
+  app.get("/api/marketplace/products", async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const products = await storage.getProducts(category);
+      res.send(products);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Get featured products
+  app.get("/api/marketplace/featured", async (req, res) => {
+    try {
+      const products = await storage.getFeaturedProducts();
+      res.send(products);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Track product click
+  app.post("/api/marketplace/products/:id/click", async (req, res) => {
+    try {
+      const productId = req.params.id;
+      await storage.trackProductClick(productId);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // Get all vendors
+  app.get("/api/marketplace/vendors", async (req, res) => {
+    try {
+      const vendors = await storage.getVendors();
+      res.send(vendors);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
 
   return httpServer;
 }

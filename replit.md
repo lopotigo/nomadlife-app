@@ -128,6 +128,12 @@ Preferred communication style: Simple, everyday language.
   - Contextual FloatingTips: Appear on specific pages after tutorial completion with delays
   - State persisted to localStorage with key "nomadlife_onboarding"
   - Tips on: unified-map (map and feed tips), profile (customization tips), travel-diary (trip creation tips)
+- **Marketplace**: Monetization feature for nomad-focused products
+  - Vendor and product database tables with affiliate tracking
+  - Categories: eSIM, bags, clothing, insurance, tech, software
+  - Featured products, discount display, click tracking for affiliate revenue
+  - Category filtering, responsive design for mobile/desktop
+  - Accessible via bottom nav on mobile and sidebar on desktop
 
 ### PWA Configuration
 
