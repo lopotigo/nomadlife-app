@@ -7,6 +7,8 @@ import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
 import { I18nProvider } from "@/lib/i18n";
+import { OnboardingProvider } from "@/lib/onboarding";
+import { WelcomeTutorial } from "@/components/welcome-tutorial";
 
 import MapFeed from "@/pages/map-feed";
 import Profile from "@/pages/profile";
@@ -57,10 +59,13 @@ function App() {
       <ThemeProvider>
         <I18nProvider>
           <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
+            <OnboardingProvider>
+              <TooltipProvider>
+                <Toaster />
+                <WelcomeTutorial />
+                <Router />
+              </TooltipProvider>
+            </OnboardingProvider>
           </AuthProvider>
         </I18nProvider>
       </ThemeProvider>
