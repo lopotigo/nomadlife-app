@@ -863,9 +863,19 @@ export default function UnifiedMap() {
       <CreateEventModal
         open={showNewEvent}
         onClose={() => setShowNewEvent(false)}
-        onEventCreated={() => {
+        onEventCreated={async () => {
           setShowNewEvent(false);
           toast({ title: "Evento creato!", description: "Il tuo evento è stato pubblicato" });
+          // Reload events to show the new one
+          try {
+            const eventsRes = await fetch("/api/events", { credentials: "include" });
+            if (eventsRes.ok) {
+              const eventsData = await eventsRes.json();
+              setEvents(eventsData);
+            }
+          } catch (err) {
+            console.error("Error reloading events:", err);
+          }
         }}
       />
       
