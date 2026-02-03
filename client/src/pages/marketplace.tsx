@@ -82,11 +82,9 @@ export default function Marketplace() {
       <div className="hidden md:flex h-screen">
         {/* Left Sidebar */}
         <div className="w-20 bg-card border-r border-border flex flex-col items-center py-6 space-y-6">
-          <Link href="/">
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xl">
-              N
-            </div>
-          </Link>
+          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xl">
+            N
+          </div>
           <nav className="flex flex-col space-y-4">
             <Link href="/">
               <Button variant="ghost" size="icon" className="w-12 h-12">
