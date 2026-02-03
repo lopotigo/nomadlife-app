@@ -6,7 +6,8 @@ import { Link } from "wouter";
 import { 
   Home, Map, Users, ShoppingBag, Bell, User, 
   SlidersHorizontal, ExternalLink, Star, BadgeCheck, 
-  Plane, Wifi, Briefcase, Shield, Smartphone, Package
+  Plane, Wifi, Briefcase, Shield, Smartphone, Package,
+  Search, Calendar, MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -85,33 +86,48 @@ export default function Marketplace() {
           <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xl">
             N
           </div>
-          <nav className="flex flex-col space-y-4">
+          <nav className="flex flex-col space-y-2">
             <Link href="/">
-              <Button variant="ghost" size="icon" className="w-12 h-12">
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.map")}>
                 <Map className="w-5 h-5" />
               </Button>
             </Link>
+            <Link href="/search">
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.search")}>
+                <Search className="w-5 h-5" />
+              </Button>
+            </Link>
             <Link href="/travel-diary">
-              <Button variant="ghost" size="icon" className="w-12 h-12">
-                <Home className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.travel_diary")}>
+                <Plane className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/events-calendar">
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.events_calendar")}>
+                <Calendar className="w-5 h-5" />
               </Button>
             </Link>
             <Link href="/chat">
-              <Button variant="ghost" size="icon" className="w-12 h-12">
-                <Users className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.messages")}>
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/coworking">
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.coworking")}>
+                <Briefcase className="w-5 h-5" />
               </Button>
             </Link>
             <Link href="/marketplace">
-              <Button variant="secondary" size="icon" className="w-12 h-12">
+              <Button variant="secondary" size="icon" className="w-12 h-12" title={t("nav.marketplace")}>
                 <ShoppingBag className="w-5 h-5" />
               </Button>
             </Link>
           </nav>
-          <div className="mt-auto space-y-4">
+          <div className="mt-auto space-y-2">
             {user && <NotificationsDropdown />}
             {user && (
               <Link href="/profile">
-                <Button variant="ghost" size="icon" className="w-12 h-12">
+                <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.profile")}>
                   <User className="w-5 h-5" />
                 </Button>
               </Link>
