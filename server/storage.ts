@@ -858,10 +858,14 @@ export class DrizzleStorage implements IStorage {
         and(
           eq(schema.trips.isPublic, true),
           or(
+            sql`LOWER(${schema.trips.title}) LIKE ${searchTerm}`,
+            sql`LOWER(${schema.trips.description}) LIKE ${searchTerm}`,
             sql`LOWER(${schema.trips.startLocation}) LIKE ${searchTerm}`,
             sql`LOWER(${schema.trips.endLocation}) LIKE ${searchTerm}`,
             sql`LOWER(${schema.tripStops.city}) LIKE ${searchTerm}`,
-            sql`LOWER(${schema.tripStops.country}) LIKE ${searchTerm}`
+            sql`LOWER(${schema.tripStops.country}) LIKE ${searchTerm}`,
+            sql`LOWER(${schema.users.name}) LIKE ${searchTerm}`,
+            sql`LOWER(${schema.users.username}) LIKE ${searchTerm}`
           )
         )
       )
