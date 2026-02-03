@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 
@@ -57,6 +57,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/events-calendar" icon={Calendar} label={t("nav.events_calendar")} active={location === "/events-calendar"} />
           <NavItem href="/chat" icon={MessageSquare} label={t("nav.messages")} active={location === "/chat"} />
           <NavItem href="/coworking" icon={Briefcase} label={t("nav.coworking")} active={location === "/coworking"} />
+          <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
         </nav>
 
