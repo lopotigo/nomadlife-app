@@ -123,6 +123,11 @@ Preferred communication style: Simple, everyday language.
   - Persisted to localStorage
 - **Mobile Header**: Fixed header on mobile with NomadLife branding and notifications bell
 - **Enhanced Search**: Trips searchable by title, description, and author name/username
+- **Onboarding System**: Comprehensive tutorial for new users:
+  - WelcomeTutorial: 4 interactive slides introducing map, sharing, travel diary, and community features
+  - Contextual FloatingTips: Appear on specific pages after tutorial completion with delays
+  - State persisted to localStorage with key "nomadlife_onboarding"
+  - Tips on: unified-map (map and feed tips), profile (customization tips), travel-diary (trip creation tips)
 
 ### PWA Configuration
 
