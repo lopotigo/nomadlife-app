@@ -145,7 +145,7 @@ export default function MapFeed() {
         {[
           { icon: Home, label: "Feed", path: "/" },
           { icon: Compass, label: "Explore", path: "/explore" },
-          { icon: Building2, label: "Coworking", path: "/coworking" },
+          { icon: Building2, label: "Booking", path: "/booking" },
           { icon: MessageSquare, label: "Chat", path: "/chat" },
           { icon: User, label: "Profile", path: "/profile" },
         ].map((item) => (
@@ -171,7 +171,7 @@ export default function MapFeed() {
             {[
               { icon: Home, label: "Feed", path: "/", active: true },
               { icon: Compass, label: "Explore", path: "/explore" },
-              { icon: Building2, label: "Coworking", path: "/coworking" },
+              { icon: Building2, label: "Booking", path: "/booking" },
               { icon: MessageSquare, label: "Chat", path: "/chat" },
               { icon: User, label: "Profile", path: "/profile" },
               { icon: Crown, label: "Premium", path: "/subscription" },

@@ -112,8 +112,8 @@ export default function Marketplace() {
                 <MessageSquare className="w-5 h-5" />
               </Button>
             </Link>
-            <Link href="/coworking">
-              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.coworking")}>
+            <Link href="/booking">
+              <Button variant="ghost" size="icon" className="w-12 h-12" title={t("nav.booking")}>
                 <Briefcase className="w-5 h-5" />
               </Button>
             </Link>

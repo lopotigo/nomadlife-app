@@ -1743,7 +1743,7 @@ function StopCard({
                   <Plus className="w-4 h-4 mr-2" />
                   Aggiungi spesa
                 </Button>
-                <Link href={`/coworking?city=${encodeURIComponent(stop.city)}&type=hotel`}>
+                <Link href={`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`}>
                   <Button 
                     onClick={(e) => e.stopPropagation()}
                     variant="outline"

@@ -704,7 +704,7 @@ export default function Explore() {
                         Plan Trip
                       </button>
                       <button 
-                        onClick={() => setLocation("/coworking")}
+                        onClick={() => setLocation("/booking")}
                         className="flex-1 py-3 bg-muted rounded-2xl text-sm font-bold hover:bg-muted/80 transition-all"
                         data-testid="button-view-spaces"
                       >
