@@ -1274,6 +1274,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/users/:id/trips", async (req, res) => {
+    try {
+      const trips = await storage.getUserTripsWithStops(req.params.id);
+      res.send(trips);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/is-following/:userId", requireAuth, async (req, res) => {
     try {
       const isFollowing = await storage.isFollowing((req.user as User).id, req.params.userId);

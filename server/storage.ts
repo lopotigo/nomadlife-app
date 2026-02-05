@@ -122,6 +122,7 @@ export interface IStorage {
   getTrips(filters?: { userId?: string; isPublic?: boolean; status?: string }): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
   getTrip(id: string): Promise<(Trip & { user: User; stops: (TripStop & { expenses: TripExpense[] })[] }) | undefined>;
   getUserTrips(userId: string): Promise<Trip[]>;
+  getUserTripsWithStops(userId: string): Promise<(Trip & { stops: TripStop[] })[]>;
   createTrip(trip: InsertTrip): Promise<Trip>;
   updateTrip(id: string, updates: Partial<Trip>): Promise<Trip | undefined>;
   deleteTrip(id: string): Promise<boolean>;
@@ -836,6 +837,23 @@ export class DrizzleStorage implements IStorage {
     return await this.db.select().from(schema.trips)
       .where(eq(schema.trips.userId, userId))
       .orderBy(desc(schema.trips.createdAt));
+  }
+
+  async getUserTripsWithStops(userId: string): Promise<(Trip & { stops: TripStop[] })[]> {
+    const trips = await this.db.select().from(schema.trips)
+      .where(eq(schema.trips.userId, userId))
+      .orderBy(desc(schema.trips.createdAt));
+    
+    const tripsWithStops = await Promise.all(
+      trips.map(async (trip) => {
+        const stops = await this.db.select().from(schema.tripStops)
+          .where(eq(schema.tripStops.tripId, trip.id))
+          .orderBy(schema.tripStops.orderIndex);
+        return { ...trip, stops };
+      })
+    );
+    
+    return tripsWithStops;
   }
 
   async createTrip(insertTrip: InsertTrip): Promise<Trip> {

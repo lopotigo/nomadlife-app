@@ -112,7 +112,15 @@ export function PersonalStats({ userId, compact = false }: { userId: string; com
     );
   }
 
-  if (!stats) return null;
+  if (!stats) {
+    return (
+      <div className="text-center py-6 bg-muted/30 rounded-xl">
+        <Globe className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Nessuna statistica disponibile</p>
+        <p className="text-xs text-muted-foreground mt-1">Inizia a creare viaggi per vedere le tue statistiche!</p>
+      </div>
+    );
+  }
 
   if (compact) {
     return (
