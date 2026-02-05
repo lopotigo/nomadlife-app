@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, X } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,10 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
   const [location] = useLocation();
   const { t } = useI18n();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  
+  const { data: adminCheck } = useQuery<{ isAdmin: boolean }>({
+    queryKey: ["/api/admin/check"],
+  });
 
   return (
     <div className="h-screen bg-background pb-20 md:pb-0 font-sans overflow-hidden">
@@ -62,6 +67,9 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
+          {adminCheck?.isAdmin && (
+            <NavItem href="/admin" icon={ShieldCheck} label="Admin" active={location === "/admin"} />
+          )}
         </nav>
 
         <div className="mt-auto p-4 bg-secondary/50 rounded-xl">
