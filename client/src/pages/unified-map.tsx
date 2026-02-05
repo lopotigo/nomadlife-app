@@ -608,15 +608,14 @@ export default function UnifiedMap() {
                               <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
                             </div>
                             <div className="flex items-center gap-1">
-                              <Link href={`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`}>
-                                <button
-                                  className="p-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 transition-colors"
-                                  data-testid={`button-book-stop-${stop.id}`}
-                                  title="Prenota qui"
-                                >
-                                  <Hotel className="w-3.5 h-3.5" />
-                                </button>
-                              </Link>
+                              <button
+                                onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
+                                className="p-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 transition-colors"
+                                data-testid={`button-book-stop-${stop.id}`}
+                                title="Prenota qui"
+                              >
+                                <Hotel className="w-3.5 h-3.5" />
+                              </button>
                               <button
                                 onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
                                 className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
