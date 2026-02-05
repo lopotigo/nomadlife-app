@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
-  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage
+  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -607,13 +607,24 @@ export default function UnifiedMap() {
                               <Calendar className="w-3 h-3" />
                               <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
                             </div>
-                            <button
-                              onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
-                              className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
-                              data-testid={`button-share-trip-${trip.id}`}
-                            >
-                              <Share2 className="w-3.5 h-3.5" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <Link href={`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`}>
+                                <button
+                                  className="p-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 transition-colors"
+                                  data-testid={`button-book-stop-${stop.id}`}
+                                  title="Prenota qui"
+                                >
+                                  <Hotel className="w-3.5 h-3.5" />
+                                </button>
+                              </Link>
+                              <button
+                                onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
+                                className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                                data-testid={`button-share-trip-${trip.id}`}
+                              >
+                                <Share2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                           {stop.notes && (
                             <p className="text-xs text-gray-600 mt-2 italic">{stop.notes}</p>

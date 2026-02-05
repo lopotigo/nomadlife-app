@@ -132,6 +132,7 @@ Preferred communication style: Simple, everyday language.
   - Primary route: `/booking` (legacy `/coworking` still works)
   - Includes hotels, hostels, and coworking spaces
   - Trip stops have "Cerca alloggio" button linking directly to booking with city pre-selected
+  - **Map Integration**: Trip stop popups on the map now include a blue Hotel button for quick booking access
 - **Marketplace**: Monetization feature for nomad-focused products
   - Vendor and product database tables with affiliate tracking
   - Categories: eSIM, bags, clothing, insurance, tech, software
