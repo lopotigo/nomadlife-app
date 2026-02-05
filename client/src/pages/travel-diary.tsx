@@ -2328,12 +2328,12 @@ function TripPlannerMap({
             </div>
             
             <Button
-              onClick={onClose}
+              onClick={() => setShowCO2Panel(false)}
               className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-medium"
               data-testid="button-confirm-transport"
             >
               <CheckCircle2 className="w-4 h-4 mr-2" />
-              Conferma e Chiudi
+              Conferma
             </Button>
           </motion.div>
         )}
