@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, X } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +13,7 @@ interface LayoutProps {
 export default function Layout({ children, fullWidth = false }: LayoutProps) {
   const [location] = useLocation();
   const { t } = useI18n();
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   return (
     <div className="h-screen bg-background pb-20 md:pb-0 font-sans overflow-hidden">
@@ -78,8 +81,53 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         <MobileNavItem href="/travel-diary" icon={Plane} label={t("nav.trips")} active={location === "/travel-diary"} />
         <MobileNavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label={t("nav.chat")} active={location === "/chat"} />
-        <MobileNavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
+        <button 
+          onClick={() => setShowMoreMenu(!showMoreMenu)}
+          className={`flex flex-col items-center justify-center gap-0.5 min-w-[50px] py-2 ${showMoreMenu ? "text-primary" : "text-muted-foreground"}`}
+        >
+          <MoreHorizontal className="w-5 h-5" />
+          <span className="text-[10px]">{t("nav.more")}</span>
+        </button>
       </nav>
+
+      {/* More Menu Overlay */}
+      <AnimatePresence>
+        {showMoreMenu && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="md:hidden fixed bottom-16 inset-x-0 bg-card border-t border-border p-4 z-40"
+          >
+            <div className="grid grid-cols-4 gap-4">
+              <Link href="/search" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/search" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <Search className="w-6 h-6" />
+                  <span className="text-xs">{t("nav.search")}</span>
+                </div>
+              </Link>
+              <Link href="/events-calendar" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/events-calendar" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <Calendar className="w-6 h-6" />
+                  <span className="text-xs">{t("nav.events_calendar")}</span>
+                </div>
+              </Link>
+              <Link href="/marketplace" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/marketplace" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <ShoppingBag className="w-6 h-6" />
+                  <span className="text-xs">{t("nav.marketplace")}</span>
+                </div>
+              </Link>
+              <Link href="/profile" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/profile" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <User className="w-6 h-6" />
+                  <span className="text-xs">{t("nav.profile")}</span>
+                </div>
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
