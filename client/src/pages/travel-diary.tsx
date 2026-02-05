@@ -2194,9 +2194,11 @@ function TripPlannerMap({
             onClick={onClose}
             variant="outline"
             size="sm"
-            className="bg-slate-800/90 border-slate-600"
+            className="bg-slate-800/90 border-slate-600 text-white"
+            data-testid="button-close-map"
           >
-            <X className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            <span className="ml-1">Indietro</span>
           </Button>
         </div>
       </div>
@@ -2324,6 +2326,15 @@ function TripPlannerMap({
                 Scegli treno o bici per ridurre le emissioni del tuo viaggio!
               </p>
             </div>
+            
+            <Button
+              onClick={onClose}
+              className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white font-medium"
+              data-testid="button-confirm-transport"
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Conferma e Chiudi
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
