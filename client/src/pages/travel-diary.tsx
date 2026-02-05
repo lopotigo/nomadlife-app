@@ -779,10 +779,6 @@ export default function TravelDiary() {
             <TripsList 
               trips={trips} 
               onSelectTrip={(tripId) => fetchTripDetails(tripId)}
-              onViewOnMap={(tripId) => {
-                fetchTripDetails(tripId);
-                setActiveTab("explore");
-              }}
               onPlanRoute={(tripId) => {
                 fetchTripDetails(tripId);
                 setTimeout(() => setShowPlannerMap(true), 300);
@@ -1155,7 +1151,7 @@ export default function TravelDiary() {
   );
 }
 
-function TripsList({ trips, onSelectTrip, onViewOnMap, onPlanRoute }: { trips: Trip[]; onSelectTrip: (id: string) => void; onViewOnMap: (id: string) => void; onPlanRoute: (id: string) => void }) {
+function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSelectTrip: (id: string) => void; onPlanRoute: (id: string) => void }) {
   const [statusFilter, setStatusFilter] = useState<"all" | "planned" | "in_progress" | "completed">("all");
   
   const filteredTrips = trips.filter(trip => {
@@ -1263,28 +1259,12 @@ function TripsList({ trips, onSelectTrip, onViewOnMap, onPlanRoute }: { trips: T
             </div>
           <div className="mt-3 pt-3 border-t border-slate-700/50 flex gap-2">
             <button
-              onClick={() => onSelectTrip(trip.id)}
-              className="flex-1 py-2 px-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-              data-testid={`button-trip-details-${trip.id}`}
-            >
-              <Edit className="w-4 h-4" />
-              Dettagli
-            </button>
-            <button
-              onClick={() => onViewOnMap(trip.id)}
-              className="flex-1 py-2 px-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-              data-testid={`button-view-on-map-${trip.id}`}
-            >
-              <Globe className="w-4 h-4" />
-              Vedi Mappa
-            </button>
-            <button
               onClick={() => onPlanRoute(trip.id)}
               className="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
-              data-testid={`button-plan-route-${trip.id}`}
+              data-testid={`button-map-${trip.id}`}
             >
-              <Route className="w-4 h-4" />
-              Crea Percorso
+              <Globe className="w-4 h-4" />
+              Mappa
             </button>
           </div>
         </motion.div>
