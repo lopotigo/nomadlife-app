@@ -107,7 +107,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
             exit={{ opacity: 0, y: 100 }}
             className="md:hidden fixed bottom-16 inset-x-0 bg-card border-t border-border p-4 z-40"
           >
-            <div className="grid grid-cols-4 gap-4">
+            <div className={`grid ${adminCheck?.isAdmin ? "grid-cols-5" : "grid-cols-4"} gap-4`}>
               <Link href="/search" onClick={() => setShowMoreMenu(false)}>
                 <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/search" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                   <Search className="w-6 h-6" />
@@ -132,6 +132,14 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
                   <span className="text-xs">{t("nav.profile")}</span>
                 </div>
               </Link>
+              {adminCheck?.isAdmin && (
+                <Link href="/admin" onClick={() => setShowMoreMenu(false)}>
+                  <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/admin" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                    <ShieldCheck className="w-6 h-6" />
+                    <span className="text-xs">Admin</span>
+                  </div>
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
