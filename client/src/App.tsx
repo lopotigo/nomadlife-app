@@ -28,6 +28,7 @@ import AvatarBuilder from "@/pages/avatar-builder";
 import EventsCalendar from "@/pages/events-calendar";
 import EventDetail from "@/pages/event-detail";
 import Marketplace from "@/pages/marketplace";
+import Admin from "@/pages/admin";
 
 function Router() {
   return (
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/events-calendar" component={EventsCalendar} />
       <Route path="/event/:id" component={EventDetail} />
       <Route path="/marketplace" component={Marketplace} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
