@@ -2027,7 +2027,18 @@ function TripPlannerMap({
   const [showCO2Panel, setShowCO2Panel] = useState(true);
   const [selectedTransports, setSelectedTransports] = useState<Record<string, TransportMode>>({});
   const [savedLegs, setSavedLegs] = useState<Record<string, boolean>>({});
+  const [prevStopsCount, setPrevStopsCount] = useState(trip.stops.length);
   const { toast } = useToast();
+  
+  // Apri automaticamente il pannello trasporti quando viene aggiunta una nuova tappa
+  useEffect(() => {
+    const currentCount = trip.stops.filter(s => s.latitude && s.longitude).length;
+    if (currentCount > prevStopsCount && currentCount >= 2) {
+      setShowCO2Panel(true);
+      toast({ title: "Scegli il mezzo di trasporto", description: "Seleziona come vuoi viaggiare per questa tratta" });
+    }
+    setPrevStopsCount(currentCount);
+  }, [trip.stops]);
   
   // Salva il trasporto nel database
   const handleSelectTransport = async (legId: string, mode: TransportMode, stopId: string, distance: number) => {
@@ -2062,8 +2073,12 @@ function TripPlannerMap({
     const distance = calculateDistance(stop.latitude!, stop.longitude!, nextStop.latitude!, nextStop.longitude!);
     const options = getTransportOptions(distance);
     const legId = `${stop.id}-${nextStop.id}`;
-    const selected = selectedTransports[legId] || options.find(o => o.co2 === Math.min(...options.map(x => x.co2)))?.mode || "train";
-    return { from: stop, to: nextStop, distance, options, legId, selected };
+    // Priorità: 1) selezione locale, 2) valore salvato nel DB (nextStop.transportMode), 3) opzione più eco
+    const selected = selectedTransports[legId] || 
+                     (nextStop.transportMode as TransportMode) || 
+                     options.find(o => o.co2 === Math.min(...options.map(x => x.co2)))?.mode || 
+                     "train";
+    return { from: stop, to: nextStop, distance, options, legId, selected, stopId: nextStop.id };
   });
 
   const totalCO2 = legs.reduce((sum, leg) => {
