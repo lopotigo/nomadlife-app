@@ -139,6 +139,13 @@ Preferred communication style: Simple, everyday language.
   - Featured products, discount display, click tracking for affiliate revenue
   - Category filtering, responsive design for mobile/desktop
   - Accessible via bottom nav on mobile and sidebar on desktop
+- **Admin Panel** (`/admin`): Protected management interface
+  - Access restricted to users with `isAdmin = true` in database
+  - Dashboard with stats: total products, vendors, clicks, featured count
+  - Full CRUD for Vendors (name, logo, website, category)
+  - Full CRUD for Products (name, description, price, discount, affiliate URL, featured/active toggles)
+  - Amazon affiliate link integration for marketplace products
+  - Backend protection with `requireAdmin` middleware on all `/api/admin/*` routes
 
 ### PWA Configuration
 
