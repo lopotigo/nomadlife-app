@@ -14,7 +14,7 @@ import MapFeed from "@/pages/map-feed";
 import Profile from "@/pages/profile";
 import UserProfile from "@/pages/user-profile";
 import Chat from "@/pages/chat";
-import Coworking from "@/pages/coworking";
+import Booking from "@/pages/coworking";
 import Subscription from "@/pages/subscription";
 import Auth from "@/pages/auth";
 import DesignPreview from "@/pages/design-preview";
@@ -35,7 +35,8 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/" component={UnifiedMap} />
       <Route path="/feed" component={MapFeed} />
-      <Route path="/coworking" component={Coworking} />
+      <Route path="/booking" component={Booking} />
+      <Route path="/coworking" component={Booking} />
       <Route path="/chat" component={Chat} />
       <Route path="/subscription" component={Subscription} />
       <Route path="/profile" component={Profile} />

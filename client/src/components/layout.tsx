@@ -56,7 +56,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/travel-diary" icon={Plane} label={t("nav.travel_diary")} active={location === "/travel-diary"} />
           <NavItem href="/events-calendar" icon={Calendar} label={t("nav.events_calendar")} active={location === "/events-calendar"} />
           <NavItem href="/chat" icon={MessageSquare} label={t("nav.messages")} active={location === "/chat"} />
-          <NavItem href="/coworking" icon={Briefcase} label={t("nav.coworking")} active={location === "/coworking"} />
+          <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
         </nav>
@@ -76,7 +76,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-1 z-50">
         <MobileNavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
         <MobileNavItem href="/travel-diary" icon={Plane} label={t("nav.trips")} active={location === "/travel-diary"} />
-        <MobileNavItem href="/coworking" icon={Briefcase} label={t("nav.coworking")} active={location === "/coworking"} />
+        <MobileNavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label={t("nav.chat")} active={location === "/chat"} />
         <MobileNavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
       </nav>

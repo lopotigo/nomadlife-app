@@ -217,7 +217,7 @@ export default function Coworking() {
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search coworking spaces, hotels, hostels..."
+                    placeholder="Cerca hotel, coworking, ostelli..."
                     className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                     data-testid="input-search"
                   />
