@@ -2019,6 +2019,7 @@ function TripPlannerMap({
   onClose: () => void;
   userAvatar?: string | null;
 }) {
+  const [, setLocation] = useLocation();
   const [pendingLocation, setPendingLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [cityName, setCityName] = useState("");
   const [countryName, setCountryName] = useState("");
@@ -2408,6 +2409,14 @@ function TripPlannerMap({
               <div className="min-w-[150px]">
                 <h3 className="font-bold">{stop.city}, {stop.country}</h3>
                 <p className="text-xs text-slate-400">Tappa {index + 1}</p>
+                <button
+                  onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
+                  className="mt-2 w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg transition-colors"
+                  data-testid={`button-book-stop-${stop.id}`}
+                >
+                  <Hotel className="w-3.5 h-3.5" />
+                  Prenota qui
+                </button>
               </div>
             </Popup>
           </Marker>
