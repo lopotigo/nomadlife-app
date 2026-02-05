@@ -187,11 +187,18 @@ export interface IStorage {
 
   // Marketplace
   getProducts(category?: string): Promise<(schema.Product & { vendor: schema.Vendor })[]>;
+  getProductById(id: string): Promise<schema.Product | undefined>;
   getFeaturedProducts(): Promise<(schema.Product & { vendor: schema.Vendor })[]>;
   trackProductClick(productId: string): Promise<void>;
   getVendors(): Promise<schema.Vendor[]>;
+  getVendorById(id: string): Promise<schema.Vendor | undefined>;
   createVendor(vendor: schema.InsertVendor): Promise<schema.Vendor>;
+  updateVendor(id: string, vendor: Partial<schema.InsertVendor>): Promise<schema.Vendor | undefined>;
+  deleteVendor(id: string): Promise<boolean>;
   createProduct(product: schema.InsertProduct): Promise<schema.Product>;
+  updateProduct(id: string, product: Partial<schema.InsertProduct & { isFeatured?: boolean; isActive?: boolean }>): Promise<schema.Product | undefined>;
+  deleteProduct(id: string): Promise<boolean>;
+  getMarketplaceStats(): Promise<{ totalProducts: number; totalVendors: number; totalClicks: number; featuredCount: number }>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1474,6 +1481,49 @@ export class DrizzleStorage implements IStorage {
   async createProduct(product: schema.InsertProduct): Promise<schema.Product> {
     const result = await this.db.insert(schema.products).values(product).returning();
     return result[0];
+  }
+
+  async getProductById(id: string): Promise<schema.Product | undefined> {
+    const result = await this.db.select().from(schema.products).where(eq(schema.products.id, id));
+    return result[0];
+  }
+
+  async getVendorById(id: string): Promise<schema.Vendor | undefined> {
+    const result = await this.db.select().from(schema.vendors).where(eq(schema.vendors.id, id));
+    return result[0];
+  }
+
+  async updateVendor(id: string, vendor: Partial<schema.InsertVendor>): Promise<schema.Vendor | undefined> {
+    const result = await this.db.update(schema.vendors).set(vendor).where(eq(schema.vendors.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteVendor(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.vendors).where(eq(schema.vendors.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async updateProduct(id: string, product: Partial<schema.InsertProduct & { isFeatured?: boolean; isActive?: boolean }>): Promise<schema.Product | undefined> {
+    const result = await this.db.update(schema.products).set(product).where(eq(schema.products.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.products).where(eq(schema.products.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getMarketplaceStats(): Promise<{ totalProducts: number; totalVendors: number; totalClicks: number; featuredCount: number }> {
+    const products = await this.db.select().from(schema.products).where(eq(schema.products.isActive, true));
+    const vendors = await this.db.select().from(schema.vendors).where(eq(schema.vendors.isActive, true));
+    const totalClicks = products.reduce((sum, p) => sum + (p.clicks || 0), 0);
+    const featuredCount = products.filter(p => p.isFeatured).length;
+    return {
+      totalProducts: products.length,
+      totalVendors: vendors.length,
+      totalClicks,
+      featuredCount
+    };
   }
 }
 

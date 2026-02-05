@@ -1732,6 +1732,106 @@ export async function registerRoutes(
     }
   });
 
+  // ========== ADMIN ROUTES ==========
+
+  // Middleware to check if user is admin
+  const requireAdmin = async (req: any, res: any, next: any) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).send({ error: "Non autenticato" });
+    }
+    const user = req.user as any;
+    if (!user.isAdmin) {
+      return res.status(403).send({ error: "Accesso negato - Solo admin" });
+    }
+    next();
+  };
+
+  // Check if current user is admin
+  app.get("/api/admin/check", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.send({ isAdmin: false });
+    }
+    const user = req.user as any;
+    res.send({ isAdmin: user.isAdmin || false });
+  });
+
+  // Get marketplace stats
+  app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getMarketplaceStats();
+      res.send(stats);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // VENDOR ADMIN ROUTES
+  app.post("/api/admin/vendors", requireAdmin, async (req, res) => {
+    try {
+      const vendor = await storage.createVendor(req.body);
+      res.send(vendor);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.put("/api/admin/vendors/:id", requireAdmin, async (req, res) => {
+    try {
+      const vendor = await storage.updateVendor(req.params.id, req.body);
+      if (!vendor) {
+        return res.status(404).send({ error: "Vendor non trovato" });
+      }
+      res.send(vendor);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/admin/vendors/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteVendor(req.params.id);
+      if (!deleted) {
+        return res.status(404).send({ error: "Vendor non trovato" });
+      }
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // PRODUCT ADMIN ROUTES
+  app.post("/api/admin/products", requireAdmin, async (req, res) => {
+    try {
+      const product = await storage.createProduct(req.body);
+      res.send(product);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.put("/api/admin/products/:id", requireAdmin, async (req, res) => {
+    try {
+      const product = await storage.updateProduct(req.params.id, req.body);
+      if (!product) {
+        return res.status(404).send({ error: "Prodotto non trovato" });
+      }
+      res.send(product);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteProduct(req.params.id);
+      if (!deleted) {
+        return res.status(404).send({ error: "Prodotto non trovato" });
+      }
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
 
   return httpServer;
 }

@@ -14,6 +14,7 @@ export const users = pgTable("users", {
   avatar: text("avatar"),
   location: text("location"),
   isPremium: boolean("is_premium").default(false).notNull(),
+  isAdmin: boolean("is_admin").default(false).notNull(),
   countriesVisited: integer("countries_visited").default(0).notNull(),
   citiesVisited: integer("cities_visited").default(0).notNull(),
   coworkingSpaces: integer("coworking_spaces").default(0).notNull(),
