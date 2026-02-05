@@ -128,6 +128,10 @@ Preferred communication style: Simple, everyday language.
   - Contextual FloatingTips: Appear on specific pages after tutorial completion with delays
   - State persisted to localStorage with key "nomadlife_onboarding"
   - Tips on: unified-map (map and feed tips), profile (customization tips), travel-diary (trip creation tips)
+- **Booking Section (formerly Coworking)**: Renamed from "Coworking" to "Booking" for broader scope
+  - Primary route: `/booking` (legacy `/coworking` still works)
+  - Includes hotels, hostels, and coworking spaces
+  - Trip stops have "Cerca alloggio" button linking directly to booking with city pre-selected
 - **Marketplace**: Monetization feature for nomad-focused products
   - Vendor and product database tables with affiliate tracking
   - Categories: eSIM, bags, clothing, insurance, tech, software
