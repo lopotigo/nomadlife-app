@@ -1856,7 +1856,7 @@ function ExploreTripsMap({
           <Marker
             key={stop.id}
             position={[stop.latitude!, stop.longitude!]}
-            icon={createStopMarkerIcon(stop.orderIndex)}
+            icon={createStopMarkerIcon(stop.orderIndex, stop.tripColor, stop.trip.user?.avatar)}
             eventHandlers={{
               click: () => setSelectedTripId(stop.trip.id),
             }}
