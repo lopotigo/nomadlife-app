@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, Fragment } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
@@ -175,12 +175,12 @@ function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { posi
       const midLat = (start.lat + end.lat) / 2;
       const midLng = (start.lng + end.lng) / 2;
       const distance = start.distanceTo(end);
-      const offset = distance * 0.00001;
+      const offset = Math.max(distance * 0.00002, 0.3);
       
-      const controlLat = midLat + offset * 0.5;
+      const controlLat = midLat + offset;
       const controlLng = midLng;
       
-      for (let t = 0; t <= 1; t += 0.05) {
+      for (let t = 0; t <= 1; t += 0.03) {
         const lat = (1 - t) * (1 - t) * start.lat + 2 * (1 - t) * t * controlLat + t * t * end.lat;
         const lng = (1 - t) * (1 - t) * start.lng + 2 * (1 - t) * t * controlLng + t * t * end.lng;
         curvedPoints.push(L.latLng(lat, lng));
@@ -188,19 +188,52 @@ function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { posi
     }
     curvedPoints.push(L.latLng(positions[positions.length - 1][0], positions[positions.length - 1][1]));
     
-    const polyline = L.polyline(curvedPoints, {
-      color,
-      weight: 4,
-      opacity: 0.85,
+    const layers: L.Polyline[] = [];
+    
+    const shadow = L.polyline(curvedPoints, {
+      color: "#000000",
+      weight: 7,
+      opacity: 0.2,
       lineCap: "round",
       lineJoin: "round",
-      dashArray: dashed ? "8, 6" : undefined,
     });
+    shadow.addTo(map);
+    layers.push(shadow);
     
-    polyline.addTo(map);
+    const outline = L.polyline(curvedPoints, {
+      color: "#ffffff",
+      weight: 6,
+      opacity: 0.6,
+      lineCap: "round",
+      lineJoin: "round",
+    });
+    outline.addTo(map);
+    layers.push(outline);
+    
+    const mainLine = L.polyline(curvedPoints, {
+      color,
+      weight: 4,
+      opacity: 1,
+      lineCap: "round",
+      lineJoin: "round",
+      dashArray: dashed ? "12, 8" : undefined,
+    });
+    mainLine.addTo(map);
+    layers.push(mainLine);
+    
+    const animDots = L.polyline(curvedPoints, {
+      color: "#ffffff",
+      weight: 2,
+      opacity: 0.6,
+      lineCap: "round",
+      dashArray: "4, 14",
+      className: "route-anim-dots",
+    });
+    animDots.addTo(map);
+    layers.push(animDots);
     
     return () => {
-      map.removeLayer(polyline);
+      layers.forEach(l => map.removeLayer(l));
     };
   }, [positions, map, color, dashed]);
   
@@ -266,7 +299,7 @@ function PostMapPopup({
   };
 
   return (
-    <div className="min-w-[260px] max-w-[320px]" data-testid={`popup-post-${post.id}`}>
+    <div className="w-[280px]" data-testid={`popup-post-${post.id}`}>
       <div className="flex items-center gap-2 p-3 pb-2">
         <a href={`/user/${post.user.id}`} className="shrink-0">
           <img 
@@ -721,7 +754,7 @@ export default function UnifiedMap() {
                 position={[post.latitude!, post.longitude!]}
                 icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId)}
               >
-                <Popup className="custom-popup" maxWidth={320}>
+                <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
                   <PostMapPopup 
                     post={post} 
                     likedPosts={likedPosts}
@@ -739,8 +772,8 @@ export default function UnifiedMap() {
                 position={[event.latitude!, event.longitude!]}
                 icon={createEventMarkerIcon(event.imageUrl, event.color || "#a855f7")}
               >
-                <Popup className="custom-popup">
-                  <div className="p-3 min-w-[220px]">
+                <Popup className="custom-popup" maxWidth={340} minWidth={260} autoPanPadding={[20, 20]} autoPan={true}>
+                  <div className="p-3 w-[260px]">
                     <Link href={`/event/${event.id}`} className="flex items-center gap-2 mb-2 hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors cursor-pointer">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                         <Calendar className="w-5 h-5 text-white" />
@@ -797,7 +830,7 @@ export default function UnifiedMap() {
               const positions: [number, number][] = validStops.map(s => [s.latitude!, s.longitude!]);
               
               return (
-                <div key={`trip-${trip.id}`}>
+                <Fragment key={`trip-${trip.id}`}>
                   {positions.length >= 2 && (
                     <CurvedPolyline 
                       positions={positions} 
@@ -812,8 +845,8 @@ export default function UnifiedMap() {
                       position={[stop.latitude!, stop.longitude!]}
                       icon={createStopMarkerIcon(stop.orderIndex, trip.color, trip.user?.avatar, stop.imageUrl)}
                     >
-                      <Popup className="custom-popup" maxWidth={320}>
-                        <div className="min-w-[260px] max-w-[300px]" data-testid={`popup-stop-${stop.id}`}>
+                      <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
+                        <div className="w-[280px]" data-testid={`popup-stop-${stop.id}`}>
                           {stop.imageUrl && (
                             <div className="relative">
                               <img src={stop.imageUrl} className="w-full h-32 object-cover" alt={stop.city} />
@@ -924,7 +957,7 @@ export default function UnifiedMap() {
                       </Popup>
                     </Marker>
                   ))}
-                </div>
+                </Fragment>
               );
             })}
           </MapContainer>
@@ -1221,8 +1254,27 @@ export default function UnifiedMap() {
         .event-marker img { width: 100%; height: 100%; object-fit: cover; transform: rotate(45deg) scale(1.4); }
         .event-marker-icon svg { transform: rotate(45deg); fill: white; width: 20px; height: 20px; }
         .custom-stop-marker { background: transparent !important; border: none !important; }
-        .custom-popup .leaflet-popup-content-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .route-anim-dots { animation: dashMove 1.5s linear infinite; }
+        @keyframes dashMove { to { stroke-dashoffset: -18; } }
+        .custom-popup .leaflet-popup-content-wrapper { 
+          background: white; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); 
+          padding: 0 !important; overflow: hidden;
+        }
+        .custom-popup .leaflet-popup-content { 
+          margin: 0 !important; width: auto !important;
+          max-height: 360px; overflow-y: auto;
+          scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.15) transparent;
+        }
+        .custom-popup .leaflet-popup-content::-webkit-scrollbar { width: 4px; }
+        .custom-popup .leaflet-popup-content::-webkit-scrollbar-track { background: transparent; }
+        .custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
         .custom-popup .leaflet-popup-tip { background: white; }
+        .custom-popup .leaflet-popup-close-button { 
+          color: #666 !important; font-size: 20px !important; 
+          top: 6px !important; right: 8px !important;
+          width: 24px !important; height: 24px !important;
+          z-index: 10;
+        }
         .leaflet-container { font-family: inherit; }
       `}</style>
 
