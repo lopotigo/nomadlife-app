@@ -1250,7 +1250,7 @@ function CreatePostModal({
         <div className="flex justify-end">
           <Button
             onClick={handleSubmit}
-            disabled={!content.trim() || isSubmitting || isUploading || !latitude || !longitude}
+            disabled={!content.trim() || isSubmitting || isUploading}
             data-testid="button-submit-new-post"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Pubblica</>}
