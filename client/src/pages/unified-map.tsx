@@ -1178,9 +1178,37 @@ function CreatePostModal({
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Posizione"
+            placeholder="Cerca città (es. Roma, Milano...)"
             value={location}
             onChange={(e) => setLocationName(e.target.value)}
+            onBlur={async () => {
+              if (location.trim() && !latitude) {
+                try {
+                  const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location.trim())}&format=json&limit=1`);
+                  const data = await res.json();
+                  if (data && data[0]) {
+                    setLatitude(parseFloat(data[0].lat));
+                    setLongitude(parseFloat(data[0].lon));
+                  }
+                } catch {}
+              }
+            }}
+            onKeyDown={async (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (location.trim()) {
+                  try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location.trim())}&format=json&limit=1`);
+                    const data = await res.json();
+                    if (data && data[0]) {
+                      setLatitude(parseFloat(data[0].lat));
+                      setLongitude(parseFloat(data[0].lon));
+                      setLocationName(data[0].display_name.split(",").slice(0, 2).join(",").trim());
+                    }
+                  } catch {}
+                }
+              }
+            }}
             className="flex-1"
             data-testid="input-new-post-location"
           />
@@ -1190,12 +1218,12 @@ function CreatePostModal({
         </div>
 
         {latitude && longitude ? (
-          <p className="text-xs text-green-500 mb-4">
-            Il tuo post apparirà sulla mappa
+          <p className="text-xs text-green-500 mb-4 flex items-center gap-1">
+            <MapPin className="w-3 h-3" /> Posizione trovata - il post apparirà sulla mappa
           </p>
         ) : (
           <p className="text-xs text-amber-500 mb-4">
-            Clicca "Auto" o sulla mappa per aggiungere la posizione
+            Scrivi una città e premi Invio, oppure clicca "Auto" per la tua posizione
           </p>
         )}
 
@@ -1250,7 +1278,7 @@ function CreatePostModal({
         <div className="flex justify-end">
           <Button
             onClick={handleSubmit}
-            disabled={!content.trim() || isSubmitting || isUploading}
+            disabled={!content.trim() || isSubmitting || isUploading || !latitude || !longitude}
             data-testid="button-submit-new-post"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Pubblica</>}
