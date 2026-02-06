@@ -18,7 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
+import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3 } from "lucide-react";
@@ -33,100 +34,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6", avatarUrl?: string | null, stopMediaUrl?: string | null) {
-  const imageUrl = stopMediaUrl || avatarUrl;
-  
-  if (imageUrl) {
-    return L.divIcon({
-      html: `<div style="width:36px;height:36px;border-radius:50%;border:3px solid ${color};box-shadow:0 2px 8px rgba(0,0,0,0.4);overflow:hidden;background:white;">
-        <img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;" />
-        <div style="position:absolute;bottom:-2px;right:-2px;background:${color};color:white;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:9px;border:1px solid white;">${orderIndex + 1}</div>
-      </div>`,
-      className: "custom-stop-marker",
-      iconSize: [36, 36],
-      iconAnchor: [18, 18],
-      popupAnchor: [0, -18],
-    });
-  }
-  
-  return L.divIcon({
-    html: `<div style="background:${color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${orderIndex + 1}</div>`,
-    className: "custom-stop-marker",
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -14],
-  });
-}
-
-function CurvedRouteLine({ positions, color = "#3b82f6", dashed = false, opacity = 0.9 }: { positions: [number, number][]; color?: string; dashed?: boolean; opacity?: number }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (positions.length < 2) return;
-    
-    const curvedPoints: L.LatLng[] = [];
-    
-    for (let i = 0; i < positions.length - 1; i++) {
-      const start = L.latLng(positions[i][0], positions[i][1]);
-      const end = L.latLng(positions[i + 1][0], positions[i + 1][1]);
-      
-      const midLat = (start.lat + end.lat) / 2;
-      const midLng = (start.lng + end.lng) / 2;
-      const distance = start.distanceTo(end);
-      const offset = Math.min(distance * 0.000005, 0.15);
-      
-      const dx = end.lng - start.lng;
-      const dy = end.lat - start.lat;
-      const controlLat = midLat + offset * (dx >= 0 ? 1 : -1);
-      const controlLng = midLng - offset * 0.3 * (dy >= 0 ? 1 : -1);
-      
-      for (let t = 0; t <= 1; t += 0.03) {
-        const lat = (1 - t) * (1 - t) * start.lat + 2 * (1 - t) * t * controlLat + t * t * end.lat;
-        const lng = (1 - t) * (1 - t) * start.lng + 2 * (1 - t) * t * controlLng + t * t * end.lng;
-        curvedPoints.push(L.latLng(lat, lng));
-      }
-    }
-    curvedPoints.push(L.latLng(positions[positions.length - 1][0], positions[positions.length - 1][1]));
-    
-    const layers: L.Polyline[] = [];
-    
-    const shadow = L.polyline(curvedPoints, {
-      color: "#000000", weight: 5, opacity: 0.12 * (opacity / 0.9),
-      lineCap: "round", lineJoin: "round", interactive: false,
-    });
-    shadow.addTo(map);
-    layers.push(shadow);
-    
-    const outline = L.polyline(curvedPoints, {
-      color: "#ffffff", weight: 4, opacity: 0.5 * (opacity / 0.9),
-      lineCap: "round", lineJoin: "round", interactive: false,
-    });
-    outline.addTo(map);
-    layers.push(outline);
-    
-    const mainLine = L.polyline(curvedPoints, {
-      color, weight: 3, opacity,
-      lineCap: "round", lineJoin: "round",
-      dashArray: dashed ? "10, 6" : undefined, interactive: false,
-    });
-    mainLine.addTo(map);
-    layers.push(mainLine);
-    
-    const animDots = L.polyline(curvedPoints, {
-      color: "#ffffff", weight: 1.5, opacity: 0.5 * (opacity / 0.9),
-      lineCap: "round", dashArray: "3, 12",
-      className: "route-anim-dots", interactive: false,
-    });
-    animDots.addTo(map);
-    layers.push(animDots);
-    
-    return () => {
-      layers.forEach(l => map.removeLayer(l));
-    };
-  }, [positions, map, color, dashed, opacity]);
-  
-  return null;
-}
+// createStopMarkerIcon and CurvedRouteLine imported from shared component
 
 interface Trip {
   id: string;

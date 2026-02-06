@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { CurvedRouteLine } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, CheckCircle2, Loader2, ArrowRight, Train, Plane, Car, Bike, Footprints } from "lucide-react";
@@ -26,76 +27,6 @@ const customIcon = new L.Icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
-
-function CurvedRouteLine({ positions, color = "#22c55e", dashed = false }: { positions: [number, number][]; color?: string; dashed?: boolean }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (positions.length < 2) return;
-    
-    const curvedPoints: L.LatLng[] = [];
-    
-    for (let i = 0; i < positions.length - 1; i++) {
-      const start = L.latLng(positions[i][0], positions[i][1]);
-      const end = L.latLng(positions[i + 1][0], positions[i + 1][1]);
-      
-      const midLat = (start.lat + end.lat) / 2;
-      const midLng = (start.lng + end.lng) / 2;
-      const distance = start.distanceTo(end);
-      const offset = Math.min(distance * 0.000005, 0.15);
-      
-      const dx = end.lng - start.lng;
-      const dy = end.lat - start.lat;
-      const controlLat = midLat + offset * (dx >= 0 ? 1 : -1);
-      const controlLng = midLng - offset * 0.3 * (dy >= 0 ? 1 : -1);
-      
-      for (let t = 0; t <= 1; t += 0.03) {
-        const lat = (1 - t) * (1 - t) * start.lat + 2 * (1 - t) * t * controlLat + t * t * end.lat;
-        const lng = (1 - t) * (1 - t) * start.lng + 2 * (1 - t) * t * controlLng + t * t * end.lng;
-        curvedPoints.push(L.latLng(lat, lng));
-      }
-    }
-    curvedPoints.push(L.latLng(positions[positions.length - 1][0], positions[positions.length - 1][1]));
-    
-    const layers: L.Polyline[] = [];
-    
-    const shadow = L.polyline(curvedPoints, {
-      color: "#000000", weight: 5, opacity: 0.12,
-      lineCap: "round", lineJoin: "round", interactive: false,
-    });
-    shadow.addTo(map);
-    layers.push(shadow);
-    
-    const outline = L.polyline(curvedPoints, {
-      color: "#ffffff", weight: 4, opacity: 0.5,
-      lineCap: "round", lineJoin: "round", interactive: false,
-    });
-    outline.addTo(map);
-    layers.push(outline);
-    
-    const mainLine = L.polyline(curvedPoints, {
-      color, weight: 3, opacity: 0.9,
-      lineCap: "round", lineJoin: "round",
-      dashArray: dashed ? "10, 6" : undefined, interactive: false,
-    });
-    mainLine.addTo(map);
-    layers.push(mainLine);
-    
-    const animDots = L.polyline(curvedPoints, {
-      color: "#ffffff", weight: 1.5, opacity: 0.5,
-      lineCap: "round", dashArray: "3, 12",
-      className: "route-anim-dots", interactive: false,
-    });
-    animDots.addTo(map);
-    layers.push(animDots);
-    
-    return () => {
-      layers.forEach(l => map.removeLayer(l));
-    };
-  }, [positions, map, color, dashed]);
-  
-  return null;
-}
 
 const CITIES = [
   { 
