@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Image, MapPin, Send, X, Loader2 } from "lucide-react";
+import { Image, MapPin, Send, X, Loader2, Plane, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUpload } from "@/hooks/use-upload";
+import { useI18n } from "@/lib/i18n";
 
 interface CreatePostFormProps {
   onPostCreated: () => void;
@@ -15,19 +17,29 @@ interface CreatePostFormProps {
 export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useI18n();
   const [content, setContent] = useState("");
   const [location, setLocation] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [showTripSelect, setShowTripSelect] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  const { data: myTrips = [] } = useQuery<any[]>({
+    queryKey: ["/api/my-trips"],
+    enabled: isExpanded,
+  });
+
+  const selectedTrip = myTrips.find((t: any) => t.id === selectedTripId);
+
   const { uploadFile, isUploading, progress } = useUpload({
     onSuccess: (response) => {
       setImageUrl(response.objectPath);
-      toast({ title: "Photo uploaded!", description: "Your photo is ready to share." });
+      toast({ title: "Foto caricata!", description: "La tua foto è pronta per la condivisione." });
     },
     onError: (error) => {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      toast({ title: "Errore upload", description: error.message, variant: "destructive" });
     },
   });
 
@@ -52,6 +64,7 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
           content: content.trim(),
           imageUrl: imageUrl || null,
           location: location.trim() || null,
+          tripId: selectedTripId || null,
         }),
       });
 
@@ -59,14 +72,15 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
         setContent("");
         setLocation("");
         setImageUrl("");
+        setSelectedTripId(null);
         setIsExpanded(false);
-        toast({ title: "Post shared!", description: "Your post is now visible to everyone." });
+        toast({ title: "Post condiviso!", description: "Il tuo post è ora visibile a tutti." });
         onPostCreated();
       } else {
         throw new Error("Failed to create post");
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to share post. Please try again.", variant: "destructive" });
+      toast({ title: "Errore", description: "Impossibile condividere il post. Riprova.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -90,7 +104,7 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
           }
         },
         () => {
-          toast({ title: "Location access denied", description: "Please enable location access or enter manually.", variant: "destructive" });
+          toast({ title: "Accesso posizione negato", description: "Abilita l'accesso alla posizione o inseriscila manualmente.", variant: "destructive" });
         }
       );
     }
@@ -112,7 +126,7 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
             className={`${!isExpanded ? "cursor-pointer" : ""}`}
           >
             <Textarea
-              placeholder="Share your nomad experience..."
+              placeholder={t("post.placeholder") || "Condividi la tua esperienza nomade..."}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onFocus={() => setIsExpanded(true)}
@@ -132,7 +146,7 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                 {imageUrl && (
                   <div className="relative rounded-xl overflow-hidden">
                     <img 
-                      src={imageUrl.startsWith("/objects/") ? imageUrl : imageUrl} 
+                      src={imageUrl} 
                       alt="Upload preview" 
                       className="w-full h-40 object-cover"
                     />
@@ -148,14 +162,29 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                 {isUploading && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Uploading... {progress}%</span>
+                    <span>Caricamento... {progress}%</span>
+                  </div>
+                )}
+
+                {selectedTrip && (
+                  <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2">
+                    <Plane className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium text-primary flex-1">
+                      {selectedTrip.title}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {selectedTrip.startLocation} → {selectedTrip.endLocation}
+                    </span>
+                    <button onClick={() => setSelectedTripId(null)} className="text-muted-foreground hover:text-foreground">
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
 
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Add location..."
+                    placeholder={t("post.add_location") || "Aggiungi posizione..."}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className="flex-1 h-8 text-xs border-none bg-muted/50"
@@ -184,9 +213,70 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                       />
                       <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
                         <Image className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-medium">Photo</span>
+                        <span className="text-xs font-medium">Foto</span>
                       </div>
                     </label>
+
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowTripSelect(!showTripSelect)}
+                        className={`flex items-center gap-1 px-3 py-1.5 rounded-xl transition-colors ${
+                          selectedTripId ? "bg-primary/10 text-primary" : "bg-muted hover:bg-muted/80"
+                        }`}
+                        data-testid="button-attach-trip"
+                      >
+                        <Plane className="w-4 h-4" />
+                        <span className="text-xs font-medium">{t("post.trip") || "Viaggio"}</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+
+                      <AnimatePresence>
+                        {showTripSelect && myTrips.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border rounded-xl shadow-lg overflow-hidden z-50"
+                          >
+                            <div className="p-2 border-b border-border">
+                              <p className="text-xs font-medium text-muted-foreground">{t("post.select_trip") || "Seleziona un viaggio"}</p>
+                            </div>
+                            <div className="max-h-48 overflow-y-auto">
+                              {myTrips.map((trip: any) => (
+                                <button
+                                  key={trip.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedTripId(trip.id);
+                                    setShowTripSelect(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 hover:bg-muted/50 transition-colors ${
+                                    selectedTripId === trip.id ? "bg-primary/10" : ""
+                                  }`}
+                                  data-testid={`select-trip-${trip.id}`}
+                                >
+                                  <p className="text-sm font-medium truncate">{trip.title}</p>
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {trip.startLocation} → {trip.endLocation}
+                                  </p>
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                        {showTripSelect && myTrips.length === 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="absolute bottom-full left-0 mb-2 w-48 bg-card border border-border rounded-xl shadow-lg p-3 z-50"
+                          >
+                            <p className="text-xs text-muted-foreground">{t("post.no_trips") || "Nessun viaggio. Creane uno nel Diario di Viaggio!"}</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
 
                   <div className="flex gap-2">
@@ -199,9 +289,11 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                         setContent("");
                         setLocation("");
                         setImageUrl("");
+                        setSelectedTripId(null);
+                        setShowTripSelect(false);
                       }}
                     >
-                      Cancel
+                      {t("common.cancel") || "Annulla"}
                     </Button>
                     <Button
                       onClick={handleSubmit}
@@ -215,7 +307,7 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                       ) : (
                         <>
                           <Send className="w-4 h-4" />
-                          Share
+                          {t("post.share") || "Condividi"}
                         </>
                       )}
                     </Button>

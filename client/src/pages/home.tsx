@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Post, User, Comment, Trip, TripStop, TripExpense, Event } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
@@ -601,6 +601,15 @@ function PostCard({ post, onLike, currentUser }: { post: PostWithUser; onLike: (
           <span className="font-bold mr-2">{post.user.username}</span>
           {post.content}
         </p>
+
+        {post.tripId && (
+          <Link href={`/trip/${post.tripId}`}>
+            <div className="mt-2 flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary/20 transition-colors" data-testid={`trip-badge-${post.id}`}>
+              <Plane className="w-4 h-4 text-primary" />
+              <span className="text-xs font-medium text-primary">Viaggio allegato - clicca per vedere</span>
+            </div>
+          </Link>
+        )}
 
         <AnimatePresence>
           {showComments && (
