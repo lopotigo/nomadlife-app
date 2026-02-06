@@ -401,7 +401,7 @@ export default function UnifiedMap() {
     });
     
     if (allPoints.length === 0) {
-      return { mapCenter: [44, 11] as [number, number], mapZoom: 3 };
+      return { mapCenter: [20, 50] as [number, number], mapZoom: 2 };
     }
     
     const avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
