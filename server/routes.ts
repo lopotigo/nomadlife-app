@@ -944,6 +944,47 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/trips/:id/copy", requireAuth, async (req, res) => {
+    try {
+      const sourceTrip = await storage.getTrip(req.params.id);
+      if (!sourceTrip) {
+        return res.status(404).send({ error: "Trip not found" });
+      }
+      const currentUser = req.user as User;
+      const newTrip = await storage.createTrip({
+        userId: currentUser.id,
+        title: `${sourceTrip.title} (copia)`,
+        description: sourceTrip.description || "",
+        startDate: sourceTrip.startDate,
+        endDate: sourceTrip.endDate,
+        startLocation: sourceTrip.startLocation,
+        endLocation: sourceTrip.endLocation,
+        isPublic: false,
+        status: "planned",
+      });
+      const stops = await storage.getTripStops(req.params.id);
+      for (const stop of stops) {
+        await storage.createTripStop({
+          tripId: newTrip.id,
+          city: stop.city,
+          country: stop.country,
+          latitude: stop.latitude,
+          longitude: stop.longitude,
+          orderIndex: stop.orderIndex,
+          arrivalDate: stop.arrivalDate,
+          notes: stop.notes,
+          transportMode: stop.transportMode,
+          distanceKm: stop.distanceKm,
+          co2Kg: stop.co2Kg,
+          sourceTripId: req.params.id,
+        });
+      }
+      res.json(newTrip);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // PATCH trip (status, visibility)
   app.patch("/api/trips/:tripId", requireAuth, async (req, res) => {
     try {

@@ -372,6 +372,9 @@ export default function TravelDiary() {
           notes: formData.get("notes") || undefined,
           imageUrl: stopImageUrl || undefined,
           orderIndex: nextOrderIndex,
+          rating: parseInt(formData.get("rating") as string) || undefined,
+          accommodationName: formData.get("accommodationName") || undefined,
+          accommodationType: formData.get("accommodationType") || undefined,
         }),
       });
 
@@ -885,6 +888,67 @@ export default function TravelDiary() {
                   className="bg-slate-700 border-slate-600"
                   data-testid="input-stop-notes"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="accommodationName">Alloggio (opzionale)</Label>
+                  <Input 
+                    id="accommodationName"
+                    name="accommodationName" 
+                    placeholder="Hotel Roma" 
+                    className="bg-slate-700 border-slate-600"
+                    data-testid="input-accommodation-name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="accommodationType">Tipo</Label>
+                  <select 
+                    id="accommodationType"
+                    name="accommodationType" 
+                    className="w-full h-10 rounded-md bg-slate-700 border border-slate-600 px-3 text-sm"
+                    data-testid="select-accommodation-type"
+                  >
+                    <option value="">Seleziona...</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="hostel">Ostello</option>
+                    <option value="airbnb">Airbnb</option>
+                    <option value="camping">Camping</option>
+                    <option value="couchsurfing">Couchsurfing</option>
+                    <option value="other">Altro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label>Valutazione (opzionale)</Label>
+                <div className="flex items-center gap-1 mt-1" data-testid="rating-input">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={(e) => {
+                        const container = e.currentTarget.parentElement;
+                        const input = container?.querySelector('input[name="rating"]') as HTMLInputElement;
+                        const currentVal = parseInt(input?.value || "0");
+                        input.value = currentVal === star ? "0" : String(star);
+                        container?.querySelectorAll('svg').forEach((svg, i) => {
+                          if (i < (currentVal === star ? 0 : star)) {
+                            svg.classList.add('fill-amber-400', 'text-amber-400');
+                            svg.classList.remove('text-gray-500');
+                          } else {
+                            svg.classList.remove('fill-amber-400', 'text-amber-400');
+                            svg.classList.add('text-gray-500');
+                          }
+                        });
+                      }}
+                      className="p-0.5 hover:scale-110 transition-transform"
+                    >
+                      <svg className="w-6 h-6 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                    </button>
+                  ))}
+                  <input type="hidden" name="rating" defaultValue="0" />
+                </div>
               </div>
               
               <div>

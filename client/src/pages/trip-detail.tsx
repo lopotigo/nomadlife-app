@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
-import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe } from "lucide-react";
+import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareQRModal } from "@/components/share-qr-modal";
 import type { Trip, TripStop, User } from "@shared/schema";
 
 type TripWithDetails = Trip & { stops: TripStop[]; user?: User };
 
+function StarsDisplay({ rating, size = 16 }: { rating: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <Star key={i} style={{ width: size, height: size }} className={i <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"} />
+      ))}
+    </div>
+  );
+}
+
 export default function TripDetail() {
   const [, params] = useRoute("/trip/:id");
   const [trip, setTrip] = useState<TripWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showShare, setShowShare] = useState(false);
+  const [expandedStop, setExpandedStop] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -59,6 +70,10 @@ export default function TripDetail() {
   }
 
   const sortedStops = [...(trip.stops || [])].sort((a, b) => a.orderIndex - b.orderIndex);
+  const totalKm = sortedStops.reduce((sum, s) => sum + (s.distanceKm || 0), 0);
+  const totalCo2 = sortedStops.reduce((sum, s) => sum + (s.co2Kg || 0), 0);
+  const co2Car = totalKm * 0.171;
+  const co2Saved = co2Car - totalCo2;
 
   return (
     <Layout>
@@ -77,50 +92,97 @@ export default function TripDetail() {
         </div>
 
         <div className="bg-card rounded-2xl overflow-hidden shadow-lg mb-6">
-          <div className="bg-gradient-to-r from-primary to-primary/70 p-6 text-white">
-            <div className="flex items-center gap-3 mb-2">
-              <Plane className="w-8 h-8" />
-              <h1 className="text-2xl font-bold">{trip.title}</h1>
+          {trip.imageUrl && (
+            <div className="relative h-48">
+              <img src={trip.imageUrl} className="w-full h-full object-cover" alt={trip.title} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="flex items-center gap-3">
+                  <Plane className="w-8 h-8 text-white" />
+                  <h1 className="text-2xl font-bold text-white">{trip.title}</h1>
+                </div>
+                {trip.description && <p className="text-white/80 mt-1">{trip.description}</p>}
+              </div>
             </div>
-            {trip.description && (
-              <p className="text-white/80">{trip.description}</p>
-            )}
-          </div>
+          )}
+          {!trip.imageUrl && (
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 p-6 text-white">
+              <div className="flex items-center gap-3 mb-2">
+                <Plane className="w-8 h-8" />
+                <h1 className="text-2xl font-bold">{trip.title}</h1>
+              </div>
+              {trip.description && <p className="text-white/80">{trip.description}</p>}
+            </div>
+          )}
 
           <div className="p-4">
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="w-4 h-4" />
+            {trip.user && (
+              <Link href={`/user/${trip.user.id}`}>
+                <div className="flex items-center gap-2 mb-4 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors cursor-pointer">
+                  <img 
+                    src={trip.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user.username}`}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-200"
+                    alt={trip.user.name || ""}
+                  />
+                  <div>
+                    <p className="font-semibold text-sm">{trip.user.name}</p>
+                    <p className="text-xs text-muted-foreground">@{trip.user.username}</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+                <Calendar className="w-4 h-4 text-emerald-500" />
                 <span className="text-sm">
-                  {trip.startDate ? new Date(trip.startDate).toLocaleDateString("it-IT") : "Data non definita"}
+                  {trip.startDate ? new Date(trip.startDate).toLocaleDateString("it-IT") : "N/D"}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <DollarSign className="w-4 h-4" />
-                <span className="text-sm">
-                  Budget: {trip.totalBudget || 0} {trip.currency || "EUR"}
-                </span>
+              <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+                <DollarSign className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm">{trip.totalBudget || 0} {trip.currency || "EUR"}</span>
               </div>
               {trip.startLocation && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">Da: {trip.startLocation}</span>
+                <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+                  <MapPin className="w-4 h-4 text-emerald-500" />
+                  <span className="text-sm truncate">{trip.startLocation}</span>
                 </div>
               )}
               {trip.endLocation && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Globe className="w-4 h-4" />
-                  <span className="text-sm">A: {trip.endLocation}</span>
+                <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+                  <Globe className="w-4 h-4 text-emerald-500" />
+                  <span className="text-sm truncate">{trip.endLocation}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2 mb-4">
-              <span className={`px-2 py-1 rounded-full text-xs ${trip.isPublic ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"}`}>
+            {totalKm > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-emerald-700">{totalKm}</p>
+                  <p className="text-[10px] text-emerald-600">km totali</p>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-emerald-700">{sortedStops.length}</p>
+                  <p className="text-[10px] text-emerald-600">tappe</p>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-3 text-center">
+                  <p className="text-lg font-bold text-emerald-700">{co2Saved > 0 ? `−${co2Saved.toFixed(0)}` : totalCo2}</p>
+                  <p className="text-[10px] text-emerald-600">{co2Saved > 0 ? "kg CO₂ risparmiata" : "kg CO₂"}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${trip.isPublic ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
                 {trip.isPublic ? "Pubblico" : "Privato"}
               </span>
-              <span className="text-xs text-muted-foreground">
-                {sortedStops.length} tapp{sortedStops.length === 1 ? "a" : "e"}
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                trip.status === "completed" ? "bg-emerald-100 text-emerald-700" : 
+                trip.status === "in_progress" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+              }`}>
+                {trip.status === "completed" ? "Completato" : trip.status === "in_progress" ? "In corso" : "Pianificato"}
               </span>
             </div>
           </div>
@@ -128,27 +190,99 @@ export default function TripDetail() {
 
         {sortedStops.length > 0 && (
           <div className="bg-card rounded-2xl p-4 shadow-lg">
-            <h2 className="font-bold text-lg mb-4">Tappe del viaggio</h2>
-            <div className="space-y-4">
+            <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <Route className="w-5 h-5 text-emerald-500" />
+              Tappe del viaggio
+            </h2>
+            <div className="space-y-3">
               {sortedStops.map((stop, index) => (
-                <div key={stop.id} className="relative pl-8 pb-4 border-l-2 border-primary/30 last:border-transparent">
-                  <div className="absolute left-0 top-0 -translate-x-1/2 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+                <div key={stop.id} className="relative pl-10 pb-2">
+                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-emerald-400 to-emerald-200 ml-4" />
+                  <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold shadow-md z-10">
                     {index + 1}
                   </div>
-                  <div>
-                    <h3 className="font-bold">{stop.city}</h3>
-                    <p className="text-sm text-muted-foreground">{stop.country}</p>
-                    <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
-                        {stop.departureDate && ` - ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
-                      </span>
+                  
+                  <button 
+                    onClick={() => setExpandedStop(expandedStop === stop.id ? null : stop.id)}
+                    className={`w-full text-left rounded-xl transition-all ${expandedStop === stop.id ? "bg-emerald-50 ring-1 ring-emerald-200" : "hover:bg-gray-50"}`}
+                  >
+                    <div className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div>
+                            <h3 className="font-bold text-sm">{stop.city}</h3>
+                            <p className="text-xs text-muted-foreground">{stop.country}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {stop.rating && <StarsDisplay rating={stop.rating} size={12} />}
+                          {stop.imageUrl && (
+                            <img src={stop.imageUrl} className="w-10 h-10 rounded-lg object-cover" alt="" />
+                          )}
+                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${expandedStop === stop.id ? "rotate-180" : ""}`} />
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
+                          {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
+                        </span>
+                        {stop.transportMode && <span className="capitalize">{stop.transportMode}</span>}
+                        {stop.distanceKm && <span>{stop.distanceKm} km</span>}
+                      </div>
                     </div>
-                    {stop.notes && (
-                      <p className="text-sm text-muted-foreground mt-2 italic">{stop.notes}</p>
-                    )}
-                  </div>
+                  </button>
+
+                  {expandedStop === stop.id && (
+                    <div className="mt-1 rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                      {stop.imageUrl && (
+                        <img src={stop.imageUrl} className="w-full h-40 object-cover" alt={stop.city} />
+                      )}
+                      <div className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold">{stop.city}, {stop.country}</h4>
+                          {stop.rating && <StarsDisplay rating={stop.rating} size={16} />}
+                        </div>
+
+                        {stop.accommodationName && (
+                          <div className="flex items-center gap-3 bg-blue-50 text-blue-700 rounded-xl px-3 py-2.5">
+                            <Bed className="w-5 h-5 shrink-0" />
+                            <div>
+                              <p className="font-semibold text-sm">{stop.accommodationName}</p>
+                              {stop.accommodationType && <p className="text-blue-500 text-xs capitalize">{stop.accommodationType}</p>}
+                            </div>
+                            {stop.rating && (
+                              <div className="ml-auto">
+                                <StarsDisplay rating={stop.rating} size={14} />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {stop.notes && (
+                          <div className="bg-gray-50 rounded-xl p-3">
+                            <p className="text-sm text-gray-700 italic">"{stop.notes}"</p>
+                          </div>
+                        )}
+
+                        {stop.transportMode && (
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="capitalize flex items-center gap-1">
+                              <Route className="w-3.5 h-3.5" /> {stop.transportMode}
+                            </span>
+                            {stop.distanceKm && <span>{stop.distanceKm} km</span>}
+                            {stop.co2Kg ? (
+                              <span className="flex items-center gap-1 text-emerald-600">
+                                <Leaf className="w-3.5 h-3.5" /> {stop.co2Kg} kg CO₂
+                              </span>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

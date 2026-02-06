@@ -73,6 +73,15 @@ Preferred communication style: Simple, everyday language.
 
 ### Recent Updates
 
+- **Enhanced Trip Experience (Differentiating Feature)**:
+  - Avatar-based markers: Trip stops show user avatar as marker on map
+  - Larger avatar marker with "QUI ORA" badge for posts with trips attached (shows where user is now)
+  - Premium PostMapPopup: Expandable itinerary with star ratings, accommodation info, photo previews, trip stats (km, CO2, stops), copy trip button, direct link to trip diary
+  - Premium trip stop popup: Photo header with gradient overlay, star rating, accommodation card (name + type), weather widget, diary/booking/share buttons
+  - Copy trip API: POST /api/trips/:id/copy to duplicate public trips to own diary
+  - Trip detail page upgraded: Stats dashboard (total km, CO2 saved, stops count), expandable stops with ratings, accommodation details, user profile link
+  - Trip stops schema: Added rating (1-5 stars), accommodationName, accommodationType fields
+  - Travel diary stop creation: Star rating input, accommodation name/type fields
 - Added multi-format post creation: video upload, photo upload, link attachment, trip association
 - Implemented QR code sharing system with `qrcode.react` library
 - Created dedicated pages for viewing individual posts (`/post/:id`) and trips (`/trip/:id`)

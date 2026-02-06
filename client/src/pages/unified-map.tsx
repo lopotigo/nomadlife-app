@@ -5,7 +5,8 @@ import { Link, useLocation } from "wouter";
 import { 
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
-  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown
+  Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
+  Star, Copy, ExternalLink, Route, Bed, MapPinned
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -60,6 +61,9 @@ interface TripStop {
   transportMode?: string;
   distanceKm?: number;
   co2Kg?: number;
+  rating?: number | null;
+  accommodationName?: string | null;
+  accommodationType?: string | null;
 }
 
 interface Trip {
@@ -75,7 +79,24 @@ interface Trip {
   stops: TripStop[];
 }
 
-function createPostMarkerIcon(imageUrl: string | null) {
+function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean) {
+  if (hasTripId && avatarUrl) {
+    return L.divIcon({
+      html: `<div style="position:relative;">
+        <div style="width:52px;height:52px;border-radius:50%;border:3px solid #10b981;box-shadow:0 4px 14px rgba(16,185,129,0.5);overflow:hidden;background:white;position:relative;">
+          <img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;" />
+        </div>
+        <div style="position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#10b981,#059669);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.4-.1.9.3 1.2l5.6 4-2 2-2-1c-.4-.2-.9-.2-1.2.1l-.2.2c-.2.3-.2.7 0 1l2.4 2.4c.3.3.7.3 1 0l.2-.2c.3-.3.3-.8.1-1.2l-1-2 2-2 4 5.6c.3.4.8.5 1.2.3l.5-.3c.4-.2.6-.6.5-1.1Z"/></svg>
+        </div>
+        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#10b981;color:white;font-size:8px;font-weight:700;padding:1px 6px;border-radius:8px;white-space:nowrap;border:1.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);">QUI ORA</div>
+      </div>`,
+      className: "custom-post-marker-trip",
+      iconSize: [52, 52],
+      iconAnchor: [26, 52],
+      popupAnchor: [0, -52],
+    });
+  }
   const html = imageUrl 
     ? `<div class="post-marker"><img src="${imageUrl}" alt="post" /></div>`
     : `<div class="post-marker post-marker-text"><svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>`;
@@ -114,27 +135,19 @@ function adjustColor(hex: string, amount: number): string {
 }
 
 function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6", avatarUrl?: string | null, stopMediaUrl?: string | null) {
-  const imageUrl = stopMediaUrl || avatarUrl;
-  
-  if (imageUrl) {
-    return L.divIcon({
-      html: `<div style="width:36px;height:36px;border-radius:50%;border:3px solid ${color};box-shadow:0 2px 8px rgba(0,0,0,0.4);overflow:hidden;background:white;">
-        <img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;" />
-        <div style="position:absolute;bottom:-2px;right:-2px;background:${color};color:white;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:9px;border:1px solid white;">${orderIndex + 1}</div>
-      </div>`,
-      className: "custom-stop-marker",
-      iconSize: [36, 36],
-      iconAnchor: [18, 18],
-      popupAnchor: [0, -18],
-    });
-  }
+  const avatar = avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=nomad${orderIndex}`;
   
   return L.divIcon({
-    html: `<div style="background:${color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${orderIndex + 1}</div>`,
+    html: `<div style="position:relative;">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${color};box-shadow:0 3px 10px rgba(0,0,0,0.35);overflow:hidden;background:white;">
+        <img src="${avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+      </div>
+      <div style="position:absolute;bottom:-3px;right:-3px;background:${color};color:white;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:9px;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);">${orderIndex + 1}</div>
+    </div>`,
     className: "custom-stop-marker",
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -14],
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
   });
 }
 
@@ -194,6 +207,20 @@ function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { posi
   return null;
 }
 
+function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <Star 
+          key={i} 
+          style={{ width: size, height: size }} 
+          className={i <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"} 
+        />
+      ))}
+    </div>
+  );
+}
+
 function PostMapPopup({ 
   post, likedPosts, pulsingPosts, onLike, onShare 
 }: { 
@@ -203,108 +230,201 @@ function PostMapPopup({
   onLike: (id: string) => void; 
   onShare: (post: PostWithUser) => void;
 }) {
-  const [tripStops, setTripStops] = useState<TripStop[]>([]);
-  const [tripTitle, setTripTitle] = useState("");
+  const [tripData, setTripData] = useState<any>(null);
   const [loadingTrip, setLoadingTrip] = useState(false);
   const [showStops, setShowStops] = useState(false);
   const [expandedStop, setExpandedStop] = useState<string | null>(null);
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
-    if (post.tripId && showStops && tripStops.length === 0) {
+    if (post.tripId && showStops && !tripData) {
       setLoadingTrip(true);
       fetch(`/api/trips/${post.tripId}`, { credentials: "include" })
         .then(r => r.json())
-        .then(data => {
-          setTripStops(data.stops || []);
-          setTripTitle(data.title || "");
-        })
+        .then(data => setTripData(data))
         .catch(() => {})
         .finally(() => setLoadingTrip(false));
     }
   }, [post.tripId, showStops]);
 
+  const tripStops: TripStop[] = tripData?.stops || [];
+  const sortedStops = [...tripStops].sort((a, b) => a.orderIndex - b.orderIndex);
+  const totalKm = sortedStops.reduce((sum, s) => sum + (s.distanceKm || 0), 0);
+  const totalCo2 = sortedStops.reduce((sum, s) => sum + (s.co2Kg || 0), 0);
+
+  const handleCopyTrip = async () => {
+    if (!tripData) return;
+    try {
+      const res = await fetch(`/api/trips/${tripData.id}/copy`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        alert("Viaggio aggiunto al tuo diario!");
+      }
+    } catch {}
+  };
+
   return (
-    <div className="p-2 min-w-[220px] max-w-[300px]">
-      <div className="flex items-center gap-2 mb-2">
-        <img 
-          src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
-          className="w-8 h-8 rounded-full"
-          alt={post.user.name}
-        />
-        <div>
-          <p className="font-semibold text-sm">{post.user.name}</p>
+    <div className="min-w-[260px] max-w-[320px]" data-testid={`popup-post-${post.id}`}>
+      <div className="flex items-center gap-2 p-3 pb-2">
+        <a href={`/user/${post.user.id}`} className="shrink-0">
+          <img 
+            src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
+            className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20"
+            alt={post.user.name}
+          />
+        </a>
+        <div className="flex-1 min-w-0">
+          <a href={`/user/${post.user.id}`} className="font-semibold text-sm hover:text-primary transition-colors">{post.user.name}</a>
           <p className="text-xs text-gray-500">@{post.user.username}</p>
         </div>
+        {post.tripId && (
+          <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+            <Plane className="w-3 h-3" /> Viaggio
+          </span>
+        )}
       </div>
+
       {post.imageUrl && (
-        <img src={post.imageUrl} className="w-full h-24 object-cover rounded mb-2" alt="" />
+        <img src={post.imageUrl} className="w-full h-28 object-cover" alt="" />
       )}
-      <p className="text-sm">{post.content.length > 100 ? post.content.substring(0, 100) + "..." : post.content}</p>
       
+      <div className="px-3 py-2">
+        <p className="text-sm leading-relaxed">{post.content.length > 120 ? post.content.substring(0, 120) + "..." : post.content}</p>
+      </div>
+
       {post.tripId && (
-        <div className="mt-2">
+        <div className="px-3 pb-2">
           <button
             onClick={() => setShowStops(!showStops)}
-            className="w-full flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            className="w-full flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-700 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all border border-emerald-200/50"
             data-testid={`button-show-trip-stops-${post.id}`}
           >
-            <Plane className="w-3.5 h-3.5" />
-            <span className="flex-1 text-left">{showStops ? "Nascondi tappe" : "Mostra tappe del viaggio"}</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showStops ? "rotate-180" : ""}`} />
+            <Route className="w-4 h-4" />
+            <span className="flex-1 text-left">{showStops ? "Nascondi itinerario" : "Esplora itinerario"}</span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${showStops ? "rotate-180" : ""}`} />
           </button>
 
           {showStops && (
-            <div className="mt-2 space-y-1 max-h-[200px] overflow-y-auto">
+            <div className="mt-2">
               {loadingTrip ? (
-                <div className="flex justify-center py-3">
-                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
                 </div>
-              ) : tripStops.length === 0 ? (
-                <p className="text-xs text-gray-400 text-center py-2">Nessuna tappa</p>
+              ) : sortedStops.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-3">Nessuna tappa</p>
               ) : (
                 <>
-                  {tripTitle && <p className="text-xs font-semibold text-gray-600 px-1 mb-1">{tripTitle}</p>}
-                  {tripStops
-                    .sort((a, b) => a.orderIndex - b.orderIndex)
-                    .map((stop, idx) => (
-                    <div key={stop.id}>
-                      <button
-                        onClick={() => setExpandedStop(expandedStop === stop.id ? null : stop.id)}
-                        className={`w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-2 ${
-                          expandedStop === stop.id ? "bg-primary/10 text-primary" : "hover:bg-gray-100"
-                        }`}
-                        data-testid={`button-stop-${stop.id}`}
-                      >
-                        <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span className="font-medium truncate">{stop.city}</span>
-                        <span className="text-gray-400 truncate">{stop.country}</span>
-                      </button>
-                      
-                      {expandedStop === stop.id && (
-                        <div className="ml-7 mt-1 mb-2 p-2 bg-gray-50 rounded-lg border border-gray-200 text-xs space-y-1">
-                          <p className="font-semibold">{stop.city}, {stop.country}</p>
-                          {stop.arrivalDate && (
-                            <p className="text-gray-500">
-                              Arrivo: {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
-                              {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
-                            </p>
-                          )}
-                          {stop.notes && <p className="text-gray-600 italic">"{stop.notes}"</p>}
-                          {stop.imageUrl && (
-                            <img src={stop.imageUrl} className="w-full h-20 object-cover rounded mt-1" alt={stop.city} />
-                          )}
-                          {stop.transportMode && (
-                            <p className="text-gray-500">Trasporto: {stop.transportMode}</p>
-                          )}
-                          {stop.distanceKm && (
-                            <p className="text-gray-500">{stop.distanceKm} km{stop.co2Kg ? ` · ${stop.co2Kg} kg CO₂` : ""}</p>
-                          )}
-                        </div>
-                      )}
+                  {tripData?.title && (
+                    <div className="flex items-center justify-between mb-2 px-1">
+                      <p className="text-xs font-bold text-gray-700">{tripData.title}</p>
+                      <span className="text-[10px] text-gray-400">{sortedStops.length} tappe</span>
                     </div>
-                  ))}
+                  )}
+
+                  {totalKm > 0 && (
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-1.5 mb-2 text-[10px]">
+                      <span className="flex items-center gap-1 text-gray-600"><MapPinned className="w-3 h-3" /> {totalKm} km</span>
+                      <span className="flex items-center gap-1 text-gray-600"><Route className="w-3 h-3" /> {sortedStops.length} tappe</span>
+                      {totalCo2 > 0 && <span className="text-emerald-600">{totalCo2} kg CO₂</span>}
+                    </div>
+                  )}
+
+                  <div className="space-y-0.5 max-h-[220px] overflow-y-auto pr-1">
+                    {sortedStops.map((stop, idx) => (
+                      <div key={stop.id}>
+                        <button
+                          onClick={() => setExpandedStop(expandedStop === stop.id ? null : stop.id)}
+                          className={`w-full text-left px-2 py-2 rounded-xl text-xs transition-all flex items-center gap-2 ${
+                            expandedStop === stop.id ? "bg-emerald-50 ring-1 ring-emerald-200" : "hover:bg-gray-50"
+                          }`}
+                          data-testid={`button-stop-${stop.id}`}
+                        >
+                          <span className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 shadow-sm">
+                            {idx + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold">{stop.city}</span>
+                            <span className="text-gray-400 ml-1">{stop.country}</span>
+                          </div>
+                          {stop.rating && <StarRating rating={stop.rating} size={10} />}
+                          {stop.imageUrl && (
+                            <img src={stop.imageUrl} className="w-8 h-8 rounded-lg object-cover shrink-0" alt="" />
+                          )}
+                        </button>
+                        
+                        {expandedStop === stop.id && (
+                          <div className="ml-8 mt-1 mb-2 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+                            {stop.imageUrl && (
+                              <img src={stop.imageUrl} className="w-full h-24 object-cover" alt={stop.city} />
+                            )}
+                            <div className="p-3 space-y-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <p className="font-bold text-sm">{stop.city}, {stop.country}</p>
+                                {stop.rating && <StarRating rating={stop.rating} size={12} />}
+                              </div>
+
+                              {stop.accommodationName && (
+                                <div className="flex items-center gap-2 bg-blue-50 text-blue-700 rounded-lg px-2 py-1.5">
+                                  <Bed className="w-3.5 h-3.5" />
+                                  <div>
+                                    <p className="font-semibold">{stop.accommodationName}</p>
+                                    {stop.accommodationType && <p className="text-blue-500 text-[10px] capitalize">{stop.accommodationType}</p>}
+                                  </div>
+                                </div>
+                              )}
+
+                              {stop.arrivalDate && (
+                                <p className="text-gray-500 flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
+                                  {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
+                                </p>
+                              )}
+                              {stop.notes && <p className="text-gray-600 italic bg-gray-50 p-2 rounded-lg">"{stop.notes}"</p>}
+                              {stop.transportMode && (
+                                <div className="flex items-center gap-2 text-gray-500">
+                                  <span className="capitalize">{stop.transportMode}</span>
+                                  {stop.distanceKm && <span>{stop.distanceKm} km</span>}
+                                  {stop.co2Kg ? <span className="text-emerald-600">{stop.co2Kg} kg CO₂</span> : null}
+                                </div>
+                              )}
+                              <a 
+                                href={`/trip/${post.tripId}`}
+                                className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-xs font-semibold transition-colors w-full"
+                                data-testid={`link-trip-diary-${stop.id}`}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Apri nel Diario
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2 mt-2">
+                    <a 
+                      href={`/trip/${post.tripId}`}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl py-2 text-xs font-semibold transition-colors"
+                      data-testid={`link-full-trip-${post.id}`}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      Diario completo
+                    </a>
+                    {currentUser && currentUser.id !== post.userId && (
+                      <button 
+                        onClick={handleCopyTrip}
+                        className="flex items-center justify-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl py-2 px-3 text-xs font-semibold transition-colors"
+                        data-testid={`button-copy-trip-${post.id}`}
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                        Copia
+                      </button>
+                    )}
+                  </div>
                 </>
               )}
             </div>
@@ -312,16 +432,18 @@ function PostMapPopup({
         </div>
       )}
 
-      <div className="flex items-center justify-between mt-2">
+      <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100">
         <div className="flex items-center gap-3 text-xs text-gray-500">
           <button 
             onClick={() => onLike(post.id)}
-            className={`flex items-center gap-1 ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
+            className={`flex items-center gap-1 transition-colors ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
           >
-            <Heart className={`w-3 h-3 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500' : ''}`} /> 
+            <Heart className={`w-3.5 h-3.5 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500' : ''}`} /> 
             {post.likes}
           </button>
-          <Link href={`/post/${post.id}`} className="flex items-center gap-1 hover:text-primary transition-colors"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</Link>
+          <Link href={`/post/${post.id}`} className="flex items-center gap-1 hover:text-primary transition-colors">
+            <MessageCircle className="w-3.5 h-3.5" /> {post.commentsCount}
+          </Link>
         </div>
         <button
           onClick={() => onShare(post)}
@@ -597,7 +719,7 @@ export default function UnifiedMap() {
               <Marker
                 key={`post-${post.id}`}
                 position={[post.latitude!, post.longitude!]}
-                icon={createPostMarkerIcon(post.imageUrl)}
+                icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId)}
               >
                 <Popup className="custom-popup" maxWidth={320}>
                   <PostMapPopup 
@@ -684,66 +806,120 @@ export default function UnifiedMap() {
                     />
                   )}
                   
-                  {validStops.map((stop) => (
+                  {validStops.map((stop, idx) => (
                     <Marker
                       key={`stop-${stop.id}`}
                       position={[stop.latitude!, stop.longitude!]}
                       icon={createStopMarkerIcon(stop.orderIndex, trip.color, trip.user?.avatar, stop.imageUrl)}
                     >
-                      <Popup className="custom-popup">
-                        <div className="p-3 min-w-[200px]">
-                          <a 
-                            href={`/user/${trip.user?.id || trip.userId}`}
-                            className="flex items-center gap-2 mb-3 hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors cursor-pointer"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <img 
-                              src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
-                              className="w-8 h-8 rounded-full object-cover"
-                              alt={trip.user?.name || "User"}
-                            />
-                            <div>
-                              <p className="font-semibold text-sm text-primary hover:underline">{trip.user?.name || trip.user?.username || "Utente"}</p>
-                              {trip.user?.username && <p className="text-xs text-gray-500">@{trip.user.username}</p>}
+                      <Popup className="custom-popup" maxWidth={320}>
+                        <div className="min-w-[260px] max-w-[300px]" data-testid={`popup-stop-${stop.id}`}>
+                          {stop.imageUrl && (
+                            <div className="relative">
+                              <img src={stop.imageUrl} className="w-full h-32 object-cover" alt={stop.city} />
+                              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-white font-bold text-sm">{stop.city}</p>
+                                    <p className="text-white/70 text-xs">{stop.country}</p>
+                                  </div>
+                                  {stop.rating && <StarRating rating={stop.rating} size={14} />}
+                                </div>
+                              </div>
                             </div>
-                          </a>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div style={{ background: trip.color }} className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                              {stop.orderIndex + 1}
+                          )}
+                          
+                          {!stop.imageUrl && (
+                            <div className="p-3 pb-1">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div style={{ background: trip.color }} className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                                    {stop.orderIndex + 1}
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-sm">{stop.city}</p>
+                                    <p className="text-xs text-gray-500">{stop.country}</p>
+                                  </div>
+                                </div>
+                                {stop.rating && <StarRating rating={stop.rating} size={12} />}
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-bold">{stop.city}</p>
-                              <p className="text-xs text-gray-500">{stop.country}</p>
+                          )}
+                          
+                          <div className="p-3 space-y-2">
+                            <a 
+                              href={`/user/${trip.user?.id || trip.userId}`}
+                              className="flex items-center gap-2 hover:bg-gray-50 rounded-lg p-1 -m-1 transition-colors"
+                            >
+                              <img 
+                                src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
+                                className="w-7 h-7 rounded-full object-cover ring-2 ring-primary/20"
+                                alt={trip.user?.name || "User"}
+                              />
+                              <div>
+                                <p className="font-semibold text-xs text-primary">{trip.user?.name || "Utente"}</p>
+                                <p className="text-[10px] text-gray-400">{trip.title}</p>
+                              </div>
+                            </a>
+
+                            {stop.accommodationName && (
+                              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 rounded-lg px-2.5 py-2">
+                                <Bed className="w-4 h-4 shrink-0" />
+                                <div>
+                                  <p className="font-semibold text-xs">{stop.accommodationName}</p>
+                                  {stop.accommodationType && <p className="text-blue-500 text-[10px] capitalize">{stop.accommodationType}</p>}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-3 text-[11px] text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
+                                {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
+                              </span>
                             </div>
-                          </div>
-                          <p className="text-xs text-slate-600 mb-1">{trip.title}</p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <Calendar className="w-3 h-3" />
-                              <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
+
+                            {stop.notes && (
+                              <p className="text-xs text-gray-600 italic bg-gray-50 p-2 rounded-lg">"{stop.notes}"</p>
+                            )}
+
+                            {stop.transportMode && (
+                              <div className="flex items-center gap-2 text-[11px] text-gray-500">
+                                <span className="capitalize">{stop.transportMode}</span>
+                                {stop.distanceKm && <span>· {stop.distanceKm} km</span>}
+                                {stop.co2Kg ? <span className="text-emerald-600">· {stop.co2Kg} kg CO₂</span> : null}
+                              </div>
+                            )}
+
+                            <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
+
+                            <div className="flex gap-1.5 pt-1">
+                              <a 
+                                href={`/trip/${trip.id}`}
+                                className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-[11px] font-semibold transition-colors"
+                                data-testid={`link-trip-diary-stop-${stop.id}`}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Diario
+                              </a>
                               <button
                                 onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
-                                className="p-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 transition-colors"
+                                className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-3 text-[11px] font-semibold transition-colors"
                                 data-testid={`button-book-stop-${stop.id}`}
-                                title="Prenota qui"
                               >
-                                <Hotel className="w-3.5 h-3.5" />
+                                <Hotel className="w-3 h-3" />
+                                Prenota
                               </button>
                               <button
                                 onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
-                                className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                                className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                                 data-testid={`button-share-trip-${trip.id}`}
                               >
                                 <Share2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
-                          {stop.notes && (
-                            <p className="text-xs text-gray-600 mt-2 italic">{stop.notes}</p>
-                          )}
-                          <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
                         </div>
                       </Popup>
                     </Marker>

@@ -328,6 +328,9 @@ export const tripStops = pgTable("trip_stops", {
   co2Kg: integer("co2_kg"), // emissioni CO2 in grammi
   placeId: varchar("place_id").references(() => places.id, { onDelete: "set null" }), // hotel/coworking collegato
   sourceTripId: varchar("source_trip_id"), // se copiata da un altro viaggio
+  rating: integer("rating"), // 1-5 stelle per il posto
+  accommodationName: text("accommodation_name"), // nome dell'alloggio
+  accommodationType: text("accommodation_type"), // hotel, hostel, airbnb, camping, couchsurfing
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -339,6 +342,9 @@ export const updateTripStopSchema = z.object({
   transportMode: z.enum(["walk", "bike", "train", "car", "plane"]).optional(),
   distanceKm: z.number().min(0).optional(),
   co2Kg: z.number().min(0).optional(),
+  rating: z.number().min(1).max(5).optional(),
+  accommodationName: z.string().optional(),
+  accommodationType: z.enum(["hotel", "hostel", "airbnb", "camping", "couchsurfing", "other"]).optional(),
 });
 export type InsertTripStop = z.infer<typeof insertTripStopSchema>;
 export type UpdateTripStop = z.infer<typeof updateTripStopSchema>;
