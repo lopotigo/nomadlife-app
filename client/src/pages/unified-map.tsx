@@ -401,7 +401,7 @@ export default function UnifiedMap() {
     });
     
     if (allPoints.length === 0) {
-      return { mapCenter: [20, 50] as [number, number], mapZoom: 2 };
+      return { mapCenter: [44, 11] as [number, number], mapZoom: 3 };
     }
     
     const avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
@@ -1727,6 +1727,15 @@ function FeedPostCard({
           />
         )}
       </Link>
+
+      {post.tripId && (
+        <Link href={`/trip/${post.tripId}`}>
+          <div className="mt-2 flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary/20 transition-colors" data-testid={`trip-badge-${post.id}`}>
+            <Plane className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-primary">Viaggio allegato - clicca per vedere</span>
+          </div>
+        </Link>
+      )}
       
       <div className="flex items-center gap-4 mt-3 text-muted-foreground">
         <button 
