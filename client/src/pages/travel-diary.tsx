@@ -58,6 +58,76 @@ function createStopMarkerIcon(orderIndex: number, color: string = "#3b82f6", ava
   });
 }
 
+function CurvedRouteLine({ positions, color = "#3b82f6", dashed = false, opacity = 0.9 }: { positions: [number, number][]; color?: string; dashed?: boolean; opacity?: number }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (positions.length < 2) return;
+    
+    const curvedPoints: L.LatLng[] = [];
+    
+    for (let i = 0; i < positions.length - 1; i++) {
+      const start = L.latLng(positions[i][0], positions[i][1]);
+      const end = L.latLng(positions[i + 1][0], positions[i + 1][1]);
+      
+      const midLat = (start.lat + end.lat) / 2;
+      const midLng = (start.lng + end.lng) / 2;
+      const distance = start.distanceTo(end);
+      const offset = Math.min(distance * 0.000005, 0.15);
+      
+      const dx = end.lng - start.lng;
+      const dy = end.lat - start.lat;
+      const controlLat = midLat + offset * (dx >= 0 ? 1 : -1);
+      const controlLng = midLng - offset * 0.3 * (dy >= 0 ? 1 : -1);
+      
+      for (let t = 0; t <= 1; t += 0.03) {
+        const lat = (1 - t) * (1 - t) * start.lat + 2 * (1 - t) * t * controlLat + t * t * end.lat;
+        const lng = (1 - t) * (1 - t) * start.lng + 2 * (1 - t) * t * controlLng + t * t * end.lng;
+        curvedPoints.push(L.latLng(lat, lng));
+      }
+    }
+    curvedPoints.push(L.latLng(positions[positions.length - 1][0], positions[positions.length - 1][1]));
+    
+    const layers: L.Polyline[] = [];
+    
+    const shadow = L.polyline(curvedPoints, {
+      color: "#000000", weight: 5, opacity: 0.12 * (opacity / 0.9),
+      lineCap: "round", lineJoin: "round", interactive: false,
+    });
+    shadow.addTo(map);
+    layers.push(shadow);
+    
+    const outline = L.polyline(curvedPoints, {
+      color: "#ffffff", weight: 4, opacity: 0.5 * (opacity / 0.9),
+      lineCap: "round", lineJoin: "round", interactive: false,
+    });
+    outline.addTo(map);
+    layers.push(outline);
+    
+    const mainLine = L.polyline(curvedPoints, {
+      color, weight: 3, opacity,
+      lineCap: "round", lineJoin: "round",
+      dashArray: dashed ? "10, 6" : undefined, interactive: false,
+    });
+    mainLine.addTo(map);
+    layers.push(mainLine);
+    
+    const animDots = L.polyline(curvedPoints, {
+      color: "#ffffff", weight: 1.5, opacity: 0.5 * (opacity / 0.9),
+      lineCap: "round", dashArray: "3, 12",
+      className: "route-anim-dots", interactive: false,
+    });
+    animDots.addTo(map);
+    layers.push(animDots);
+    
+    return () => {
+      layers.forEach(l => map.removeLayer(l));
+    };
+  }, [positions, map, color, dashed, opacity]);
+  
+  return null;
+}
+
 interface Trip {
   id: string;
   userId: string;
@@ -1901,18 +1971,12 @@ function ExploreTripsMap({
         />
         
         {tripPolylines.map((polyline) => (
-          <Polyline
+          <CurvedRouteLine
             key={polyline.tripId}
             positions={polyline.positions}
-            pathOptions={{ 
-              color: polyline.color, 
-              weight: 3,
-              opacity: selectedTripId && selectedTripId !== polyline.tripId ? 0.3 : 0.8,
-              dashArray: "10, 5",
-            }}
-            eventHandlers={{
-              click: () => setSelectedTripId(polyline.tripId),
-            }}
+            color={polyline.color}
+            opacity={selectedTripId && selectedTripId !== polyline.tripId ? 0.3 : 0.8}
+            dashed={true}
           />
         ))}
         
@@ -2434,31 +2498,16 @@ function TripPlannerMap({
         {legs.map((leg, index) => {
           const selectedOpt = leg.options.find(o => o.mode === leg.selected);
           const color = selectedOpt?.color || "#10b981";
-          const getLineStyle = (mode: string) => {
-            switch(mode) {
-              case "walk": return { weight: 3, dashArray: "4, 8", lineCap: "round" as const };
-              case "bike": return { weight: 4, dashArray: "8, 6", lineCap: "round" as const };
-              case "train": return { weight: 6, dashArray: undefined, lineCap: "round" as const };
-              case "car": return { weight: 5, dashArray: undefined, lineCap: "round" as const };
-              case "plane": return { weight: 3, dashArray: "12, 12", lineCap: "butt" as const };
-              default: return { weight: 4, dashArray: undefined, lineCap: "round" as const };
-            }
-          };
-          const lineStyle = getLineStyle(leg.selected);
+          const isDashed = leg.selected === "walk" || leg.selected === "bike" || leg.selected === "plane";
           return (
-            <Polyline
+            <CurvedRouteLine
               key={leg.legId}
               positions={[
                 [leg.from.latitude!, leg.from.longitude!],
                 [leg.to.latitude!, leg.to.longitude!]
               ]}
-              pathOptions={{ 
-                color, 
-                weight: lineStyle.weight, 
-                opacity: 0.9,
-                dashArray: lineStyle.dashArray,
-                lineCap: lineStyle.lineCap
-              }}
+              color={color}
+              dashed={isDashed}
             />
           );
         })}

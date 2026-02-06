@@ -163,3 +163,10 @@
   color: #ef4444;
   fill: #ef4444;
 }
+
+.route-anim-dots {
+  animation: dashMove 1.5s linear infinite;
+}
+@keyframes dashMove {
+  to { stroke-dashoffset: -18; }
+}
