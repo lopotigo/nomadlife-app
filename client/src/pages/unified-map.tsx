@@ -175,10 +175,12 @@ function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { posi
       const midLat = (start.lat + end.lat) / 2;
       const midLng = (start.lng + end.lng) / 2;
       const distance = start.distanceTo(end);
-      const offset = Math.max(distance * 0.00002, 0.3);
+      const offset = Math.min(distance * 0.000005, 0.15);
       
-      const controlLat = midLat + offset;
-      const controlLng = midLng;
+      const dx = end.lng - start.lng;
+      const dy = end.lat - start.lat;
+      const controlLat = midLat + offset * (dx >= 0 ? 1 : -1);
+      const controlLng = midLng - offset * 0.3 * (dy >= 0 ? 1 : -1);
       
       for (let t = 0; t <= 1; t += 0.03) {
         const lat = (1 - t) * (1 - t) * start.lat + 2 * (1 - t) * t * controlLat + t * t * end.lat;
@@ -192,42 +194,46 @@ function CurvedPolyline({ positions, color = "#3b82f6", dashed = false }: { posi
     
     const shadow = L.polyline(curvedPoints, {
       color: "#000000",
-      weight: 7,
-      opacity: 0.2,
+      weight: 5,
+      opacity: 0.12,
       lineCap: "round",
       lineJoin: "round",
+      interactive: false,
     });
     shadow.addTo(map);
     layers.push(shadow);
     
     const outline = L.polyline(curvedPoints, {
       color: "#ffffff",
-      weight: 6,
-      opacity: 0.6,
+      weight: 4,
+      opacity: 0.5,
       lineCap: "round",
       lineJoin: "round",
+      interactive: false,
     });
     outline.addTo(map);
     layers.push(outline);
     
     const mainLine = L.polyline(curvedPoints, {
       color,
-      weight: 4,
-      opacity: 1,
+      weight: 3,
+      opacity: 0.9,
       lineCap: "round",
       lineJoin: "round",
-      dashArray: dashed ? "12, 8" : undefined,
+      dashArray: dashed ? "10, 6" : undefined,
+      interactive: false,
     });
     mainLine.addTo(map);
     layers.push(mainLine);
     
     const animDots = L.polyline(curvedPoints, {
       color: "#ffffff",
-      weight: 2,
-      opacity: 0.6,
+      weight: 1.5,
+      opacity: 0.5,
       lineCap: "round",
-      dashArray: "4, 14",
+      dashArray: "3, 12",
       className: "route-anim-dots",
+      interactive: false,
     });
     animDots.addTo(map);
     layers.push(animDots);
