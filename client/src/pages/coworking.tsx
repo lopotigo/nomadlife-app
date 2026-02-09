@@ -63,6 +63,7 @@ export default function Coworking() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [eventType, setEventType] = useState<"all" | "public" | "nomad">("all");
+  const [urlParamsApplied, setUrlParamsApplied] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -73,6 +74,18 @@ export default function Coworking() {
     }
 
     setGuestName(user.name);
+
+    if (!urlParamsApplied) {
+      const params = new URLSearchParams(window.location.search);
+      const cityParam = params.get("city");
+      const typeParam = params.get("type");
+      if (cityParam) setSearchQuery(cityParam);
+      if (typeParam && ["hotel", "hostel", "coworking"].includes(typeParam)) {
+        setSelectedType(typeParam);
+      }
+      setUrlParamsApplied(true);
+    }
+
     fetchData();
   }, [user, authLoading, setLocation]);
 

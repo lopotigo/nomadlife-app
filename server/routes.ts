@@ -321,6 +321,63 @@ export async function registerRoutes(
     }
   });
 
+  // ========== EXTERNAL HOTEL SEARCH (ready for API integration) ==========
+  app.get("/api/hotels/search", requireAuth, async (req, res) => {
+    try {
+      const { city, checkIn, checkOut, guests, currency } = req.query;
+      
+      if (!city) {
+        return res.status(400).send({ error: "City is required" });
+      }
+
+      // TODO: Replace with real hotel API (Booking.com, Hotels.com, Amadeus, etc.)
+      // When API key is configured, this will call the external service.
+      // For now, return local places filtered by city + any matching results structure.
+      const apiKey = process.env.HOTEL_API_KEY;
+      
+      if (apiKey) {
+        // Future: Call external hotel API here
+        // const results = await fetchExternalHotels({ city, checkIn, checkOut, guests, apiKey });
+        // return res.send(results);
+      }
+      
+      // Fallback: search local places database
+      const localResults = await storage.searchPlaces({
+        query: city as string,
+        type: "hotel",
+      });
+      
+      res.send({
+        source: apiKey ? "external" : "local",
+        city: city as string,
+        checkIn: checkIn as string || null,
+        checkOut: checkOut as string || null,
+        results: localResults.map(p => ({
+          id: p.id,
+          name: p.name,
+          type: p.type,
+          location: p.location,
+          city: p.city,
+          country: p.country,
+          description: p.description,
+          price: p.price,
+          pricePerNight: p.pricePerNight,
+          currency: p.currency || "EUR",
+          imageUrl: p.imageUrl,
+          rating: p.rating,
+          reviews: p.reviews,
+          amenities: p.amenities,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          affiliateUrl: null, // Will be populated by external API
+          externalId: null,
+        })),
+      });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== PLACE REVIEWS ==========
   app.get("/api/places/:id/reviews", async (req, res) => {
     try {
