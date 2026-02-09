@@ -592,6 +592,17 @@ function PostCard({ post, onLike, currentUser }: { post: PostWithUser; onLike: (
             <MessageCircle className="w-6 h-6" />
             <span className="text-sm font-bold">{commentsCount}</span>
           </button>
+          {currentUser && post.user.id !== currentUser.id && (
+            <Link href={`/chat?user=${post.user.id}`}>
+              <button 
+                className="text-foreground hover:text-violet-500 transition-colors"
+                data-testid={`button-dm-${post.id}`}
+                title={`Messaggio a ${post.user.name}`}
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </Link>
+          )}
           <button className="ml-auto text-foreground hover:text-primary transition-colors">
             <Share2 className="w-6 h-6" />
           </button>

@@ -386,13 +386,25 @@ function PostMapPopup({
             <MessageCircle className="w-3.5 h-3.5" /> {post.commentsCount}
           </Link>
         </div>
-        <button
-          onClick={() => onShare(post)}
-          className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
-          data-testid={`button-share-post-${post.id}`}
-        >
-          <Share2 className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {currentUser && post.user.id !== currentUser.id && (
+            <a
+              href={`/chat?user=${post.user.id}`}
+              className="p-1.5 rounded-full bg-violet-500/10 hover:bg-violet-500/20 text-violet-500 transition-colors"
+              title={`Messaggio a ${post.user.name}`}
+              data-testid={`button-dm-popup-${post.id}`}
+            >
+              <Send className="w-3.5 h-3.5" />
+            </a>
+          )}
+          <button
+            onClick={() => onShare(post)}
+            className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+            data-testid={`button-share-post-${post.id}`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

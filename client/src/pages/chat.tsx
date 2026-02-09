@@ -30,6 +30,8 @@ export default function Chat() {
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [followerIds, setFollowerIds] = useState<Set<string>>(new Set());
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
   const [selectedPrivateUser, setSelectedPrivateUser] = useState<User | null>(null);
   const [groupMessages, setGroupMessages] = useState<MessageWithSender[]>([]);
@@ -83,13 +85,17 @@ export default function Chat() {
     Promise.all([
       fetch("/api/chat-groups", { credentials: "include" }).then(res => res.json()),
       fetch("/api/users", { credentials: "include" }).then(res => res.json()),
-      fetch("/api/conversations", { credentials: "include" }).then(res => res.json())
+      fetch("/api/conversations", { credentials: "include" }).then(res => res.json()),
+      fetch(`/api/users/${user.id}/followers`, { credentials: "include" }).then(res => res.json()).catch(() => []),
+      fetch(`/api/users/${user.id}/following`, { credentials: "include" }).then(res => res.json()).catch(() => []),
     ])
-      .then(([groupsData, usersData, conversationsData]) => {
+      .then(([groupsData, usersData, conversationsData, followersData, followingData]) => {
         setGroups(Array.isArray(groupsData) ? groupsData : []);
         const otherUsers = Array.isArray(usersData) ? usersData.filter((u: User) => u.id !== user.id) : [];
         setAllUsers(otherUsers);
         setConversations(Array.isArray(conversationsData) ? conversationsData : []);
+        setFollowerIds(new Set(Array.isArray(followersData) ? followersData.map((f: any) => f.followerId) : []));
+        setFollowingIds(new Set(Array.isArray(followingData) ? followingData.map((f: any) => f.followingId) : []));
         
         if (privateUserId) {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
@@ -222,18 +228,23 @@ export default function Chat() {
   const hasActiveChat = selectedGroup || selectedPrivateUser;
   const currentMessages = selectedGroup ? groupMessages : privateMessages;
 
-  // Combine conversations with other users, prioritizing conversations with messages
+  const getRelationship = (userId: string): "mutual" | "following" | "follower" | "none" => {
+    const iFollow = followingIds.has(userId);
+    const followsMe = followerIds.has(userId);
+    if (iFollow && followsMe) return "mutual";
+    if (iFollow) return "following";
+    if (followsMe) return "follower";
+    return "none";
+  };
+
   const sortedContacts = (() => {
     const searchLower = searchQuery.toLowerCase();
     
-    // First, get users from conversations (those who have messaged you or you've messaged)
     const conversationUserIds = new Set(conversations.map(c => c.user.id));
     
-    // Sort conversations by last message time (most recent first)
     const sortedConversations = [...conversations]
       .sort((a, b) => new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime());
     
-    // Users with active conversations go first
     const conversationUsers = sortedConversations
       .map(c => c.user)
       .filter(u => 
@@ -241,15 +252,29 @@ export default function Chat() {
         u.username.toLowerCase().includes(searchLower)
       );
     
-    // Then add other users without conversations
+    const connectedUsers = allUsers
+      .filter(u => !conversationUserIds.has(u.id))
+      .filter(u => followingIds.has(u.id) || followerIds.has(u.id))
+      .filter(u => 
+        u.name.toLowerCase().includes(searchLower) ||
+        u.username.toLowerCase().includes(searchLower)
+      )
+      .sort((a, b) => {
+        const relA = getRelationship(a.id);
+        const relB = getRelationship(b.id);
+        const order = { mutual: 0, following: 1, follower: 2, none: 3 };
+        return order[relA] - order[relB];
+      });
+    
     const otherUsers = allUsers
       .filter(u => !conversationUserIds.has(u.id))
+      .filter(u => !followingIds.has(u.id) && !followerIds.has(u.id))
       .filter(u => 
         u.name.toLowerCase().includes(searchLower) ||
         u.username.toLowerCase().includes(searchLower)
       );
     
-    return [...conversationUsers, ...otherUsers];
+    return [...conversationUsers, ...connectedUsers, ...otherUsers];
   })();
 
   if (authLoading || loading) {
@@ -271,7 +296,7 @@ export default function Chat() {
             <div className="w-12 h-12 mx-auto bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
-            <p className="text-[10px] text-slate-500 text-center mt-1">My Groups</p>
+            <p className="text-[10px] text-slate-500 text-center mt-1">Gruppi</p>
           </div>
           
           <div className="flex-1 overflow-y-auto py-3 space-y-2">
@@ -290,8 +315,13 @@ export default function Chat() {
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg`}>
                   {group.name[0]}
                 </div>
+                {group.members > 1 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {group.members > 99 ? "99+" : group.members}
+                  </span>
+                )}
                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                  {group.name}
+                  {group.name} ({group.city})
                 </div>
               </button>
             ))}
@@ -305,7 +335,7 @@ export default function Chat() {
             >
               <Plus className="w-5 h-5" />
             </button>
-            <p className="text-[10px] text-slate-500 text-center mt-1">New</p>
+            <p className="text-[10px] text-slate-500 text-center mt-1">Nuovo</p>
           </div>
         </aside>
 
@@ -315,7 +345,7 @@ export default function Chat() {
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-violet-400" />
-                Messages
+                Messaggi
               </h1>
               <button
                 onClick={() => setShowNewContact(true)}
@@ -331,7 +361,7 @@ export default function Chat() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
-                placeholder="Search contacts..."
+                placeholder="Cerca contatti..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
@@ -351,6 +381,7 @@ export default function Chat() {
                 const conversation = conversations.find(c => c.user.id === u.id);
                 const unreadCount = conversation?.unreadCount || 0;
                 const lastMessage = conversation?.lastMessage;
+                const rel = getRelationship(u.id);
                 
                 return (
                   <button
@@ -377,7 +408,18 @@ export default function Chat() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className={`font-semibold text-sm truncate ${unreadCount > 0 ? 'text-white' : 'text-slate-300'}`}>{u.name}</p>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <p className={`font-semibold text-sm truncate ${unreadCount > 0 ? 'text-white' : 'text-slate-300'}`}>{u.name}</p>
+                          {rel === "mutual" && (
+                            <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full">amici</span>
+                          )}
+                          {rel === "following" && (
+                            <span className="shrink-0 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[9px] font-bold rounded-full">segui</span>
+                          )}
+                          {rel === "follower" && (
+                            <span className="shrink-0 px-1.5 py-0.5 bg-violet-500/20 text-violet-400 text-[9px] font-bold rounded-full">ti segue</span>
+                          )}
+                        </div>
                         {lastMessage && (
                           <span className="text-[10px] text-slate-500">
                             {new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -433,7 +475,7 @@ export default function Chat() {
                     </div>
                     <div className="flex-1">
                       <h2 className="font-bold text-white">{selectedGroup.name}</h2>
-                      <p className="text-xs text-slate-400">{selectedGroup.members} members - {selectedGroup.city}</p>
+                      <p className="text-xs text-slate-400">{selectedGroup.members} membri - {selectedGroup.city}</p>
                     </div>
                   </>
                 ) : null}
@@ -464,7 +506,7 @@ export default function Chat() {
                           </div>
                         )}
                         <h3 className="font-bold text-white text-lg">{selectedPrivateUser.name}</h3>
-                        <p className="text-slate-500 text-sm mt-1">Start a conversation!</p>
+                        <p className="text-slate-500 text-sm mt-1">Inizia una conversazione!</p>
                       </>
                     ) : selectedGroup ? (
                       <>
@@ -472,7 +514,7 @@ export default function Chat() {
                           {selectedGroup.name[0]}
                         </div>
                         <h3 className="font-bold text-white text-lg">{selectedGroup.name}</h3>
-                        <p className="text-slate-500 text-sm mt-1">Be the first to say hello!</p>
+                        <p className="text-slate-500 text-sm mt-1">Sii il primo a salutare!</p>
                       </>
                     ) : null}
                   </div>
@@ -542,7 +584,7 @@ export default function Chat() {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
+                  placeholder="Scrivi un messaggio..."
                   className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
                   data-testid="input-message"
                 />
@@ -561,8 +603,8 @@ export default function Chat() {
               <div className="w-24 h-24 rounded-3xl bg-slate-800 flex items-center justify-center mb-4">
                 <Send className="w-12 h-12 text-slate-600" />
               </div>
-              <h2 className="text-xl font-bold text-white">Select a conversation</h2>
-              <p className="text-slate-500 mt-2">Choose a contact or group to start chatting</p>
+              <h2 className="text-xl font-bold text-white">Seleziona una conversazione</h2>
+              <p className="text-slate-500 mt-2">Scegli un contatto o un gruppo per iniziare a chattare</p>
             </div>
           )}
         </main>
@@ -698,7 +740,7 @@ function CreateGroupModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Create New Group</h2>
+          <h2 className="text-xl font-bold text-white">Crea Nuovo Gruppo</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors"
@@ -709,12 +751,12 @@ function CreateGroupModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Group Name *</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Nome Gruppo *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Bali Digital Nomads"
+              placeholder="es. Nomadi Digitali Bali"
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
               data-testid="input-group-name"
               required
@@ -722,12 +764,12 @@ function CreateGroupModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">City *</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Città *</label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="e.g., Bali"
+              placeholder="es. Bali"
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
               data-testid="input-group-city"
               required
@@ -735,11 +777,11 @@ function CreateGroupModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Description</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">Descrizione</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What's this group about?"
+              placeholder="Di cosa parla questo gruppo?"
               rows={3}
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none resize-none"
               data-testid="input-group-description"
@@ -753,7 +795,7 @@ function CreateGroupModal({
               onClick={onClose}
               className="flex-1 border-slate-700 text-slate-400 hover:text-white"
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               type="submit"
@@ -761,7 +803,7 @@ function CreateGroupModal({
               className="flex-1 bg-violet-500 hover:bg-violet-600 text-white"
               data-testid="button-create-group-submit"
             >
-              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Group"}
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crea Gruppo"}
             </Button>
           </div>
         </form>
