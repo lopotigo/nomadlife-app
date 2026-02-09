@@ -49,6 +49,6 @@ integrations = ["javascript_object_storage:2.0.0", "github:1.0.0"]
 [userenv]
 
 [userenv.shared]
-VAPID_PUBLIC_KEY = "BL5px5vIPb0AyQJ6IriSdQwffRjCMXbZK0cs--xs8VPY1-iFKyj3Y0lKT55PLPN_vjD2c8Uflx-S1vj5xEQO1lk"
-VAPID_PRIVATE_KEY = "v8yVQIufRKS92gytA2BJCk5iLTqaBhwA_QLJHw4Rx7c"
+VAPID_PUBLIC_KEY = "BAu1UowOm6ix-AbcXKoewxxzGf7adudea0r600KR8MJcAtBrAyjvtjqWQHRtzeTZsKbvXskBe4QtmsnjHLKKKtw"
+VAPID_PRIVATE_KEY = "w2ncBeSnm3_Cl5eRz8g462Wt6Sn_ySlvM2WKMA279nU"
 VAPID_SUBJECT = "mailto:nomadlife@replit.app"

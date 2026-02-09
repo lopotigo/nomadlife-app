@@ -19,6 +19,44 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   );
 }
 
+async function sendPushToUser(userId: string, title: string, body: string, url?: string) {
+  try {
+    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
+    
+    const subscriptions = await storage.getPushSubscriptionsByUser(userId);
+    if (subscriptions.length === 0) return;
+
+    const payload = JSON.stringify({
+      title,
+      body,
+      icon: "/icons/icon-192x192.png",
+      badge: "/icons/icon-72x72.png",
+      data: { url: url || "/" },
+    });
+
+    const results = await Promise.allSettled(
+      subscriptions.map(sub =>
+        webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth },
+          },
+          payload
+        )
+      )
+    );
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      if (result.status === "rejected" && (result.reason as any)?.statusCode === 410) {
+        await storage.deletePushSubscription(userId, subscriptions[i].endpoint);
+      }
+    }
+  } catch (err) {
+    console.error("Push notification error:", err);
+  }
+}
+
 // Configure Passport Local Strategy
 passport.use(
   new LocalStrategy(async (username, password, done) => {
@@ -550,6 +588,12 @@ export async function registerRoutes(
         senderId: (req.user as User).id,
       });
       const message = await storage.createMessage(data);
+      
+      if (data.receiverId && data.receiverId !== (req.user as User).id) {
+        const senderName = (req.user as User).name || (req.user as User).username;
+        sendPushToUser(data.receiverId, "NomadLife", `${senderName}: ${data.content?.substring(0, 100) || "Nuovo messaggio"}`, `/chat`);
+      }
+      
       res.status(201).send(message);
     } catch (error: any) {
       res.status(400).send({ error: error.message });
@@ -924,6 +968,7 @@ export async function registerRoutes(
           relatedUserId: (req.user as User).id,
           relatedTripId: trip.id,
         });
+        sendPushToUser(f.followerId, "NomadLife", `${(req.user as User).name} ha iniziato un nuovo viaggio: "${trip.title}"`, `/trip/${trip.id}`);
       }
       
       res.status(201).send(trip);
@@ -972,6 +1017,7 @@ export async function registerRoutes(
               message: `${currentUser.name || currentUser.username} ha iniziato il viaggio "${trip.title}"`,
               relatedTripId: trip.id,
             });
+            sendPushToUser(followerId, "NomadLife", `${currentUser.name || currentUser.username} ha iniziato il viaggio "${trip.title}"`, `/trip/${trip.id}`);
           }
         } catch (notifError) {
           console.error("Error sending trip start notifications:", notifError);
@@ -1123,6 +1169,7 @@ export async function registerRoutes(
             relatedUserId: (req.user as User).id,
             relatedTripId: trip.id,
           });
+          sendPushToUser(f.followerId, "NomadLife", `${(req.user as User).name} ha aggiunto una nuova tappa: ${stop.city}, ${stop.country}`, `/trip/${trip.id}`);
         }
       }
       
@@ -1413,6 +1460,7 @@ export async function registerRoutes(
         message: `${(req.user as User).name} ha iniziato a seguirti`,
         relatedUserId: currentUserId,
       });
+      sendPushToUser(targetUserId, "NomadLife", `${(req.user as User).name} ha iniziato a seguirti`, `/profile/${currentUserId}`);
       
       res.status(201).send(follower);
     } catch (error: any) {
