@@ -6,6 +6,7 @@ import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertic
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/lib/i18n";
 import type { ChatGroup, Message, User } from "@shared/schema";
 
 type MessageWithSender = Message & { sender: User };
@@ -22,6 +23,7 @@ const GROUP_COLORS = [
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { t } = useI18n();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
@@ -216,11 +218,11 @@ export default function Chat() {
         setSelectedGroup(newGroup);
         setSelectedPrivateUser(null);
         setShowCreateGroup(false);
-        toast({ title: "Group created!", description: `${name} is ready to use` });
+        toast({ title: t("chat.group_created"), description: name });
       }
     } catch (error) {
       console.error("Failed to create group:", error);
-      toast({ title: "Error", description: "Failed to create group", variant: "destructive" });
+      toast({ title: t("chat.group_create_failed"), variant: "destructive" });
     }
   };
 
@@ -296,7 +298,7 @@ export default function Chat() {
             <div className="w-12 h-12 mx-auto bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
-            <p className="text-[10px] text-slate-500 text-center mt-1">Gruppi</p>
+            <p className="text-[10px] text-slate-500 text-center mt-1">{t("chat.groups")}</p>
           </div>
           
           <div className="flex-1 overflow-y-auto py-3 space-y-2">
@@ -335,7 +337,7 @@ export default function Chat() {
             >
               <Plus className="w-5 h-5" />
             </button>
-            <p className="text-[10px] text-slate-500 text-center mt-1">Nuovo</p>
+            <p className="text-[10px] text-slate-500 text-center mt-1">{t("chat.new")}</p>
           </div>
         </aside>
 
@@ -345,13 +347,13 @@ export default function Chat() {
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-violet-400" />
-                Messaggi
+                {t("chat.title")}
               </h1>
               <button
                 onClick={() => setShowNewContact(true)}
                 className="w-8 h-8 bg-violet-500 hover:bg-violet-600 rounded-lg flex items-center justify-center text-white transition-colors"
                 data-testid="button-new-contact"
-                title="Nuovo Contatto"
+                title={t("chat.new_contact")}
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -361,7 +363,7 @@ export default function Chat() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 type="text"
-                placeholder="Cerca contatti..."
+                placeholder={t("chat.search_contacts")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
@@ -374,7 +376,7 @@ export default function Chat() {
             {sortedContacts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <Send className="w-10 h-10 text-slate-600 mb-4" />
-                <p className="text-slate-400 font-medium">No contacts found</p>
+                <p className="text-slate-400 font-medium">{t("chat.no_contacts")}</p>
               </div>
             ) : (
               sortedContacts.map(u => {
@@ -411,13 +413,13 @@ export default function Chat() {
                         <div className="flex items-center gap-1.5 min-w-0">
                           <p className={`font-semibold text-sm truncate ${unreadCount > 0 ? 'text-white' : 'text-slate-300'}`}>{u.name}</p>
                           {rel === "mutual" && (
-                            <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full">amici</span>
+                            <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full">{t("chat.badge_mutual")}</span>
                           )}
                           {rel === "following" && (
-                            <span className="shrink-0 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[9px] font-bold rounded-full">segui</span>
+                            <span className="shrink-0 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[9px] font-bold rounded-full">{t("chat.badge_following")}</span>
                           )}
                           {rel === "follower" && (
-                            <span className="shrink-0 px-1.5 py-0.5 bg-violet-500/20 text-violet-400 text-[9px] font-bold rounded-full">ti segue</span>
+                            <span className="shrink-0 px-1.5 py-0.5 bg-violet-500/20 text-violet-400 text-[9px] font-bold rounded-full">{t("chat.badge_follower")}</span>
                           )}
                         </div>
                         {lastMessage && (
@@ -428,7 +430,7 @@ export default function Chat() {
                       </div>
                       {lastMessage ? (
                         <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-slate-300 font-medium' : 'text-slate-500'}`}>
-                          {lastMessage.senderId === user?.id ? "Tu: " : ""}{lastMessage.content}
+                          {lastMessage.senderId === user?.id ? t("chat.you_prefix") : ""}{lastMessage.content}
                         </p>
                       ) : (
                         <p className="text-xs text-slate-500 truncate">@{u.username}</p>
@@ -475,7 +477,7 @@ export default function Chat() {
                     </div>
                     <div className="flex-1">
                       <h2 className="font-bold text-white">{selectedGroup.name}</h2>
-                      <p className="text-xs text-slate-400">{selectedGroup.members} membri - {selectedGroup.city}</p>
+                      <p className="text-xs text-slate-400">{selectedGroup.members} {t("chat.members")} - {selectedGroup.city}</p>
                     </div>
                   </>
                 ) : null}
@@ -506,7 +508,7 @@ export default function Chat() {
                           </div>
                         )}
                         <h3 className="font-bold text-white text-lg">{selectedPrivateUser.name}</h3>
-                        <p className="text-slate-500 text-sm mt-1">Inizia una conversazione!</p>
+                        <p className="text-slate-500 text-sm mt-1">{t("chat.start_conversation")}</p>
                       </>
                     ) : selectedGroup ? (
                       <>
@@ -514,7 +516,7 @@ export default function Chat() {
                           {selectedGroup.name[0]}
                         </div>
                         <h3 className="font-bold text-white text-lg">{selectedGroup.name}</h3>
-                        <p className="text-slate-500 text-sm mt-1">Sii il primo a salutare!</p>
+                        <p className="text-slate-500 text-sm mt-1">{t("chat.be_first")}</p>
                       </>
                     ) : null}
                   </div>
@@ -584,7 +586,7 @@ export default function Chat() {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Scrivi un messaggio..."
+                  placeholder={t("chat.write_message")}
                   className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
                   data-testid="input-message"
                 />
@@ -603,8 +605,8 @@ export default function Chat() {
               <div className="w-24 h-24 rounded-3xl bg-slate-800 flex items-center justify-center mb-4">
                 <Send className="w-12 h-12 text-slate-600" />
               </div>
-              <h2 className="text-xl font-bold text-white">Seleziona una conversazione</h2>
-              <p className="text-slate-500 mt-2">Scegli un contatto o un gruppo per iniziare a chattare</p>
+              <h2 className="text-xl font-bold text-white">{t("chat.select_conversation")}</h2>
+              <p className="text-slate-500 mt-2">{t("chat.select_conversation_desc")}</p>
             </div>
           )}
         </main>
@@ -629,7 +631,7 @@ export default function Chat() {
               <div className="p-4 border-b border-slate-700 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Users className="w-5 h-5 text-violet-400" />
-                  Nuovo Contatto
+                  {t("chat.new_contact")}
                 </h2>
                 <button
                   onClick={() => { setShowNewContact(false); setNewContactSearch(""); }}
@@ -645,7 +647,7 @@ export default function Chat() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
                     type="text"
-                    placeholder="Cerca utenti per nome..."
+                    placeholder={t("chat.search_users")}
                     value={newContactSearch}
                     onChange={(e) => setNewContactSearch(e.target.value)}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
@@ -691,7 +693,7 @@ export default function Chat() {
                   ).length === 0 && (
                     <div className="text-center py-8 text-slate-500">
                       <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                      <p>Nessun utente trovato</p>
+                      <p>{t("chat.no_users_found")}</p>
                     </div>
                   )}
                 </div>
@@ -711,6 +713,7 @@ function CreateGroupModal({
   onClose: () => void;
   onCreate: (name: string, city: string, description: string) => void;
 }) {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [description, setDescription] = useState("");
@@ -740,7 +743,7 @@ function CreateGroupModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Crea Nuovo Gruppo</h2>
+          <h2 className="text-xl font-bold text-white">{t("chat.create_group")}</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors"
@@ -751,12 +754,12 @@ function CreateGroupModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Nome Gruppo *</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">{t("chat.group_name")} *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="es. Nomadi Digitali Bali"
+              placeholder={t("chat.group_name_placeholder")}
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
               data-testid="input-group-name"
               required
@@ -764,12 +767,12 @@ function CreateGroupModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Città *</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">{t("chat.city")} *</label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="es. Bali"
+              placeholder={t("chat.city_placeholder")}
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
               data-testid="input-group-city"
               required
@@ -777,11 +780,11 @@ function CreateGroupModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Descrizione</label>
+            <label className="block text-sm font-medium text-slate-400 mb-2">{t("chat.description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Di cosa parla questo gruppo?"
+              placeholder={t("chat.description_placeholder")}
               rows={3}
               className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none resize-none"
               data-testid="input-group-description"
@@ -795,7 +798,7 @@ function CreateGroupModal({
               onClick={onClose}
               className="flex-1 border-slate-700 text-slate-400 hover:text-white"
             >
-              Annulla
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -803,7 +806,7 @@ function CreateGroupModal({
               className="flex-1 bg-violet-500 hover:bg-violet-600 text-white"
               data-testid="button-create-group-submit"
             >
-              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crea Gruppo"}
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : t("chat.create_group_btn")}
             </Button>
           </div>
         </form>

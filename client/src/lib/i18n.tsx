@@ -124,6 +124,8 @@ const translations: Record<Language, Translations> = {
     "chat.description_placeholder": "Di cosa parla questo gruppo?",
     "chat.create_group_btn": "Crea Gruppo",
     "chat.message_to": "Messaggio a",
+    "chat.group_created": "Gruppo creato!",
+    "chat.group_create_failed": "Impossibile creare il gruppo",
   },
   
   en: {
@@ -243,6 +245,8 @@ const translations: Record<Language, Translations> = {
     "chat.description_placeholder": "What's this group about?",
     "chat.create_group_btn": "Create Group",
     "chat.message_to": "Message to",
+    "chat.group_created": "Group created!",
+    "chat.group_create_failed": "Failed to create group",
   },
   
   es: {
@@ -362,6 +366,8 @@ const translations: Record<Language, Translations> = {
     "chat.description_placeholder": "¿De qué trata este grupo?",
     "chat.create_group_btn": "Crear Grupo",
     "chat.message_to": "Mensaje a",
+    "chat.group_created": "¡Grupo creado!",
+    "chat.group_create_failed": "No se pudo crear el grupo",
   }
 };
 
