@@ -163,8 +163,17 @@ Preferred communication style: Simple, everyday language.
 - **Icons**: 8 sizes (72x72 to 512x512) in `client/public/icons/`
 - **Installation**: Users can install NomadLife from the browser menu ("Add to Home Screen" on mobile, "Install app" on desktop)
 
+### Push Notifications
+- **VAPID Keys**: Configured as environment variables (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
+- **Service Worker**: `client/public/sw.js` handles push events, shows native notifications, handles click-to-navigate
+- **Frontend Hook**: `client/src/hooks/use-push-notifications.ts` manages subscribe/unsubscribe flow
+- **Backend Helper**: `sendPushToUser()` in `server/routes.ts` sends push to all user's devices, auto-cleans expired subscriptions (410)
+- **Push Triggers**: New follower, new trip, trip started, new stop added, new private message
+- **Subscribe/Unsubscribe**: Toggle in Profile page, endpoints at `/api/push/subscribe` and `/api/push/unsubscribe`
+
 ## External Dependencies
 
 - **Database**: PostgreSQL (via `DATABASE_URL`)
 - **UI Components**: Radix UI primitives, shadcn/ui, Lucide React for icons
 - **Authentication/Session**: `express-session`, `passport`, `passport-local`, `bcryptjs`
+- **Push Notifications**: `web-push` library with VAPID authentication
