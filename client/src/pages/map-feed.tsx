@@ -113,14 +113,14 @@ export default function MapFeed() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950">
+      <div className="flex items-center justify-center h-screen bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-teal-500" data-testid="loader-main" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-slate-950 text-white overflow-hidden">
+    <div className="h-screen bg-background text-foreground overflow-hidden">
       <style>{`
         .custom-post-marker { background: transparent; border: none; }
         .post-marker {
@@ -141,7 +141,7 @@ export default function MapFeed() {
         .leaflet-popup-close-button { color: white !important; }
       `}</style>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-[1001] bg-slate-900 border-t border-slate-800 flex justify-around py-2 md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-[1001] bg-background border-t border-border flex justify-around py-2 md:hidden">
         {[
           { icon: Home, label: "Feed", path: "/" },
           { icon: Compass, label: "Explore", path: "/explore" },
@@ -150,7 +150,7 @@ export default function MapFeed() {
           { icon: User, label: "Profile", path: "/profile" },
         ].map((item) => (
           <Link key={item.path} href={item.path}>
-            <div className="flex flex-col items-center gap-1 px-3 py-1 text-slate-400 hover:text-teal-400 transition-colors" data-testid={`mobile-nav-${item.label.toLowerCase()}`}>
+            <div className="flex flex-col items-center gap-1 px-3 py-1 text-muted-foreground hover:text-teal-400 transition-colors" data-testid={`mobile-nav-${item.label.toLowerCase()}`}>
               <item.icon className="w-5 h-5" />
               <span className="text-xs">{item.label}</span>
             </div>
@@ -159,7 +159,7 @@ export default function MapFeed() {
       </nav>
 
       <div className="flex h-full pb-16 md:pb-0">
-        <aside className="hidden md:flex w-20 lg:w-64 bg-slate-900 border-r border-slate-800 flex-col p-4 shrink-0">
+        <aside className="hidden md:flex w-20 lg:w-64 bg-background border-r border-border flex-col p-4 shrink-0">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center">
               <span className="text-xl">🌍</span>
@@ -179,7 +179,7 @@ export default function MapFeed() {
               <Link key={item.path} href={item.path}>
                 <div
                   className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors cursor-pointer ${
-                    item.active ? "bg-teal-500/20 text-teal-400" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    item.active ? "bg-teal-500/20 text-teal-400" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                   data-testid={`nav-${item.label.toLowerCase()}`}
                 >
@@ -190,9 +190,9 @@ export default function MapFeed() {
             ))}
           </nav>
 
-          <div className="mt-auto pt-4 border-t border-slate-800">
+          <div className="mt-auto pt-4 border-t border-border">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-700 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-accent overflow-hidden">
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
@@ -203,12 +203,12 @@ export default function MapFeed() {
               </div>
               <div className="hidden lg:block flex-1 min-w-0">
                 <p className="font-medium truncate">{user?.name}</p>
-                <p className="text-xs text-slate-500 truncate">@{user?.username}</p>
+                <p className="text-xs text-muted-foreground truncate">@{user?.username}</p>
               </div>
             </div>
             <button
               onClick={logout}
-              className="hidden lg:block mt-3 w-full text-sm text-slate-500 hover:text-white transition-colors"
+              className="hidden lg:block mt-3 w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
               data-testid="button-logout"
             >
               Log out
@@ -252,14 +252,14 @@ export default function MapFeed() {
               <Plus className="w-5 h-5" />
             </button>
 
-            <div className="absolute top-4 left-4 z-[1000] bg-slate-900/90 backdrop-blur-sm rounded-xl px-3 py-1.5 border border-slate-700">
-              <p className="text-xs text-slate-300">
+            <div className="absolute top-4 left-4 z-[1000] bg-background/90 backdrop-blur-sm rounded-xl px-3 py-1.5 border border-border">
+              <p className="text-xs text-foreground">
                 <span className="text-teal-400 font-bold">{postsWithCoords.length}</span> posts on map
               </p>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-slate-950 p-4">
+          <div className="flex-1 overflow-y-auto bg-background p-4">
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
               <span>📍</span> Latest Posts
             </h2>
@@ -268,7 +268,7 @@ export default function MapFeed() {
                 <div
                   key={post.id}
                   onClick={() => setSelectedPost(post)}
-                  className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer"
+                  className="bg-background rounded-2xl overflow-hidden border border-border hover:border-accent transition-colors cursor-pointer"
                   data-testid={`feed-post-${post.id}`}
                 >
                   {post.imageUrl && (
@@ -276,7 +276,7 @@ export default function MapFeed() {
                   )}
                   <div className="p-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-slate-700 overflow-hidden">
+                      <div className="w-8 h-8 rounded-full bg-accent overflow-hidden">
                         {post.user.avatar ? (
                           <img src={post.user.avatar} alt={post.user.name} className="w-full h-full object-cover" />
                         ) : (
@@ -288,14 +288,14 @@ export default function MapFeed() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">{post.user.name}</p>
                         {post.location && (
-                          <p className="text-xs text-slate-500 flex items-center gap-1">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
                             <MapPin className="w-3 h-3" /> {post.location}
                           </p>
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-slate-300 line-clamp-2">{post.content}</p>
-                    <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
+                    <p className="text-sm text-foreground line-clamp-2">{post.content}</p>
+                    <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Heart className="w-4 h-4" /> {post.likes}
                       </span>
@@ -327,7 +327,7 @@ export default function MapFeed() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-slate-900 rounded-2xl max-w-lg w-full overflow-hidden"
+              className="bg-background rounded-2xl max-w-lg w-full overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {selectedPost.imageUrl && (
@@ -335,7 +335,7 @@ export default function MapFeed() {
               )}
               <div className="p-4">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-700 overflow-hidden">
+                  <div className="w-10 h-10 rounded-full bg-accent overflow-hidden">
                     {selectedPost.user.avatar ? (
                       <img src={selectedPost.user.avatar} alt={selectedPost.user.name} className="w-full h-full object-cover" />
                     ) : (
@@ -346,23 +346,23 @@ export default function MapFeed() {
                   </div>
                   <div>
                     <p className="font-bold">{selectedPost.user.name}</p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       {selectedPost.location || "Unknown location"}
                     </p>
                   </div>
                 </div>
-                <p className="text-slate-300 mb-4">{selectedPost.content}</p>
+                <p className="text-foreground mb-4">{selectedPost.content}</p>
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => handleLike(selectedPost.id)}
-                    className="flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-red-500 transition-colors"
                     data-testid="button-like-detail"
                   >
                     <Heart className="w-5 h-5" />
                     <span>{selectedPost.likes}</span>
                   </button>
-                  <button className="flex items-center gap-2 text-slate-400 hover:text-teal-400 transition-colors">
+                  <button className="flex items-center gap-2 text-muted-foreground hover:text-teal-400 transition-colors">
                     <MessageCircle className="w-5 h-5" />
                     <span>{selectedPost.commentsCount}</span>
                   </button>
@@ -407,12 +407,12 @@ function ProfilesSidebar({ currentUserId }: { currentUserId: string }) {
   }, [currentUserId]);
 
   return (
-    <aside className="w-80 bg-slate-900 border-l border-slate-800 hidden xl:flex flex-col">
-      <div className="p-4 border-b border-slate-800">
+    <aside className="w-80 bg-background border-l border-border hidden xl:flex flex-col">
+      <div className="p-4 border-b border-border">
         <h2 className="text-lg font-bold flex items-center gap-2">
           <Users className="w-5 h-5 text-teal-400" /> Nearby Nomads
         </h2>
-        <p className="text-xs text-slate-500 mt-1">Connect with fellow travelers</p>
+        <p className="text-xs text-muted-foreground mt-1">Connect with fellow travelers</p>
       </div>
       
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
@@ -420,7 +420,7 @@ function ProfilesSidebar({ currentUserId }: { currentUserId: string }) {
           <div
             key={profile.id}
             onClick={() => setLocation(`/chat?user=${profile.id}`)}
-            className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 cursor-pointer transition-all hover:scale-[1.02]"
+            className="p-3 rounded-xl bg-muted/50 hover:bg-muted cursor-pointer transition-all hover:scale-[1.02]"
             data-testid={`profile-card-${profile.id}`}
           >
             <div className="flex items-start gap-3">
@@ -429,10 +429,10 @@ function ProfilesSidebar({ currentUserId }: { currentUserId: string }) {
                   <img
                     src={profile.avatar}
                     alt={profile.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-slate-700"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-border"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold border-2 border-slate-700">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold border-2 border-border">
                     {profile.name.charAt(0)}
                   </div>
                 )}
@@ -441,17 +441,17 @@ function ProfilesSidebar({ currentUserId }: { currentUserId: string }) {
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-sm truncate">{profile.name}</p>
                 </div>
-                <p className="text-xs text-slate-500">@{profile.username}</p>
+                <p className="text-xs text-muted-foreground">@{profile.username}</p>
                 {profile.location && (
-                  <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                     <MapPin className="w-3 h-3 text-teal-400" /> {profile.location}
                   </p>
                 )}
               </div>
             </div>
-            {profile.bio && <p className="text-xs text-slate-400 mt-2 line-clamp-2">{profile.bio}</p>}
+            {profile.bio && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{profile.bio}</p>}
             <div className="flex items-center justify-between mt-3">
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 <span className="text-teal-400 font-semibold">{profile.countriesVisited || 0}</span> countries
               </span>
               <span className="text-xs text-teal-400 flex items-center gap-1">
@@ -462,10 +462,10 @@ function ProfilesSidebar({ currentUserId }: { currentUserId: string }) {
         ))}
       </div>
 
-      <div className="p-3 border-t border-slate-800">
+      <div className="p-3 border-t border-border">
         <Button 
           variant="outline" 
-          className="w-full border-slate-700 text-slate-400 hover:text-white hover:border-teal-500"
+          className="w-full border-border text-muted-foreground hover:text-foreground hover:border-teal-500"
           onClick={() => setLocation("/chat")}
           data-testid="button-view-all-nomads"
         >
@@ -586,12 +586,12 @@ function CreatePostModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-slate-900 rounded-2xl max-w-md w-full p-6"
+        className="bg-background rounded-2xl max-w-md w-full p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">New Post</h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-white" data-testid="button-close-create">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" data-testid="button-close-create">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -600,7 +600,7 @@ function CreatePostModal({
           placeholder="Share your experience..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="bg-slate-800 border-slate-700 mb-4 min-h-[100px]"
+          className="bg-muted border-border mb-4 min-h-[100px]"
           data-testid="input-new-post-content"
         />
 
@@ -617,19 +617,19 @@ function CreatePostModal({
         )}
 
         {isUploading && (
-          <div className="mb-4 text-sm text-slate-400 flex items-center gap-2">
+          <div className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             Uploading... {progress}%
           </div>
         )}
 
         <div className="flex items-center gap-2 mb-4">
-          <MapPin className="w-4 h-4 text-slate-500" />
+          <MapPin className="w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Location name"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="flex-1 bg-slate-800 border-slate-700"
+            className="flex-1 bg-muted border-border"
             data-testid="input-new-post-location"
           />
           <Button
@@ -638,7 +638,7 @@ function CreatePostModal({
             size="sm"
             onClick={handleGetCurrentLocation}
             disabled={gettingLocation}
-            className="border-slate-700 text-slate-300"
+            className="border-border text-foreground"
           >
             {gettingLocation ? <Loader2 className="w-4 h-4 animate-spin" /> : "Auto"}
           </Button>
@@ -663,7 +663,7 @@ function CreatePostModal({
               className="hidden"
               disabled={isUploading}
             />
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-accent transition-colors">
               <Image className="w-4 h-4 text-teal-400" />
               <span className="text-sm">Photo</span>
             </div>

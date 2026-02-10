@@ -46,7 +46,7 @@ function RatingStars({ value, onChange, readonly = false }: { value: number; onC
           className={`${readonly ? "cursor-default" : "cursor-pointer hover:scale-110"} transition-transform`}
         >
           <Star
-            className={`w-4 h-4 ${star <= value ? "fill-yellow-400 text-yellow-400" : "text-slate-600"}`}
+            className={`w-4 h-4 ${star <= value ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
           />
         </button>
       ))}
@@ -58,11 +58,11 @@ function RatingBar({ label, icon: Icon, value, color }: { label: string; icon: a
   return (
     <div className="flex items-center gap-2">
       <Icon className={`w-4 h-4 ${color}`} />
-      <span className="text-xs text-slate-400 w-16">{label}</span>
-      <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+      <span className="text-xs text-muted-foreground w-16">{label}</span>
+      <div className="flex-1 h-2 bg-accent rounded-full overflow-hidden">
         <div className={`h-full ${color.replace("text-", "bg-")} rounded-full`} style={{ width: `${(value / 5) * 100}%` }} />
       </div>
-      <span className="text-xs font-bold text-white w-8">{value.toFixed(1)}</span>
+      <span className="text-xs font-bold text-foreground w-8">{value.toFixed(1)}</span>
     </div>
   );
 }
@@ -156,9 +156,9 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
   }
 
   return (
-    <div className="space-y-4 mt-4 pt-4 border-t border-slate-700">
+    <div className="space-y-4 mt-4 pt-4 border-t border-border">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
           <Star className="w-4 h-4 text-yellow-400" />
           Recensioni ({ratings?.count || 0})
         </h3>
@@ -167,7 +167,7 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
             size="sm"
             variant="outline"
             onClick={() => setShowForm(true)}
-            className="text-xs border-slate-600"
+            className="text-xs border-border"
             data-testid="button-add-review"
           >
             Aggiungi recensione
@@ -176,7 +176,7 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
       </div>
 
       {ratings && ratings.count > 0 && (
-        <div className="bg-slate-800 rounded-xl p-3 space-y-2">
+        <div className="bg-muted rounded-xl p-3 space-y-2">
           <RatingBar label="WiFi" icon={Wifi} value={ratings.wifi} color="text-blue-400" />
           <RatingBar label="Silenzio" icon={Volume2} value={ratings.noise} color="text-green-400" />
           <RatingBar label="Prezzo" icon={DollarSign} value={ratings.price} color="text-yellow-400" />
@@ -185,35 +185,35 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
       )}
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-slate-800 rounded-xl p-4 space-y-3">
+        <form onSubmit={handleSubmit} className="bg-muted rounded-xl p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-slate-400 flex items-center gap-1 mb-1">
+              <label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
                 <Wifi className="w-3 h-3" /> WiFi
               </label>
               <RatingStars value={formData.wifiRating} onChange={(v) => setFormData(p => ({ ...p, wifiRating: v }))} />
             </div>
             <div>
-              <label className="text-xs text-slate-400 flex items-center gap-1 mb-1">
+              <label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
                 <Volume2 className="w-3 h-3" /> Silenzio
               </label>
               <RatingStars value={formData.noiseRating} onChange={(v) => setFormData(p => ({ ...p, noiseRating: v }))} />
             </div>
             <div>
-              <label className="text-xs text-slate-400 flex items-center gap-1 mb-1">
+              <label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
                 <DollarSign className="w-3 h-3" /> Prezzo
               </label>
               <RatingStars value={formData.priceRating} onChange={(v) => setFormData(p => ({ ...p, priceRating: v }))} />
             </div>
             <div>
-              <label className="text-xs text-slate-400 flex items-center gap-1 mb-1">
+              <label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
                 <Sparkles className="w-3 h-3" /> Pulizia
               </label>
               <RatingStars value={formData.cleanRating} onChange={(v) => setFormData(p => ({ ...p, cleanRating: v }))} />
             </div>
           </div>
           <div>
-            <label className="text-xs text-slate-400 flex items-center gap-1 mb-1">
+            <label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
               <Star className="w-3 h-3" /> Valutazione complessiva
             </label>
             <RatingStars value={formData.overallRating} onChange={(v) => setFormData(p => ({ ...p, overallRating: v }))} />
@@ -222,12 +222,12 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
             placeholder="Scrivi un commento (opzionale)..."
             value={formData.comment}
             onChange={(e) => setFormData(p => ({ ...p, comment: e.target.value }))}
-            className="bg-slate-700 border-slate-600 text-white text-sm resize-none"
+            className="bg-accent border-border text-foreground text-sm resize-none"
             rows={2}
             data-testid="input-review-comment"
           />
           <div className="flex gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)} className="text-slate-400">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)} className="text-muted-foreground">
               Annulla
             </Button>
             <Button type="submit" size="sm" disabled={createMutation.isPending} className="bg-teal-500 hover:bg-teal-600" data-testid="button-submit-review">
@@ -240,7 +240,7 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
       {reviews && reviews.length > 0 && (
         <div className="space-y-3 max-h-48 overflow-y-auto">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-slate-800/50 rounded-xl p-3" data-testid={`review-${review.id}`}>
+            <div key={review.id} className="bg-muted/50 rounded-xl p-3" data-testid={`review-${review.id}`}>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <img
@@ -249,10 +249,10 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
                     alt=""
                   />
                   <div>
-                    <p className="text-sm font-medium text-white">{review.user.name}</p>
+                    <p className="text-sm font-medium text-foreground">{review.user.name}</p>
                     <div className="flex items-center gap-1">
                       <RatingStars value={review.overallRating} readonly />
-                      <span className="text-xs text-slate-500 ml-1">
+                      <span className="text-xs text-muted-foreground ml-1">
                         {new Date(review.createdAt).toLocaleDateString("it-IT")}
                       </span>
                     </div>
@@ -261,7 +261,7 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
                 {currentUserId === review.userId && (
                   <button
                     onClick={() => deleteMutation.mutate(review.id)}
-                    className="p-1 text-slate-500 hover:text-red-400"
+                    className="p-1 text-muted-foreground hover:text-red-400"
                     data-testid={`button-delete-review-${review.id}`}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -269,7 +269,7 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
                 )}
               </div>
               {review.comment && (
-                <p className="text-sm text-slate-400 mt-2">{review.comment}</p>
+                <p className="text-sm text-muted-foreground mt-2">{review.comment}</p>
               )}
             </div>
           ))}
@@ -277,7 +277,7 @@ export function PlaceReviews({ placeId, currentUserId }: PlaceReviewsProps) {
       )}
 
       {(!reviews || reviews.length === 0) && !showForm && (
-        <p className="text-sm text-slate-500 text-center py-2">Nessuna recensione ancora. Sii il primo!</p>
+        <p className="text-sm text-muted-foreground text-center py-2">Nessuna recensione ancora. Sii il primo!</p>
       )}
     </div>
   );

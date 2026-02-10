@@ -725,7 +725,7 @@ export default function UnifiedMap() {
   if (authLoading || loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-screen bg-slate-900">
+        <div className="flex items-center justify-center h-screen bg-background">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </Layout>
