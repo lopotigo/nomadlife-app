@@ -28,6 +28,7 @@ export default function Chat() {
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
   const privateUserId = urlParams.get("user");
+  const groupIdParam = urlParams.get("group");
 
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -99,11 +100,15 @@ export default function Chat() {
         setFollowerIds(new Set(Array.isArray(followersData) ? followersData.map((f: any) => f.followerId) : []));
         setFollowingIds(new Set(Array.isArray(followingData) ? followingData.map((f: any) => f.followingId) : []));
         
-        if (privateUserId) {
+        if (groupIdParam) {
+          const targetGroup = (Array.isArray(groupsData) ? groupsData : []).find((g: ChatGroup) => g.id === groupIdParam);
+          if (targetGroup) {
+            setSelectedGroup(targetGroup);
+          }
+        } else if (privateUserId) {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
           if (targetUser) {
             setSelectedPrivateUser(targetUser);
-            // Mark messages as read when opening from link
             fetch(`/api/messages/conversation/${targetUser.id}/read`, {
               method: "PATCH",
               credentials: "include"
@@ -113,7 +118,7 @@ export default function Chat() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user, authLoading, setLocation, privateUserId]);
+  }, [user, authLoading, setLocation, privateUserId, groupIdParam]);
 
   // Refresh conversations periodically
   useEffect(() => {

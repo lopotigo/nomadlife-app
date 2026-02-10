@@ -861,7 +861,7 @@ export default function UnifiedMap() {
                       <div className="flex gap-2 pt-2 border-t border-gray-200">
                         {isMember ? (
                           <>
-                            <Link href="/chat" className="flex-1">
+                            <Link href={`/chat?group=${group.id}`} className="flex-1">
                               <button
                                 className="w-full py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold rounded-lg transition-colors"
                                 data-testid={`button-goto-chat-${group.id}`}
