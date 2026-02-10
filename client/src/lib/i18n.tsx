@@ -126,6 +126,14 @@ const translations: Record<Language, Translations> = {
     "chat.message_to": "Messaggio a",
     "chat.group_created": "Gruppo creato!",
     "chat.group_create_failed": "Impossibile creare il gruppo",
+    "chat.groups_on_map": "Gruppi",
+    "chat.join_group": "Partecipa",
+    "chat.leave_group": "Esci dal gruppo",
+    "chat.open_group": "Aperto a tutti",
+    "chat.group_members_count": "membri",
+    "chat.go_to_chat": "Vai alla chat",
+    "chat.joined": "Iscritto",
+    "map.filter_groups": "Gruppi Chat",
   },
   
   en: {
@@ -247,6 +255,14 @@ const translations: Record<Language, Translations> = {
     "chat.message_to": "Message to",
     "chat.group_created": "Group created!",
     "chat.group_create_failed": "Failed to create group",
+    "chat.groups_on_map": "Groups",
+    "chat.join_group": "Join",
+    "chat.leave_group": "Leave group",
+    "chat.open_group": "Open to everyone",
+    "chat.group_members_count": "members",
+    "chat.go_to_chat": "Go to chat",
+    "chat.joined": "Joined",
+    "map.filter_groups": "Chat Groups",
   },
   
   es: {
@@ -368,6 +384,14 @@ const translations: Record<Language, Translations> = {
     "chat.message_to": "Mensaje a",
     "chat.group_created": "¡Grupo creado!",
     "chat.group_create_failed": "No se pudo crear el grupo",
+    "chat.groups_on_map": "Grupos",
+    "chat.join_group": "Unirse",
+    "chat.leave_group": "Salir del grupo",
+    "chat.open_group": "Abierto a todos",
+    "chat.group_members_count": "miembros",
+    "chat.go_to_chat": "Ir al chat",
+    "chat.joined": "Inscrito",
+    "map.filter_groups": "Grupos de Chat",
   }
 };
 

@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Post, User, Comment, Event } from "@shared/schema";
+import type { Post, User, Comment, Event, ChatGroup } from "@shared/schema";
+import { useI18n } from "@/lib/i18n";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -118,6 +119,21 @@ function createEventMarkerIcon(imageUrl: string | null, color: string = "#a855f7
   return L.divIcon({
     html,
     className: "custom-event-marker",
+    iconSize: [44, 44],
+    iconAnchor: [22, 44],
+    popupAnchor: [0, -44],
+  });
+}
+
+function createGroupMarkerIcon() {
+  return L.divIcon({
+    html: `<div style="position:relative;">
+      <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#06b6d4,#0891b2);border:3px solid white;box-shadow:0 4px 14px rgba(6,182,212,0.4);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58C.48 14.9 0 15.62 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85-.85-.37-1.79-.58-2.78-.58-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"/></svg>
+      </div>
+      <div style="position:absolute;bottom:-4px;right:-4px;background:#10b981;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+    </div>`,
+    className: "custom-group-marker",
     iconSize: [44, 44],
     iconAnchor: [22, 44],
     popupAnchor: [0, -44],
@@ -413,8 +429,11 @@ function PostMapPopup({
 export default function UnifiedMap() {
   const { user, loading: authLoading } = useAuth();
   const [location, setLocation] = useLocation();
+  const { t } = useI18n();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [chatGroups, setChatGroups] = useState<ChatGroup[]>([]);
+  const [joinedGroupIds, setJoinedGroupIds] = useState<Set<string>>(new Set());
   const [myTrips, setMyTrips] = useState<Trip[]>([]);
   const [followingTrips, setFollowingTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -438,6 +457,7 @@ export default function UnifiedMap() {
   const [filters, setFilters] = useState({
     showPosts: true,
     showEvents: true,
+    showGroups: true,
     showMyTrips: true,
     showFollowingTrips: true,
     maxBudget: 500,
@@ -478,9 +498,10 @@ export default function UnifiedMap() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [postsRes, eventsRes, myTripsRes, publicTripsRes] = await Promise.all([
+      const [postsRes, eventsRes, groupsRes, myTripsRes, publicTripsRes] = await Promise.all([
         fetch("/api/posts", { credentials: "include" }),
         fetch("/api/events", { credentials: "include" }),
+        fetch("/api/chat-groups", { credentials: "include" }),
         fetch("/api/my-trips", { credentials: "include" }),
         fetch("/api/trips", { credentials: "include" }),
       ]);
@@ -493,6 +514,24 @@ export default function UnifiedMap() {
       if (eventsRes.ok) {
         const eventsData = await eventsRes.json();
         setEvents(eventsData);
+      }
+
+      if (groupsRes.ok) {
+        const groupsData = await groupsRes.json();
+        setChatGroups(Array.isArray(groupsData) ? groupsData : []);
+        const memberChecks = await Promise.all(
+          (Array.isArray(groupsData) ? groupsData : []).map(async (g: ChatGroup) => {
+            try {
+              const res = await fetch(`/api/chat-groups/${g.id}/is-member`, { credentials: "include" });
+              if (res.ok) {
+                const data = await res.json();
+                return data.isMember ? g.id : null;
+              }
+            } catch {}
+            return null;
+          })
+        );
+        setJoinedGroupIds(new Set(memberChecks.filter(Boolean) as string[]));
       }
       
       if (myTripsRes.ok) {
@@ -557,6 +596,47 @@ export default function UnifiedMap() {
       return true;
     });
   }, [events, filters.showEvents, filters.maxBudget, filters.dateFrom, filters.dateTo]);
+
+  const groupsWithCoords = useMemo(() => {
+    if (!filters.showGroups) return [];
+    return chatGroups.filter(g => g.latitude && g.longitude);
+  }, [chatGroups, filters.showGroups]);
+
+  const handleJoinGroup = async (groupId: string) => {
+    try {
+      const res = await fetch(`/api/chat-groups/${groupId}/join`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setChatGroups(prev => prev.map(g => g.id === groupId ? updated : g));
+        setJoinedGroupIds(prev => new Set([...Array.from(prev), groupId]));
+      }
+    } catch (error) {
+      console.error("Failed to join group:", error);
+    }
+  };
+
+  const handleLeaveGroup = async (groupId: string) => {
+    try {
+      const res = await fetch(`/api/chat-groups/${groupId}/leave`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setChatGroups(prev => prev.map(g => g.id === groupId ? updated : g));
+        setJoinedGroupIds(prev => {
+          const next = new Set(prev);
+          next.delete(groupId);
+          return next;
+        });
+      }
+    } catch (error) {
+      console.error("Failed to leave group:", error);
+    }
+  };
 
   const tripsToShow = useMemo(() => {
     const result: (Trip & { isOwn: boolean; color: string })[] = [];
@@ -744,6 +824,74 @@ export default function UnifiedMap() {
                 </Popup>
               </Marker>
             ))}
+
+            {groupsWithCoords.map((group) => {
+              const isMember = joinedGroupIds.has(group.id);
+              return (
+                <Marker
+                  key={`group-${group.id}`}
+                  position={[parseFloat(group.latitude!), parseFloat(group.longitude!)]}
+                  icon={createGroupMarkerIcon()}
+                >
+                  <Popup className="custom-popup" maxWidth={300} minWidth={240} autoPanPadding={[20, 20]} autoPan={true}>
+                    <div className="p-3 w-[240px]" data-testid={`popup-group-${group.id}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm truncate">{group.name}</p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />{group.city}
+                          </p>
+                        </div>
+                      </div>
+                      {group.description && (
+                        <p className="text-xs text-gray-600 mb-2">{group.description.substring(0, 100)}{group.description.length > 100 ? "..." : ""}</p>
+                      )}
+                      <div className="flex items-center justify-between text-xs mb-2">
+                        <span className="flex items-center gap-1 text-cyan-600">
+                          <Users className="w-3 h-3" />
+                          {group.members} {t("chat.group_members_count")}
+                        </span>
+                        {group.isOpen && (
+                          <span className="text-emerald-600 font-medium">{t("chat.open_group")}</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2 pt-2 border-t border-gray-200">
+                        {isMember ? (
+                          <>
+                            <Link href="/chat" className="flex-1">
+                              <button
+                                className="w-full py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold rounded-lg transition-colors"
+                                data-testid={`button-goto-chat-${group.id}`}
+                              >
+                                {t("chat.go_to_chat")}
+                              </button>
+                            </Link>
+                            <button
+                              onClick={() => handleLeaveGroup(group.id)}
+                              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium rounded-lg transition-colors"
+                              data-testid={`button-leave-group-${group.id}`}
+                            >
+                              {t("chat.leave_group")}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => handleJoinGroup(group.id)}
+                            className="w-full py-1.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white text-xs font-bold rounded-lg transition-colors"
+                            data-testid={`button-join-group-${group.id}`}
+                          >
+                            {t("chat.join_group")}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
             
             {tripsToShow.map((trip) => {
               const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
@@ -972,6 +1120,18 @@ export default function UnifiedMap() {
                       checked={filters.showEvents}
                       onCheckedChange={(v) => setFilters(f => ({ ...f, showEvents: v }))}
                       data-testid="switch-events"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <MessageCircle className="w-4 h-4 text-cyan-400" />
+                      {t("map.filter_groups")}
+                    </label>
+                    <Switch
+                      checked={filters.showGroups}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showGroups: v }))}
+                      data-testid="switch-groups"
                     />
                   </div>
                   

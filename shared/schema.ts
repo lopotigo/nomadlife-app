@@ -157,6 +157,10 @@ export const chatGroups = pgTable("chat_groups", {
   city: text("city").notNull(),
   description: text("description"),
   members: integer("members").default(1).notNull(),
+  latitude: text("latitude"),
+  longitude: text("longitude"),
+  isOpen: boolean("is_open").default(true).notNull(),
+  createdById: varchar("created_by_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -167,6 +171,16 @@ export const insertChatGroupSchema = createInsertSchema(chatGroups).omit({
 });
 export type InsertChatGroup = z.infer<typeof insertChatGroupSchema>;
 export type ChatGroup = typeof chatGroups.$inferSelect;
+
+// Group Members table
+export const groupMembers = pgTable("group_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  groupId: varchar("group_id").notNull().references(() => chatGroups.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+});
+
+export type GroupMember = typeof groupMembers.$inferSelect;
 
 // Messages table
 export const messages = pgTable("messages", {

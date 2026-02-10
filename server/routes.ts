@@ -522,10 +522,83 @@ export async function registerRoutes(
   app.post("/api/chat-groups", requireAuth, async (req, res) => {
     try {
       const data = insertChatGroupSchema.parse(req.body);
-      const group = await storage.createChatGroup(data);
+      const userId = (req.user as User).id;
+
+      let latitude: string | undefined;
+      let longitude: string | undefined;
+      if (data.city) {
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(data.city)}&format=json&limit=1`,
+            { headers: { "User-Agent": "NomadLife/1.0" } }
+          );
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            if (geoData.length > 0) {
+              latitude = geoData[0].lat;
+              longitude = geoData[0].lon;
+            }
+          }
+        } catch (e) {
+          console.error("Geocoding failed for group:", e);
+        }
+      }
+
+      const group = await storage.createChatGroup({
+        ...data,
+        latitude: latitude || null,
+        longitude: longitude || null,
+        createdById: userId,
+      });
+
+      await storage.joinGroup(group.id, userId);
+
       res.status(201).send(group);
     } catch (error: any) {
       res.status(400).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/chat-groups/:id/join", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      const group = await storage.getChatGroup(req.params.id);
+      if (!group) return res.status(404).send({ error: "Group not found" });
+      await storage.joinGroup(group.id, userId);
+      const updated = await storage.getChatGroup(group.id);
+      res.send(updated);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/chat-groups/:id/leave", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      await storage.leaveGroup(req.params.id, userId);
+      const updated = await storage.getChatGroup(req.params.id);
+      res.send(updated);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/chat-groups/:id/members", async (req, res) => {
+    try {
+      const members = await storage.getGroupMembers(req.params.id);
+      res.send(members);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/chat-groups/:id/is-member", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      const isMember = await storage.isGroupMember(req.params.id, userId);
+      res.send({ isMember });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
     }
   });
 

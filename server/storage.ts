@@ -76,6 +76,10 @@ export interface IStorage {
   getChatGroups(): Promise<ChatGroup[]>;
   getChatGroup(id: string): Promise<ChatGroup | undefined>;
   createChatGroup(group: InsertChatGroup): Promise<ChatGroup>;
+  joinGroup(groupId: string, userId: string): Promise<void>;
+  leaveGroup(groupId: string, userId: string): Promise<void>;
+  isGroupMember(groupId: string, userId: string): Promise<boolean>;
+  getGroupMembers(groupId: string): Promise<string[]>;
 
   // Messages
   getGroupMessages(groupId: string, limit?: number): Promise<(Message & { sender: User })[]>;
@@ -409,6 +413,40 @@ export class DrizzleStorage implements IStorage {
   async createChatGroup(insertGroup: InsertChatGroup): Promise<ChatGroup> {
     const result = await this.db.insert(schema.chatGroups).values(insertGroup).returning();
     return result[0];
+  }
+
+  async joinGroup(groupId: string, userId: string): Promise<void> {
+    const existing = await this.db.select().from(schema.groupMembers)
+      .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, userId)));
+    if (existing.length > 0) return;
+    await this.db.insert(schema.groupMembers).values({ groupId, userId });
+    await this.db.update(schema.chatGroups)
+      .set({ members: sql`members + 1` })
+      .where(eq(schema.chatGroups.id, groupId));
+  }
+
+  async leaveGroup(groupId: string, userId: string): Promise<void> {
+    const result = await this.db.delete(schema.groupMembers)
+      .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, userId)))
+      .returning();
+    if (result.length > 0) {
+      await this.db.update(schema.chatGroups)
+        .set({ members: sql`GREATEST(members - 1, 0)` })
+        .where(eq(schema.chatGroups.id, groupId));
+    }
+  }
+
+  async isGroupMember(groupId: string, userId: string): Promise<boolean> {
+    const result = await this.db.select().from(schema.groupMembers)
+      .where(and(eq(schema.groupMembers.groupId, groupId), eq(schema.groupMembers.userId, userId)));
+    return result.length > 0;
+  }
+
+  async getGroupMembers(groupId: string): Promise<string[]> {
+    const result = await this.db.select({ userId: schema.groupMembers.userId })
+      .from(schema.groupMembers)
+      .where(eq(schema.groupMembers.groupId, groupId));
+    return result.map(r => r.userId);
   }
 
   // Messages
