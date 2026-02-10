@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
-import { useLocation, useSearch } from "wouter";
-import { Send, Search, Plus, Loader2, ArrowLeft, Users, Phone, Video, MoreVertical, MapPin, MessageCircle, X } from "lucide-react";
+import { useLocation, useSearch, Link } from "wouter";
+import { Send, Search, Plus, Loader2, ArrowLeft, Users, MapPin, MessageCircle, X, ChevronUp, Globe, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,99 @@ const GROUP_COLORS = [
   "from-orange-500 to-red-600",
   "from-pink-500 to-rose-600",
 ];
+
+const SENDER_NAME_COLORS = [
+  "text-cyan-400",
+  "text-amber-400",
+  "text-emerald-400",
+  "text-pink-400",
+  "text-violet-400",
+  "text-sky-400",
+  "text-rose-400",
+  "text-teal-400",
+  "text-orange-400",
+  "text-lime-400",
+];
+
+function getSenderColor(senderId: string): string {
+  let hash = 0;
+  for (let i = 0; i < senderId.length; i++) {
+    hash = senderId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return SENDER_NAME_COLORS[Math.abs(hash) % SENDER_NAME_COLORS.length];
+}
+
+function isOnlineSimulated(userId: string): boolean {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 3 === 0;
+}
+
+function getDateLabel(date: Date, t: (key: string) => string): string {
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return t("chat.today");
+  if (date.toDateString() === yesterday.toDateString()) return t("chat.yesterday");
+  return date.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+}
+
+function PresenceDot({ userId, size = "sm" }: { userId: string; size?: "sm" | "md" }) {
+  const online = isOnlineSimulated(userId);
+  const sizeClasses = size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5";
+  return (
+    <span
+      className={`absolute bottom-0 right-0 ${sizeClasses} rounded-full border-2 border-slate-900 ${
+        online ? "bg-emerald-400" : "bg-slate-500"
+      }`}
+      data-testid={`presence-${userId}`}
+    />
+  );
+}
+
+function AvatarWithPresence({ user: u, size = "md", showPresence = true }: { user: Pick<User, "id" | "avatar" | "name">; size?: "sm" | "md" | "lg"; showPresence?: boolean }) {
+  const sizeMap = { sm: "w-8 h-8 text-xs", md: "w-10 h-10 text-sm", lg: "w-14 h-14 text-lg" };
+  return (
+    <div className="relative flex-shrink-0">
+      {u.avatar ? (
+        <img src={u.avatar} alt={u.name} className={`${sizeMap[size]} rounded-full object-cover`} />
+      ) : (
+        <div className={`${sizeMap[size]} rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold`}>
+          {u.name?.charAt(0) || "?"}
+        </div>
+      )}
+      {showPresence && <PresenceDot userId={u.id} size={size === "lg" ? "md" : "sm"} />}
+    </div>
+  );
+}
+
+function StackedAvatars({ members, max = 4 }: { members: Partial<User>[]; max?: number }) {
+  const shown = members.slice(0, max);
+  const extra = members.length - max;
+  return (
+    <div className="flex items-center -space-x-2">
+      {shown.map((m, i) => (
+        <div key={m.id || i} className="relative" style={{ zIndex: max - i }}>
+          {m.avatar ? (
+            <img src={m.avatar} alt={m.name || ""} className="w-7 h-7 rounded-full object-cover border-2 border-slate-900" />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-900">
+              {m.name?.charAt(0) || "?"}
+            </div>
+          )}
+        </div>
+      ))}
+      {extra > 0 && (
+        <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 border-2 border-slate-900" style={{ zIndex: 0 }}>
+          +{extra}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
@@ -46,6 +139,9 @@ export default function Chat() {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showNewContact, setShowNewContact] = useState(false);
   const [newContactSearch, setNewContactSearch] = useState("");
+  const [showMembersPanel, setShowMembersPanel] = useState(false);
+  const [groupMembers, setGroupMembers] = useState<Partial<User>[]>([]);
+  const [visibleMessages, setVisibleMessages] = useState(30);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchConversations = () => {
@@ -58,13 +154,13 @@ export default function Chat() {
   const selectPrivateChat = async (u: User) => {
     setSelectedPrivateUser(u);
     setSelectedGroup(null);
-    // Mark messages from this user as read
+    setShowMembersPanel(false);
+    setVisibleMessages(30);
     try {
       await fetch(`/api/messages/conversation/${u.id}/read`, {
         method: "PATCH",
         credentials: "include"
       });
-      // Refresh conversations to update unread count
       fetchConversations();
     } catch (error) {
       console.error("Failed to mark messages as read:", error);
@@ -76,6 +172,18 @@ export default function Chat() {
       .then(res => res.json())
       .then(data => setGroups(Array.isArray(data) ? data : []))
       .catch(console.error);
+  };
+
+  const fetchGroupMembers = async (groupId: string) => {
+    try {
+      const res = await fetch(`/api/chat-groups/${groupId}/members`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setGroupMembers(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch group members:", error);
+    }
   };
 
   useEffect(() => {
@@ -104,6 +212,7 @@ export default function Chat() {
           const targetGroup = (Array.isArray(groupsData) ? groupsData : []).find((g: ChatGroup) => g.id === groupIdParam);
           if (targetGroup) {
             setSelectedGroup(targetGroup);
+            fetchGroupMembers(targetGroup.id);
           }
         } else if (privateUserId) {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
@@ -120,7 +229,6 @@ export default function Chat() {
       .finally(() => setLoading(false));
   }, [user, authLoading, setLocation, privateUserId, groupIdParam]);
 
-  // Refresh conversations periodically
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(fetchConversations, 5000);
@@ -130,32 +238,32 @@ export default function Chat() {
   useEffect(() => {
     if (!selectedGroup) return;
     
-    const fetchGroupMessages = () => {
+    fetchGroupMembers(selectedGroup.id);
+    
+    const fetchMessages = () => {
       fetch(`/api/messages/group/${selectedGroup.id}`, { credentials: "include" })
         .then(res => res.json())
         .then(data => setGroupMessages(Array.isArray(data) ? data : []))
         .catch(console.error);
     };
     
-    fetchGroupMessages();
-    const interval = setInterval(fetchGroupMessages, 3000); // Refresh every 3 seconds
-    
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [selectedGroup]);
 
   useEffect(() => {
     if (!selectedPrivateUser || !user) return;
     
-    const fetchPrivateMessages = () => {
+    const fetchMessages = () => {
       fetch(`/api/messages/private/${selectedPrivateUser.id}`, { credentials: "include" })
         .then(res => res.json())
         .then(data => setPrivateMessages(Array.isArray(data) ? data : []))
         .catch(console.error);
     };
     
-    fetchPrivateMessages();
-    const interval = setInterval(fetchPrivateMessages, 3000); // Refresh every 3 seconds
-    
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [selectedPrivateUser, user]);
 
@@ -244,9 +352,8 @@ export default function Chat() {
     return "none";
   };
 
-  const sortedContacts = (() => {
+  const sortedContacts = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
-    
     const conversationUserIds = new Set(conversations.map(c => c.user.id));
     
     const sortedConversations = [...conversations]
@@ -254,18 +361,12 @@ export default function Chat() {
     
     const conversationUsers = sortedConversations
       .map(c => c.user)
-      .filter(u => 
-        u.name.toLowerCase().includes(searchLower) ||
-        u.username.toLowerCase().includes(searchLower)
-      );
+      .filter(u => u.name.toLowerCase().includes(searchLower) || u.username.toLowerCase().includes(searchLower));
     
     const connectedUsers = allUsers
       .filter(u => !conversationUserIds.has(u.id))
       .filter(u => followingIds.has(u.id) || followerIds.has(u.id))
-      .filter(u => 
-        u.name.toLowerCase().includes(searchLower) ||
-        u.username.toLowerCase().includes(searchLower)
-      )
+      .filter(u => u.name.toLowerCase().includes(searchLower) || u.username.toLowerCase().includes(searchLower))
       .sort((a, b) => {
         const relA = getRelationship(a.id);
         const relB = getRelationship(b.id);
@@ -276,13 +377,55 @@ export default function Chat() {
     const otherUsers = allUsers
       .filter(u => !conversationUserIds.has(u.id))
       .filter(u => !followingIds.has(u.id) && !followerIds.has(u.id))
-      .filter(u => 
-        u.name.toLowerCase().includes(searchLower) ||
-        u.username.toLowerCase().includes(searchLower)
-      );
+      .filter(u => u.name.toLowerCase().includes(searchLower) || u.username.toLowerCase().includes(searchLower));
     
     return [...conversationUsers, ...connectedUsers, ...otherUsers];
-  })();
+  }, [searchQuery, conversations, allUsers, followingIds, followerIds]);
+
+  const groupedMessages = useMemo(() => {
+    const msgs = currentMessages;
+    const total = msgs.length;
+    const startIndex = Math.max(0, total - visibleMessages);
+    const visible = msgs.slice(startIndex);
+    const hasMore = startIndex > 0;
+
+    type GroupedItem = 
+      | { type: "date"; label: string }
+      | { type: "message"; msg: MessageWithSender; showAvatar: boolean; showName: boolean; isOwn: boolean; isLast: boolean };
+
+    const items: GroupedItem[] = [];
+    let lastDate = "";
+    let lastSenderId = "";
+
+    visible.forEach((msg, i) => {
+      const msgDate = new Date(msg.createdAt);
+      const dateLabel = getDateLabel(msgDate, t);
+      
+      if (dateLabel !== lastDate) {
+        items.push({ type: "date", label: dateLabel });
+        lastDate = dateLabel;
+        lastSenderId = "";
+      }
+
+      const isOwn = msg.senderId === user?.id;
+      const isSameSender = msg.senderId === lastSenderId;
+      const nextMsg = visible[i + 1];
+      const isLastInGroup = !nextMsg || nextMsg.senderId !== msg.senderId || getDateLabel(new Date(nextMsg.createdAt), t) !== dateLabel;
+
+      items.push({
+        type: "message",
+        msg,
+        showAvatar: !isSameSender,
+        showName: !isSameSender && !isOwn && !!selectedGroup,
+        isOwn,
+        isLast: isLastInGroup,
+      });
+
+      lastSenderId = msg.senderId;
+    });
+
+    return { items, hasMore };
+  }, [currentMessages, visibleMessages, user, selectedGroup, t]);
 
   if (authLoading || loading) {
     return (
@@ -310,7 +453,7 @@ export default function Chat() {
             {groups.map((group, index) => (
               <button
                 key={group.id}
-                onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); }}
+                onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); setShowMembersPanel(false); setVisibleMessages(30); }}
                 className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-all relative group ${
                   selectedGroup?.id === group.id 
                     ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-slate-950" 
@@ -399,20 +542,7 @@ export default function Chat() {
                     }`}
                     data-testid={`chat-private-${u.id}`}
                   >
-                    <div className="relative">
-                      {u.avatar ? (
-                        <img src={u.avatar} alt={u.name} className="w-12 h-12 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                          {u.name.charAt(0)}
-                        </div>
-                      )}
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                          {unreadCount > 9 ? "9+" : unreadCount}
-                        </span>
-                      )}
-                    </div>
+                    <AvatarWithPresence user={u} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 min-w-0">
@@ -433,6 +563,14 @@ export default function Chat() {
                           </span>
                         )}
                       </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {u.location && (
+                          <span className="flex items-center gap-0.5 text-[10px] text-teal-500">
+                            <MapPin className="w-2.5 h-2.5" />
+                            {u.location.split(",")[0]}
+                          </span>
+                        )}
+                      </div>
                       {lastMessage ? (
                         <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-slate-300 font-medium' : 'text-slate-500'}`}>
                           {lastMessage.senderId === user?.id ? t("chat.you_prefix") : ""}{lastMessage.content}
@@ -441,6 +579,11 @@ export default function Chat() {
                         <p className="text-xs text-slate-500 truncate">@{u.username}</p>
                       )}
                     </div>
+                    {unreadCount > 0 && (
+                      <span className="w-5 h-5 bg-violet-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                   </button>
                 );
               })
@@ -449,12 +592,17 @@ export default function Chat() {
         </aside>
 
         {/* Right Side - Chat Window */}
-        <main className={`${!hasActiveChat && isMobile ? 'hidden' : 'flex'} flex-1 flex-col bg-slate-950`}>
+        <main className={`${!hasActiveChat && isMobile ? 'hidden' : 'flex'} flex-1 flex-col bg-slate-950 relative`}>
           {hasActiveChat ? (
             <>
-              <header className="p-4 bg-slate-900 border-b border-slate-800 flex items-center gap-3">
+              {/* Chat Header */}
+              <header
+                className={`p-4 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 flex items-center gap-3 z-10 ${selectedGroup ? 'cursor-pointer hover:bg-slate-800/50 transition-colors' : ''}`}
+                onClick={() => { if (selectedGroup) setShowMembersPanel(!showMembersPanel); }}
+                data-testid="chat-header"
+              >
                 <button
-                  onClick={() => { setSelectedGroup(null); setSelectedPrivateUser(null); }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedGroup(null); setSelectedPrivateUser(null); setShowMembersPanel(false); }}
                   className="lg:hidden w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"
                   data-testid="button-back"
                 >
@@ -463,16 +611,15 @@ export default function Chat() {
                 
                 {selectedPrivateUser ? (
                   <>
-                    {selectedPrivateUser.avatar ? (
-                      <img src={selectedPrivateUser.avatar} alt={selectedPrivateUser.name} className="w-10 h-10 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                        {selectedPrivateUser.name.charAt(0)}
-                      </div>
-                    )}
+                    <AvatarWithPresence user={selectedPrivateUser} />
                     <div className="flex-1">
                       <h2 className="font-bold text-white">{selectedPrivateUser.name}</h2>
-                      <p className="text-xs text-slate-400">@{selectedPrivateUser.username}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-slate-400">@{selectedPrivateUser.username}</p>
+                        {isOnlineSimulated(selectedPrivateUser.id) && (
+                          <span className="text-[10px] text-emerald-400 font-medium">{t("chat.online_now")}</span>
+                        )}
+                      </div>
                     </div>
                   </>
                 ) : selectedGroup ? (
@@ -480,135 +627,240 @@ export default function Chat() {
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold`}>
                       {selectedGroup.name[0]}
                     </div>
-                    <div className="flex-1">
-                      <h2 className="font-bold text-white">{selectedGroup.name}</h2>
-                      <p className="text-xs text-slate-400">{selectedGroup.members} {t("chat.members")} - {selectedGroup.city}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-bold text-white truncate">{selectedGroup.name}</h2>
+                        <span className="text-[10px] px-2 py-0.5 bg-teal-500/20 text-teal-400 rounded-full font-medium flex items-center gap-1">
+                          <MapPin className="w-2.5 h-2.5" />
+                          {selectedGroup.city}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <StackedAvatars members={groupMembers} max={5} />
+                        <span className="text-[11px] text-slate-400">
+                          {selectedGroup.members} {t("chat.group_members_count")}
+                        </span>
+                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                      </div>
                     </div>
                   </>
                 ) : null}
-
-                <div className="flex gap-1">
-                  <button className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-                    <Phone className="w-4 h-4" />
-                  </button>
-                  <button className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-                    <Video className="w-4 h-4" />
-                  </button>
-                  <button className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
-                </div>
               </header>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Members Panel (slides from top) */}
+              <AnimatePresence>
+                {showMembersPanel && selectedGroup && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="bg-slate-900 border-b border-slate-800 overflow-hidden z-10"
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Users className="w-4 h-4 text-violet-400" />
+                          {t("chat.group_members")} ({groupMembers.length})
+                        </h3>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowMembersPanel(false); }}
+                          className="w-6 h-6 bg-slate-800 rounded-md flex items-center justify-center text-slate-400 hover:text-white"
+                          data-testid="button-close-members"
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                        {groupMembers.map((member) => {
+                          const online = isOnlineSimulated(member.id!);
+                          return (
+                            <div
+                              key={member.id}
+                              className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-colors group/member"
+                              data-testid={`member-${member.id}`}
+                            >
+                              <AvatarWithPresence user={member as User} size="sm" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{member.name}</p>
+                                <div className="flex items-center gap-1.5">
+                                  {(member as any).location && (
+                                    <span className="text-[10px] text-teal-400 flex items-center gap-0.5 truncate">
+                                      <Globe className="w-2.5 h-2.5 flex-shrink-0" />
+                                      {(member as any).location.split(",")[0]}
+                                    </span>
+                                  )}
+                                  <span className={`text-[10px] ${online ? "text-emerald-400" : "text-slate-500"}`}>
+                                    {online ? t("chat.online_now") : t("chat.offline")}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-1 opacity-0 group-hover/member:opacity-100 transition-opacity">
+                                <Link href={`/profile/${member.id}`}>
+                                  <button
+                                    className="w-7 h-7 bg-slate-700 hover:bg-violet-500 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                                    title={t("chat.view_profile")}
+                                    data-testid={`button-profile-${member.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Compass className="w-3.5 h-3.5" />
+                                  </button>
+                                </Link>
+                                {member.id !== user?.id && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const u = allUsers.find(u => u.id === member.id);
+                                      if (u) { selectPrivateChat(u); setShowMembersPanel(false); }
+                                    }}
+                                    className="w-7 h-7 bg-slate-700 hover:bg-teal-500 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                                    title={t("chat.send_message")}
+                                    data-testid={`button-dm-${member.id}`}
+                                  >
+                                    <Send className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto px-4 py-3">
+                {/* Load previous messages button */}
+                {groupedMessages.hasMore && (
+                  <div className="flex justify-center mb-4">
+                    <button
+                      onClick={() => setVisibleMessages(prev => prev + 30)}
+                      className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-full transition-colors border border-slate-700/50"
+                      data-testid="button-load-previous"
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" />
+                      {t("chat.load_previous")}
+                    </button>
+                  </div>
+                )}
+
                 {currentMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    {selectedPrivateUser ? (
-                      <>
-                        {selectedPrivateUser.avatar ? (
-                          <img src={selectedPrivateUser.avatar} alt={selectedPrivateUser.name} className="w-20 h-20 rounded-full object-cover mb-4" />
-                        ) : (
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl mb-4">
-                            {selectedPrivateUser.name.charAt(0)}
-                          </div>
-                        )}
-                        <h3 className="font-bold text-white text-lg">{selectedPrivateUser.name}</h3>
-                        <p className="text-slate-500 text-sm mt-1">{t("chat.start_conversation")}</p>
-                      </>
-                    ) : selectedGroup ? (
-                      <>
-                        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-2xl mb-4`}>
-                          {selectedGroup.name[0]}
-                        </div>
-                        <h3 className="font-bold text-white text-lg">{selectedGroup.name}</h3>
-                        <p className="text-slate-500 text-sm mt-1">{t("chat.be_first")}</p>
-                      </>
-                    ) : null}
+                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center mb-4">
+                      <Compass className="w-10 h-10 text-teal-400" />
+                    </div>
+                    <h3 className="font-bold text-white text-lg">{t("chat.no_messages_yet")}</h3>
+                    <p className="text-slate-500 text-sm mt-2 max-w-xs">
+                      {selectedGroup ? t("chat.group_welcome") : t("chat.start_the_conversation")}
+                    </p>
                   </div>
                 ) : (
-                  currentMessages.map((msg) => {
-                    const isOwn = msg.senderId === user?.id;
-                    const senderAvatar = isOwn ? user?.avatar : msg.sender?.avatar;
-                    const senderName = isOwn ? user?.name : msg.sender?.name;
-                    
-                    return (
-                      <motion.div
-                        key={msg.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} items-start gap-3`}
-                        data-testid={`message-${msg.id}`}
-                      >
-                        {!isOwn && (
-                          <div className="flex-shrink-0">
-                            {senderAvatar ? (
-                              <img src={senderAvatar} alt={senderName || ""} className="w-9 h-9 rounded-full object-cover" />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
-                                {senderName?.[0] || "?"}
+                  <div className="space-y-0.5">
+                    {groupedMessages.items.map((item, i) => {
+                      if (item.type === "date") {
+                        return (
+                          <div key={`date-${i}`} className="flex items-center justify-center my-4">
+                            <div className="px-3 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-700/50">
+                              <span className="text-[11px] text-slate-400 font-medium">{item.label}</span>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const { msg, showAvatar, showName, isOwn, isLast } = item;
+                      const senderAvatar = isOwn ? user?.avatar : msg.sender?.avatar;
+                      const senderName = isOwn ? user?.name : msg.sender?.name;
+                      const senderLocation = !isOwn ? (msg.sender as any)?.location : null;
+
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'} ${showAvatar ? 'mt-3' : 'mt-0.5'} ${isLast ? 'mb-1' : ''}`}
+                          data-testid={`message-${msg.id}`}
+                        >
+                          {/* Avatar column for other users */}
+                          {!isOwn && (
+                            <div className="w-9 mr-2 flex-shrink-0">
+                              {showAvatar ? (
+                                <Link href={`/profile/${msg.senderId}`}>
+                                  <div className="cursor-pointer">
+                                    {senderAvatar ? (
+                                      <img src={senderAvatar} alt={senderName || ""} className="w-8 h-8 rounded-full object-cover" />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                        {senderName?.[0] || "?"}
+                                      </div>
+                                    )}
+                                  </div>
+                                </Link>
+                              ) : null}
+                            </div>
+                          )}
+                          
+                          <div className={`max-w-[70%]`}>
+                            {/* Sender name + location tag */}
+                            {showName && (
+                              <div className="flex items-center gap-2 mb-0.5 ml-1">
+                                <span className={`text-xs font-semibold ${getSenderColor(msg.senderId)}`}>
+                                  {senderName}
+                                </span>
+                                {senderLocation && (
+                                  <span className="text-[9px] text-slate-500 flex items-center gap-0.5">
+                                    <MapPin className="w-2 h-2" />
+                                    {senderLocation.split(",")[0]}
+                                  </span>
+                                )}
                               </div>
                             )}
-                          </div>
-                        )}
-                        
-                        <div className={`max-w-[70%] ${isOwn ? 'order-1' : ''}`}>
-                          {!isOwn && selectedGroup && (
-                            <p className="text-xs font-semibold text-violet-400 mb-1 ml-1">{senderName}</p>
-                          )}
-                          <div className={`px-4 py-2.5 rounded-2xl ${
-                            isOwn ? 'bg-violet-500 text-white rounded-br-sm' : 'bg-slate-800 text-white rounded-bl-sm'
-                          }`}>
-                            <p className="text-sm">{msg.content}</p>
-                            <p className={`text-[10px] mt-1 ${isOwn ? 'text-violet-200' : 'text-slate-500'}`}>
-                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                            <div className={`px-3.5 py-2 ${
+                              isOwn 
+                                ? `bg-gradient-to-br from-violet-500 to-violet-600 text-white ${showAvatar ? 'rounded-2xl rounded-br-md' : isLast ? 'rounded-2xl rounded-tr-md' : 'rounded-xl rounded-r-md'}` 
+                                : `bg-slate-800/80 text-white ${showAvatar ? 'rounded-2xl rounded-bl-md' : isLast ? 'rounded-2xl rounded-tl-md' : 'rounded-xl rounded-l-md'}`
+                            }`}>
+                              <p className="text-sm leading-relaxed">{msg.content}</p>
+                              <p className={`text-[10px] mt-0.5 text-right ${isOwn ? 'text-violet-200/70' : 'text-slate-500'}`}>
+                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
                           </div>
                         </div>
-
-                        {isOwn && (
-                          <div className="flex-shrink-0">
-                            {senderAvatar ? (
-                              <img src={senderAvatar} alt={senderName || ""} className="w-9 h-9 rounded-full object-cover" />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold">
-                                {senderName?.[0] || "?"}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })
+                      );
+                    })}
+                  </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Message Input */}
               <form
                 onSubmit={selectedPrivateUser ? handleSendPrivateMessage : handleSendGroupMessage}
-                className="p-4 bg-slate-900 border-t border-slate-800 flex gap-2"
+                className="p-3 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 flex gap-2"
               >
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={t("chat.write_message")}
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+                  className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
                   data-testid="input-message"
                 />
                 <button
                   type="submit"
                   disabled={!newMessage.trim() || sending}
-                  className="w-12 h-12 bg-violet-500 text-white rounded-xl flex items-center justify-center hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-11 h-11 bg-gradient-to-br from-violet-500 to-violet-600 text-white rounded-2xl flex items-center justify-center hover:from-violet-600 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-violet-500/20"
                   data-testid="button-send"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4.5 h-4.5" />
                 </button>
               </form>
             </>
           ) : (
             <div className="hidden lg:flex flex-col items-center justify-center h-full text-center">
-              <div className="w-24 h-24 rounded-3xl bg-slate-800 flex items-center justify-center mb-4">
-                <Send className="w-12 h-12 text-slate-600" />
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center mb-4">
+                <Compass className="w-12 h-12 text-teal-400" />
               </div>
               <h2 className="text-xl font-bold text-white">{t("chat.select_conversation")}</h2>
               <p className="text-slate-500 mt-2">{t("chat.select_conversation_desc")}</p>
@@ -678,13 +930,7 @@ export default function Chat() {
                         className="w-full p-3 flex items-center gap-3 rounded-xl hover:bg-slate-800 transition-colors text-left"
                         data-testid={`new-contact-${u.id}`}
                       >
-                        {u.avatar ? (
-                          <img src={u.avatar} alt={u.name} className="w-10 h-10 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                            {u.name.charAt(0)}
-                          </div>
-                        )}
+                        <AvatarWithPresence user={u} size="sm" />
                         <div>
                           <p className="font-semibold text-white text-sm">{u.name}</p>
                           <p className="text-xs text-slate-400">@{u.username}</p>

@@ -585,8 +585,9 @@ export async function registerRoutes(
 
   app.get("/api/chat-groups/:id/members", async (req, res) => {
     try {
-      const members = await storage.getGroupMembers(req.params.id);
-      res.send(members);
+      const members = await storage.getGroupMembersWithDetails(req.params.id);
+      const safeMembers = members.map(({ password, ...rest }) => rest);
+      res.send(safeMembers);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

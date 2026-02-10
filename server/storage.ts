@@ -80,6 +80,7 @@ export interface IStorage {
   leaveGroup(groupId: string, userId: string): Promise<void>;
   isGroupMember(groupId: string, userId: string): Promise<boolean>;
   getGroupMembers(groupId: string): Promise<string[]>;
+  getGroupMembersWithDetails(groupId: string): Promise<User[]>;
 
   // Messages
   getGroupMessages(groupId: string, limit?: number): Promise<(Message & { sender: User })[]>;
@@ -447,6 +448,15 @@ export class DrizzleStorage implements IStorage {
       .from(schema.groupMembers)
       .where(eq(schema.groupMembers.groupId, groupId));
     return result.map(r => r.userId);
+  }
+
+  async getGroupMembersWithDetails(groupId: string): Promise<User[]> {
+    const result = await this.db
+      .select({ user: schema.users })
+      .from(schema.groupMembers)
+      .innerJoin(schema.users, eq(schema.groupMembers.userId, schema.users.id))
+      .where(eq(schema.groupMembers.groupId, groupId));
+    return result.map(r => r.user);
   }
 
   // Messages
