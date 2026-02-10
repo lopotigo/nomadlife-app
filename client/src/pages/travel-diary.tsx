@@ -547,7 +547,7 @@ export default function TravelDiary() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background">
         <style>{`
           .custom-stop-marker { background: transparent; border: none; }
           .stop-marker {
@@ -562,15 +562,15 @@ export default function TravelDiary() {
           .leaflet-popup-close-button { color: white !important; }
         `}</style>
         
-        <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 p-4">
+        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 p-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                 <Plane className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Viaggi</h1>
-                <p className="text-xs text-slate-400">Diario di viaggio</p>
+                <h1 className="text-xl font-bold text-foreground">Viaggi</h1>
+                <p className="text-xs text-muted-foreground">Diario di viaggio</p>
               </div>
             </div>
             {activeTab === "my-trips" && (
@@ -584,7 +584,7 @@ export default function TravelDiary() {
                   Nuovo Viaggio
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
+              <DialogContent className="bg-muted border-border text-foreground max-w-md">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Globe className="w-5 h-5 text-emerald-500" />
@@ -599,7 +599,7 @@ export default function TravelDiary() {
                       name="title" 
                       placeholder="Es: Avventura in Thailandia" 
                       required 
-                      className="bg-slate-700 border-slate-600"
+                      className="bg-accent border-border"
                       data-testid="input-trip-title"
                     />
                   </div>
@@ -609,7 +609,7 @@ export default function TravelDiary() {
                       id="description"
                       name="description" 
                       placeholder="Racconta il tuo viaggio..." 
-                      className="bg-slate-700 border-slate-600"
+                      className="bg-accent border-border"
                       data-testid="input-trip-description"
                     />
                   </div>
@@ -621,7 +621,7 @@ export default function TravelDiary() {
                         name="startLocation" 
                         placeholder="Milano" 
                         required 
-                        className="bg-slate-700 border-slate-600"
+                        className="bg-accent border-border"
                         data-testid="input-start-location"
                       />
                     </div>
@@ -632,7 +632,7 @@ export default function TravelDiary() {
                         name="endLocation" 
                         placeholder="Bangkok" 
                         required 
-                        className="bg-slate-700 border-slate-600"
+                        className="bg-accent border-border"
                         data-testid="input-end-location"
                       />
                     </div>
@@ -645,17 +645,17 @@ export default function TravelDiary() {
                         type="date" 
                         name="startDate" 
                         required 
-                        className="bg-slate-700 border-slate-600"
+                        className="bg-accent border-border"
                         data-testid="input-start-date"
                       />
                     </div>
                     <div>
                       <Label htmlFor="currency">Valuta</Label>
                       <Select name="currency" defaultValue="EUR">
-                        <SelectTrigger className="bg-slate-700 border-slate-600" data-testid="select-currency">
+                        <SelectTrigger className="bg-accent border-border" data-testid="select-currency">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-700 border-slate-600">
+                        <SelectContent className="bg-accent border-border">
                           <SelectItem value="EUR">€ EUR</SelectItem>
                           <SelectItem value="USD">$ USD</SelectItem>
                           <SelectItem value="GBP">£ GBP</SelectItem>
@@ -667,10 +667,10 @@ export default function TravelDiary() {
                   <div>
                     <Label>Tipo di viaggio</Label>
                     <Select name="status" defaultValue="planned">
-                      <SelectTrigger className="bg-slate-700 border-slate-600" data-testid="select-status">
+                      <SelectTrigger className="bg-accent border-border" data-testid="select-status">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectContent className="bg-accent border-border">
                         <SelectItem value="planned">📝 Pianificato (futuro)</SelectItem>
                         <SelectItem value="in_progress">✈️ In corso</SelectItem>
                         <SelectItem value="completed">✅ Completato</SelectItem>
@@ -684,10 +684,10 @@ export default function TravelDiary() {
                       name="isPublic" 
                       value="true" 
                       defaultChecked 
-                      className="w-4 h-4 rounded bg-slate-700"
+                      className="w-4 h-4 rounded bg-accent"
                       data-testid="checkbox-public"
                     />
-                    <Label htmlFor="isPublic" className="text-sm text-slate-300">
+                    <Label htmlFor="isPublic" className="text-sm text-foreground">
                       Rendi visibile agli altri nomadi
                     </Label>
                   </div>
@@ -711,7 +711,7 @@ export default function TravelDiary() {
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 activeTab === "my-trips" 
                   ? "bg-emerald-500 text-white" 
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                  : "bg-muted text-muted-foreground hover:bg-accent"
               }`}
               data-testid="tab-my-trips"
             >
@@ -723,7 +723,7 @@ export default function TravelDiary() {
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 activeTab === "explore" 
                   ? "bg-emerald-500 text-white" 
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                  : "bg-muted text-muted-foreground hover:bg-accent"
               }`}
               data-testid="tab-explore"
             >
@@ -749,10 +749,10 @@ export default function TravelDiary() {
           ) : (
             <>
             {user && (
-              <div className="mb-6 bg-slate-800/50 rounded-2xl p-4">
+              <div className="mb-6 bg-muted/50 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <BarChart3 className="w-5 h-5 text-emerald-400" />
-                  <h3 className="font-semibold text-white">{t("diary.your_stats")}</h3>
+                  <h3 className="font-semibold text-foreground">{t("diary.your_stats")}</h3>
                 </div>
                 <PersonalStats userId={user.id} compact />
               </div>
@@ -786,7 +786,7 @@ export default function TravelDiary() {
         )}
 
         <Dialog open={showNewStop} onOpenChange={(open) => { setShowNewStop(open); if (!open) setStopImageUrl(null); }}>
-          <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
+          <DialogContent className="bg-muted border-border text-foreground max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-emerald-500" />
@@ -818,7 +818,7 @@ export default function TravelDiary() {
                     name="city" 
                     placeholder="Bangkok" 
                     required 
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                     data-testid="input-stop-city"
                   />
                 </div>
@@ -829,7 +829,7 @@ export default function TravelDiary() {
                     name="country" 
                     placeholder="Thailandia" 
                     required 
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                     data-testid="input-stop-country"
                   />
                 </div>
@@ -842,7 +842,7 @@ export default function TravelDiary() {
                     type="date" 
                     name="arrivalDate" 
                     required 
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                     data-testid="input-arrival-date"
                   />
                 </div>
@@ -852,7 +852,7 @@ export default function TravelDiary() {
                     id="departureDate"
                     type="date" 
                     name="departureDate" 
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                     data-testid="input-departure-date"
                   />
                 </div>
@@ -863,7 +863,7 @@ export default function TravelDiary() {
                   id="notes"
                   name="notes" 
                   placeholder="Appunti sulla tappa..." 
-                  className="bg-slate-700 border-slate-600"
+                  className="bg-accent border-border"
                   data-testid="input-stop-notes"
                 />
               </div>
@@ -875,7 +875,7 @@ export default function TravelDiary() {
                     id="accommodationName"
                     name="accommodationName" 
                     placeholder="Hotel Roma" 
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                     data-testid="input-accommodation-name"
                   />
                 </div>
@@ -884,7 +884,7 @@ export default function TravelDiary() {
                   <select 
                     id="accommodationType"
                     name="accommodationType" 
-                    className="w-full h-10 rounded-md bg-slate-700 border border-slate-600 px-3 text-sm"
+                    className="w-full h-10 rounded-md bg-accent border border-border px-3 text-sm"
                     data-testid="select-accommodation-type"
                   >
                     <option value="">Seleziona...</option>
@@ -956,7 +956,7 @@ export default function TravelDiary() {
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
                       <input
                         type="file"
                         accept="image/*,video/*"
@@ -968,15 +968,15 @@ export default function TravelDiary() {
                       {isUploadingStopMedia ? (
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
-                          <span className="text-xs text-slate-400">{uploadProgress}%</span>
+                          <span className="text-xs text-muted-foreground">{uploadProgress}%</span>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex gap-2">
-                            <Image className="w-5 h-5 text-slate-400" />
-                            <Video className="w-5 h-5 text-slate-400" />
+                            <Image className="w-5 h-5 text-muted-foreground" />
+                            <Video className="w-5 h-5 text-muted-foreground" />
                           </div>
-                          <span className="text-xs text-slate-400">Carica foto o video</span>
+                          <span className="text-xs text-muted-foreground">Carica foto o video</span>
                         </div>
                       )}
                     </label>
@@ -998,7 +998,7 @@ export default function TravelDiary() {
         </Dialog>
 
         <Dialog open={!!showNewExpense} onOpenChange={() => { setShowNewExpense(null); setExpenseType(""); }}>
-          <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-md">
+          <DialogContent className="bg-muted border-border text-foreground max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Wallet className="w-5 h-5 text-emerald-500" />
@@ -1009,10 +1009,10 @@ export default function TravelDiary() {
               <div>
                 <Label htmlFor="type">Tipo Spesa *</Label>
                 <Select value={expenseType} onValueChange={setExpenseType}>
-                  <SelectTrigger className={`bg-slate-700 border-slate-600 ${!expenseType ? 'text-slate-400' : ''}`} data-testid="select-expense-type">
+                  <SelectTrigger className={`bg-accent border-border ${!expenseType ? 'text-muted-foreground' : ''}`} data-testid="select-expense-type">
                     <SelectValue placeholder="Seleziona tipo..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-slate-600 max-h-60">
+                  <SelectContent className="bg-accent border-border max-h-60">
                     {expenseTypes.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex items-center gap-2">
@@ -1031,7 +1031,7 @@ export default function TravelDiary() {
                   name="name" 
                   placeholder="Es: Ostello Central, Café Roma..." 
                   required 
-                  className="bg-slate-700 border-slate-600"
+                  className="bg-accent border-border"
                   data-testid="input-expense-name"
                 />
               </div>
@@ -1045,17 +1045,17 @@ export default function TravelDiary() {
                     name="cost" 
                     placeholder="25.00" 
                     required 
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                     data-testid="input-expense-cost"
                   />
                 </div>
                 <div>
                   <Label htmlFor="currency">Valuta</Label>
                   <Select name="currency" defaultValue="EUR">
-                    <SelectTrigger className="bg-slate-700 border-slate-600">
+                    <SelectTrigger className="bg-accent border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-700 border-slate-600">
+                    <SelectContent className="bg-accent border-border">
                       <SelectItem value="EUR">€ EUR</SelectItem>
                       <SelectItem value="USD">$ USD</SelectItem>
                       <SelectItem value="GBP">£ GBP</SelectItem>
@@ -1068,16 +1068,16 @@ export default function TravelDiary() {
                 </div>
               </div>
               
-              <div className="p-3 bg-slate-700/50 rounded-lg space-y-3">
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Valutazioni Qualità</p>
+              <div className="p-3 bg-accent/50 rounded-lg space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Valutazioni Qualità</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="rating" className="text-xs">⭐ Generale</Label>
                     <Select name="rating">
-                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-rating">
+                      <SelectTrigger className="bg-accent border-border h-9" data-testid="select-rating">
                         <SelectValue placeholder="--" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectContent className="bg-accent border-border">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
                             {"⭐".repeat(n)}
@@ -1089,10 +1089,10 @@ export default function TravelDiary() {
                   <div>
                     <Label htmlFor="wifiRating" className="text-xs">📶 WiFi</Label>
                     <Select name="wifiRating">
-                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-wifi-rating">
+                      <SelectTrigger className="bg-accent border-border h-9" data-testid="select-wifi-rating">
                         <SelectValue placeholder="--" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectContent className="bg-accent border-border">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
                             {"⭐".repeat(n)}
@@ -1104,10 +1104,10 @@ export default function TravelDiary() {
                   <div>
                     <Label htmlFor="cleanRating" className="text-xs">🧹 Pulizia</Label>
                     <Select name="cleanRating">
-                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-clean-rating">
+                      <SelectTrigger className="bg-accent border-border h-9" data-testid="select-clean-rating">
                         <SelectValue placeholder="--" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectContent className="bg-accent border-border">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
                             {"⭐".repeat(n)}
@@ -1119,10 +1119,10 @@ export default function TravelDiary() {
                   <div>
                     <Label htmlFor="locationRating" className="text-xs">📍 Posizione</Label>
                     <Select name="locationRating">
-                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-location-rating">
+                      <SelectTrigger className="bg-accent border-border h-9" data-testid="select-location-rating">
                         <SelectValue placeholder="--" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectContent className="bg-accent border-border">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
                             {"⭐".repeat(n)}
@@ -1134,10 +1134,10 @@ export default function TravelDiary() {
                   <div className="col-span-2">
                     <Label htmlFor="valueRating" className="text-xs">💰 Rapporto Qualità/Prezzo</Label>
                     <Select name="valueRating">
-                      <SelectTrigger className="bg-slate-700 border-slate-600 h-9" data-testid="select-value-rating">
+                      <SelectTrigger className="bg-accent border-border h-9" data-testid="select-value-rating">
                         <SelectValue placeholder="--" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
+                      <SelectContent className="bg-accent border-border">
                         {[1, 2, 3, 4, 5].map((n) => (
                           <SelectItem key={n} value={n.toString()}>
                             {"⭐".repeat(n)}
@@ -1155,7 +1155,7 @@ export default function TravelDiary() {
                   id="review"
                   name="review" 
                   placeholder="La tua esperienza, consigli per altri nomadi..." 
-                  className="bg-slate-700 border-slate-600"
+                  className="bg-accent border-border"
                   rows={3}
                   data-testid="input-expense-review"
                 />
@@ -1221,11 +1221,11 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-16"
       >
-        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-800 flex items-center justify-center">
-          <Plane className="w-10 h-10 text-slate-600" />
+        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+          <Plane className="w-10 h-10 text-muted-foreground" />
         </div>
-        <h3 className="text-xl font-semibold text-white mb-2">Nessun viaggio ancora</h3>
-        <p className="text-slate-400 mb-6">Inizia a documentare le tue avventure!</p>
+        <h3 className="text-xl font-semibold text-foreground mb-2">Nessun viaggio ancora</h3>
+        <p className="text-muted-foreground mb-6">Inizia a documentare le tue avventure!</p>
       </motion.div>
     );
   }
@@ -1233,7 +1233,7 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white">I Tuoi Viaggi</h2>
+        <h2 className="text-lg font-semibold text-foreground">I Tuoi Viaggi</h2>
       </div>
       
       <div className="flex gap-2 flex-wrap mb-4">
@@ -1249,7 +1249,7 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               statusFilter === tab.value
                 ? "bg-emerald-500 text-white"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                : "bg-muted text-muted-foreground hover:bg-accent"
             }`}
             data-testid={`filter-${tab.value}`}
           >
@@ -1259,7 +1259,7 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
       </div>
       
       {filteredTrips.length === 0 ? (
-        <div className="text-center py-8 text-slate-400">
+        <div className="text-center py-8 text-muted-foreground">
           Nessun viaggio in questa categoria
         </div>
       ) : (
@@ -1269,7 +1269,7 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50"
+            className="bg-muted/50 rounded-2xl p-4 border border-border/50"
             data-testid={`trip-card-${trip.id}`}
           >
             <div 
@@ -1285,21 +1285,21 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
                   <Plane className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">{trip.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <h3 className="font-semibold text-foreground">{trip.title}</h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="w-3 h-3" />
                     <span>{trip.startLocation} → {trip.endLocation}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                     <Calendar className="w-3 h-3" />
                     <span>{new Date(trip.startDate).toLocaleDateString("it-IT")}</span>
                     {getStatusBadge(trip.status)}
                   </div>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-500" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </div>
-          <div className="mt-3 pt-3 border-t border-slate-700/50 flex gap-2">
+          <div className="mt-3 pt-3 border-t border-border/50 flex gap-2">
             <button
               onClick={() => onPlanRoute(trip.id)}
               className="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 text-white text-sm font-medium transition-colors flex items-center justify-center gap-2"
@@ -1385,7 +1385,7 @@ function TripDetails({
       <div className="flex items-center justify-between">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           data-testid="button-back"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
@@ -1417,9 +1417,9 @@ function TripDetails({
       <div className="bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-2xl p-6 border border-emerald-500/30">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">{trip.title}</h2>
+            <h2 className="text-2xl font-bold text-foreground">{trip.title}</h2>
             {trip.description && (
-              <p className="text-slate-300 mt-1">{trip.description}</p>
+              <p className="text-foreground mt-1">{trip.description}</p>
             )}
           </div>
           {trip.isActive && (
@@ -1428,7 +1428,7 @@ function TripDetails({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-6 text-slate-300">
+        <div className="flex items-center gap-6 text-foreground">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4" />
             <span>{trip.startLocation} → {trip.endLocation}</span>
@@ -1440,21 +1440,21 @@ function TripDetails({
         </div>
         <div className="mt-4 pt-4 border-t border-emerald-500/30 flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-400">Spese totali</p>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-sm text-muted-foreground">Spese totali</p>
+            <p className="text-2xl font-bold text-foreground">
               {currencySymbol}{(totalExpenses / 100).toFixed(2)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-400">Tappe</p>
-            <p className="text-2xl font-bold text-white">{trip.stops.length}</p>
+            <p className="text-sm text-muted-foreground">Tappe</p>
+            <p className="text-2xl font-bold text-foreground">{trip.stops.length}</p>
           </div>
         </div>
         
         {/* Controlli stato e visibilità */}
         <div className="mt-4 pt-4 border-t border-emerald-500/30 grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs text-slate-400 mb-2">Stato viaggio</p>
+            <p className="text-xs text-muted-foreground mb-2">Stato viaggio</p>
             <div className="flex gap-1">
               {[
                 { value: "planned", label: "Pianificato", icon: Calendar },
@@ -1467,7 +1467,7 @@ function TripDetails({
                   className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
                     status === opt.value 
                       ? "bg-emerald-500 text-white" 
-                      : "bg-slate-700/50 text-slate-400 hover:bg-slate-600"
+                      : "bg-accent/50 text-muted-foreground hover:bg-accent"
                   }`}
                   data-testid={`status-${opt.value}`}
                 >
@@ -1478,13 +1478,13 @@ function TripDetails({
             </div>
           </div>
           <div>
-            <p className="text-xs text-slate-400 mb-2">Visibilità</p>
+            <p className="text-xs text-muted-foreground mb-2">Visibilità</p>
             <button
               onClick={handleTogglePublic}
               className={`w-full py-2 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 isPublic 
                   ? "bg-blue-500 text-white" 
-                  : "bg-slate-700/50 text-slate-400"
+                  : "bg-accent/50 text-muted-foreground"
               }`}
               data-testid="toggle-public"
             >
@@ -1496,7 +1496,7 @@ function TripDetails({
       </div>
 
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Tappe del viaggio</h3>
+        <h3 className="text-lg font-semibold text-foreground">Tappe del viaggio</h3>
         <Button 
           onClick={onAddStop}
           size="sm"
@@ -1509,10 +1509,10 @@ function TripDetails({
       </div>
 
       {trip.stops.length === 0 ? (
-        <div className="text-center py-8 bg-slate-800/50 rounded-xl border border-dashed border-slate-700">
-          <MapPin className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-          <p className="text-slate-400">Nessuna tappa ancora</p>
-          <p className="text-sm text-slate-500">Aggiungi la tua prima destinazione</p>
+        <div className="text-center py-8 bg-muted/50 rounded-xl border border-dashed border-border">
+          <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">Nessuna tappa ancora</p>
+          <p className="text-sm text-muted-foreground">Aggiungi la tua prima destinazione</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -1583,8 +1583,8 @@ function TransportSelector({
 
   return (
     <div className="py-4 px-2">
-      <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
-        <p className="text-xs text-slate-500 text-center mb-2">Come arrivi qui?</p>
+      <div className="bg-muted/60 rounded-xl p-3 border border-border/50">
+        <p className="text-xs text-muted-foreground text-center mb-2">Come arrivi qui?</p>
         <div className="flex justify-center gap-1">
           {TRANSPORT_OPTIONS.map((option) => {
             const Icon = option.icon;
@@ -1596,7 +1596,7 @@ function TransportSelector({
                 className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
                   isSelected 
                     ? "text-white scale-105" 
-                    : "text-slate-500 hover:text-slate-300 hover:bg-slate-700/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 }`}
                 style={{ backgroundColor: isSelected ? option.color : "transparent" }}
                 title={option.label}
@@ -1609,11 +1609,11 @@ function TransportSelector({
           })}
         </div>
         {selected && (
-          <div className="flex justify-center items-center gap-3 mt-3 pt-2 border-t border-slate-700/50">
-            <span className="text-sm text-slate-300">{distance} km</span>
-            <span className="text-slate-600">•</span>
-            <span className="text-sm text-slate-400">{duration}</span>
-            <span className="text-slate-600">•</span>
+          <div className="flex justify-center items-center gap-3 mt-3 pt-2 border-t border-border/50">
+            <span className="text-sm text-foreground">{distance} km</span>
+            <span className="text-muted-foreground">•</span>
+            <span className="text-sm text-muted-foreground">{duration}</span>
+            <span className="text-muted-foreground">•</span>
             {co2 > 0 ? (
               <span className="text-sm text-amber-400 font-medium">{co2} kg CO₂</span>
             ) : (
@@ -1644,19 +1644,19 @@ function TripCO2Summary({ stops }: { stops: TripStop[] }) {
       className={`mt-4 p-4 rounded-xl border ${
         isEcoFriendly 
           ? "bg-green-500/10 border-green-500/30" 
-          : "bg-slate-800/50 border-slate-700/50"
+          : "bg-muted/50 border-border/50"
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            isEcoFriendly ? "bg-green-500/20 text-green-400" : "bg-slate-700 text-slate-400"
+            isEcoFriendly ? "bg-green-500/20 text-green-400" : "bg-accent text-muted-foreground"
           }`}>
             <Leaf className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-sm font-medium text-white">Impatto Ambientale</p>
-            <p className="text-xs text-slate-400">{totalDistance} km totali</p>
+            <p className="text-sm font-medium text-foreground">Impatto Ambientale</p>
+            <p className="text-xs text-muted-foreground">{totalDistance} km totali</p>
           </div>
         </div>
         <div className="text-right">
@@ -1694,7 +1694,7 @@ function StopCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden"
+      className="bg-muted/50 rounded-xl border border-border/50 overflow-hidden"
       data-testid={`stop-card-${stop.id}`}
     >
       <div 
@@ -1702,12 +1702,12 @@ function StopCard({
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">
+          <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-foreground font-bold">
             {index + 1}
           </div>
           <div className="flex-1">
-            <h4 className="font-semibold text-white">{stop.city}, {stop.country}</h4>
-            <div className="flex items-center gap-3 text-sm text-slate-400">
+            <h4 className="font-semibold text-foreground">{stop.city}, {stop.country}</h4>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span>{new Date(stop.arrivalDate).toLocaleDateString("it-IT")}</span>
               {stop.departureDate && (
                 <span>→ {new Date(stop.departureDate).toLocaleDateString("it-IT")}</span>
@@ -1715,12 +1715,12 @@ function StopCard({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-sm text-slate-400">{stop.expenses.length} spese</p>
+            <p className="text-sm text-muted-foreground">{stop.expenses.length} spese</p>
             <p className="font-semibold text-emerald-400">
               {currencySymbol}{(totalStopExpenses / 100).toFixed(2)}
             </p>
           </div>
-          <ChevronRight className={`w-5 h-5 text-slate-500 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+          <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${expanded ? 'rotate-90' : ''}`} />
         </div>
       </div>
 
@@ -1730,11 +1730,11 @@ function StopCard({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-slate-700/50"
+            className="border-t border-border/50"
           >
             <div className="p-4 space-y-3">
               {stop.notes && (
-                <p className="text-sm text-slate-400 italic">"{stop.notes}"</p>
+                <p className="text-sm text-muted-foreground italic">"{stop.notes}"</p>
               )}
               
               {stop.expenses.length > 0 && (
@@ -1745,16 +1745,16 @@ function StopCard({
                     return (
                       <div 
                         key={expense.id}
-                        className="flex items-center gap-3 p-2 bg-slate-700/30 rounded-lg"
+                        className="flex items-center gap-3 p-2 bg-accent/30 rounded-lg"
                         data-testid={`expense-${expense.id}`}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-slate-600 flex items-center justify-center">
-                          <Icon className="w-4 h-4 text-slate-300" />
+                        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+                          <Icon className="w-4 h-4 text-foreground" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-white">{expense.name}</p>
+                          <p className="text-sm font-medium text-foreground">{expense.name}</p>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-400">{expenseType?.label}</span>
+                            <span className="text-xs text-muted-foreground">{expenseType?.label}</span>
                             {expense.rating && (
                               <span className="text-xs text-amber-400">
                                 {"⭐".repeat(expense.rating)}
@@ -1779,7 +1779,7 @@ function StopCard({
                   }}
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-dashed border-slate-600 text-slate-400 hover:text-white"
+                  className="flex-1 border-dashed border-border text-muted-foreground hover:text-foreground"
                   data-testid={`button-add-expense-${stop.id}`}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -1861,7 +1861,7 @@ function ExploreTripsMap({
     <div className="h-[calc(100vh-180px)] relative">
       <button
         onClick={onBack}
-        className="absolute top-4 left-4 z-[1000] bg-slate-800/90 backdrop-blur-sm text-white px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-slate-700 transition-colors shadow-lg"
+        className="absolute top-4 left-4 z-[1000] bg-card/90 backdrop-blur-sm text-foreground px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-accent transition-colors shadow-lg"
         data-testid="button-back-from-explore"
       >
         <ChevronRight className="w-4 h-4 rotate-180" />
@@ -1900,22 +1900,22 @@ function ExploreTripsMap({
             <Popup>
               <div className="min-w-[200px]">
                 <h3 className="font-bold text-base mb-1">{stop.city}, {stop.country}</h3>
-                <p className="text-xs text-slate-300 mb-2">
+                <p className="text-xs text-foreground mb-2">
                   {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
                   {stop.departureDate && ` - ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
                 </p>
-                <div className="border-t border-slate-600 pt-2 mt-2">
-                  <p className="text-xs text-slate-400">Viaggio:</p>
+                <div className="border-t border-border pt-2 mt-2">
+                  <p className="text-xs text-muted-foreground">Viaggio:</p>
                   <p className="font-medium" style={{ color: stop.tripColor }}>{stop.trip.title}</p>
-                  <p className="text-xs text-slate-400 mt-1">di {stop.trip.user.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">di {stop.trip.user.name}</p>
                 </div>
                 {stop.notes && (
-                  <p className="text-xs text-slate-300 mt-2 italic">"{stop.notes}"</p>
+                  <p className="text-xs text-foreground mt-2 italic">"{stop.notes}"</p>
                 )}
                 <div className="flex gap-2 mt-3">
                   <button
                     onClick={() => onSelectTrip(stop.trip.id)}
-                    className="flex-1 bg-slate-600 text-white text-xs py-1.5 px-2 rounded-lg hover:bg-slate-500"
+                    className="flex-1 bg-accent text-foreground text-xs py-1.5 px-2 rounded-lg hover:bg-muted"
                   >
                     Vedi dettagli
                   </button>
@@ -1929,7 +1929,7 @@ function ExploreTripsMap({
                               setCopyingStopId(null);
                             }
                           }}
-                          className="w-full bg-slate-700 text-white text-xs py-1.5 px-2 rounded-lg"
+                          className="w-full bg-accent text-foreground text-xs py-1.5 px-2 rounded-lg"
                           autoFocus
                         >
                           <option value="">Scegli viaggio...</option>
@@ -1955,18 +1955,18 @@ function ExploreTripsMap({
       </MapContainer>
       
       {trips.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80">
           <div className="text-center">
-            <Globe className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">Nessun viaggio pubblico</h3>
-            <p className="text-slate-400">I viaggi condivisi dagli altri nomadi appariranno qui</p>
+            <Globe className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">Nessun viaggio pubblico</h3>
+            <p className="text-muted-foreground">I viaggi condivisi dagli altri nomadi appariranno qui</p>
           </div>
         </div>
       )}
       
       {trips.length > 0 && (
-        <div className="absolute bottom-4 left-4 right-4 bg-slate-800/90 backdrop-blur-sm rounded-xl p-4 max-h-48 overflow-y-auto">
-          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        <div className="absolute bottom-4 left-4 right-4 bg-card/90 backdrop-blur-sm rounded-xl p-4 max-h-48 overflow-y-auto">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <Users className="w-4 h-4" />
             Viaggi pubblici ({trips.length})
           </h3>
@@ -1976,7 +1976,7 @@ function ExploreTripsMap({
                 key={trip.id}
                 onClick={() => setSelectedTripId(trip.id)}
                 className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all ${
-                  selectedTripId === trip.id ? "bg-emerald-500/20 border border-emerald-500/50" : "hover:bg-slate-700"
+                  selectedTripId === trip.id ? "bg-emerald-500/20 border border-emerald-500/50" : "hover:bg-accent"
                 }`}
               >
                 <div 
@@ -1984,8 +1984,8 @@ function ExploreTripsMap({
                   style={{ backgroundColor: tripColors[index % tripColors.length] }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{trip.title}</p>
-                  <p className="text-xs text-slate-400">{trip.user.name} • {trip.stops.length} tappe</p>
+                  <p className="text-sm font-medium text-foreground truncate">{trip.title}</p>
+                  <p className="text-xs text-muted-foreground">{trip.user.name} • {trip.stops.length} tappe</p>
                 </div>
                 <button
                   onClick={(e) => {
@@ -2177,7 +2177,7 @@ function TripPlannerMap({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900">
+    <div className="fixed inset-0 z-50 bg-background">
       <style>{`
         .user-location-icon { background: transparent !important; border: none !important; }
         .user-location-marker { position: relative; width: 24px; height: 24px; }
@@ -2199,12 +2199,12 @@ function TripPlannerMap({
       `}</style>
       
       <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
-        <div className="bg-slate-800/90 backdrop-blur-sm rounded-xl p-3 md:p-4">
-          <h2 className="text-sm md:text-lg font-bold text-white flex items-center gap-2">
+        <div className="bg-card/90 backdrop-blur-sm rounded-xl p-3 md:p-4">
+          <h2 className="text-sm md:text-lg font-bold text-foreground flex items-center gap-2">
             <Route className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
             {trip.title}
           </h2>
-          <p className="text-xs text-slate-400 hidden md:block">Clicca sulla mappa per aggiungere tappe</p>
+          <p className="text-xs text-muted-foreground hidden md:block">Clicca sulla mappa per aggiungere tappe</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {legs.length > 0 && (
@@ -2212,7 +2212,7 @@ function TripPlannerMap({
               onClick={() => setShowCO2Panel(!showCO2Panel)}
               variant="outline"
               size="sm"
-              className={`bg-slate-800/90 ${showCO2Panel ? 'border-emerald-500 text-emerald-400' : 'border-emerald-500 text-emerald-400 animate-pulse'}`}
+              className={`bg-card/90 ${showCO2Panel ? 'border-emerald-500 text-emerald-400' : 'border-emerald-500 text-emerald-400 animate-pulse'}`}
               data-testid="button-toggle-co2"
             >
               <Route className="w-4 h-4 md:mr-2" />
@@ -2228,7 +2228,7 @@ function TripPlannerMap({
               onClick={onClearAllStops}
               variant="outline"
               size="sm"
-              className="bg-slate-800/90 border-red-500/50 text-red-400 hover:bg-red-500/10"
+              className="bg-card/90 border-red-500/50 text-red-400 hover:bg-red-500/10"
               data-testid="button-clear-route"
             >
               <Trash2 className="w-4 h-4" />
@@ -2238,7 +2238,7 @@ function TripPlannerMap({
             onClick={handleGetLocation}
             variant="outline"
             size="sm"
-            className="bg-slate-800/90 border-blue-500/50 text-blue-400"
+            className="bg-card/90 border-blue-500/50 text-blue-400"
           >
             <Navigation className="w-4 h-4" />
           </Button>
@@ -2246,7 +2246,7 @@ function TripPlannerMap({
             onClick={onClose}
             variant="outline"
             size="sm"
-            className="bg-slate-800/90 border-slate-600 text-white"
+            className="bg-card/90 border-border text-foreground"
             data-testid="button-close-map"
           >
             <ChevronRight className="w-4 h-4 rotate-180" />
@@ -2261,17 +2261,17 @@ function TripPlannerMap({
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="absolute left-2 right-2 bottom-20 max-h-[40vh] md:left-auto md:right-4 md:top-20 md:bottom-20 md:max-h-none md:w-80 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-3 md:p-4 overflow-y-auto"
+            className="absolute left-2 right-2 bottom-20 max-h-[40vh] md:left-auto md:right-4 md:top-20 md:bottom-20 md:max-h-none md:w-80 z-[1000] bg-card/95 backdrop-blur-sm rounded-xl p-3 md:p-4 overflow-y-auto"
             data-testid="co2-panel"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Leaf className="w-5 h-5 text-emerald-500" />
                 Come viaggi?
               </h3>
               <button
                 onClick={() => setShowCO2Panel(false)}
-                className="p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-600 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg bg-accent/50 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                 data-testid="button-close-co2-panel"
               >
                 <X className="w-4 h-4" />
@@ -2285,11 +2285,11 @@ function TripPlannerMap({
             <div className="bg-emerald-500/20 rounded-lg p-3 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-emerald-300">Distanza totale</span>
-                <span className="text-white font-bold">{totalDistance} km</span>
+                <span className="text-foreground font-bold">{totalDistance} km</span>
               </div>
               <div className="flex justify-between text-sm mt-1">
                 <span className="text-emerald-300">Emissioni totali</span>
-                <span className="text-white font-bold">{totalCO2} kg CO2</span>
+                <span className="text-foreground font-bold">{totalCO2} kg CO2</span>
               </div>
             </div>
 
@@ -2299,19 +2299,19 @@ function TripPlannerMap({
                 const greenest = leg.options.reduce((a, b) => a.co2 <= b.co2 ? a : b);
                 
                 return (
-                  <div key={leg.legId} className="bg-slate-700/50 rounded-lg p-3" data-testid={`leg-${index}`}>
+                  <div key={leg.legId} className="bg-accent/50 rounded-lg p-3" data-testid={`leg-${index}`}>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="w-6 h-6 rounded-full bg-emerald-500 text-white text-xs flex items-center justify-center font-bold">
                         {index + 1}
                       </span>
                       <div className="flex-1 text-sm">
-                        <span className="text-white font-medium">{leg.from.city}</span>
-                        <span className="text-slate-400 mx-1">→</span>
-                        <span className="text-white font-medium">{leg.to.city}</span>
+                        <span className="text-foreground font-medium">{leg.from.city}</span>
+                        <span className="text-muted-foreground mx-1">→</span>
+                        <span className="text-foreground font-medium">{leg.to.city}</span>
                       </div>
                     </div>
                     
-                    <div className="text-xs text-slate-400 mb-2">{leg.distance} km</div>
+                    <div className="text-xs text-muted-foreground mb-2">{leg.distance} km</div>
                     
                     <div className="grid grid-cols-2 gap-2">
                       {leg.options.map((opt) => {
@@ -2326,7 +2326,7 @@ function TripPlannerMap({
                             className={`flex flex-col items-center gap-1 p-2 rounded-lg text-xs transition-all border ${
                               isSelected 
                                 ? 'border-emerald-500 bg-emerald-500/20 text-white' 
-                                : 'border-slate-600 bg-slate-700/50 text-slate-300 hover:bg-slate-600'
+                                : 'border-border bg-accent/50 text-foreground hover:bg-accent'
                             }`}
                             data-testid={`transport-${index}-${opt.mode}`}
                           >
@@ -2351,14 +2351,14 @@ function TripPlannerMap({
                               <CheckCircle2 className="w-3 h-3" /> Salvato!
                             </span>
                           ) : (
-                            <span className="text-white font-bold">
+                            <span className="text-foreground font-bold">
                               {selectedOpt.duration}
                             </span>
                           )}
                         </div>
                         <div className="flex items-center justify-between text-xs mt-1">
-                          <span className="text-slate-400">Emissioni</span>
-                          <span className={selectedOpt.co2 === 0 ? "text-green-400 font-medium" : "text-slate-300"}>
+                          <span className="text-muted-foreground">Emissioni</span>
+                          <span className={selectedOpt.co2 === 0 ? "text-green-400 font-medium" : "text-foreground"}>
                             {selectedOpt.co2 === 0 ? "Zero emissioni!" : `${selectedOpt.co2} kg CO2`}
                           </span>
                         </div>
@@ -2374,7 +2374,7 @@ function TripPlannerMap({
                 <CheckCircle2 className="w-4 h-4" />
                 Suggerimento Green
               </div>
-              <p className="text-xs text-slate-300 mt-1">
+              <p className="text-xs text-foreground mt-1">
                 Scegli treno o bici per ridurre le emissioni del tuo viaggio!
               </p>
             </div>
@@ -2429,7 +2429,7 @@ function TripPlannerMap({
             <Popup>
               <div className="min-w-[150px]">
                 <h3 className="font-bold">{stop.city}, {stop.country}</h3>
-                <p className="text-xs text-slate-400">Tappa {index + 1}</p>
+                <p className="text-xs text-muted-foreground">Tappa {index + 1}</p>
                 <button
                   onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
                   className="mt-2 w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg transition-colors"
@@ -2457,10 +2457,10 @@ function TripPlannerMap({
       </MapContainer>
       
       {pendingLocation && (
-        <div className="absolute bottom-20 md:bottom-4 left-4 right-4 z-[1000] bg-slate-800/95 backdrop-blur-sm rounded-xl p-4">
-          <h3 className="text-white font-semibold mb-3">Aggiungi questa tappa?</h3>
+        <div className="absolute bottom-20 md:bottom-4 left-4 right-4 z-[1000] bg-card/95 backdrop-blur-sm rounded-xl p-4">
+          <h3 className="text-foreground font-semibold mb-3">Aggiungi questa tappa?</h3>
           {isLoading ? (
-            <div className="flex items-center gap-2 text-slate-400">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" />
               Cercando la posizione...
             </div>
@@ -2468,19 +2468,19 @@ function TripPlannerMap({
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-slate-400 text-xs">Città</Label>
+                  <Label className="text-muted-foreground text-xs">Città</Label>
                   <Input
                     value={cityName}
                     onChange={(e) => setCityName(e.target.value)}
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                   />
                 </div>
                 <div>
-                  <Label className="text-slate-400 text-xs">Paese</Label>
+                  <Label className="text-muted-foreground text-xs">Paese</Label>
                   <Input
                     value={countryName}
                     onChange={(e) => setCountryName(e.target.value)}
-                    className="bg-slate-700 border-slate-600"
+                    className="bg-accent border-border"
                   />
                 </div>
               </div>
@@ -2488,7 +2488,7 @@ function TripPlannerMap({
                 <Button
                   onClick={() => setPendingLocation(null)}
                   variant="outline"
-                  className="flex-1 border-slate-600"
+                  className="flex-1 border-border"
                 >
                   Annulla
                 </Button>
@@ -2505,16 +2505,16 @@ function TripPlannerMap({
         </div>
       )}
 
-      <div className="absolute bottom-4 right-4 z-[1000] bg-slate-800/90 backdrop-blur-sm rounded-xl p-3">
+      <div className="absolute bottom-4 right-4 z-[1000] bg-card/90 backdrop-blur-sm rounded-xl p-3">
         <div className="flex items-center gap-3 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="text-slate-300">{stopsWithCoords.length} tappe</span>
+            <span className="text-foreground">{stopsWithCoords.length} tappe</span>
           </div>
           {userLocation && (
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="text-slate-300">Tu sei qui</span>
+              <span className="text-foreground">Tu sei qui</span>
             </div>
           )}
         </div>

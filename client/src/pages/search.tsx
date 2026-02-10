@@ -331,7 +331,7 @@ export default function SearchPage() {
               exit={{ scale: 0.5, rotate: 5 }}
               transition={{ type: "spring", damping: 15, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 max-w-sm w-full shadow-2xl border-4 border-amber-200 dark:border-slate-700 relative overflow-hidden"
+              className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-card dark:to-background rounded-3xl p-6 max-w-sm w-full shadow-2xl border-4 border-amber-200 dark:border-border relative overflow-hidden"
               data-testid="city-popup"
             >
               {/* Decorative elements */}
@@ -341,7 +341,7 @@ export default function SearchPage() {
               {/* Close button */}
               <button
                 onClick={() => setSelectedCity(null)}
-                className="absolute top-3 right-3 w-8 h-8 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                className="absolute top-3 right-3 w-8 h-8 bg-white dark:bg-muted rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                 data-testid="button-close-popup"
               >
                 <X className="w-4 h-4" />
@@ -356,8 +356,8 @@ export default function SearchPage() {
                 >
                   {selectedCity.emoji || "🌍"}
                 </motion.div>
-                <h2 className="text-2xl font-black text-slate-800 dark:text-white">{selectedCity.name}</h2>
-                <p className="text-slate-600 dark:text-slate-400 font-medium">{selectedCity.country}</p>
+                <h2 className="text-2xl font-black text-foreground">{selectedCity.name}</h2>
+                <p className="text-muted-foreground font-medium">{selectedCity.country}</p>
               </div>
 
               {/* Nomads count - Big and fun */}
@@ -381,34 +381,34 @@ export default function SearchPage() {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="flex-1 bg-white dark:bg-slate-700 rounded-xl p-3 text-center shadow-md"
+                  className="flex-1 bg-white dark:bg-muted rounded-xl p-3 text-center shadow-md"
                 >
                   <div className="text-2xl">{selectedCity.weather?.split(' ')[0] || "🌤️"}</div>
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.weather?.split(' ')[1] || "N/A"}</div>
+                  <div className="text-sm font-bold text-foreground">{selectedCity.weather?.split(' ')[1] || "N/A"}</div>
                 </motion.div>
                 <motion.div 
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.25 }}
-                  className="flex-1 bg-white dark:bg-slate-700 rounded-xl p-3 text-center shadow-md"
+                  className="flex-1 bg-white dark:bg-muted rounded-xl p-3 text-center shadow-md"
                 >
                   <div className="text-2xl">⚡</div>
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.internetSpeed || 50} Mbps</div>
+                  <div className="text-sm font-bold text-foreground">{selectedCity.internetSpeed || 50} Mbps</div>
                 </motion.div>
                 <motion.div 
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="flex-1 bg-white dark:bg-slate-700 rounded-xl p-3 text-center shadow-md"
+                  className="flex-1 bg-white dark:bg-muted rounded-xl p-3 text-center shadow-md"
                 >
                   <div className="text-2xl">⭐</div>
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCity.rating?.toFixed(1) || "4.0"}</div>
+                  <div className="text-sm font-bold text-foreground">{selectedCity.rating?.toFixed(1) || "4.0"}</div>
                 </motion.div>
               </div>
 
               {/* Costs breakdown - Fun cards */}
               <div className="space-y-2">
-                <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide">Costo giornaliero</h3>
+                <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">Costo giornaliero</h3>
                 
                 {[
                   { icon: Home, label: "Alloggio", min: selectedCity.costAccommodationMin, max: selectedCity.costAccommodationMax, color: "from-blue-400 to-blue-500" },
@@ -421,16 +421,16 @@ export default function SearchPage() {
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.35 + i * 0.05 }}
-                    className="flex items-center gap-3 bg-white dark:bg-slate-700 rounded-xl p-3 shadow-sm"
+                    className="flex items-center gap-3 bg-white dark:bg-muted rounded-xl p-3 shadow-sm"
                   >
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-md`}>
                       <item.icon className="w-5 h-5" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-slate-700 dark:text-slate-300">{item.label}</div>
+                      <div className="font-medium text-foreground">{item.label}</div>
                     </div>
                     <div className="text-right">
-                      <span className="font-bold text-slate-800 dark:text-white">€{item.min || 0}-{item.max || 0}</span>
+                      <span className="font-bold text-foreground">€{item.min || 0}-{item.max || 0}</span>
                     </div>
                   </motion.div>
                 ))}
@@ -440,7 +440,7 @@ export default function SearchPage() {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.6 }}
-                  className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-600 dark:to-slate-700 rounded-xl p-4 text-white mt-4"
+                  className="bg-gradient-to-r from-muted to-background dark:from-accent dark:to-muted rounded-xl p-4 text-foreground mt-4"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold">TOTALE GIORNALIERO</span>

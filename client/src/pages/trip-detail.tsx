@@ -12,7 +12,7 @@ function StarsDisplay({ rating, size = 16 }: { rating: number; size?: number }) 
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map(i => (
-        <Star key={i} style={{ width: size, height: size }} className={i <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300"} />
+        <Star key={i} style={{ width: size, height: size }} className={i <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"} />
       ))}
     </div>
   );
@@ -118,7 +118,7 @@ export default function TripDetail() {
           <div className="p-4">
             {trip.user && (
               <Link href={`/user/${trip.user.id}`}>
-                <div className="flex items-center gap-2 mb-4 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors cursor-pointer">
+                <div className="flex items-center gap-2 mb-4 hover:bg-muted rounded-lg p-2 -m-2 transition-colors cursor-pointer">
                   <img 
                     src={trip.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user.username}`}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-200"
@@ -133,24 +133,24 @@ export default function TripDetail() {
             )}
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-xl p-3">
                 <Calendar className="w-4 h-4 text-emerald-500" />
                 <span className="text-sm">
                   {trip.startDate ? new Date(trip.startDate).toLocaleDateString("it-IT") : "N/D"}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+              <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-xl p-3">
                 <DollarSign className="w-4 h-4 text-emerald-500" />
                 <span className="text-sm">{trip.totalBudget || 0} {trip.currency || "EUR"}</span>
               </div>
               {trip.startLocation && (
-                <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-xl p-3">
                   <MapPin className="w-4 h-4 text-emerald-500" />
                   <span className="text-sm truncate">{trip.startLocation}</span>
                 </div>
               )}
               {trip.endLocation && (
-                <div className="flex items-center gap-2 text-muted-foreground bg-gray-50 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-xl p-3">
                   <Globe className="w-4 h-4 text-emerald-500" />
                   <span className="text-sm truncate">{trip.endLocation}</span>
                 </div>
@@ -180,7 +180,7 @@ export default function TripDetail() {
               </span>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                 trip.status === "completed" ? "bg-emerald-100 text-emerald-700" : 
-                trip.status === "in_progress" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                trip.status === "in_progress" ? "bg-blue-100 text-blue-700" : "bg-muted text-muted-foreground"
               }`}>
                 {trip.status === "completed" ? "Completato" : trip.status === "in_progress" ? "In corso" : "Pianificato"}
               </span>
@@ -204,7 +204,7 @@ export default function TripDetail() {
                   
                   <button 
                     onClick={() => setExpandedStop(expandedStop === stop.id ? null : stop.id)}
-                    className={`w-full text-left rounded-xl transition-all ${expandedStop === stop.id ? "bg-emerald-50 ring-1 ring-emerald-200" : "hover:bg-gray-50"}`}
+                    className={`w-full text-left rounded-xl transition-all ${expandedStop === stop.id ? "bg-emerald-50 ring-1 ring-emerald-200" : "hover:bg-muted"}`}
                   >
                     <div className="p-3">
                       <div className="flex items-center justify-between">
@@ -219,7 +219,7 @@ export default function TripDetail() {
                           {stop.imageUrl && (
                             <img src={stop.imageUrl} className="w-10 h-10 rounded-lg object-cover" alt="" />
                           )}
-                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${expandedStop === stop.id ? "rotate-180" : ""}`} />
+                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedStop === stop.id ? "rotate-180" : ""}`} />
                         </div>
                       </div>
                       
@@ -236,7 +236,7 @@ export default function TripDetail() {
                   </button>
 
                   {expandedStop === stop.id && (
-                    <div className="mt-1 rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                    <div className="mt-1 rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                       {stop.imageUrl && (
                         <img src={stop.imageUrl} className="w-full h-40 object-cover" alt={stop.city} />
                       )}
@@ -262,8 +262,8 @@ export default function TripDetail() {
                         )}
 
                         {stop.notes && (
-                          <div className="bg-gray-50 rounded-xl p-3">
-                            <p className="text-sm text-gray-700 italic">"{stop.notes}"</p>
+                          <div className="bg-muted rounded-xl p-3">
+                            <p className="text-sm text-muted-foreground italic">"{stop.notes}"</p>
                           </div>
                         )}
 

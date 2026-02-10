@@ -64,8 +64,8 @@ function PresenceDot({ userId, size = "sm" }: { userId: string; size?: "sm" | "m
   const sizeClasses = size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5";
   return (
     <span
-      className={`absolute bottom-0 right-0 ${sizeClasses} rounded-full border-2 border-slate-900 ${
-        online ? "bg-emerald-400" : "bg-slate-500"
+      className={`absolute bottom-0 right-0 ${sizeClasses} rounded-full border-2 border-background ${
+        online ? "bg-emerald-400" : "bg-muted-foreground"
       }`}
       data-testid={`presence-${userId}`}
     />
@@ -96,16 +96,16 @@ function StackedAvatars({ members, max = 4 }: { members: Partial<User>[]; max?: 
       {shown.map((m, i) => (
         <div key={m.id || i} className="relative" style={{ zIndex: max - i }}>
           {m.avatar ? (
-            <img src={m.avatar} alt={m.name || ""} className="w-7 h-7 rounded-full object-cover border-2 border-slate-900" />
+            <img src={m.avatar} alt={m.name || ""} className="w-7 h-7 rounded-full object-cover border-2 border-background" />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-900">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-background">
               {m.name?.charAt(0) || "?"}
             </div>
           )}
         </div>
       ))}
       {extra > 0 && (
-        <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 border-2 border-slate-900" style={{ zIndex: 0 }}>
+        <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-[10px] font-bold text-foreground border-2 border-background" style={{ zIndex: 0 }}>
           +{extra}
         </div>
       )}
@@ -430,7 +430,7 @@ export default function Chat() {
   if (authLoading || loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-screen bg-slate-900">
+        <div className="flex items-center justify-center h-screen bg-background">
           <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
         </div>
       </Layout>
@@ -439,14 +439,14 @@ export default function Chat() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-64px)] md:h-screen bg-slate-900">
+      <div className="flex h-[calc(100vh-64px)] md:h-screen bg-background">
         {/* Left Sidebar - Groups */}
-        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-20 bg-slate-950 border-r border-slate-800`}>
-          <div className="p-3 border-b border-slate-800">
+        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-20 bg-background border-r border-border`}>
+          <div className="p-3 border-b border-border">
             <div className="w-12 h-12 mx-auto bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
-            <p className="text-[10px] text-slate-500 text-center mt-1">{t("chat.groups")}</p>
+            <p className="text-[10px] text-muted-foreground text-center mt-1">{t("chat.groups")}</p>
           </div>
           
           <div className="flex-1 overflow-y-auto py-3 space-y-2">
@@ -456,7 +456,7 @@ export default function Chat() {
                 onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); setShowMembersPanel(false); setVisibleMessages(30); }}
                 className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-all relative group ${
                   selectedGroup?.id === group.id 
-                    ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-slate-950" 
+                    ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-background" 
                     : "hover:scale-110"
                 }`}
                 title={group.name}
@@ -470,14 +470,14 @@ export default function Chat() {
                     {group.members > 99 ? "99+" : group.members}
                   </span>
                 )}
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-muted text-foreground text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
                   {group.name} ({group.city})
                 </div>
               </button>
             ))}
           </div>
 
-          <div className="p-3 border-t border-slate-800">
+          <div className="p-3 border-t border-border">
             <button 
               onClick={() => setShowCreateGroup(true)}
               className="w-12 h-12 mx-auto bg-violet-500 hover:bg-violet-600 rounded-xl flex items-center justify-center text-white transition-colors"
@@ -485,15 +485,15 @@ export default function Chat() {
             >
               <Plus className="w-5 h-5" />
             </button>
-            <p className="text-[10px] text-slate-500 text-center mt-1">{t("chat.new")}</p>
+            <p className="text-[10px] text-muted-foreground text-center mt-1">{t("chat.new")}</p>
           </div>
         </aside>
 
         {/* Middle Section - Contacts List */}
-        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-full lg:w-80 bg-slate-900 border-r border-slate-800`}>
-          <div className="p-4 border-b border-slate-800">
+        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-full lg:w-80 bg-background border-r border-border`}>
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+              <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-violet-400" />
                 {t("chat.title")}
               </h1>
@@ -508,13 +508,13 @@ export default function Chat() {
             </div>
             
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={t("chat.search_contacts")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+                className="w-full bg-muted border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
                 data-testid="input-search-contacts"
               />
             </div>
@@ -523,8 +523,8 @@ export default function Chat() {
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {sortedContacts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Send className="w-10 h-10 text-slate-600 mb-4" />
-                <p className="text-slate-400 font-medium">{t("chat.no_contacts")}</p>
+                <Send className="w-10 h-10 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground font-medium">{t("chat.no_contacts")}</p>
               </div>
             ) : (
               sortedContacts.map(u => {
@@ -538,7 +538,7 @@ export default function Chat() {
                     key={u.id}
                     onClick={() => selectPrivateChat(u)}
                     className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                      selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-slate-800"
+                      selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-muted"
                     }`}
                     data-testid={`chat-private-${u.id}`}
                   >
@@ -546,7 +546,7 @@ export default function Chat() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <p className={`font-semibold text-sm truncate ${unreadCount > 0 ? 'text-white' : 'text-slate-300'}`}>{u.name}</p>
+                          <p className="font-semibold text-sm truncate text-foreground">{u.name}</p>
                           {rel === "mutual" && (
                             <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full">{t("chat.badge_mutual")}</span>
                           )}
@@ -558,7 +558,7 @@ export default function Chat() {
                           )}
                         </div>
                         {lastMessage && (
-                          <span className="text-[10px] text-slate-500">
+                          <span className="text-[10px] text-muted-foreground">
                             {new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         )}
@@ -572,11 +572,11 @@ export default function Chat() {
                         )}
                       </div>
                       {lastMessage ? (
-                        <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-slate-300 font-medium' : 'text-slate-500'}`}>
+                        <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                           {lastMessage.senderId === user?.id ? t("chat.you_prefix") : ""}{lastMessage.content}
                         </p>
                       ) : (
-                        <p className="text-xs text-slate-500 truncate">@{u.username}</p>
+                        <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
                       )}
                     </div>
                     {unreadCount > 0 && (
@@ -592,18 +592,18 @@ export default function Chat() {
         </aside>
 
         {/* Right Side - Chat Window */}
-        <main className={`${!hasActiveChat && isMobile ? 'hidden' : 'flex'} flex-1 flex-col bg-slate-950 relative`}>
+        <main className={`${!hasActiveChat && isMobile ? 'hidden' : 'flex'} flex-1 flex-col bg-background relative`}>
           {hasActiveChat ? (
             <>
               {/* Chat Header */}
               <header
-                className={`p-4 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800 flex items-center gap-3 z-10 ${selectedGroup ? 'cursor-pointer hover:bg-slate-800/50 transition-colors' : ''}`}
+                className={`p-4 bg-card/95 backdrop-blur-sm border-b border-border flex items-center gap-3 z-10 ${selectedGroup ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''}`}
                 onClick={() => { if (selectedGroup) setShowMembersPanel(!showMembersPanel); }}
                 data-testid="chat-header"
               >
                 <button
                   onClick={(e) => { e.stopPropagation(); setSelectedGroup(null); setSelectedPrivateUser(null); setShowMembersPanel(false); }}
-                  className="lg:hidden w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white"
+                  className="lg:hidden w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-foreground"
                   data-testid="button-back"
                 >
                   <ArrowLeft className="w-5 h-5" />
@@ -613,9 +613,9 @@ export default function Chat() {
                   <>
                     <AvatarWithPresence user={selectedPrivateUser} />
                     <div className="flex-1">
-                      <h2 className="font-bold text-white">{selectedPrivateUser.name}</h2>
+                      <h2 className="font-bold text-foreground">{selectedPrivateUser.name}</h2>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs text-slate-400">@{selectedPrivateUser.username}</p>
+                        <p className="text-xs text-muted-foreground">@{selectedPrivateUser.username}</p>
                         {isOnlineSimulated(selectedPrivateUser.id) && (
                           <span className="text-[10px] text-emerald-400 font-medium">{t("chat.online_now")}</span>
                         )}
@@ -629,7 +629,7 @@ export default function Chat() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h2 className="font-bold text-white truncate">{selectedGroup.name}</h2>
+                        <h2 className="font-bold text-foreground truncate">{selectedGroup.name}</h2>
                         <span className="text-[10px] px-2 py-0.5 bg-teal-500/20 text-teal-400 rounded-full font-medium flex items-center gap-1">
                           <MapPin className="w-2.5 h-2.5" />
                           {selectedGroup.city}
@@ -637,10 +637,10 @@ export default function Chat() {
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
                         <StackedAvatars members={groupMembers} max={5} />
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-muted-foreground">
                           {selectedGroup.members} {t("chat.group_members_count")}
                         </span>
-                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                        <Users className="w-3.5 h-3.5 text-muted-foreground" />
                       </div>
                     </div>
                   </>
@@ -655,17 +655,17 @@ export default function Chat() {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.25 }}
-                    className="bg-slate-900 border-b border-slate-800 overflow-hidden z-10"
+                    className="bg-background border-b border-border overflow-hidden z-10"
                   >
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                           <Users className="w-4 h-4 text-violet-400" />
                           {t("chat.group_members")} ({groupMembers.length})
                         </h3>
                         <button
                           onClick={(e) => { e.stopPropagation(); setShowMembersPanel(false); }}
-                          className="w-6 h-6 bg-slate-800 rounded-md flex items-center justify-center text-slate-400 hover:text-white"
+                          className="w-6 h-6 bg-muted rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground"
                           data-testid="button-close-members"
                         >
                           <ChevronUp className="w-3.5 h-3.5" />
@@ -678,12 +678,12 @@ export default function Chat() {
                           return (
                             <div
                               key={member.id}
-                              className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-colors group/member"
+                              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/60 hover:bg-muted transition-colors group/member"
                               data-testid={`member-${member.id}`}
                             >
                               <AvatarWithPresence user={member as User} size="sm" />
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">{member.name}</p>
+                                <p className="text-sm font-medium text-foreground truncate">{member.name}</p>
                                 <div className="flex items-center gap-1.5">
                                   {(member as any).location && (
                                     <span className="text-[10px] text-teal-400 flex items-center gap-0.5 truncate">
@@ -691,7 +691,7 @@ export default function Chat() {
                                       {(member as any).location.split(",")[0]}
                                     </span>
                                   )}
-                                  <span className={`text-[10px] ${online ? "text-emerald-400" : "text-slate-500"}`}>
+                                  <span className={`text-[10px] ${online ? "text-emerald-400" : "text-muted-foreground"}`}>
                                     {online ? t("chat.online_now") : t("chat.offline")}
                                   </span>
                                 </div>
@@ -699,7 +699,7 @@ export default function Chat() {
                               <div className="flex gap-1 opacity-0 group-hover/member:opacity-100 transition-opacity">
                                 <Link href={`/profile/${member.id}`}>
                                   <button
-                                    className="w-7 h-7 bg-slate-700 hover:bg-violet-500 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                                    className="w-7 h-7 bg-accent hover:bg-violet-500 rounded-lg flex items-center justify-center text-foreground hover:text-white transition-colors"
                                     title={t("chat.view_profile")}
                                     data-testid={`button-profile-${member.id}`}
                                     onClick={(e) => e.stopPropagation()}
@@ -714,7 +714,7 @@ export default function Chat() {
                                       const u = allUsers.find(u => u.id === member.id);
                                       if (u) { selectPrivateChat(u); setShowMembersPanel(false); }
                                     }}
-                                    className="w-7 h-7 bg-slate-700 hover:bg-teal-500 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-colors"
+                                    className="w-7 h-7 bg-accent hover:bg-teal-500 rounded-lg flex items-center justify-center text-foreground hover:text-white transition-colors"
                                     title={t("chat.send_message")}
                                     data-testid={`button-dm-${member.id}`}
                                   >
@@ -738,7 +738,7 @@ export default function Chat() {
                   <div className="flex justify-center mb-4">
                     <button
                       onClick={() => setVisibleMessages(prev => prev + 30)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-full transition-colors border border-slate-700/50"
+                      className="flex items-center gap-2 px-4 py-2 bg-muted/80 hover:bg-accent text-foreground text-xs font-medium rounded-full transition-colors border border-border/50"
                       data-testid="button-load-previous"
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
@@ -749,11 +749,11 @@ export default function Chat() {
 
                 {currentMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center mb-4">
+                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-muted to-accent flex items-center justify-center mb-4">
                       <Compass className="w-10 h-10 text-teal-400" />
                     </div>
-                    <h3 className="font-bold text-white text-lg">{t("chat.no_messages_yet")}</h3>
-                    <p className="text-slate-500 text-sm mt-2 max-w-xs">
+                    <h3 className="font-bold text-foreground text-lg">{t("chat.no_messages_yet")}</h3>
+                    <p className="text-muted-foreground text-sm mt-2 max-w-xs">
                       {selectedGroup ? t("chat.group_welcome") : t("chat.start_the_conversation")}
                     </p>
                   </div>
@@ -763,8 +763,8 @@ export default function Chat() {
                       if (item.type === "date") {
                         return (
                           <div key={`date-${i}`} className="flex items-center justify-center my-4">
-                            <div className="px-3 py-1 bg-slate-800/80 backdrop-blur-sm rounded-full border border-slate-700/50">
-                              <span className="text-[11px] text-slate-400 font-medium">{item.label}</span>
+                            <div className="px-3 py-1 bg-muted/80 backdrop-blur-sm rounded-full border border-border/50">
+                              <span className="text-[11px] text-muted-foreground font-medium">{item.label}</span>
                             </div>
                           </div>
                         );
@@ -808,7 +808,7 @@ export default function Chat() {
                                   {senderName}
                                 </span>
                                 {senderLocation && (
-                                  <span className="text-[9px] text-slate-500 flex items-center gap-0.5">
+                                  <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
                                     <MapPin className="w-2 h-2" />
                                     {senderLocation.split(",")[0]}
                                   </span>
@@ -818,10 +818,10 @@ export default function Chat() {
                             <div className={`px-3.5 py-2 ${
                               isOwn 
                                 ? `bg-gradient-to-br from-violet-500 to-violet-600 text-white ${showAvatar ? 'rounded-2xl rounded-br-md' : isLast ? 'rounded-2xl rounded-tr-md' : 'rounded-xl rounded-r-md'}` 
-                                : `bg-slate-800/80 text-white ${showAvatar ? 'rounded-2xl rounded-bl-md' : isLast ? 'rounded-2xl rounded-tl-md' : 'rounded-xl rounded-l-md'}`
+                                : `bg-muted/80 text-foreground ${showAvatar ? 'rounded-2xl rounded-bl-md' : isLast ? 'rounded-2xl rounded-tl-md' : 'rounded-xl rounded-l-md'}`
                             }`}>
                               <p className="text-sm leading-relaxed">{msg.content}</p>
-                              <p className={`text-[10px] mt-0.5 text-right ${isOwn ? 'text-violet-200/70' : 'text-slate-500'}`}>
+                              <p className={`text-[10px] mt-0.5 text-right ${isOwn ? 'text-violet-200/70' : 'text-muted-foreground'}`}>
                                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
@@ -837,14 +837,14 @@ export default function Chat() {
               {/* Message Input */}
               <form
                 onSubmit={selectedPrivateUser ? handleSendPrivateMessage : handleSendGroupMessage}
-                className="p-3 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 flex gap-2"
+                className="p-3 bg-card/95 backdrop-blur-sm border-t border-border flex gap-2"
               >
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={t("chat.write_message")}
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+                  className="flex-1 bg-muted border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
                   data-testid="input-message"
                 />
                 <button
@@ -859,11 +859,11 @@ export default function Chat() {
             </>
           ) : (
             <div className="hidden lg:flex flex-col items-center justify-center h-full text-center">
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center mb-4">
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-muted to-accent flex items-center justify-center mb-4">
                 <Compass className="w-12 h-12 text-teal-400" />
               </div>
-              <h2 className="text-xl font-bold text-white">{t("chat.select_conversation")}</h2>
-              <p className="text-slate-500 mt-2">{t("chat.select_conversation_desc")}</p>
+              <h2 className="text-xl font-bold text-foreground">{t("chat.select_conversation")}</h2>
+              <p className="text-muted-foreground mt-2">{t("chat.select_conversation_desc")}</p>
             </div>
           )}
         </main>
@@ -883,16 +883,16 @@ export default function Chat() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-xl"
+              className="bg-background border border-border rounded-2xl w-full max-w-md shadow-xl"
             >
-              <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <Users className="w-5 h-5 text-violet-400" />
                   {t("chat.new_contact")}
                 </h2>
                 <button
                   onClick={() => { setShowNewContact(false); setNewContactSearch(""); }}
-                  className="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center text-slate-400"
+                  className="w-8 h-8 bg-muted hover:bg-accent rounded-lg flex items-center justify-center text-muted-foreground"
                   data-testid="button-close-new-contact"
                 >
                   <X className="w-4 h-4" />
@@ -901,13 +901,13 @@ export default function Chat() {
 
               <div className="p-4">
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder={t("chat.search_users")}
                     value={newContactSearch}
                     onChange={(e) => setNewContactSearch(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+                    className="w-full bg-muted border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
                     data-testid="input-new-contact-search"
                     autoFocus
                   />
@@ -927,13 +927,13 @@ export default function Chat() {
                           setShowNewContact(false);
                           setNewContactSearch("");
                         }}
-                        className="w-full p-3 flex items-center gap-3 rounded-xl hover:bg-slate-800 transition-colors text-left"
+                        className="w-full p-3 flex items-center gap-3 rounded-xl hover:bg-muted transition-colors text-left"
                         data-testid={`new-contact-${u.id}`}
                       >
                         <AvatarWithPresence user={u} size="sm" />
                         <div>
-                          <p className="font-semibold text-white text-sm">{u.name}</p>
-                          <p className="text-xs text-slate-400">@{u.username}</p>
+                          <p className="font-semibold text-foreground text-sm">{u.name}</p>
+                          <p className="text-xs text-muted-foreground">@{u.username}</p>
                         </div>
                       </button>
                     ))
@@ -942,7 +942,7 @@ export default function Chat() {
                     u.name.toLowerCase().includes(newContactSearch.toLowerCase()) ||
                     u.username.toLowerCase().includes(newContactSearch.toLowerCase())
                   ).length === 0 && (
-                    <div className="text-center py-8 text-slate-500">
+                    <div className="text-center py-8 text-muted-foreground">
                       <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
                       <p>{t("chat.no_users_found")}</p>
                     </div>
@@ -990,14 +990,14 @@ function CreateGroupModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-slate-900 rounded-2xl w-full max-w-md p-6 border border-slate-800"
+        className="bg-background rounded-2xl w-full max-w-md p-6 border border-border"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">{t("chat.create_group")}</h2>
+          <h2 className="text-xl font-bold text-foreground">{t("chat.create_group")}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -1005,39 +1005,39 @@ function CreateGroupModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">{t("chat.group_name")} *</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t("chat.group_name")} *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("chat.group_name_placeholder")}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+              className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
               data-testid="input-group-name"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">{t("chat.city")} *</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t("chat.city")} *</label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder={t("chat.city_placeholder")}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none"
+              className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
               data-testid="input-group-city"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">{t("chat.description")}</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">{t("chat.description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("chat.description_placeholder")}
               rows={3}
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-violet-500/50 outline-none resize-none"
+              className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none resize-none"
               data-testid="input-group-description"
             />
           </div>
@@ -1047,7 +1047,7 @@ function CreateGroupModal({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex-1 border-slate-700 text-slate-400 hover:text-white"
+              className="flex-1 border-border text-muted-foreground hover:text-foreground"
             >
               {t("common.cancel")}
             </Button>
