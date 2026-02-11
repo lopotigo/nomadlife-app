@@ -156,6 +156,20 @@ Preferred communication style: Simple, everyday language.
   - Amazon affiliate link integration for marketplace products
   - Backend protection with `requireAdmin` middleware on all `/api/admin/*` routes
 
+- **Trip Replay** (`TripReplay` component): Animated fullscreen map replay of trips
+  - Intro screen with trip title, stop count, total km
+  - Animated line drawing between stops with transport-mode colored paths
+  - Camera fly-to transitions between stops
+  - Moving marker with user avatar and "IN VIAGGIO" badge
+  - Stop info cards with city, dates, rating, accommodation, notes
+  - Traveling progress bar showing km covered
+  - Play/Pause, Skip, Restart controls
+  - Speed selection (1x, 2x, 3x)
+  - Fullscreen toggle support
+  - Summary screen at end with total stats (stops, km, CO₂)
+  - Available from Trip Detail page and Travel Diary (TripDetails)
+- **YouTube Video Embeds**: Posts with YouTube/youtu.be links render as embedded iframe players in feed, map popups, and post detail pages
+
 ### PWA Configuration
 
 - **Manifest**: `client/public/manifest.json` - App name, icons, theme colors, shortcuts

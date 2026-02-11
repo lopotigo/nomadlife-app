@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
-import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown } from "lucide-react";
+import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareQRModal } from "@/components/share-qr-modal";
+import { TripReplay } from "@/components/trip-replay";
 import type { Trip, TripStop, User } from "@shared/schema";
 
 type TripWithDetails = Trip & { stops: TripStop[]; user?: User };
@@ -23,6 +24,7 @@ export default function TripDetail() {
   const [trip, setTrip] = useState<TripWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showShare, setShowShare] = useState(false);
+  const [showReplay, setShowReplay] = useState(false);
   const [expandedStop, setExpandedStop] = useState<string | null>(null);
 
   useEffect(() => {
@@ -85,10 +87,22 @@ export default function TripDetail() {
               Indietro
             </Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={() => setShowShare(true)} data-testid="button-share-trip">
-            <Share2 className="w-4 h-4 mr-2" />
-            Condividi
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowReplay(true)} 
+              className="border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10"
+              data-testid="button-trip-replay"
+            >
+              <Play className="w-4 h-4 mr-1" />
+              Replay
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowShare(true)} data-testid="button-share-trip">
+              <Share2 className="w-4 h-4 mr-2" />
+              Condividi
+            </Button>
+          </div>
         </div>
 
         <div className="bg-card rounded-2xl overflow-hidden shadow-lg mb-6">
@@ -297,6 +311,16 @@ export default function TripDetail() {
           type="trip"
           id={trip.id}
           title={trip.title}
+        />
+      )}
+
+      {showReplay && (
+        <TripReplay
+          tripTitle={trip.title}
+          stops={sortedStops}
+          userAvatar={trip.user?.avatar || undefined}
+          userName={trip.user?.name || trip.user?.username}
+          onClose={() => setShowReplay(false)}
         />
       )}
     </Layout>

@@ -22,10 +22,11 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "re
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3 } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { useI18n } from "@/lib/i18n";
 import { FloatingTip } from "@/components/contextual-tip";
+import { TripReplay } from "@/components/trip-replay";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -1337,6 +1338,7 @@ function TripDetails({
 }) {
   const [isPublic, setIsPublic] = useState(trip.isPublic);
   const [status, setStatus] = useState(trip.status);
+  const [showReplay, setShowReplay] = useState(false);
   const { toast } = useToast();
   const totalExpenses = calculateTotal(trip);
   const currencySymbol = trip.currency === "EUR" ? "€" : trip.currency === "USD" ? "$" : trip.currency;
@@ -1392,6 +1394,16 @@ function TripDetails({
           <span className="text-sm">Indietro</span>
         </button>
         <div className="flex items-center gap-2 flex-shrink-0">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowReplay(true)}
+            className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs px-2"
+            data-testid="button-diary-replay"
+          >
+            <Film className="w-4 h-4 mr-1" />
+            <span className="hidden sm:inline">Replay</span>
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -1552,6 +1564,16 @@ function TripDetails({
           
           <TripCO2Summary stops={trip.stops} />
         </div>
+      )}
+
+      {showReplay && (
+        <TripReplay
+          tripTitle={trip.title}
+          stops={trip.stops}
+          userAvatar={trip.user?.avatar || undefined}
+          userName={trip.user?.name || trip.user?.username}
+          onClose={() => setShowReplay(false)}
+        />
       )}
     </motion.div>
   );
