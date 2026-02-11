@@ -124,7 +124,7 @@ export function FloatingTip({
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm"
+          className="fixed bottom-24 left-4 right-4 z-40 md:left-auto md:right-4 md:max-w-sm"
           data-testid={`floating-tip-${tipKey}`}
         >
           <div className="bg-primary text-primary-foreground rounded-2xl p-4 shadow-2xl">

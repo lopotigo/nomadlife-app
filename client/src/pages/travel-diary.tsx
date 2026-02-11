@@ -1382,25 +1382,26 @@ function TripDetails({
       animate={{ opacity: 1 }}
       className="space-y-6"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           data-testid="button-back"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
-          Indietro
+          <span className="text-sm">Indietro</span>
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={onOpenPlannerMap}
-            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 text-xs px-2"
             data-testid="button-plan-on-map"
           >
             <Route className="w-4 h-4 mr-1" />
-            Crea percorso
+            <span className="hidden sm:inline">Crea percorso</span>
+            <span className="sm:hidden">Mappa</span>
           </Button>
           <Button 
             variant="outline" 
@@ -1452,10 +1453,10 @@ function TripDetails({
         </div>
         
         {/* Controlli stato e visibilità */}
-        <div className="mt-4 pt-4 border-t border-emerald-500/30 grid grid-cols-2 gap-4">
+        <div className="mt-4 pt-4 border-t border-emerald-500/30 space-y-3">
           <div>
             <p className="text-xs text-muted-foreground mb-2">Stato viaggio</p>
-            <div className="flex gap-1">
+            <div className="flex gap-1.5">
               {[
                 { value: "planned", label: "Pianificato", icon: Calendar },
                 { value: "in_progress", label: "In corso", icon: Play },
@@ -1464,15 +1465,15 @@ function TripDetails({
                 <button
                   key={opt.value}
                   onClick={() => handleChangeStatus(opt.value)}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
+                  className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${
                     status === opt.value 
                       ? "bg-emerald-500 text-white" 
                       : "bg-accent/50 text-muted-foreground hover:bg-accent"
                   }`}
                   data-testid={`status-${opt.value}`}
                 >
-                  <opt.icon className="w-3 h-3" />
-                  {opt.label.split(" ")[0]}
+                  <opt.icon className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{opt.label.split(" ")[0]}</span>
                 </button>
               ))}
             </div>
@@ -1481,7 +1482,7 @@ function TripDetails({
             <p className="text-xs text-muted-foreground mb-2">Visibilità</p>
             <button
               onClick={handleTogglePublic}
-              className={`w-full py-2 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+              className={`w-full py-2.5 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                 isPublic 
                   ? "bg-blue-500 text-white" 
                   : "bg-accent/50 text-muted-foreground"
