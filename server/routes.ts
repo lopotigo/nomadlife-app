@@ -114,15 +114,20 @@ export async function registerRoutes(
     try {
       const data = insertUserSchema.parse(req.body);
       
+      const pw = data.password;
+      if (pw.length < 8 || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) {
+        return res.status(400).send({ error: "La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale" });
+      }
+
       // Check if user exists
       const existingUser = await storage.getUserByUsername(data.username);
       if (existingUser) {
-        return res.status(400).send({ error: "Username already exists" });
+        return res.status(400).send({ error: "Username già in uso" });
       }
       
       const existingEmail = await storage.getUserByEmail(data.email);
       if (existingEmail) {
-        return res.status(400).send({ error: "Email already exists" });
+        return res.status(400).send({ error: "Email già in uso" });
       }
       
       // Hash password

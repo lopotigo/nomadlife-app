@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -6,14 +6,198 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plane, Loader2 } from "lucide-react";
+import { Plane, Loader2, Check, X, MapPin, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+interface CityResult {
+  display_name: string;
+  name: string;
+  address: {
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    state?: string;
+    country?: string;
+    country_code?: string;
+  };
+  lat: string;
+  lon: string;
+}
+
+function validatePassword(password: string) {
+  return {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+}
+
+function PasswordStrength({ password }: { password: string }) {
+  const checks = validatePassword(password);
+  const allValid = checks.minLength && checks.hasUppercase && checks.hasNumber && checks.hasSpecial;
+
+  if (!password) return null;
+
+  return (
+    <div className="space-y-1 mt-2" data-testid="password-strength">
+      {[
+        { key: "minLength", label: "Almeno 8 caratteri", valid: checks.minLength },
+        { key: "hasUppercase", label: "Una lettera maiuscola", valid: checks.hasUppercase },
+        { key: "hasNumber", label: "Un numero", valid: checks.hasNumber },
+        { key: "hasSpecial", label: "Un carattere speciale (!@#$...)", valid: checks.hasSpecial },
+      ].map(({ key, label, valid }) => (
+        <div key={key} className={`flex items-center gap-1.5 text-xs ${valid ? "text-emerald-500" : "text-red-400"}`}>
+          {valid ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+          <span>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CityAutocomplete({
+  city,
+  country,
+  onCityChange,
+  onCountryChange,
+  disabled,
+}: {
+  city: string;
+  country: string;
+  onCityChange: (v: string) => void;
+  onCountryChange: (v: string) => void;
+  disabled: boolean;
+}) {
+  const [suggestions, setSuggestions] = useState<CityResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const searchCities = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6&featuretype=city&accept-language=it`,
+        { headers: { "User-Agent": "NomadLife/1.0" } }
+      );
+      const data: CityResult[] = await res.json();
+      const cityResults = data.filter(
+        (d) => d.address?.city || d.address?.town || d.address?.village || d.address?.municipality
+      );
+      setSuggestions(cityResults.length > 0 ? cityResults : data.slice(0, 5));
+      setShowDropdown(true);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleInputChange = (value: string) => {
+    onCityChange(value);
+    onCountryChange("");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => searchCities(value), 300);
+  };
+
+  const selectCity = (result: CityResult) => {
+    const cityName = result.address?.city || result.address?.town || result.address?.village || result.address?.municipality || result.name;
+    const countryName = result.address?.country || "";
+    onCityChange(cityName);
+    onCountryChange(countryName);
+    setShowDropdown(false);
+    setSuggestions([]);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <Label htmlFor="signup-city">Città</Label>
+        <div ref={containerRef} className="relative">
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              id="signup-city"
+              value={city}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onFocus={() => { if (suggestions.length > 0) setShowDropdown(true); }}
+              data-testid="input-signup-city"
+              placeholder="Milano, Roma, Bali..."
+              required
+              disabled={disabled}
+              className="pl-9"
+              autoComplete="off"
+            />
+            {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />}
+          </div>
+          {showDropdown && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-card border border-border rounded-xl shadow-xl max-h-60 overflow-y-auto" data-testid="city-dropdown">
+              {suggestions.map((s, i) => {
+                const cityName = s.address?.city || s.address?.town || s.address?.village || s.address?.municipality || s.name;
+                const countryName = s.address?.country || "";
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => selectCity(s)}
+                    className="w-full text-left px-4 py-2.5 hover:bg-accent transition-colors flex items-center gap-3 border-b border-border/30 last:border-0"
+                    data-testid={`city-option-${i}`}
+                  >
+                    <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">{cityName}</p>
+                      <p className="text-xs text-muted-foreground">{countryName}{s.address?.state ? `, ${s.address.state}` : ""}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="signup-country">Paese</Label>
+        <Input
+          id="signup-country"
+          value={country}
+          onChange={(e) => onCountryChange(e.target.value)}
+          data-testid="input-signup-country"
+          placeholder="Selezionato automaticamente"
+          required
+          disabled={disabled}
+          className="bg-muted/50"
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function Auth() {
   const { login, signup } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [signupPassword, setSignupPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,10 +208,10 @@ export default function Auth() {
     try {
       setLoading(true);
       await login(username, password);
-      toast({ title: "Welcome back!", description: "You've successfully logged in." });
+      toast({ title: "Bentornato!", description: "Accesso effettuato con successo." });
       setLocation("/");
     } catch (error: any) {
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+      toast({ title: "Accesso fallito", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -36,22 +220,42 @@ export default function Auth() {
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    const checks = validatePassword(signupPassword);
+    if (!checks.minLength || !checks.hasUppercase || !checks.hasNumber || !checks.hasSpecial) {
+      toast({
+        title: "Password non valida",
+        description: "La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!city.trim() || !country.trim()) {
+      toast({
+        title: "Città e Paese richiesti",
+        description: "Seleziona una città dal menu a tendina.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const data = {
       username: formData.get("username") as string,
       email: formData.get("email") as string,
-      password: formData.get("password") as string,
+      password: signupPassword,
       name: formData.get("name") as string,
       bio: "",
-      location: formData.get("location") as string,
+      location: `${city}, ${country}`,
     };
 
     try {
       setLoading(true);
       await signup(data);
-      toast({ title: "Account created!", description: "Welcome to NomadLife." });
+      toast({ title: "Account creato!", description: "Benvenuto su NomadLife." });
       setLocation("/");
     } catch (error: any) {
-      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+      toast({ title: "Registrazione fallita", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -65,20 +269,20 @@ export default function Auth() {
             <Plane className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-display font-bold mb-2">NomadLife</h1>
-          <p className="text-muted-foreground">Connect with digital nomads worldwide</p>
+          <p className="text-muted-foreground">La community globale dei nomadi digitali</p>
         </div>
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="login">Accedi</TabsTrigger>
+            <TabsTrigger value="signup">Registrati</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">
             <Card>
               <CardHeader>
-                <CardTitle>Welcome back</CardTitle>
-                <CardDescription>Enter your credentials to access your account</CardDescription>
+                <CardTitle>Bentornato</CardTitle>
+                <CardDescription>Inserisci le tue credenziali per accedere</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
@@ -107,11 +311,8 @@ export default function Auth() {
                   </div>
                   <Button type="submit" className="w-full" disabled={loading} data-testid="button-login">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Login
+                    Accedi
                   </Button>
-                  <p className="text-xs text-center text-muted-foreground">
-                    Demo: username "marco", password "password123"
-                  </p>
                 </form>
               </CardContent>
             </Card>
@@ -120,13 +321,13 @@ export default function Auth() {
           <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>Create account</CardTitle>
-                <CardDescription>Join the global nomad community</CardDescription>
+                <CardTitle>Crea il tuo account</CardTitle>
+                <CardDescription>Unisciti alla community globale dei nomadi</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name">Nome e Cognome</Label>
                     <Input
                       id="signup-name"
                       name="name"
@@ -159,32 +360,43 @@ export default function Auth() {
                       disabled={loading}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-location">Current Location</Label>
-                    <Input
-                      id="signup-location"
-                      name="location"
-                      data-testid="input-signup-location"
-                      placeholder="Bali, Indonesia"
-                      required
-                      disabled={loading}
-                    />
-                  </div>
+
+                  <CityAutocomplete
+                    city={city}
+                    country={country}
+                    onCityChange={setCity}
+                    onCountryChange={setCountry}
+                    disabled={loading}
+                  />
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      data-testid="input-signup-password"
-                      placeholder="••••••••"
-                      required
-                      disabled={loading}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        type={showPassword ? "text" : "password"}
+                        data-testid="input-signup-password"
+                        placeholder="••••••••"
+                        required
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        data-testid="button-toggle-password"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <PasswordStrength password={signupPassword} />
                   </div>
+
                   <Button type="submit" className="w-full" disabled={loading} data-testid="button-signup">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Create Account
+                    Crea Account
                   </Button>
                 </form>
               </CardContent>
