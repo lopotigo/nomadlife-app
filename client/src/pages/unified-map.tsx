@@ -81,6 +81,37 @@ interface Trip {
   stops: TripStop[];
 }
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return null;
+}
+
+function YouTubeEmbed({ url, className = "" }: { url: string; className?: string }) {
+  const embedUrl = getYouTubeEmbedUrl(url);
+  if (!embedUrl) return null;
+  return (
+    <div className={`relative w-full aspect-video ${className}`}>
+      <iframe
+        src={embedUrl}
+        className="absolute inset-0 w-full h-full rounded-xl"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        title="YouTube video"
+      />
+    </div>
+  );
+}
+
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
+}
+
 function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean) {
   if (hasTripId && avatarUrl) {
     return L.divIcon({
@@ -246,10 +277,29 @@ function PostMapPopup({
       {post.imageUrl && (
         <img src={post.imageUrl} className="w-full h-28 object-cover" alt="" />
       )}
+
+      {!post.imageUrl && post.videoUrl && (
+        post.videoUrl.startsWith("http") && isYouTubeUrl(post.videoUrl)
+          ? <YouTubeEmbed url={post.videoUrl} className="px-2 pt-2" />
+          : <video src={post.videoUrl} controls className="w-full h-28 object-cover" />
+      )}
+
+      {!post.imageUrl && !post.videoUrl && post.linkUrl && isYouTubeUrl(post.linkUrl) && (
+        <YouTubeEmbed url={post.linkUrl} className="px-2 pt-2" />
+      )}
       
       <div className="px-3 py-2">
         <p className="text-sm leading-relaxed">{post.content.length > 120 ? post.content.substring(0, 120) + "..." : post.content}</p>
       </div>
+
+      {post.linkUrl && !isYouTubeUrl(post.linkUrl) && (
+        <div className="px-3 pb-1">
+          <a href={post.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-blue-500 hover:underline truncate">
+            <LinkIcon className="w-3 h-3 flex-shrink-0" />
+            {post.linkUrl}
+          </a>
+        </div>
+      )}
 
       {post.tripId && (
         <div className="px-3 pb-2">
@@ -2178,6 +2228,23 @@ function FeedPostCard({
           />
         )}
       </Link>
+
+      {!post.imageUrl && post.videoUrl && (
+        post.videoUrl.startsWith("http") && isYouTubeUrl(post.videoUrl)
+          ? <YouTubeEmbed url={post.videoUrl} className="mt-3" />
+          : <video src={post.videoUrl} controls className="mt-3 rounded-xl w-full max-h-64 object-cover" />
+      )}
+
+      {!post.imageUrl && !post.videoUrl && post.linkUrl && isYouTubeUrl(post.linkUrl) && (
+        <YouTubeEmbed url={post.linkUrl} className="mt-3" />
+      )}
+
+      {post.linkUrl && !isYouTubeUrl(post.linkUrl) && (
+        <a href={post.linkUrl} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-2 p-2.5 bg-muted rounded-xl hover:bg-muted/80 transition-colors">
+          <LinkIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+          <span className="text-sm text-blue-500 truncate">{post.linkUrl}</span>
+        </a>
+      )}
 
       {post.tripId && (
         <Link href={`/trip/${post.tripId}`}>

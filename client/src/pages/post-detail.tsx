@@ -10,6 +10,15 @@ import type { Post, User, Comment } from "@shared/schema";
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
+}
+
 export default function PostDetail() {
   const [, params] = useRoute("/post/:id");
   const [post, setPost] = useState<PostWithUser | null>(null);
@@ -145,13 +154,35 @@ export default function PostDetail() {
           )}
 
           {post.videoUrl && (
-            <video src={post.videoUrl} controls className="w-full aspect-video object-cover" />
+            post.videoUrl.startsWith("http") && isYouTubeUrl(post.videoUrl)
+              ? <div className="relative w-full aspect-video">
+                  <iframe
+                    src={getYouTubeEmbedUrl(post.videoUrl)!}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title="YouTube video"
+                  />
+                </div>
+              : <video src={post.videoUrl} controls className="w-full aspect-video object-cover" />
+          )}
+
+          {!post.videoUrl && post.linkUrl && isYouTubeUrl(post.linkUrl) && (
+            <div className="relative w-full aspect-video">
+              <iframe
+                src={getYouTubeEmbedUrl(post.linkUrl)!}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="YouTube video"
+              />
+            </div>
           )}
 
           <div className="p-4">
             <p className="text-lg mb-4">{post.content}</p>
 
-            {post.linkUrl && (
+            {post.linkUrl && !isYouTubeUrl(post.linkUrl) && (
               <a
                 href={post.linkUrl}
                 target="_blank"
