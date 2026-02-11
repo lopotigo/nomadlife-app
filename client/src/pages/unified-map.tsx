@@ -112,7 +112,7 @@ function isYouTubeUrl(url: string): boolean {
   return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
 }
 
-function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean) {
+function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean, hasVideo?: boolean) {
   if (hasTripId && avatarUrl) {
     return L.divIcon({
       html: `<div style="position:relative;">
@@ -130,9 +130,16 @@ function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null
       popupAnchor: [0, -52],
     });
   }
-  const html = imageUrl 
-    ? `<div class="post-marker"><img src="${imageUrl}" alt="post" /></div>`
-    : `<div class="post-marker post-marker-text"><svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>`;
+  let html: string;
+  if (imageUrl) {
+    html = `<div class="post-marker"><img src="${imageUrl}" alt="post" /></div>`;
+  } else if (hasVideo) {
+    html = `<div class="post-marker" style="background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="9.5,7.5 16.5,12 9.5,16.5"/></svg>
+    </div>`;
+  } else {
+    html = `<div class="post-marker post-marker-text"><svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>`;
+  }
   return L.divIcon({
     html,
     className: "custom-post-marker",
@@ -802,7 +809,7 @@ export default function UnifiedMap() {
               <Marker
                 key={`post-${post.id}`}
                 position={[post.latitude!, post.longitude!]}
-                icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId)}
+                icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId, !!(post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl))))}
               >
                 <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
                   <PostMapPopup 
