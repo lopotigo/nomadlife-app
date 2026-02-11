@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, SkipForward, RotateCcw, X, Plane, Train, Car, Footprints, Bike, MapPin, Calendar, Star, Leaf, Route, Bed, ChevronRight, Maximize2, Minimize2, Gauge } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, X, Plane, Train, Car, Footprints, Bike, MapPin, Calendar, Star, Leaf, Route, Bed, ChevronRight, Maximize2, Minimize2, Gauge, Bus } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 interface TripStop {
@@ -38,6 +38,7 @@ const transportIcons: Record<string, typeof Plane> = {
   car: Car,
   walk: Footprints,
   bike: Bike,
+  bus: Bus,
 };
 
 const transportLabels: Record<string, string> = {
@@ -45,7 +46,8 @@ const transportLabels: Record<string, string> = {
   train: "Treno",
   car: "Auto",
   walk: "A piedi",
-  bike: "Bicicletta",
+  bike: "Bici",
+  bus: "Bus",
 };
 
 const transportColors: Record<string, string> = {
@@ -54,7 +56,18 @@ const transportColors: Record<string, string> = {
   car: "#f59e0b",
   walk: "#10b981",
   bike: "#06b6d4",
+  bus: "#f97316",
 };
+
+const transportEmoji: Record<string, string> = {
+  plane: "✈️",
+  train: "🚂",
+  car: "🚗",
+  walk: "🚶",
+  bike: "🚲",
+  bus: "🚌",
+};
+
 
 function AnimatedMapController({
   stops,
@@ -64,6 +77,7 @@ function AnimatedMapController({
   lineLayersRef,
   movingMarkerRef,
   userAvatar,
+  phase,
 }: {
   stops: TripStop[];
   currentStopIndex: number;
@@ -72,6 +86,7 @@ function AnimatedMapController({
   lineLayersRef: React.MutableRefObject<L.Layer[]>;
   movingMarkerRef: React.MutableRefObject<L.Marker | null>;
   userAvatar?: string;
+  phase: string;
 }) {
   const map = useMap();
 
@@ -114,6 +129,7 @@ function AnimatedMapController({
 
       const line = L.polyline(curvedPoints, {
         color, weight: 3.5, opacity: 0.9, interactive: false, lineCap: "round",
+        dashArray: getDashForTransport(end.transportMode),
       });
       line.addTo(map);
       lineLayersRef.current.push(line);
@@ -123,9 +139,24 @@ function AnimatedMapController({
       });
       glow.addTo(map);
       lineLayersRef.current.push(glow);
+
+      const midIdx = Math.floor(curvedPoints.length / 2);
+      const midPoint = curvedPoints[midIdx];
+      const emoji = transportEmoji[end.transportMode || "walk"] || "🚶";
+      const transportMidMarker = L.marker(midPoint, {
+        icon: L.divIcon({
+          html: `<div style="font-size:20px;text-shadow:0 2px 4px rgba(0,0,0,0.5);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));">${emoji}</div>`,
+          className: "transport-emoji-marker",
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        }),
+        zIndexOffset: 50,
+        interactive: false,
+      }).addTo(map);
+      lineLayersRef.current.push(transportMidMarker);
     }
 
-    if (currentStopIndex > 0 && currentStopIndex <= validStops.length - 1) {
+    if (phase === "traveling" && currentStopIndex > 0 && currentStopIndex <= validStops.length - 1) {
       const prevStop = validStops[currentStopIndex - 1];
       const currStop = validStops[currentStopIndex];
       const color = transportColors[currStop.transportMode || "walk"] || "#10b981";
@@ -141,6 +172,7 @@ function AnimatedMapController({
       if (partialPath.length > 1) {
         const animLine = L.polyline(partialPath, {
           color, weight: 3.5, opacity: 0.9, interactive: false, lineCap: "round",
+          dashArray: getDashForTransport(currStop.transportMode),
         });
         animLine.addTo(map);
         lineLayersRef.current.push(animLine);
@@ -154,38 +186,69 @@ function AnimatedMapController({
 
       const currentPos = partialPath[partialPath.length - 1] || L.latLng(prevStop.latitude!, prevStop.longitude!);
 
+      const transportMode = currStop.transportMode || "walk";
+      const emoji = transportEmoji[transportMode] || "🚶";
+      const label = transportLabels[transportMode] || "A piedi";
+
+      let angle = 0;
+      if (partialPath.length >= 2) {
+        const p1 = partialPath[partialPath.length - 2];
+        const p2 = partialPath[partialPath.length - 1];
+        angle = Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * (180 / Math.PI);
+      }
+
       if (movingMarkerRef.current) {
         movingMarkerRef.current.setLatLng(currentPos);
       } else {
-        const rawUrl = userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
-        const avatarUrl = sanitizeUrl(rawUrl) || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
         const icon = L.divIcon({
-          html: `<div style="position:relative;">
-            <div style="width:48px;height:48px;border-radius:50%;border:3px solid ${color};box-shadow:0 0 20px ${color}80, 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:white;animation:pulse-glow 2s ease-in-out infinite;">
-              <img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+          html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:52px;height:52px;border-radius:50%;border:3px solid ${color};box-shadow:0 0 24px ${color}80, 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:${color};display:flex;align-items:center;justify-content:center;animation:pulse-glow 1.5s ease-in-out infinite;">
+              <span style="font-size:28px;${transportMode === 'plane' ? `transform:rotate(${angle - 90}deg);` : ''}">${emoji}</span>
             </div>
-            <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);">IN VIAGGIO</div>
+            <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:1.5px solid white;">${label}</div>
           </div>`,
           className: "trip-replay-marker",
-          iconSize: [48, 56],
-          iconAnchor: [24, 28],
+          iconSize: [52, 64],
+          iconAnchor: [26, 32],
         });
         movingMarkerRef.current = L.marker(currentPos, { icon, zIndexOffset: 1000 }).addTo(map);
       }
     }
 
+    if (phase === "arrived" && currentStopIndex < validStops.length) {
+      const stop = validStops[currentStopIndex];
+      const rawUrl = userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
+      const avatarUrl = sanitizeUrl(rawUrl) || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
+      
+      const arrivedIcon = L.divIcon({
+        html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:56px;height:56px;border-radius:50%;border:3px solid #10b981;box-shadow:0 0 24px rgba(16,185,129,0.6), 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:white;animation:bounce-in 0.5s ease;">
+            <img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+          </div>
+          <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:1.5px solid white;">📍 ${stop.city}</div>
+        </div>`,
+        className: "trip-replay-marker",
+        iconSize: [56, 72],
+        iconAnchor: [28, 36],
+      });
+      
+      const avatarMarker = L.marker([stop.latitude!, stop.longitude!], { icon: arrivedIcon, zIndexOffset: 1000 }).addTo(map);
+      lineLayersRef.current.push(avatarMarker);
+    }
+
     for (let i = 0; i <= Math.min(currentStopIndex, validStops.length - 1); i++) {
       const stop = validStops[i];
-      const isCurrentStop = i === currentStopIndex;
+      const isCurrentStop = i === currentStopIndex && phase === "arrived";
       const isPast = i < currentStopIndex;
 
       if (!isPast && !isCurrentStop) continue;
+      if (isCurrentStop) continue;
 
-      const size = isCurrentStop ? 36 : 28;
-      const color = isCurrentStop ? "#10b981" : "#6b7280";
+      const size = 28;
+      const color = "#6b7280";
 
       const markerIcon = L.divIcon({
-        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:3px solid ${color};background:${isCurrentStop ? '#10b981' : '#374151'};display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:${isCurrentStop ? '14' : '11'}px;box-shadow:0 2px 8px rgba(0,0,0,0.3);${isCurrentStop ? 'animation:bounce-in 0.5s ease;' : ''}">
+        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:3px solid ${color};background:#374151;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
           ${i + 1}
         </div>`,
         className: "stop-replay-marker",
@@ -193,11 +256,26 @@ function AnimatedMapController({
         iconAnchor: [size / 2, size / 2],
       });
 
-      const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: isCurrentStop ? 900 : 100 }).addTo(map);
+      const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: 100 }).addTo(map);
       lineLayersRef.current.push(marker);
     }
 
-  }, [currentStopIndex, progress, stops, map, lineLayersRef, movingMarkerRef, userAvatar]);
+    for (let i = currentStopIndex + 1; i < validStops.length; i++) {
+      const stop = validStops[i];
+      const size = 24;
+      const markerIcon = L.divIcon({
+        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px dashed #4b5563;background:#1f2937;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:bold;font-size:10px;box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+          ${i + 1}
+        </div>`,
+        className: "stop-replay-marker",
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+      const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: 50 }).addTo(map);
+      lineLayersRef.current.push(marker);
+    }
+
+  }, [currentStopIndex, progress, stops, map, lineLayersRef, movingMarkerRef, userAvatar, phase]);
 
   useEffect(() => {
     const validStops = stops.filter(s => s.latitude != null && s.longitude != null);
@@ -211,6 +289,14 @@ function AnimatedMapController({
   }, [currentStopIndex, stops, map]);
 
   return null;
+}
+
+function getDashForTransport(mode?: string | null): string | undefined {
+  switch (mode) {
+    case "walk": return "4 8";
+    case "bike": return "8 6";
+    default: return undefined;
+  }
 }
 
 function generateCurvedPath(start: [number, number], end: [number, number]): L.LatLng[] {
@@ -266,6 +352,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showPhoto, setShowPhoto] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lineLayersRef = useRef<L.Layer[]>([]);
   const movingMarkerRef = useRef<L.Marker | null>(null);
@@ -292,7 +379,16 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
     setPhase("arrived");
     setProgress(0);
     setIsPlaying(true);
+    setShowPhoto(false);
   }, []);
+
+  useEffect(() => {
+    if (phase === "arrived") {
+      setShowPhoto(false);
+      const photoTimer = setTimeout(() => setShowPhoto(true), 400);
+      return () => clearTimeout(photoTimer);
+    }
+  }, [phase, currentStopIndex]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -302,11 +398,12 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
         if (currentStopIndex < validStops.length - 1) {
           setPhase("traveling");
           setProgress(0);
+          setShowPhoto(false);
         } else {
           setPhase("summary");
           setIsPlaying(false);
         }
-      }, 2500 / speed);
+      }, 3000 / speed);
       return () => clearTimeout(timer);
     }
 
@@ -372,6 +469,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
     setPhase("intro");
     setProgress(0);
     setIsPlaying(false);
+    setShowPhoto(false);
   };
 
   const toggleFullscreen = () => {
@@ -419,7 +517,11 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
           60% { transform: scale(1.2); }
           100% { transform: scale(1); opacity: 1; }
         }
-        .trip-replay-marker, .stop-replay-marker { background: none !important; border: none !important; }
+        @keyframes float-vehicle {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+        }
+        .trip-replay-marker, .stop-replay-marker, .transport-emoji-marker { background: none !important; border: none !important; }
       `}</style>
 
       <div className="absolute top-0 left-0 right-0 z-[10001] p-4 flex items-center justify-between">
@@ -456,6 +558,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
             lineLayersRef={lineLayersRef}
             movingMarkerRef={movingMarkerRef}
             userAvatar={userAvatar}
+            phase={phase}
           />
         </MapContainer>
 
@@ -482,7 +585,20 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                 </motion.div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{tripTitle}</h2>
                 <p className="text-white/60 mb-1">{validStops.length} tappe &middot; {totalKm} km</p>
-                {userName && <p className="text-white/40 text-sm mb-4">Viaggio di {userName}</p>}
+                {userName && <p className="text-white/40 text-sm mb-3">Viaggio di {userName}</p>}
+
+                <div className="flex items-center justify-center gap-1 flex-wrap mb-4">
+                  {validStops.map((stop, i) => (
+                    <span key={stop.id} className="flex items-center gap-0.5">
+                      <span className="text-xs text-white/80 font-medium">{stop.city}</span>
+                      {i < validStops.length - 1 && (
+                        <>
+                          <span className="text-sm mx-0.5">{transportEmoji[validStops[i + 1]?.transportMode || "walk"]}</span>
+                        </>
+                      )}
+                    </span>
+                  ))}
+                </div>
 
                 <div className="bg-white/10 rounded-xl p-4 mb-6 text-left space-y-2">
                   <p className="text-white/80 text-sm font-medium text-center mb-2">Come funziona:</p>
@@ -523,33 +639,64 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
               className="absolute bottom-28 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[10000]"
             >
               <div className="bg-card/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-border/50">
-                {currentStop.imageUrl && (
-                  <div className="relative h-32">
-                    <img src={currentStop.imageUrl} className="w-full h-full object-cover" alt={currentStop.city} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <div className="absolute bottom-2 left-3 right-3">
+                {currentStop.imageUrl && showPhoto && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 140, opacity: 1 }}
+                    transition={{ type: "spring", damping: 20, delay: 0.2 }}
+                    className="relative overflow-hidden"
+                  >
+                    <img src={currentStop.imageUrl} className="w-full h-[140px] object-cover" alt={currentStop.city} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <motion.div 
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="absolute bottom-2 left-3 right-3 flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
-                        <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
-                          Tappa {currentStopIndex + 1}
+                        <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
+                          📍 Tappa {currentStopIndex + 1}
                         </span>
                         {currentStop.rating && <StarsDisplay rating={currentStop.rating} size={12} />}
                       </div>
-                    </div>
-                  </div>
+                      {currentStop.transportMode && currentStopIndex > 0 && (
+                        <span className="text-lg">{transportEmoji[currentStop.transportMode]}</span>
+                      )}
+                    </motion.div>
+                  </motion.div>
                 )}
-                <div className="p-4">
-                  {!currentStop.imageUrl && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
-                        Tappa {currentStopIndex + 1}
+
+                {!currentStop.imageUrl && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 p-3 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+                        📍 Tappa {currentStopIndex + 1}
                       </span>
                       {currentStop.rating && <StarsDisplay rating={currentStop.rating} size={12} />}
                     </div>
-                  )}
-                  <h3 className="text-lg font-bold text-foreground">{currentStop.city}</h3>
+                    {currentStop.transportMode && currentStopIndex > 0 && (
+                      <span className="text-xl">{transportEmoji[currentStop.transportMode]}</span>
+                    )}
+                  </motion.div>
+                )}
+
+                <div className="p-4">
+                  <motion.h3 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-lg font-bold text-foreground"
+                  >
+                    {currentStop.city}
+                  </motion.h3>
                   <p className="text-sm text-muted-foreground">{currentStop.country}</p>
 
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {new Date(currentStop.arrivalDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
@@ -559,19 +706,25 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                         <Route className="w-3 h-3" /> {currentStop.distanceKm} km
                       </span>
                     )}
-                    {currentStop.transportMode && (
-                      <span className="flex items-center gap-1 capitalize">
-                        {(() => {
-                          const TIcon = transportIcons[currentStop.transportMode];
-                          return TIcon ? <TIcon className="w-3 h-3" /> : null;
-                        })()}
-                        {transportLabels[currentStop.transportMode] || currentStop.transportMode}
+                    {currentStop.transportMode && currentStopIndex > 0 && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        style={{ 
+                          backgroundColor: (transportColors[currentStop.transportMode] || "#10b981") + "20",
+                          color: transportColors[currentStop.transportMode] || "#10b981"
+                        }}
+                      >
+                        {transportEmoji[currentStop.transportMode]} {transportLabels[currentStop.transportMode] || currentStop.transportMode}
                       </span>
                     )}
                   </div>
 
                   {currentStop.accommodationName && (
-                    <div className="mt-2 flex items-center gap-2 bg-blue-500/10 rounded-lg px-3 py-2">
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="mt-2 flex items-center gap-2 bg-blue-500/10 rounded-lg px-3 py-2"
+                    >
                       <Bed className="w-4 h-4 text-blue-400" />
                       <div>
                         <p className="text-xs font-medium text-foreground">{currentStop.accommodationName}</p>
@@ -579,7 +732,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                           <p className="text-[10px] text-muted-foreground capitalize">{currentStop.accommodationType}</p>
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
                   {currentStop.notes && (
@@ -587,10 +740,16 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                   )}
 
                   {nextStop && (
-                    <div className="mt-3 pt-2 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground">
-                      <ChevronRight className="w-3 h-3" />
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="mt-3 pt-2 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground"
+                    >
+                      <span className="text-sm">{transportEmoji[nextStop.transportMode || "walk"]}</span>
                       <span>Prossima: <span className="text-foreground font-medium">{nextStop.city}</span></span>
-                    </div>
+                      {nextStop.distanceKm && <span className="text-[10px] ml-auto">({nextStop.distanceKm} km)</span>}
+                    </motion.div>
                   )}
                 </div>
               </div>
@@ -603,26 +762,29 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute bottom-28 left-4 right-4 sm:left-auto sm:right-4 sm:w-72 z-[10000]"
+              className="absolute bottom-28 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[10000]"
             >
               <div className="bg-card/90 backdrop-blur-md rounded-2xl p-4 shadow-2xl border border-border/50">
                 <div className="flex items-center gap-3 mb-3">
                   {TransportIcon && (
                     <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="w-10 h-10 rounded-full flex items-center justify-center"
+                      animate={{ x: [0, 8, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.2 }}
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
                       style={{ backgroundColor: transportColors[nextStop.transportMode || "walk"] + "20" }}
                     >
-                      <TransportIcon className="w-5 h-5" style={{ color: transportColors[nextStop.transportMode || "walk"] }} />
+                      {transportEmoji[nextStop.transportMode || "walk"]}
                     </motion.div>
                   )}
                   <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">In viaggio verso</p>
-                    <p className="font-bold text-foreground">{nextStop.city}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">In viaggio</p>
+                    <p className="font-bold text-foreground">{currentStop.city} → {nextStop.city}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {transportLabels[nextStop.transportMode || "walk"]} {nextStop.distanceKm ? `• ${nextStop.distanceKm} km` : ""}
+                    </p>
                   </div>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{
@@ -631,9 +793,11 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                     }}
                   />
                 </div>
-                <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
+                <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground">
                   <span>{currentStop.city}</span>
-                  <span>{nextStop.distanceKm ? `${Math.round(nextStop.distanceKm * progress)} / ${nextStop.distanceKm} km` : ""}</span>
+                  <span className="font-medium" style={{ color: transportColors[nextStop.transportMode || "walk"] }}>
+                    {nextStop.distanceKm ? `${Math.round(nextStop.distanceKm * progress)} / ${nextStop.distanceKm} km` : `${Math.round(progress * 100)}%`}
+                  </span>
                   <span>{nextStop.city}</span>
                 </div>
               </div>
@@ -677,7 +841,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                   </div>
                   {totalCo2 > 0 && (
                     <div className="bg-muted rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-amber-400">{totalCo2}</p>
+                      <p className="text-2xl font-bold text-amber-400">{totalCo2.toFixed(1)}</p>
                       <p className="text-xs text-muted-foreground">kg CO₂</p>
                     </div>
                   )}
@@ -691,12 +855,12 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
 
                 <div className="mb-4">
                   <p className="text-xs text-muted-foreground mb-2">Percorso</p>
-                  <div className="flex items-center gap-1 flex-wrap">
+                  <div className="flex items-center gap-0.5 flex-wrap">
                     {validStops.map((stop, i) => (
-                      <span key={stop.id} className="flex items-center gap-1">
+                      <span key={stop.id} className="flex items-center gap-0.5">
                         <span className="text-xs font-medium text-foreground">{stop.city}</span>
                         {i < validStops.length - 1 && (
-                          <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-sm mx-0.5">{transportEmoji[validStops[i + 1]?.transportMode || "walk"]}</span>
                         )}
                       </span>
                     ))}
@@ -726,22 +890,39 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
       </div>
 
       <div className="bg-card/95 backdrop-blur-md border-t border-border/50 px-4 py-3 z-[10001]">
-        <div className="flex items-center gap-2 mb-2 justify-center">
-          {validStops.map((s, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <div
-                className={`w-2.5 h-2.5 rounded-full transition-all ${
-                  i < currentStopIndex ? "bg-emerald-500" :
-                  i === currentStopIndex ? "bg-emerald-400 w-3.5 h-3.5 ring-2 ring-emerald-400/30" :
-                  "bg-muted-foreground/30"
-                }`}
-              />
-              {i === currentStopIndex && (
-                <span className="text-[10px] text-emerald-400 font-medium">{s.city}</span>
-              )}
-            </div>
-          ))}
-          <span className="text-[10px] text-muted-foreground ml-1">
+        <div className="flex items-center gap-0.5 mb-2 justify-center overflow-x-auto scrollbar-hide">
+          {validStops.map((s, i) => {
+            const isPast = i < currentStopIndex;
+            const isCurrent = i === currentStopIndex;
+            const nextTransport = i < validStops.length - 1 ? validStops[i + 1]?.transportMode : null;
+            return (
+              <div key={i} className="flex items-center gap-0.5 shrink-0">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      isPast ? "bg-emerald-500" :
+                      isCurrent ? "bg-emerald-400 w-3.5 h-3.5 ring-2 ring-emerald-400/30" :
+                      "bg-muted-foreground/30"
+                    }`}
+                  />
+                  {isCurrent && (
+                    <span className="text-[9px] text-emerald-400 font-medium mt-0.5 whitespace-nowrap">{s.city}</span>
+                  )}
+                </div>
+                {i < validStops.length - 1 && nextTransport && (
+                  <div className="flex items-center mx-0.5">
+                    <div className={`h-px w-3 ${isPast ? "bg-emerald-500" : "bg-muted-foreground/30"}`} />
+                    <span className="text-[10px] mx-0.5">{transportEmoji[nextTransport] || "🚶"}</span>
+                    <div className={`h-px w-3 ${isPast ? "bg-emerald-500" : "bg-muted-foreground/30"}`} />
+                  </div>
+                )}
+                {i < validStops.length - 1 && !nextTransport && (
+                  <div className={`h-px w-4 mx-0.5 ${isPast ? "bg-emerald-500" : "bg-muted-foreground/30"}`} />
+                )}
+              </div>
+            );
+          })}
+          <span className="text-[10px] text-muted-foreground ml-1 shrink-0">
             {currentStopIndex + 1}/{validStops.length}
           </span>
         </div>
