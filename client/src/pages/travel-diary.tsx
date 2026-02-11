@@ -1398,11 +1398,11 @@ function TripDetails({
             variant="outline" 
             size="sm" 
             onClick={() => setShowReplay(true)}
-            className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs px-2"
+            className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10 text-xs px-3 animate-pulse hover:animate-none"
             data-testid="button-diary-replay"
           >
             <Film className="w-4 h-4 mr-1" />
-            <span className="hidden sm:inline">Replay</span>
+            Replay Viaggio
           </Button>
           <Button 
             variant="outline" 

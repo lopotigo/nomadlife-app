@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, SkipForward, RotateCcw, X, Plane, Train, Car, Footprints, Bike, MapPin, Calendar, Star, Leaf, Route, Bed, ChevronRight, Maximize2, Minimize2 } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, X, Plane, Train, Car, Footprints, Bike, MapPin, Calendar, Star, Leaf, Route, Bed, ChevronRight, Maximize2, Minimize2, Gauge } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
 interface TripStop {
@@ -466,13 +466,13 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-[10000] bg-black/70 backdrop-blur-sm flex items-center justify-center"
+              className="absolute inset-0 z-[10000] bg-black/80 backdrop-blur-md flex items-center justify-center"
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
-                className="text-center p-8"
+                className="text-center p-6 sm:p-8 max-w-sm mx-4"
               >
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
@@ -480,17 +480,34 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                 >
                   <Plane className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
                 </motion.div>
-                <h2 className="text-3xl font-bold text-white mb-2">{tripTitle}</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{tripTitle}</h2>
                 <p className="text-white/60 mb-1">{validStops.length} tappe &middot; {totalKm} km</p>
-                {userName && <p className="text-white/40 text-sm mb-6">Viaggio di {userName}</p>}
+                {userName && <p className="text-white/40 text-sm mb-4">Viaggio di {userName}</p>}
+
+                <div className="bg-white/10 rounded-xl p-4 mb-6 text-left space-y-2">
+                  <p className="text-white/80 text-sm font-medium text-center mb-2">Come funziona:</p>
+                  <div className="flex items-center gap-3 text-white/70 text-xs">
+                    <Play className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span>Premi <strong className="text-white">Avvia</strong> per vedere il viaggio animato sulla mappa</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-white/70 text-xs">
+                    <SkipForward className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span>Usa le <strong className="text-white">frecce</strong> per saltare tra le tappe</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-white/70 text-xs">
+                    <Gauge className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span>Cambia <strong className="text-white">velocità</strong> con i pulsanti 1x 2x 3x</span>
+                  </div>
+                </div>
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={startReplay}
-                  className="px-8 py-3 bg-emerald-500 text-white rounded-full font-bold text-lg shadow-lg shadow-emerald-500/30 flex items-center gap-2 mx-auto"
+                  className="px-8 py-4 bg-emerald-500 text-white rounded-full font-bold text-lg shadow-lg shadow-emerald-500/30 flex items-center gap-2 mx-auto"
                   data-testid="button-start-replay"
                 >
-                  <Play className="w-5 h-5" /> Avvia Replay
+                  <Play className="w-6 h-6" /> Avvia Replay
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -709,63 +726,84 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
       </div>
 
       <div className="bg-card/95 backdrop-blur-md border-t border-border/50 px-4 py-3 z-[10001]">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          <div className="flex items-center gap-1">
-            {validStops.map((_, i) => (
+        <div className="flex items-center gap-2 mb-2 justify-center">
+          {validStops.map((s, i) => (
+            <div key={i} className="flex items-center gap-1">
               <div
-                key={i}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`w-2.5 h-2.5 rounded-full transition-all ${
                   i < currentStopIndex ? "bg-emerald-500" :
-                  i === currentStopIndex ? "bg-emerald-400 w-3" :
+                  i === currentStopIndex ? "bg-emerald-400 w-3.5 h-3.5 ring-2 ring-emerald-400/30" :
                   "bg-muted-foreground/30"
                 }`}
               />
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
+              {i === currentStopIndex && (
+                <span className="text-[10px] text-emerald-400 font-medium">{s.city}</span>
+              )}
+            </div>
+          ))}
+          <span className="text-[10px] text-muted-foreground ml-1">
+            {currentStopIndex + 1}/{validStops.length}
+          </span>
+        </div>
+        <div className="flex items-center justify-between max-w-lg mx-auto">
+          <div className="flex flex-col items-center gap-0.5">
             <button
               onClick={handleRestart}
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
               data-testid="button-restart"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
-            <button
-              onClick={handlePlayPause}
-              className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-colors"
-              data-testid="button-play-pause"
-            >
-              {phase === "summary" ? (
-                <RotateCcw className="w-5 h-5" />
-              ) : isPlaying ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5 ml-0.5" />
-              )}
-            </button>
-            <button
-              onClick={handleSkip}
-              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="button-skip"
-            >
-              <SkipForward className="w-4 h-4" />
-            </button>
+            <span className="text-[9px] text-muted-foreground">Riavvia</span>
           </div>
 
-          <div className="flex items-center gap-1">
-            {[1, 2, 3].map(s => (
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-0.5">
               <button
-                key={s}
-                onClick={() => setSpeed(s)}
-                className={`px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-                  speed === s ? "bg-emerald-500 text-white" : "text-muted-foreground hover:text-foreground"
-                }`}
-                data-testid={`button-speed-${s}`}
+                onClick={handlePlayPause}
+                className="w-14 h-14 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-colors"
+                data-testid="button-play-pause"
               >
-                {s}x
+                {phase === "summary" ? (
+                  <RotateCcw className="w-6 h-6" />
+                ) : isPlaying ? (
+                  <Pause className="w-6 h-6" />
+                ) : (
+                  <Play className="w-6 h-6 ml-0.5" />
+                )}
               </button>
-            ))}
+              <span className="text-[9px] text-muted-foreground">
+                {phase === "summary" ? "Rivedi" : isPlaying ? "Pausa" : "Play"}
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <button
+                onClick={handleSkip}
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="button-skip"
+              >
+                <SkipForward className="w-4 h-4" />
+              </button>
+              <span className="text-[9px] text-muted-foreground">Avanti</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[9px] text-muted-foreground">Velocità</span>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3].map(s => (
+                <button
+                  key={s}
+                  onClick={() => setSpeed(s)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                    speed === s ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
+                  data-testid={`button-speed-${s}`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
