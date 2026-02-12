@@ -1,14 +1,83 @@
 import { useState, useEffect } from "react";
-import { Bell, Check, Heart, MessageCircle, UserPlus, Plane } from "lucide-react";
+import { Bell, Check, Heart, MessageCircle, UserPlus, Plane, MapPin, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import type { Notification } from "@shared/schema";
+
+function getNotificationRoute(notification: Notification): string | null {
+  switch (notification.type) {
+    case "new_follower":
+    case "follow":
+      return notification.relatedUserId ? `/profile/${notification.relatedUserId}` : null;
+    case "new_trip":
+    case "trip_started":
+      return notification.relatedTripId ? `/trip/${notification.relatedTripId}` : null;
+    case "new_stop":
+      return notification.relatedTripId ? `/trip/${notification.relatedTripId}` : null;
+    case "message":
+      return "/messages";
+    case "like":
+    case "comment":
+      return notification.relatedUserId ? `/profile/${notification.relatedUserId}` : null;
+    default:
+      return notification.relatedTripId
+        ? `/trip/${notification.relatedTripId}`
+        : notification.relatedUserId
+        ? `/profile/${notification.relatedUserId}`
+        : null;
+  }
+}
+
+function getNotificationIcon(type: string) {
+  switch (type) {
+    case "like": return <Heart className="w-4 h-4 text-red-500" />;
+    case "comment": return <MessageCircle className="w-4 h-4 text-blue-500" />;
+    case "new_follower":
+    case "follow": return <UserPlus className="w-4 h-4 text-green-500" />;
+    case "new_trip":
+    case "trip_started": return <Plane className="w-4 h-4 text-purple-500" />;
+    case "new_stop": return <MapPin className="w-4 h-4 text-orange-500" />;
+    case "message": return <MessageCircle className="w-4 h-4 text-cyan-500" />;
+    default: return <Bell className="w-4 h-4" />;
+  }
+}
+
+function getActionLabel(notification: Notification): string | null {
+  const route = getNotificationRoute(notification);
+  if (!route) return null;
+  switch (notification.type) {
+    case "new_follower":
+    case "follow": return "Vedi profilo";
+    case "new_trip":
+    case "trip_started": return "Vedi viaggio";
+    case "new_stop": return "Vedi viaggio";
+    case "message": return "Vai ai messaggi";
+    case "like":
+    case "comment": return "Vedi profilo";
+    default: return "Apri";
+  }
+}
+
+function timeAgo(dateStr: string | Date): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "adesso";
+  if (diffMin < 60) return `${diffMin}min fa`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH}h fa`;
+  const diffD = Math.floor(diffH / 24);
+  if (diffD < 7) return `${diffD}g fa`;
+  return date.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+}
 
 export function NotificationsDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [, setLocation] = useLocation();
 
   const fetchUnreadCount = async () => {
     try {
@@ -39,8 +108,8 @@ export function NotificationsDropdown() {
   const markAsRead = async (id: string) => {
     try {
       await fetch(`/api/notifications/${id}/read`, { method: "POST", credentials: "include" });
-      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
-      setUnreadCount(Math.max(0, unreadCount - 1));
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
       console.error(err);
     }
@@ -49,10 +118,21 @@ export function NotificationsDropdown() {
   const markAllAsRead = async () => {
     try {
       await fetch("/api/notifications/read-all", { method: "POST", credentials: "include" });
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.isRead) {
+      markAsRead(notification.id);
+    }
+    const route = getNotificationRoute(notification);
+    if (route) {
+      setIsOpen(false);
+      setLocation(route);
     }
   };
 
@@ -68,16 +148,6 @@ export function NotificationsDropdown() {
     }
   }, [isOpen]);
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case "like": return <Heart className="w-4 h-4 text-red-500" />;
-      case "comment": return <MessageCircle className="w-4 h-4 text-blue-500" />;
-      case "follow": return <UserPlus className="w-4 h-4 text-green-500" />;
-      case "trip": return <Plane className="w-4 h-4 text-purple-500" />;
-      default: return <Bell className="w-4 h-4" />;
-    }
-  };
-
   return (
     <div className="relative">
       <Button
@@ -89,7 +159,7 @@ export function NotificationsDropdown() {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -98,11 +168,11 @@ export function NotificationsDropdown() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 max-h-96 overflow-y-auto bg-card rounded-xl shadow-xl border border-border z-50">
-            <div className="p-3 border-b border-border flex items-center justify-between">
-              <h3 className="font-semibold">Notifiche</h3>
+          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[28rem] overflow-y-auto bg-card rounded-xl shadow-xl border border-border z-50">
+            <div className="p-3 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+              <h3 className="font-semibold text-sm">Notifiche</h3>
               {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
+                <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-7">
                   <Check className="w-3 h-3 mr-1" />
                   Segna tutte lette
                 </Button>
@@ -114,32 +184,49 @@ export function NotificationsDropdown() {
                 <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
+              <div className="p-8 text-center text-muted-foreground text-sm">
+                <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 Nessuna notifica
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 hover:bg-muted/50 cursor-pointer flex items-start gap-3 ${
-                      !notification.isRead ? "bg-primary/5" : ""
-                    }`}
-                    onClick={() => !notification.isRead && markAsRead(notification.id)}
-                    data-testid={`notification-${notification.id}`}
-                  >
-                    <div className="mt-1">{getIcon(notification.type)}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm">{notification.message}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(notification.createdAt).toLocaleDateString("it-IT")}
-                      </p>
+                {notifications.map((notification) => {
+                  const route = getNotificationRoute(notification);
+                  const actionLabel = getActionLabel(notification);
+                  return (
+                    <div
+                      key={notification.id}
+                      className={`p-3 flex items-start gap-3 transition-colors ${
+                        route ? "cursor-pointer hover:bg-muted/60 active:bg-muted" : ""
+                      } ${!notification.isRead ? "bg-primary/5" : ""}`}
+                      onClick={() => handleNotificationClick(notification)}
+                      data-testid={`notification-${notification.id}`}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm leading-snug ${!notification.isRead ? "font-medium" : ""}`}>
+                          {notification.message}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground">
+                            {timeAgo(notification.createdAt)}
+                          </span>
+                          {route && actionLabel && (
+                            <span className="text-xs text-primary font-medium flex items-center gap-0.5">
+                              <Navigation className="w-2.5 h-2.5" />
+                              {actionLabel}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {!notification.isRead && (
+                        <div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                      )}
                     </div>
-                    {!notification.isRead && (
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
