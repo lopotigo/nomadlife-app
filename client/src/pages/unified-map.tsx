@@ -122,6 +122,22 @@ function openDirections(lat: number, lng: number, label?: string) {
   }
 }
 
+function searchFlights(fromCity?: string, toCity?: string, date?: string) {
+  let query = "Flights";
+  if (fromCity) query += `+from+${fromCity}`;
+  if (toCity) query += `+to+${toCity}`;
+  if (date) query += `+on+${date}`;
+  const url = `https://www.google.com/travel/flights?curr=EUR&q=${encodeURIComponent(query)}`;
+  window.open(url, "_blank");
+}
+
+function searchHotels(city: string, checkin?: string, checkout?: string) {
+  let url = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&lang=it`;
+  if (checkin) url += `&checkin=${checkin}`;
+  if (checkout) url += `&checkout=${checkout}`;
+  window.open(url, "_blank");
+}
+
 function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean, hasVideo?: boolean) {
   if (hasTripId && avatarUrl) {
     return L.divIcon({
@@ -414,10 +430,10 @@ function PostMapPopup({
                                   {stop.co2Kg ? <span className="text-emerald-600">{stop.co2Kg} kg CO₂</span> : null}
                                 </div>
                               )}
-                              <div className="flex gap-1.5">
+                              <div className="flex gap-1.5 flex-wrap">
                                 <a 
                                   href={`/trip/${post.tripId}`}
-                                  className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-xs font-semibold transition-colors"
+                                  className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-xs font-semibold transition-colors min-w-[50px]"
                                   data-testid={`link-trip-diary-${stop.id}`}
                                 >
                                   <ExternalLink className="w-3 h-3" />
@@ -426,12 +442,29 @@ function PostMapPopup({
                                 {stop.latitude && stop.longitude && (
                                   <button
                                     onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
-                                    className="flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-3 text-xs font-semibold transition-colors"
+                                    className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2 text-xs font-semibold transition-colors"
                                     data-testid={`button-directions-expandstop-${stop.id}`}
+                                    title="Indicazioni"
                                   >
                                     <Navigation className="w-3 h-3" />
                                   </button>
                                 )}
+                                <button
+                                  onClick={() => searchFlights(idx > 0 ? sortedStops[idx - 1].city : undefined, stop.city, stop.arrivalDate)}
+                                  className="flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-1.5 px-2 text-xs font-semibold transition-colors"
+                                  data-testid={`button-flights-expandstop-${stop.id}`}
+                                  title="Cerca voli"
+                                >
+                                  <Plane className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => searchHotels(stop.city, stop.arrivalDate, stop.departureDate)}
+                                  className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2 text-xs font-semibold transition-colors"
+                                  data-testid={`button-hotel-expandstop-${stop.id}`}
+                                  title="Cerca hotel"
+                                >
+                                  <Hotel className="w-3 h-3" />
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -1093,10 +1126,10 @@ export default function UnifiedMap() {
 
                             <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
 
-                            <div className="flex gap-1.5 pt-1">
+                            <div className="flex gap-1.5 pt-1 flex-wrap">
                               <a 
                                 href={`/trip/${trip.id}`}
-                                className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-[11px] font-semibold transition-colors"
+                                className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-[11px] font-semibold transition-colors min-w-[60px]"
                                 data-testid={`link-trip-diary-stop-${stop.id}`}
                               >
                                 <ExternalLink className="w-3 h-3" />
@@ -1104,15 +1137,25 @@ export default function UnifiedMap() {
                               </a>
                               <button
                                 onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
-                                className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2.5 text-[11px] font-semibold transition-colors"
+                                className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
                                 data-testid={`button-directions-stop-${stop.id}`}
+                                title="Indicazioni"
                               >
                                 <Navigation className="w-3 h-3" />
                               </button>
                               <button
-                                onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
-                                className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2.5 text-[11px] font-semibold transition-colors"
-                                data-testid={`button-book-stop-${stop.id}`}
+                                onClick={() => searchFlights(idx > 0 ? validStops[idx - 1].city : undefined, stop.city, stop.arrivalDate)}
+                                className="flex items-center justify-center gap-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+                                data-testid={`button-flights-stop-${stop.id}`}
+                                title="Cerca voli"
+                              >
+                                <Plane className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => searchHotels(stop.city, stop.arrivalDate, stop.departureDate)}
+                                className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+                                data-testid={`button-hotel-stop-${stop.id}`}
+                                title="Cerca hotel"
                               >
                                 <Hotel className="w-3 h-3" />
                               </button>

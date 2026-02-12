@@ -185,6 +185,12 @@ Preferred communication style: Simple, everyday language.
 - **Push Triggers**: New follower, new trip, trip started, new stop added, new private message
 - **Subscribe/Unsubscribe**: Toggle in Profile page, endpoints at `/api/push/subscribe` and `/api/push/unsubscribe`
 
+- **Directions & Navigation**: "Indicazioni" button on map popups opens Google Maps (Android/PC) or Apple Maps (iOS) with destination coordinates for real navigation
+- **Flight & Hotel Search**: Deep links to Google Flights (flights) and Booking.com (hotels) from trip stop popups and travel diary
+  - Buttons in: map stop popups, expanded itinerary, travel diary stops, trip planner map
+  - Ready for Travelpayouts affiliate integration (add partner ID to earn commissions)
+  - Helper functions: `searchFlights()` and `searchHotels()` in unified-map.tsx and travel-diary.tsx
+
 ## External Dependencies
 
 - **Database**: PostgreSQL (via `DATABASE_URL`)

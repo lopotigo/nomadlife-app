@@ -37,6 +37,22 @@ L.Icon.Default.mergeOptions({
 
 // createStopMarkerIcon and CurvedRouteLine imported from shared component
 
+function searchFlights(fromCity?: string, toCity?: string, date?: string) {
+  let query = "Flights";
+  if (fromCity) query += `+from+${fromCity}`;
+  if (toCity) query += `+to+${toCity}`;
+  if (date) query += `+on+${date}`;
+  const url = `https://www.google.com/travel/flights?curr=EUR&q=${encodeURIComponent(query)}`;
+  window.open(url, "_blank");
+}
+
+function searchHotels(city: string, checkin?: string, checkout?: string) {
+  let url = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&lang=it`;
+  if (checkin) url += `&checkin=${checkin}`;
+  if (checkout) url += `&checkout=${checkout}`;
+  window.open(url, "_blank");
+}
+
 interface Trip {
   id: string;
   userId: string;
@@ -1558,6 +1574,7 @@ function TripDetails({
                 index={index}
                 currency={trip.currency}
                 onAddExpense={() => onAddExpense(stop.id)}
+                prevCity={index > 0 ? trip.stops[index - 1].city : undefined}
               />
             </div>
           ))}
@@ -1701,12 +1718,14 @@ function StopCard({
   stop, 
   index, 
   currency,
-  onAddExpense 
+  onAddExpense,
+  prevCity
 }: { 
   stop: TripStop & { expenses: TripExpense[] }; 
   index: number;
   currency: string;
   onAddExpense: () => void;
+  prevCity?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const currencySymbol = currency === "EUR" ? "€" : currency === "USD" ? "$" : currency;
@@ -1794,7 +1813,7 @@ function StopCard({
                 </div>
               )}
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1802,24 +1821,38 @@ function StopCard({
                   }}
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-dashed border-border text-muted-foreground hover:text-foreground"
+                  className="flex-1 border-dashed border-border text-muted-foreground hover:text-foreground min-w-[120px]"
                   data-testid={`button-add-expense-${stop.id}`}
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Aggiungi spesa
                 </Button>
-                <Link href={`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`}>
-                  <Button 
-                    onClick={(e) => e.stopPropagation()}
-                    variant="outline"
-                    size="sm"
-                    className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-                    data-testid={`button-find-hotel-${stop.id}`}
-                  >
-                    <Hotel className="w-4 h-4 mr-2" />
-                    Cerca alloggio
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    searchFlights(prevCity, stop.city, stop.arrivalDate);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10"
+                  data-testid={`button-find-flights-${stop.id}`}
+                >
+                  <Plane className="w-4 h-4 mr-2" />
+                  Voli
+                </Button>
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    searchHotels(stop.city, stop.arrivalDate, stop.departureDate);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                  data-testid={`button-find-hotel-${stop.id}`}
+                >
+                  <Hotel className="w-4 h-4 mr-2" />
+                  Hotel
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -2450,17 +2483,27 @@ function TripPlannerMap({
             icon={createStopMarkerIcon(index, "#f97316", userAvatar, stop.imageUrl)}
           >
             <Popup>
-              <div className="min-w-[150px]">
+              <div className="min-w-[180px]">
                 <h3 className="font-bold">{stop.city}, {stop.country}</h3>
                 <p className="text-xs text-muted-foreground">Tappa {index + 1}</p>
-                <button
-                  onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
-                  className="mt-2 w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1.5 px-3 rounded-lg transition-colors"
-                  data-testid={`button-book-stop-${stop.id}`}
-                >
-                  <Hotel className="w-3.5 h-3.5" />
-                  Prenota qui
-                </button>
+                <div className="flex gap-1.5 mt-2">
+                  <button
+                    onClick={() => searchFlights(index > 0 ? stopsWithCoords[index - 1].city : undefined, stop.city, stop.arrivalDate)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs py-1.5 px-2 rounded-lg transition-colors"
+                    data-testid={`button-flights-planner-${stop.id}`}
+                  >
+                    <Plane className="w-3.5 h-3.5" />
+                    Voli
+                  </button>
+                  <button
+                    onClick={() => searchHotels(stop.city, stop.arrivalDate, stop.departureDate)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1.5 px-2 rounded-lg transition-colors"
+                    data-testid={`button-hotel-planner-${stop.id}`}
+                  >
+                    <Hotel className="w-3.5 h-3.5" />
+                    Hotel
+                  </button>
+                </div>
               </div>
             </Popup>
           </Marker>
