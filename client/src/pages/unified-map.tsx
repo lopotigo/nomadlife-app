@@ -6,7 +6,7 @@ import {
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
-  Star, Copy, ExternalLink, Route, Bed, MapPinned
+  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -110,6 +110,16 @@ function YouTubeEmbed({ url, className = "" }: { url: string; className?: string
 
 function isYouTubeUrl(url: string): boolean {
   return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
+}
+
+function openDirections(lat: number, lng: number, label?: string) {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const destination = `${lat},${lng}`;
+  if (isIOS) {
+    window.open(`maps://maps.apple.com/?daddr=${destination}&q=${encodeURIComponent(label || "")}`, "_blank");
+  } else {
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, "_blank");
+  }
 }
 
 function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean, hasVideo?: boolean) {
@@ -404,14 +414,25 @@ function PostMapPopup({
                                   {stop.co2Kg ? <span className="text-emerald-600">{stop.co2Kg} kg CO₂</span> : null}
                                 </div>
                               )}
-                              <a 
-                                href={`/trip/${post.tripId}`}
-                                className="flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-xs font-semibold transition-colors w-full"
-                                data-testid={`link-trip-diary-${stop.id}`}
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                Apri nel Diario
-                              </a>
+                              <div className="flex gap-1.5">
+                                <a 
+                                  href={`/trip/${post.tripId}`}
+                                  className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-xs font-semibold transition-colors"
+                                  data-testid={`link-trip-diary-${stop.id}`}
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  Diario
+                                </a>
+                                {stop.latitude && stop.longitude && (
+                                  <button
+                                    onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
+                                    className="flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-3 text-xs font-semibold transition-colors"
+                                    data-testid={`button-directions-expandstop-${stop.id}`}
+                                  >
+                                    <Navigation className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -460,6 +481,16 @@ function PostMapPopup({
           </Link>
         </div>
         <div className="flex items-center gap-1">
+          {post.latitude && post.longitude && (
+            <button
+              onClick={() => openDirections(parseFloat(String(post.latitude)), parseFloat(String(post.longitude)), post.location || post.content.substring(0, 30))}
+              className="p-1.5 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-600 transition-colors"
+              title="Indicazioni"
+              data-testid={`button-directions-post-${post.id}`}
+            >
+              <Navigation className="w-3.5 h-3.5" />
+            </button>
+          )}
           {currentUser && post.user.id !== currentUser.id && (
             <a
               href={`/chat?user=${post.user.id}`}
@@ -858,6 +889,16 @@ export default function UnifiedMap() {
                         {event.attendees} partecipanti
                       </span>
                       <div className="flex items-center gap-1.5">
+                        {event.latitude && event.longitude && (
+                          <button
+                            onClick={() => openDirections(parseFloat(String(event.latitude)), parseFloat(String(event.longitude)), event.title)}
+                            className="p-1.5 rounded-full bg-green-100 hover:bg-green-200 text-green-600 transition-colors"
+                            data-testid={`button-directions-event-${event.id}`}
+                            title="Indicazioni"
+                          >
+                            <Navigation className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button
                           onClick={() => setPosterEvent(event)}
                           className="p-1.5 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-600 transition-colors"
@@ -1062,12 +1103,18 @@ export default function UnifiedMap() {
                                 Diario
                               </a>
                               <button
+                                onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
+                                className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2.5 text-[11px] font-semibold transition-colors"
+                                data-testid={`button-directions-stop-${stop.id}`}
+                              >
+                                <Navigation className="w-3 h-3" />
+                              </button>
+                              <button
                                 onClick={() => setLocation(`/booking?city=${encodeURIComponent(stop.city)}&type=hotel`)}
-                                className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-3 text-[11px] font-semibold transition-colors"
+                                className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2.5 text-[11px] font-semibold transition-colors"
                                 data-testid={`button-book-stop-${stop.id}`}
                               >
                                 <Hotel className="w-3 h-3" />
-                                Prenota
                               </button>
                               <button
                                 onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
