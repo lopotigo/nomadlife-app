@@ -68,6 +68,58 @@ const transportEmoji: Record<string, string> = {
   bus: "🚌",
 };
 
+const cityImageCache: Record<string, string> = {};
+
+async function fetchCityImage(city: string): Promise<string> {
+  if (cityImageCache[city]) return cityImageCache[city];
+  try {
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`);
+    if (res.ok) {
+      const data = await res.json();
+      const imgUrl = data.thumbnail?.source?.replace(/\/\d+px-/, "/600px-") || data.originalimage?.source;
+      if (imgUrl) {
+        cityImageCache[city] = imgUrl;
+        return imgUrl;
+      }
+    }
+  } catch {}
+  const fallback = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`;
+  cityImageCache[city] = fallback;
+  return fallback;
+}
+
+function CityImage({ city, imageUrl, alt }: { city: string; imageUrl?: string | null; alt: string }) {
+  const [src, setSrc] = useState(imageUrl || "");
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    if (imageUrl) {
+      setSrc(imageUrl);
+      return;
+    }
+    let cancelled = false;
+    fetchCityImage(city).then(url => {
+      if (!cancelled) setSrc(url);
+    });
+    return () => { cancelled = true; };
+  }, [city, imageUrl]);
+
+  if (!src) return <div className="w-full h-[140px] bg-gradient-to-br from-emerald-900/40 to-teal-900/40 flex items-center justify-center"><MapPin className="w-8 h-8 text-emerald-400/50" /></div>;
+
+  return (
+    <img
+      src={src}
+      className={`w-full h-[140px] object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+      alt={alt}
+      onLoad={() => setLoaded(true)}
+      onError={() => {
+        setSrc(`https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`);
+      }}
+    />
+  );
+}
+
 
 function AnimatedMapController({
   stops,
@@ -277,16 +329,23 @@ function AnimatedMapController({
 
   }, [currentStopIndex, progress, stops, map, lineLayersRef, movingMarkerRef, userAvatar, phase]);
 
+  const zoomRef = useRef(6);
+
   useEffect(() => {
     const validStops = stops.filter(s => s.latitude != null && s.longitude != null);
     if (validStops.length === 0) return;
 
     if (currentStopIndex < validStops.length) {
       const target = validStops[currentStopIndex];
-      const zoom = currentStopIndex === 0 ? 6 : 5;
-      map.flyTo([target.latitude!, target.longitude!], zoom, { duration: 1.5 });
+      map.flyTo([target.latitude!, target.longitude!], zoomRef.current, { duration: 1.5, noMoveStart: true });
     }
   }, [currentStopIndex, stops, map]);
+
+  useEffect(() => {
+    const onZoomEnd = () => { zoomRef.current = map.getZoom(); };
+    map.on("zoomend", onZoomEnd);
+    return () => { map.off("zoomend", onZoomEnd); };
+  }, [map]);
 
   return null;
 }
@@ -357,6 +416,12 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
   const lineLayersRef = useRef<L.Layer[]>([]);
   const movingMarkerRef = useRef<L.Marker | null>(null);
   const animFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    validStops.forEach(stop => {
+      if (!stop.imageUrl) fetchCityImage(stop.city);
+    });
+  }, [validStops.length]);
 
   const totalKm = validStops.reduce((sum, s) => sum + (s.distanceKm || 0), 0);
   const totalCo2 = validStops.reduce((sum, s) => sum + (s.co2Kg || 0), 0);
@@ -646,20 +711,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                     transition={{ type: "spring", damping: 20, delay: 0.2 }}
                     className="relative overflow-hidden"
                   >
-                    <img 
-                      src={currentStop.imageUrl || `https://sourcesplash.com/400x200/?${encodeURIComponent(currentStop.city + " city")}`} 
-                      className="w-full h-[140px] object-cover" 
-                      alt={currentStop.city}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        if (target.src.includes("sourcesplash.com")) {
-                          target.src = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(currentStop.city)}`;
-                        } else {
-                          target.onerror = null;
-                          target.src = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(currentStop.city)}`;
-                        }
-                      }}
-                    />
+                    <CityImage city={currentStop.city} imageUrl={currentStop.imageUrl} alt={currentStop.city} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                     <motion.div 
                       initial={{ y: 20, opacity: 0 }}
