@@ -639,14 +639,27 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
               className="absolute bottom-28 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[10000]"
             >
               <div className="bg-card/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-border/50">
-                {currentStop.imageUrl && showPhoto && (
+                {showPhoto && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 140, opacity: 1 }}
                     transition={{ type: "spring", damping: 20, delay: 0.2 }}
                     className="relative overflow-hidden"
                   >
-                    <img src={currentStop.imageUrl} className="w-full h-[140px] object-cover" alt={currentStop.city} />
+                    <img 
+                      src={currentStop.imageUrl || `https://sourcesplash.com/400x200/?${encodeURIComponent(currentStop.city + " city")}`} 
+                      className="w-full h-[140px] object-cover" 
+                      alt={currentStop.city}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src.includes("sourcesplash.com")) {
+                          target.src = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(currentStop.city)}`;
+                        } else {
+                          target.onerror = null;
+                          target.src = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(currentStop.city)}`;
+                        }
+                      }}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                     <motion.div 
                       initial={{ y: 20, opacity: 0 }}
@@ -664,24 +677,6 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                         <span className="text-lg">{transportEmoji[currentStop.transportMode]}</span>
                       )}
                     </motion.div>
-                  </motion.div>
-                )}
-
-                {!currentStop.imageUrl && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 p-3 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
-                        📍 Tappa {currentStopIndex + 1}
-                      </span>
-                      {currentStop.rating && <StarsDisplay rating={currentStop.rating} size={12} />}
-                    </div>
-                    {currentStop.transportMode && currentStopIndex > 0 && (
-                      <span className="text-xl">{transportEmoji[currentStop.transportMode]}</span>
-                    )}
                   </motion.div>
                 )}
 
