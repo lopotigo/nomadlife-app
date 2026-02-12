@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import type { Post, User, Comment, Event, ChatGroup } from "@shared/schema";
 import { useI18n } from "@/lib/i18n";
+import { searchFlights, searchHotels } from "@/lib/travelpayouts";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -120,22 +121,6 @@ function openDirections(lat: number, lng: number, label?: string) {
   } else {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, "_blank");
   }
-}
-
-function searchFlights(fromCity?: string, toCity?: string, date?: string) {
-  let query = "Flights";
-  if (fromCity) query += `+from+${fromCity}`;
-  if (toCity) query += `+to+${toCity}`;
-  if (date) query += `+on+${date}`;
-  const url = `https://www.google.com/travel/flights?curr=EUR&q=${encodeURIComponent(query)}`;
-  window.open(url, "_blank");
-}
-
-function searchHotels(city: string, checkin?: string, checkout?: string) {
-  let url = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&lang=it`;
-  if (checkin) url += `&checkin=${checkin}`;
-  if (checkout) url += `&checkout=${checkout}`;
-  window.open(url, "_blank");
 }
 
 function createPostMarkerIcon(imageUrl: string | null, avatarUrl?: string | null, hasTripId?: boolean, hasVideo?: boolean) {

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
+import { searchFlights, searchHotels } from "@/lib/travelpayouts";
 import { useLocation, Link } from "wouter";
 import { 
   Plus, MapPin, Calendar, Wallet, Star, ChevronRight, 
@@ -36,22 +37,6 @@ L.Icon.Default.mergeOptions({
 });
 
 // createStopMarkerIcon and CurvedRouteLine imported from shared component
-
-function searchFlights(fromCity?: string, toCity?: string, date?: string) {
-  let query = "Flights";
-  if (fromCity) query += `+from+${fromCity}`;
-  if (toCity) query += `+to+${toCity}`;
-  if (date) query += `+on+${date}`;
-  const url = `https://www.google.com/travel/flights?curr=EUR&q=${encodeURIComponent(query)}`;
-  window.open(url, "_blank");
-}
-
-function searchHotels(city: string, checkin?: string, checkout?: string) {
-  let url = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(city)}&lang=it`;
-  if (checkin) url += `&checkin=${checkin}`;
-  if (checkout) url += `&checkout=${checkout}`;
-  window.open(url, "_blank");
-}
 
 interface Trip {
   id: string;

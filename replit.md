@@ -186,10 +186,13 @@ Preferred communication style: Simple, everyday language.
 - **Subscribe/Unsubscribe**: Toggle in Profile page, endpoints at `/api/push/subscribe` and `/api/push/unsubscribe`
 
 - **Directions & Navigation**: "Indicazioni" button on map popups opens Google Maps (Android/PC) or Apple Maps (iOS) with destination coordinates for real navigation
-- **Flight & Hotel Search**: Deep links to Google Flights (flights) and Booking.com (hotels) from trip stop popups and travel diary
+- **Travelpayouts Affiliate Integration**: Flight and hotel search with affiliate tracking
+  - Flights via Aviasales, hotels via Hotellook — both through Travelpayouts redirect
   - Buttons in: map stop popups, expanded itinerary, travel diary stops, trip planner map
-  - Ready for Travelpayouts affiliate integration (add partner ID to earn commissions)
-  - Helper functions: `searchFlights()` and `searchHotels()` in unified-map.tsx and travel-diary.tsx
+  - Shared utility: `client/src/lib/travelpayouts.ts` (searchFlights, searchHotels)
+  - Config: `VITE_TRAVELPAYOUTS_MARKER` env var for partner tracking ID
+  - Fallback: If no marker set, links open Aviasales/Hotellook directly (no tracking)
+  - SubIDs: "flights" and "hotels" for per-category performance tracking
 
 ## External Dependencies
 
