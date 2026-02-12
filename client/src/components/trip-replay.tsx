@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,39 +33,19 @@ interface TripReplayProps {
 }
 
 const transportIcons: Record<string, typeof Plane> = {
-  plane: Plane,
-  train: Train,
-  car: Car,
-  walk: Footprints,
-  bike: Bike,
-  bus: Bus,
+  plane: Plane, train: Train, car: Car, walk: Footprints, bike: Bike, bus: Bus,
 };
 
 const transportLabels: Record<string, string> = {
-  plane: "Aereo",
-  train: "Treno",
-  car: "Auto",
-  walk: "A piedi",
-  bike: "Bici",
-  bus: "Bus",
+  plane: "Aereo", train: "Treno", car: "Auto", walk: "A piedi", bike: "Bici", bus: "Bus",
 };
 
 const transportColors: Record<string, string> = {
-  plane: "#8b5cf6",
-  train: "#3b82f6",
-  car: "#f59e0b",
-  walk: "#10b981",
-  bike: "#06b6d4",
-  bus: "#f97316",
+  plane: "#8b5cf6", train: "#3b82f6", car: "#f59e0b", walk: "#10b981", bike: "#06b6d4", bus: "#f97316",
 };
 
 const transportEmoji: Record<string, string> = {
-  plane: "✈️",
-  train: "🚂",
-  car: "🚗",
-  walk: "🚶",
-  bike: "🚲",
-  bus: "🚌",
+  plane: "✈️", train: "🚂", car: "🚗", walk: "🚶", bike: "🚲", bus: "🚌",
 };
 
 const cityImageCache: Record<string, string> = {};
@@ -128,15 +108,12 @@ async function fetchCityImage(city: string): Promise<string> {
 }
 
 function CityImage({ city, imageUrl, alt }: { city: string; imageUrl?: string | null; alt: string }) {
-  const [src, setSrc] = useState(imageUrl || "");
-  const [loaded, setLoaded] = useState(!!imageUrl);
-  const prevCityRef = useRef(city);
+  const [src, setSrc] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (prevCityRef.current !== city) {
-      setLoaded(false);
-      prevCityRef.current = city;
-    }
+    setLoaded(false);
+    setSrc("");
     if (imageUrl) {
       setSrc(imageUrl);
       return;
@@ -154,255 +131,27 @@ function CityImage({ city, imageUrl, alt }: { city: string; imageUrl?: string | 
   return (
     <div className="w-full h-[140px] relative bg-gradient-to-br from-emerald-900/30 to-teal-900/30">
       {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center z-[1]">
           <MapPin className="w-6 h-6 text-emerald-400/40 animate-pulse" />
         </div>
       )}
       {src && (
         <img
           src={src}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
           alt={alt}
           onLoad={() => setLoaded(true)}
           onError={() => {
             const fallback = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`;
-            setSrc(fallback);
-            setLoaded(true);
+            if (src !== fallback) {
+              setSrc(fallback);
+              setLoaded(true);
+            }
           }}
         />
       )}
     </div>
   );
-}
-
-
-function AnimatedMapController({
-  stops,
-  currentStopIndex,
-  isPlaying,
-  progress,
-  lineLayersRef,
-  movingMarkerRef,
-  userAvatar,
-  phase,
-}: {
-  stops: TripStop[];
-  currentStopIndex: number;
-  isPlaying: boolean;
-  progress: number;
-  lineLayersRef: React.MutableRefObject<L.Layer[]>;
-  movingMarkerRef: React.MutableRefObject<L.Marker | null>;
-  userAvatar?: string;
-  phase: string;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    const validStops = stops.filter(s => s.latitude != null && s.longitude != null);
-    if (validStops.length === 0) return;
-
-    const bounds = L.latLngBounds(validStops.map(s => [s.latitude!, s.longitude!]));
-    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 8 });
-  }, [stops, map]);
-
-  useEffect(() => {
-    const validStops = stops.filter(s => s.latitude != null && s.longitude != null);
-    if (validStops.length === 0) return;
-
-    lineLayersRef.current.forEach(l => map.removeLayer(l));
-    lineLayersRef.current = [];
-
-    const existingMovingMarker = movingMarkerRef.current;
-    if (existingMovingMarker) {
-      map.removeLayer(existingMovingMarker);
-      movingMarkerRef.current = null;
-    }
-
-    for (let i = 0; i < currentStopIndex && i < validStops.length - 1; i++) {
-      const start = validStops[i];
-      const end = validStops[i + 1];
-      const color = transportColors[end.transportMode || "walk"] || "#10b981";
-
-      const curvedPoints = generateCurvedPath(
-        [start.latitude!, start.longitude!],
-        [end.latitude!, end.longitude!]
-      );
-
-      const shadow = L.polyline(curvedPoints, {
-        color: "#000", weight: 6, opacity: 0.15, interactive: false, lineCap: "round",
-      });
-      shadow.addTo(map);
-      lineLayersRef.current.push(shadow);
-
-      const line = L.polyline(curvedPoints, {
-        color, weight: 3.5, opacity: 0.9, interactive: false, lineCap: "round",
-        dashArray: getDashForTransport(end.transportMode),
-      });
-      line.addTo(map);
-      lineLayersRef.current.push(line);
-
-      const glow = L.polyline(curvedPoints, {
-        color, weight: 6, opacity: 0.2, interactive: false, lineCap: "round",
-      });
-      glow.addTo(map);
-      lineLayersRef.current.push(glow);
-
-      const midIdx = Math.floor(curvedPoints.length / 2);
-      const midPoint = curvedPoints[midIdx];
-      const emoji = transportEmoji[end.transportMode || "walk"] || "🚶";
-      const transportMidMarker = L.marker(midPoint, {
-        icon: L.divIcon({
-          html: `<div style="font-size:20px;text-shadow:0 2px 4px rgba(0,0,0,0.5);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));">${emoji}</div>`,
-          className: "transport-emoji-marker",
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
-        }),
-        zIndexOffset: 50,
-        interactive: false,
-      }).addTo(map);
-      lineLayersRef.current.push(transportMidMarker);
-    }
-
-    if (phase === "traveling" && currentStopIndex > 0 && currentStopIndex <= validStops.length - 1) {
-      const prevStop = validStops[currentStopIndex - 1];
-      const currStop = validStops[currentStopIndex];
-      const color = transportColors[currStop.transportMode || "walk"] || "#10b981";
-
-      const fullPath = generateCurvedPath(
-        [prevStop.latitude!, prevStop.longitude!],
-        [currStop.latitude!, currStop.longitude!]
-      );
-
-      const partialIndex = Math.floor(progress * (fullPath.length - 1));
-      const partialPath = fullPath.slice(0, partialIndex + 1);
-
-      if (partialPath.length > 1) {
-        const animLine = L.polyline(partialPath, {
-          color, weight: 3.5, opacity: 0.9, interactive: false, lineCap: "round",
-          dashArray: getDashForTransport(currStop.transportMode),
-        });
-        animLine.addTo(map);
-        lineLayersRef.current.push(animLine);
-
-        const animGlow = L.polyline(partialPath, {
-          color, weight: 6, opacity: 0.2, interactive: false, lineCap: "round",
-        });
-        animGlow.addTo(map);
-        lineLayersRef.current.push(animGlow);
-      }
-
-      const currentPos = partialPath[partialPath.length - 1] || L.latLng(prevStop.latitude!, prevStop.longitude!);
-
-      const transportMode = currStop.transportMode || "walk";
-      const emoji = transportEmoji[transportMode] || "🚶";
-      const label = transportLabels[transportMode] || "A piedi";
-
-      let angle = 0;
-      if (partialPath.length >= 2) {
-        const p1 = partialPath[partialPath.length - 2];
-        const p2 = partialPath[partialPath.length - 1];
-        angle = Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * (180 / Math.PI);
-      }
-
-      if (movingMarkerRef.current) {
-        movingMarkerRef.current.setLatLng(currentPos);
-      } else {
-        const icon = L.divIcon({
-          html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;">
-            <div style="width:52px;height:52px;border-radius:50%;border:3px solid ${color};box-shadow:0 0 24px ${color}80, 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:${color};display:flex;align-items:center;justify-content:center;animation:pulse-glow 1.5s ease-in-out infinite;">
-              <span style="font-size:28px;${transportMode === 'plane' ? `transform:rotate(${angle - 90}deg);` : ''}">${emoji}</span>
-            </div>
-            <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:1.5px solid white;">${label}</div>
-          </div>`,
-          className: "trip-replay-marker",
-          iconSize: [52, 64],
-          iconAnchor: [26, 32],
-        });
-        movingMarkerRef.current = L.marker(currentPos, { icon, zIndexOffset: 1000 }).addTo(map);
-      }
-    }
-
-    if (phase === "arrived" && currentStopIndex < validStops.length) {
-      const stop = validStops[currentStopIndex];
-      const rawUrl = userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
-      const avatarUrl = sanitizeUrl(rawUrl) || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
-      
-      const arrivedIcon = L.divIcon({
-        html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;">
-          <div style="width:56px;height:56px;border-radius:50%;border:3px solid #10b981;box-shadow:0 0 24px rgba(16,185,129,0.6), 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:white;animation:bounce-in 0.5s ease;">
-            <img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
-          </div>
-          <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:1.5px solid white;">📍 ${stop.city}</div>
-        </div>`,
-        className: "trip-replay-marker",
-        iconSize: [56, 72],
-        iconAnchor: [28, 36],
-      });
-      
-      const avatarMarker = L.marker([stop.latitude!, stop.longitude!], { icon: arrivedIcon, zIndexOffset: 1000 }).addTo(map);
-      lineLayersRef.current.push(avatarMarker);
-    }
-
-    for (let i = 0; i <= Math.min(currentStopIndex, validStops.length - 1); i++) {
-      const stop = validStops[i];
-      const isCurrentStop = i === currentStopIndex && phase === "arrived";
-      const isPast = i < currentStopIndex;
-
-      if (!isPast && !isCurrentStop) continue;
-      if (isCurrentStop) continue;
-
-      const size = 28;
-      const color = "#6b7280";
-
-      const markerIcon = L.divIcon({
-        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:3px solid ${color};background:#374151;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-          ${i + 1}
-        </div>`,
-        className: "stop-replay-marker",
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-      });
-
-      const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: 100 }).addTo(map);
-      lineLayersRef.current.push(marker);
-    }
-
-    for (let i = currentStopIndex + 1; i < validStops.length; i++) {
-      const stop = validStops[i];
-      const size = 24;
-      const markerIcon = L.divIcon({
-        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px dashed #4b5563;background:#1f2937;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:bold;font-size:10px;box-shadow:0 1px 4px rgba(0,0,0,0.2);">
-          ${i + 1}
-        </div>`,
-        className: "stop-replay-marker",
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-      });
-      const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: 50 }).addTo(map);
-      lineLayersRef.current.push(marker);
-    }
-
-  }, [currentStopIndex, progress, stops, map, lineLayersRef, movingMarkerRef, userAvatar, phase]);
-
-  const zoomRef = useRef(6);
-
-  useEffect(() => {
-    const validStops = stops.filter(s => s.latitude != null && s.longitude != null);
-    if (validStops.length === 0) return;
-
-    if (currentStopIndex < validStops.length) {
-      const target = validStops[currentStopIndex];
-      map.flyTo([target.latitude!, target.longitude!], zoomRef.current, { duration: 1.5, noMoveStart: true });
-    }
-  }, [currentStopIndex, stops, map]);
-
-  useEffect(() => {
-    const onZoomEnd = () => { zoomRef.current = map.getZoom(); };
-    map.on("zoomend", onZoomEnd);
-    return () => { map.off("zoomend", onZoomEnd); };
-  }, [map]);
-
-  return null;
 }
 
 function getDashForTransport(mode?: string | null): string | undefined {
@@ -457,8 +206,264 @@ function sanitizeUrl(url: string): string {
   }
 }
 
+function StaticMapLayers({
+  stops,
+  currentStopIndex,
+  userAvatar,
+  phase,
+}: {
+  stops: TripStop[];
+  currentStopIndex: number;
+  userAvatar?: string;
+  phase: string;
+}) {
+  const map = useMap();
+  const layersRef = useRef<L.Layer[]>([]);
+
+  useEffect(() => {
+    if (stops.length === 0) return;
+    const bounds = L.latLngBounds(stops.map(s => [s.latitude!, s.longitude!]));
+    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 8 });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map]);
+
+  useEffect(() => {
+    layersRef.current.forEach(l => map.removeLayer(l));
+    layersRef.current = [];
+
+    for (let i = 0; i < currentStopIndex && i < stops.length - 1; i++) {
+      const start = stops[i];
+      const end = stops[i + 1];
+      const color = transportColors[end.transportMode || "walk"] || "#10b981";
+
+      const curvedPoints = generateCurvedPath(
+        [start.latitude!, start.longitude!],
+        [end.latitude!, end.longitude!]
+      );
+
+      const shadow = L.polyline(curvedPoints, {
+        color: "#000", weight: 6, opacity: 0.15, interactive: false, lineCap: "round",
+      }).addTo(map);
+      layersRef.current.push(shadow);
+
+      const line = L.polyline(curvedPoints, {
+        color, weight: 3.5, opacity: 0.9, interactive: false, lineCap: "round",
+        dashArray: getDashForTransport(end.transportMode),
+      }).addTo(map);
+      layersRef.current.push(line);
+
+      const glow = L.polyline(curvedPoints, {
+        color, weight: 6, opacity: 0.2, interactive: false, lineCap: "round",
+      }).addTo(map);
+      layersRef.current.push(glow);
+
+      const midIdx = Math.floor(curvedPoints.length / 2);
+      const midPoint = curvedPoints[midIdx];
+      const emoji = transportEmoji[end.transportMode || "walk"] || "🚶";
+      const transportMidMarker = L.marker(midPoint, {
+        icon: L.divIcon({
+          html: `<div style="font-size:20px;text-shadow:0 2px 4px rgba(0,0,0,0.5);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3));">${emoji}</div>`,
+          className: "transport-emoji-marker",
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        }),
+        zIndexOffset: 50,
+        interactive: false,
+      }).addTo(map);
+      layersRef.current.push(transportMidMarker);
+    }
+
+    if (phase === "arrived" && currentStopIndex < stops.length) {
+      const stop = stops[currentStopIndex];
+      const rawUrl = userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
+      const avatarUrl = sanitizeUrl(rawUrl) || "https://api.dicebear.com/7.x/avataaars/svg?seed=nomad";
+      
+      const arrivedIcon = L.divIcon({
+        html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:56px;height:56px;border-radius:50%;border:3px solid #10b981;box-shadow:0 0 24px rgba(16,185,129,0.6), 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:white;animation:bounce-in 0.5s ease;">
+            <img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+          </div>
+          <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:1.5px solid white;">📍 ${stop.city}</div>
+        </div>`,
+        className: "trip-replay-marker",
+        iconSize: [56, 72],
+        iconAnchor: [28, 36],
+      });
+      
+      const avatarMarker = L.marker([stop.latitude!, stop.longitude!], { icon: arrivedIcon, zIndexOffset: 1000 }).addTo(map);
+      layersRef.current.push(avatarMarker);
+    }
+
+    for (let i = 0; i < stops.length; i++) {
+      const stop = stops[i];
+      const isCurrentStop = i === currentStopIndex && phase === "arrived";
+      const isPast = i < currentStopIndex;
+      const isFuture = i > currentStopIndex;
+
+      if (isCurrentStop) continue;
+
+      if (isPast) {
+        const size = 28;
+        const markerIcon = L.divIcon({
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:3px solid #6b7280;background:#374151;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
+            ${i + 1}
+          </div>`,
+          className: "stop-replay-marker",
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
+        });
+        const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: 100 }).addTo(map);
+        layersRef.current.push(marker);
+      } else if (isFuture) {
+        const size = 24;
+        const markerIcon = L.divIcon({
+          html: `<div style="width:${size}px;height:${size}px;border-radius:50%;border:2px dashed #4b5563;background:#1f2937;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:bold;font-size:10px;box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+            ${i + 1}
+          </div>`,
+          className: "stop-replay-marker",
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
+        });
+        const marker = L.marker([stop.latitude!, stop.longitude!], { icon: markerIcon, zIndexOffset: 50 }).addTo(map);
+        layersRef.current.push(marker);
+      }
+    }
+
+    return () => {
+      layersRef.current.forEach(l => map.removeLayer(l));
+      layersRef.current = [];
+    };
+  }, [currentStopIndex, phase, stops, map, userAvatar]);
+
+  return null;
+}
+
+function TravelingAnimation({
+  stops,
+  currentStopIndex,
+  progress,
+}: {
+  stops: TripStop[];
+  currentStopIndex: number;
+  progress: number;
+}) {
+  const map = useMap();
+  const animLineRef = useRef<L.Layer[]>([]);
+  const movingMarkerRef = useRef<L.Marker | null>(null);
+
+  useEffect(() => {
+    return () => {
+      animLineRef.current.forEach(l => map.removeLayer(l));
+      animLineRef.current = [];
+      if (movingMarkerRef.current) {
+        map.removeLayer(movingMarkerRef.current);
+        movingMarkerRef.current = null;
+      }
+    };
+  }, [map, currentStopIndex]);
+
+  useEffect(() => {
+    if (currentStopIndex <= 0 || currentStopIndex > stops.length - 1) return;
+
+    animLineRef.current.forEach(l => map.removeLayer(l));
+    animLineRef.current = [];
+
+    const prevStop = stops[currentStopIndex - 1];
+    const currStop = stops[currentStopIndex];
+    const color = transportColors[currStop.transportMode || "walk"] || "#10b981";
+
+    const fullPath = generateCurvedPath(
+      [prevStop.latitude!, prevStop.longitude!],
+      [currStop.latitude!, currStop.longitude!]
+    );
+
+    const partialIndex = Math.floor(progress * (fullPath.length - 1));
+    const partialPath = fullPath.slice(0, partialIndex + 1);
+
+    if (partialPath.length > 1) {
+      const animLine = L.polyline(partialPath, {
+        color, weight: 3.5, opacity: 0.9, interactive: false, lineCap: "round",
+        dashArray: getDashForTransport(currStop.transportMode),
+      }).addTo(map);
+      animLineRef.current.push(animLine);
+
+      const animGlow = L.polyline(partialPath, {
+        color, weight: 6, opacity: 0.2, interactive: false, lineCap: "round",
+      }).addTo(map);
+      animLineRef.current.push(animGlow);
+    }
+
+    const currentPos = partialPath.length > 0 ? partialPath[partialPath.length - 1] : L.latLng(prevStop.latitude!, prevStop.longitude!);
+    const transportMode = currStop.transportMode || "walk";
+    const emoji = transportEmoji[transportMode] || "🚶";
+    const label = transportLabels[transportMode] || "A piedi";
+
+    if (movingMarkerRef.current) {
+      movingMarkerRef.current.setLatLng(currentPos);
+    } else {
+      const icon = L.divIcon({
+        html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center;">
+          <div style="width:52px;height:52px;border-radius:50%;border:3px solid ${color};box-shadow:0 0 24px ${color}80, 0 4px 15px rgba(0,0,0,0.4);overflow:hidden;background:${color};display:flex;align-items:center;justify-content:center;animation:pulse-glow 1.5s ease-in-out infinite;">
+            <span style="font-size:28px;">${emoji}</span>
+          </div>
+          <div style="position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:1.5px solid white;">${label}</div>
+        </div>`,
+        className: "trip-replay-marker",
+        iconSize: [52, 64],
+        iconAnchor: [26, 32],
+      });
+      movingMarkerRef.current = L.marker(currentPos, { icon, zIndexOffset: 1000 }).addTo(map);
+    }
+  }, [progress, currentStopIndex, stops, map]);
+
+  return null;
+}
+
+function MapFlyController({
+  stops,
+  currentStopIndex,
+  phase,
+}: {
+  stops: TripStop[];
+  currentStopIndex: number;
+  phase: string;
+}) {
+  const map = useMap();
+  const zoomRef = useRef(6);
+  const hasFlownRef = useRef<string>("");
+
+  useEffect(() => {
+    const onZoomEnd = () => { zoomRef.current = map.getZoom(); };
+    map.on("zoomend", onZoomEnd);
+    return () => { map.off("zoomend", onZoomEnd); };
+  }, [map]);
+
+  useEffect(() => {
+    if (phase === "intro") {
+      hasFlownRef.current = "";
+      return;
+    }
+    if (phase !== "arrived" && phase !== "traveling") return;
+    const key = `${currentStopIndex}-${phase}`;
+    if (hasFlownRef.current === key) return;
+    hasFlownRef.current = key;
+
+    if (currentStopIndex < stops.length) {
+      const target = stops[currentStopIndex];
+      if (target.latitude != null && target.longitude != null) {
+        map.flyTo([target.latitude, target.longitude], zoomRef.current, { duration: 1.5 });
+      }
+    }
+  }, [currentStopIndex, phase, stops, map]);
+
+  return null;
+}
+
 export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: TripReplayProps) {
-  const validStops = stops.filter(s => s.latitude != null && s.longitude != null).sort((a, b) => a.orderIndex - b.orderIndex);
+  const validStops = useMemo(
+    () => stops.filter(s => s.latitude != null && s.longitude != null).sort((a, b) => a.orderIndex - b.orderIndex),
+    [stops]
+  );
 
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -466,20 +471,17 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showPhoto, setShowPhoto] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const lineLayersRef = useRef<L.Layer[]>([]);
-  const movingMarkerRef = useRef<L.Marker | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     validStops.forEach(stop => {
       if (!stop.imageUrl) fetchCityImage(stop.city);
     });
-  }, [validStops.length]);
+  }, [validStops]);
 
-  const totalKm = validStops.reduce((sum, s) => sum + (s.distanceKm || 0), 0);
-  const totalCo2 = validStops.reduce((sum, s) => sum + (s.co2Kg || 0), 0);
+  const totalKm = useMemo(() => validStops.reduce((sum, s) => sum + (s.distanceKm || 0), 0), [validStops]);
+  const totalCo2 = useMemo(() => validStops.reduce((sum, s) => sum + (s.co2Kg || 0), 0), [validStops]);
   const co2Car = totalKm * 0.171;
   const co2Saved = Math.max(0, co2Car - totalCo2);
 
@@ -490,25 +492,14 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
     }
   }, []);
 
-  useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+  useEffect(() => cleanup, [cleanup]);
 
   const startReplay = useCallback(() => {
     setCurrentStopIndex(0);
     setPhase("arrived");
     setProgress(0);
     setIsPlaying(true);
-    setShowPhoto(false);
   }, []);
-
-  useEffect(() => {
-    if (phase === "arrived") {
-      setShowPhoto(false);
-      const photoTimer = setTimeout(() => setShowPhoto(true), 400);
-      return () => clearTimeout(photoTimer);
-    }
-  }, [phase, currentStopIndex]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -518,7 +509,6 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
         if (currentStopIndex < validStops.length - 1) {
           setPhase("traveling");
           setProgress(0);
-          setShowPhoto(false);
         } else {
           setPhase("summary");
           setIsPlaying(false);
@@ -560,9 +550,6 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
       setCurrentStopIndex(0);
       setPhase("intro");
       setProgress(0);
-      if (movingMarkerRef.current) {
-        movingMarkerRef.current = null;
-      }
     } else {
       setIsPlaying(!isPlaying);
     }
@@ -582,14 +569,10 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
 
   const handleRestart = () => {
     cleanup();
-    if (movingMarkerRef.current) {
-      movingMarkerRef.current = null;
-    }
     setCurrentStopIndex(0);
     setPhase("intro");
     setProgress(0);
     setIsPlaying(false);
-    setShowPhoto(false);
   };
 
   const toggleFullscreen = () => {
@@ -637,10 +620,6 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
           60% { transform: scale(1.2); }
           100% { transform: scale(1); opacity: 1; }
         }
-        @keyframes float-vehicle {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-3px); }
-        }
         .trip-replay-marker, .stop-replay-marker, .transport-emoji-marker { background: none !important; border: none !important; }
       `}</style>
 
@@ -670,14 +649,22 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
           attributionControl={false}
         >
           <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-          <AnimatedMapController
+          <StaticMapLayers
             stops={validStops}
             currentStopIndex={currentStopIndex}
-            isPlaying={isPlaying}
-            progress={progress}
-            lineLayersRef={lineLayersRef}
-            movingMarkerRef={movingMarkerRef}
             userAvatar={userAvatar}
+            phase={phase}
+          />
+          {phase === "traveling" && (
+            <TravelingAnimation
+              stops={validStops}
+              currentStopIndex={currentStopIndex}
+              progress={progress}
+            />
+          )}
+          <MapFlyController
+            stops={validStops}
+            currentStopIndex={currentStopIndex}
             phase={phase}
           />
         </MapContainer>
@@ -712,9 +699,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                     <span key={stop.id} className="flex items-center gap-0.5">
                       <span className="text-xs text-white/80 font-medium">{stop.city}</span>
                       {i < validStops.length - 1 && (
-                        <>
-                          <span className="text-sm mx-0.5">{transportEmoji[validStops[i + 1]?.transportMode || "walk"]}</span>
-                        </>
+                        <span className="text-sm mx-0.5">{transportEmoji[validStops[i + 1]?.transportMode || "walk"]}</span>
                       )}
                     </span>
                   ))}
@@ -759,43 +744,24 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
               className="absolute bottom-28 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[10000]"
             >
               <div className="bg-card/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-border/50">
-                {showPhoto && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 140, opacity: 1 }}
-                    transition={{ type: "spring", damping: 20, delay: 0.2 }}
-                    className="relative overflow-hidden"
-                  >
-                    <CityImage city={currentStop.city} imageUrl={currentStop.imageUrl} alt={currentStop.city} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                    <motion.div 
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="absolute bottom-2 left-3 right-3 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
-                          📍 Tappa {currentStopIndex + 1}
-                        </span>
-                        {currentStop.rating && <StarsDisplay rating={currentStop.rating} size={12} />}
-                      </div>
-                      {currentStop.transportMode && currentStopIndex > 0 && (
-                        <span className="text-lg">{transportEmoji[currentStop.transportMode]}</span>
-                      )}
-                    </motion.div>
-                  </motion.div>
-                )}
+                <div className="relative overflow-hidden">
+                  <CityImage city={currentStop.city} imageUrl={currentStop.imageUrl} alt={currentStop.city} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-emerald-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
+                        📍 Tappa {currentStopIndex + 1}
+                      </span>
+                      {currentStop.rating && <StarsDisplay rating={currentStop.rating} size={12} />}
+                    </div>
+                    {currentStop.transportMode && currentStopIndex > 0 && (
+                      <span className="text-lg">{transportEmoji[currentStop.transportMode]}</span>
+                    )}
+                  </div>
+                </div>
 
                 <div className="p-4">
-                  <motion.h3 
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-lg font-bold text-foreground"
-                  >
-                    {currentStop.city}
-                  </motion.h3>
+                  <h3 className="text-lg font-bold text-foreground">{currentStop.city}</h3>
                   <p className="text-sm text-muted-foreground">{currentStop.country}</p>
 
                   <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
@@ -821,12 +787,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                   </div>
 
                   {currentStop.accommodationName && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                      className="mt-2 flex items-center gap-2 bg-blue-500/10 rounded-lg px-3 py-2"
-                    >
+                    <div className="mt-2 flex items-center gap-2 bg-blue-500/10 rounded-lg px-3 py-2">
                       <Bed className="w-4 h-4 text-blue-400" />
                       <div>
                         <p className="text-xs font-medium text-foreground">{currentStop.accommodationName}</p>
@@ -834,7 +795,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                           <p className="text-[10px] text-muted-foreground capitalize">{currentStop.accommodationType}</p>
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   )}
 
                   {currentStop.notes && (
@@ -842,16 +803,11 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                   )}
 
                   {nextStop && (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      className="mt-3 pt-2 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground"
-                    >
+                    <div className="mt-3 pt-2 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground">
                       <span className="text-sm">{transportEmoji[nextStop.transportMode || "walk"]}</span>
                       <span>Prossima: <span className="text-foreground font-medium">{nextStop.city}</span></span>
                       {nextStop.distanceKm && <span className="text-[10px] ml-auto">({nextStop.distanceKm} km)</span>}
-                    </motion.div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -887,8 +843,8 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                   </div>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
+                  <div
+                    className="h-full rounded-full transition-[width] duration-100"
                     style={{
                       width: `${progress * 100}%`,
                       backgroundColor: transportColors[nextStop.transportMode || "walk"],
@@ -1047,16 +1003,11 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
                 className="w-14 h-14 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-colors"
                 data-testid="button-play-pause"
               >
-                {phase === "summary" ? (
-                  <RotateCcw className="w-6 h-6" />
-                ) : isPlaying ? (
-                  <Pause className="w-6 h-6" />
-                ) : (
-                  <Play className="w-6 h-6 ml-0.5" />
-                )}
+                {phase === "summary" ? <RotateCcw className="w-6 h-6" /> :
+                 isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
               </button>
               <span className="text-[9px] text-muted-foreground">
-                {phase === "summary" ? "Rivedi" : isPlaying ? "Pausa" : "Play"}
+                {phase === "summary" ? "Riavvia" : isPlaying ? "Pausa" : "Avvia"}
               </span>
             </div>
             <div className="flex flex-col items-center gap-0.5">
@@ -1067,26 +1018,24 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
               >
                 <SkipForward className="w-4 h-4" />
               </button>
-              <span className="text-[9px] text-muted-foreground">Avanti</span>
+              <span className="text-[9px] text-muted-foreground">Salta</span>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-[9px] text-muted-foreground">Velocità</span>
-            <div className="flex items-center gap-1">
+          <div className="flex flex-col items-center gap-0.5">
+            <div className="flex rounded-full bg-muted overflow-hidden">
               {[1, 2, 3].map(s => (
                 <button
                   key={s}
                   onClick={() => setSpeed(s)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                    speed === s ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
+                  className={`px-2.5 py-1.5 text-xs font-bold transition-all ${speed === s ? "bg-emerald-500 text-white" : "text-muted-foreground"}`}
                   data-testid={`button-speed-${s}`}
                 >
                   {s}x
                 </button>
               ))}
             </div>
+            <span className="text-[9px] text-muted-foreground">Velocità</span>
           </div>
         </div>
       </div>
