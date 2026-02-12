@@ -70,53 +70,108 @@ const transportEmoji: Record<string, string> = {
 
 const cityImageCache: Record<string, string> = {};
 
-async function fetchCityImage(city: string): Promise<string> {
-  if (cityImageCache[city]) return cityImageCache[city];
+const italianToEnglish: Record<string, string> = {
+  "nuova delhi": "New Delhi", "londra": "London", "parigi": "Paris",
+  "berlino": "Berlin", "mosca": "Moscow", "lisbona": "Lisbon",
+  "barcellona": "Barcelona", "roma": "Rome", "milano": "Milan",
+  "firenze": "Florence", "napoli": "Naples", "venezia": "Venice",
+  "città del messico": "Mexico City", "pechino": "Beijing",
+  "il cairo": "Cairo", "atene": "Athens", "monaco": "Munich",
+  "copenaghen": "Copenhagen", "ginevra": "Geneva", "amburgo": "Hamburg",
+  "stoccolma": "Stockholm", "varsavia": "Warsaw", "budapest": "Budapest",
+  "bucarest": "Bucharest", "belgrado": "Belgrade", "vienna": "Vienna",
+  "praga": "Prague", "siviglia": "Seville", "marsiglia": "Marseille",
+  "lione": "Lyon", "colonia": "Cologne", "edimburgo": "Edinburgh",
+};
+
+function cleanCityName(city: string): string {
+  const lower = city.toLowerCase().trim();
+  if (italianToEnglish[lower]) return italianToEnglish[lower];
+  return city
+    .replace(/\s+(municipal\s+corporation|metropolitan|district|province|prefecture|region|area|city)\s*/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function tryWikipediaImage(searchName: string): Promise<string | null> {
   try {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`);
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchName)}`);
     if (res.ok) {
       const data = await res.json();
       const imgUrl = data.thumbnail?.source?.replace(/\/\d+px-/, "/600px-") || data.originalimage?.source;
-      if (imgUrl) {
-        cityImageCache[city] = imgUrl;
-        return imgUrl;
-      }
+      if (imgUrl) return imgUrl;
     }
   } catch {}
-  const fallback = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`;
-  cityImageCache[city] = fallback;
-  return fallback;
+  return null;
+}
+
+async function fetchCityImage(city: string): Promise<string> {
+  if (cityImageCache[city]) return cityImageCache[city];
+
+  const cleaned = cleanCityName(city);
+  let imgUrl = await tryWikipediaImage(cleaned);
+
+  if (!imgUrl && cleaned !== city) {
+    imgUrl = await tryWikipediaImage(city);
+  }
+
+  if (!imgUrl && cleaned.includes(" ")) {
+    const firstWord = cleaned.split(" ")[0];
+    if (firstWord.length > 3) {
+      imgUrl = await tryWikipediaImage(firstWord);
+    }
+  }
+
+  const result = imgUrl || `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`;
+  cityImageCache[city] = result;
+  return result;
 }
 
 function CityImage({ city, imageUrl, alt }: { city: string; imageUrl?: string | null; alt: string }) {
   const [src, setSrc] = useState(imageUrl || "");
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(!!imageUrl);
+  const prevCityRef = useRef(city);
 
   useEffect(() => {
-    setLoaded(false);
+    if (prevCityRef.current !== city) {
+      setLoaded(false);
+      prevCityRef.current = city;
+    }
     if (imageUrl) {
       setSrc(imageUrl);
       return;
     }
     let cancelled = false;
     fetchCityImage(city).then(url => {
-      if (!cancelled) setSrc(url);
+      if (!cancelled) {
+        setSrc(url);
+        if (url.includes("placehold.co")) setLoaded(true);
+      }
     });
     return () => { cancelled = true; };
   }, [city, imageUrl]);
 
-  if (!src) return <div className="w-full h-[140px] bg-gradient-to-br from-emerald-900/40 to-teal-900/40 flex items-center justify-center"><MapPin className="w-8 h-8 text-emerald-400/50" /></div>;
-
   return (
-    <img
-      src={src}
-      className={`w-full h-[140px] object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
-      alt={alt}
-      onLoad={() => setLoaded(true)}
-      onError={() => {
-        setSrc(`https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`);
-      }}
-    />
+    <div className="w-full h-[140px] relative bg-gradient-to-br from-emerald-900/30 to-teal-900/30">
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <MapPin className="w-6 h-6 text-emerald-400/40 animate-pulse" />
+        </div>
+      )}
+      {src && (
+        <img
+          src={src}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+          alt={alt}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            const fallback = `https://placehold.co/400x200/1a1a2e/10b981?text=${encodeURIComponent(city)}`;
+            setSrc(fallback);
+            setLoaded(true);
+          }}
+        />
+      )}
+    </div>
   );
 }
 
