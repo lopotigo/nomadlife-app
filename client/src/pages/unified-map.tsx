@@ -229,6 +229,52 @@ function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
   );
 }
 
+function PostCarouselPopup({
+  posts, likedPosts, pulsingPosts, onLike, onShare
+}: {
+  posts: PostWithUser[];
+  likedPosts: Set<string>;
+  pulsingPosts: Set<string>;
+  onLike: (id: string) => void;
+  onShare: (post: PostWithUser) => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const total = posts.length;
+  const post = posts[index];
+  if (!post) return null;
+
+  return (
+    <div>
+      {total > 1 && (
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-1.5 border-b border-gray-200/50">
+          <button
+            onClick={(e) => { e.stopPropagation(); setIndex((index - 1 + total) % total); }}
+            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center text-gray-600 hover:text-gray-900 transition-all"
+            data-testid="button-carousel-prev"
+          >
+            <ChevronDown className="w-4 h-4 rotate-90" />
+          </button>
+          <span className="text-xs font-semibold text-gray-600">{index + 1} / {total}</span>
+          <button
+            onClick={(e) => { e.stopPropagation(); setIndex((index + 1) % total); }}
+            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center text-gray-600 hover:text-gray-900 transition-all"
+            data-testid="button-carousel-next"
+          >
+            <ChevronDown className="w-4 h-4 -rotate-90" />
+          </button>
+        </div>
+      )}
+      <PostMapPopup
+        post={post}
+        likedPosts={likedPosts}
+        pulsingPosts={pulsingPosts}
+        onLike={onLike}
+        onShare={onShare}
+      />
+    </div>
+  );
+}
+
 function PostMapPopup({ 
   post, likedPosts, pulsingPosts, onLike, onShare 
 }: { 
@@ -705,6 +751,22 @@ export default function UnifiedMap() {
     [posts, filters.showPosts]
   );
 
+  const groupedPosts = useMemo(() => {
+    const groups: { lat: number; lng: number; posts: PostWithUser[] }[] = [];
+    const threshold = 0.0005;
+    postsWithCoords.forEach(post => {
+      const existing = groups.find(g =>
+        Math.abs(g.lat - post.latitude!) < threshold && Math.abs(g.lng - post.longitude!) < threshold
+      );
+      if (existing) {
+        existing.posts.push(post);
+      } else {
+        groups.push({ lat: post.latitude!, lng: post.longitude!, posts: [post] });
+      }
+    });
+    return groups;
+  }, [postsWithCoords]);
+
   const eventsWithCoords = useMemo(() => {
     if (!filters.showEvents) return [];
     
@@ -885,23 +947,38 @@ export default function UnifiedMap() {
                 });
               }}
             >
-              {postsWithCoords.map((post) => (
-                <Marker
-                  key={`post-${post.id}`}
-                  position={[post.latitude!, post.longitude!]}
-                  icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId, !!(post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl))))}
-                >
-                  <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
-                    <PostMapPopup 
-                      post={post} 
-                      likedPosts={likedPosts}
-                      pulsingPosts={pulsingPosts}
-                      onLike={handleLike}
-                      onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
-                    />
-                  </Popup>
-                </Marker>
-              ))}
+              {groupedPosts.map((group, gi) => {
+                const firstPost = group.posts[0];
+                const hasMultiple = group.posts.length > 1;
+                return (
+                  <Marker
+                    key={`group-${gi}`}
+                    position={[group.lat, group.lng]}
+                    icon={hasMultiple
+                      ? L.divIcon({
+                          html: `<div style="position:relative;width:44px;height:44px;">
+                            <img src="${firstPost.imageUrl || firstPost.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstPost.user?.username}`}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid #6366f1;box-shadow:0 2px 8px rgba(0,0,0,0.3);" />
+                            <div style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(99,102,241,0.5);">${group.posts.length}</div>
+                          </div>`,
+                          className: "",
+                          iconSize: L.point(44, 44),
+                          iconAnchor: L.point(22, 22),
+                        })
+                      : createPostMarkerIcon(firstPost.imageUrl, firstPost.user?.avatar, !!firstPost.tripId, !!(firstPost.videoUrl || (firstPost.linkUrl && isYouTubeUrl(firstPost.linkUrl))))
+                    }
+                  >
+                    <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
+                      <PostCarouselPopup
+                        posts={group.posts}
+                        likedPosts={likedPosts}
+                        pulsingPosts={pulsingPosts}
+                        onLike={handleLike}
+                        onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
+                      />
+                    </Popup>
+                  </Marker>
+                );
+              })}
             </MarkerClusterGroup>
 
             {eventsWithCoords.map((event) => (
