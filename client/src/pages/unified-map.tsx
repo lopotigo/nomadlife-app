@@ -30,6 +30,7 @@ import { WeatherWidget } from "@/components/weather-widget";
 import { FloatingTip } from "@/components/contextual-tip";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -854,23 +855,41 @@ export default function UnifiedMap() {
             />
             <MapClickHandler onMapClick={handleMapClick} />
             
-            {postsWithCoords.map((post) => (
-              <Marker
-                key={`post-${post.id}`}
-                position={[post.latitude!, post.longitude!]}
-                icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId, !!(post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl))))}
-              >
-                <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
-                  <PostMapPopup 
-                    post={post} 
-                    likedPosts={likedPosts}
-                    pulsingPosts={pulsingPosts}
-                    onLike={handleLike}
-                    onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
-                  />
-                </Popup>
-              </Marker>
-            ))}
+            <MarkerClusterGroup
+              chunkedLoading
+              maxClusterRadius={40}
+              spiderfyOnMaxZoom={true}
+              showCoverageOnHover={false}
+              zoomToBoundsOnClick={true}
+              disableClusteringAtZoom={18}
+              iconCreateFunction={(cluster: any) => {
+                const count = cluster.getChildCount();
+                return L.divIcon({
+                  html: `<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 3px 12px rgba(99,102,241,0.5);border:2px solid white;">${count}</div>`,
+                  className: "",
+                  iconSize: L.point(36, 36),
+                  iconAnchor: L.point(18, 18),
+                });
+              }}
+            >
+              {postsWithCoords.map((post) => (
+                <Marker
+                  key={`post-${post.id}`}
+                  position={[post.latitude!, post.longitude!]}
+                  icon={createPostMarkerIcon(post.imageUrl, post.user?.avatar, !!post.tripId, !!(post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl))))}
+                >
+                  <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
+                    <PostMapPopup 
+                      post={post} 
+                      likedPosts={likedPosts}
+                      pulsingPosts={pulsingPosts}
+                      onLike={handleLike}
+                      onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
+                    />
+                  </Popup>
+                </Marker>
+              ))}
+            </MarkerClusterGroup>
 
             {eventsWithCoords.map((event) => (
               <Marker
@@ -1469,6 +1488,9 @@ export default function UnifiedMap() {
         .route-anim-dots { animation: dashMove 1.5s linear infinite; }
         @keyframes dashMove { to { stroke-dashoffset: -18; } }
         .leaflet-popup-pane { z-index: 1100 !important; }
+        .marker-cluster-animated { transition: none !important; }
+        .leaflet-cluster-anim .leaflet-marker-icon, .leaflet-cluster-anim .leaflet-marker-shadow { transition: transform 0.25s ease-out, opacity 0.25s ease-out; }
+        .marker-cluster { background: transparent !important; }
         .custom-popup .leaflet-popup-content-wrapper { 
           background: white; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.3); 
           padding: 0 !important; overflow: hidden;
