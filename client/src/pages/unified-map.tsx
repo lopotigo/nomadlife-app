@@ -233,89 +233,59 @@ const POPUP_AUTO_CLOSE_MS = 10000;
 
 function PopupAutoClose({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number }) {
   const map = useMap();
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [paused, setPaused] = useState(false);
-  const [progress, setProgress] = useState(100);
-  const startTimeRef = useRef(Date.now());
-  const remainingRef = useRef(duration);
-  const rafRef = useRef<number | null>(null);
-
-  const closePopup = useCallback(() => {
-    map.closePopup();
-  }, [map]);
-
-  const tick = useCallback(() => {
-    if (paused) return;
-    const elapsed = Date.now() - startTimeRef.current;
-    const remaining = Math.max(0, remainingRef.current - elapsed);
-    const pct = (remaining / duration) * 100;
-    setProgress(pct);
-    if (remaining <= 0) {
-      closePopup();
-    } else {
-      rafRef.current = requestAnimationFrame(tick);
-    }
-  }, [paused, duration, closePopup]);
+  const barRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
 
   useEffect(() => {
-    if (paused) {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      return;
-    }
-    startTimeRef.current = Date.now();
-    rafRef.current = requestAnimationFrame(tick);
-    timerRef.current = setTimeout(closePopup, remainingRef.current);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (timerRef.current) clearTimeout(timerRef.current);
+    let remaining = duration;
+    let last = Date.now();
+
+    const close = () => {
+      try {
+        map.closePopup();
+      } catch {}
+      const popup = wrapRef.current?.closest('.leaflet-popup');
+      const btn = popup?.querySelector<HTMLElement>('.leaflet-popup-close-button, a.leaflet-popup-close-button');
+      if (btn) btn.click();
     };
-  }, [paused, tick, closePopup]);
 
-  const pauseNodeRef = useRef<HTMLDivElement | null>(null);
-  const handlersRef = useRef<{ enter: () => void; leave: () => void } | null>(null);
-
-  useEffect(() => {
-    return () => {
-      const node = pauseNodeRef.current;
-      const h = handlersRef.current;
-      if (node && h) {
-        node.removeEventListener("mouseenter", h.enter);
-        node.removeEventListener("mouseleave", h.leave);
-        node.removeEventListener("touchstart", h.enter);
-        node.removeEventListener("touchend", h.leave);
+    const iv = setInterval(() => {
+      if (pausedRef.current) {
+        last = Date.now();
+        return;
       }
-    };
-  }, []);
+      const now = Date.now();
+      remaining -= (now - last);
+      last = now;
+      if (remaining <= 0) {
+        clearInterval(iv);
+        close();
+        return;
+      }
+      if (barRef.current) {
+        barRef.current.style.width = `${Math.max(0, (remaining / duration) * 100)}%`;
+      }
+    }, 80);
 
-  const handlePause = useCallback((node: HTMLDivElement | null) => {
-    if (!node) return;
-    pauseNodeRef.current = node;
-    L.DomEvent.disableClickPropagation(node);
-    const enter = () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      remainingRef.current = Math.max(0, remainingRef.current - (Date.now() - startTimeRef.current));
-      setPaused(true);
-    };
-    const leave = () => {
-      setPaused(false);
-    };
-    handlersRef.current = { enter, leave };
-    node.addEventListener("mouseenter", enter);
-    node.addEventListener("mouseleave", leave);
-    node.addEventListener("touchstart", enter, { passive: true });
-    node.addEventListener("touchend", leave);
-  }, []);
+    return () => clearInterval(iv);
+  }, [map, duration]);
 
   return (
-    <div ref={handlePause} className="relative">
-      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-200/50 overflow-hidden rounded-b-xl">
-        <div
-          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-none"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+    <div
+      ref={wrapRef}
+      className="h-[3px] bg-gray-200/30 overflow-hidden mt-1"
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
+      onTouchStart={() => { pausedRef.current = true; }}
+      onTouchEnd={() => { pausedRef.current = false; }}
+      data-testid="popup-progress-bar"
+    >
+      <div
+        ref={barRef}
+        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
+        style={{ width: '100%' }}
+      />
     </div>
   );
 }
@@ -330,152 +300,87 @@ function PostCarouselPopup({
   onShare: (post: PostWithUser) => void;
 }) {
   const [index, setIndex] = useState(0);
-  const [expanded, setExpanded] = useState(false);
   const total = posts.length;
   const post = posts[index];
-  const setIndexRef = useRef(setIndex);
-  setIndexRef.current = setIndex;
-  const totalRef = useRef(total);
-  totalRef.current = total;
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const containerNodeRef = useRef<HTMLDivElement | null>(null);
+  const touchHandlersRef = useRef<{ start: (e: TouchEvent) => void; end: (e: TouchEvent) => void } | null>(null);
 
-  const prevRefCb = useCallback((node: HTMLButtonElement | null) => {
-    if (!node) return;
-    L.DomEvent.disableClickPropagation(node);
-    const handler = (ev: globalThis.Event) => {
-      ev.stopPropagation();
-      ev.preventDefault();
-      setIndexRef.current(prev => (prev - 1 + totalRef.current) % totalRef.current);
-    };
-    node.addEventListener("pointerdown", handler as EventListener, true);
-    node.addEventListener("click", handler as EventListener, true);
-  }, []);
-
-  const nextRefCb = useCallback((node: HTMLButtonElement | null) => {
-    if (!node) return;
-    L.DomEvent.disableClickPropagation(node);
-    const handler = (ev: globalThis.Event) => {
-      ev.stopPropagation();
-      ev.preventDefault();
-      setIndexRef.current(prev => (prev + 1) % totalRef.current);
-    };
-    node.addEventListener("pointerdown", handler as EventListener, true);
-    node.addEventListener("click", handler as EventListener, true);
-  }, []);
-
-  const swipeRef = useCallback((node: HTMLDivElement | null) => {
-    if (!node) return;
-    node.addEventListener("touchstart", (e) => {
-      const t = e.touches[0];
-      touchStartRef.current = { x: t.clientX, y: t.clientY };
-    }, { passive: true });
-    node.addEventListener("touchend", (e) => {
-      if (!touchStartRef.current) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - touchStartRef.current.x;
-      const dy = t.clientY - touchStartRef.current.y;
-      touchStartRef.current = null;
-      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
-        if (dx < 0) {
-          setIndexRef.current(prev => (prev + 1) % totalRef.current);
-        } else {
-          setIndexRef.current(prev => (prev - 1 + totalRef.current) % totalRef.current);
-        }
+  useEffect(() => {
+    return () => {
+      const node = containerNodeRef.current;
+      const h = touchHandlersRef.current;
+      if (node && h) {
+        node.removeEventListener("touchstart", h.start);
+        node.removeEventListener("touchend", h.end);
       }
-    }, { passive: true });
+    };
   }, []);
 
-  const expandRef = useCallback((node: HTMLButtonElement | null) => {
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
+    containerNodeRef.current = node;
     L.DomEvent.disableClickPropagation(node);
-    node.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      ev.preventDefault();
-      setExpanded(prev => !prev);
-    }, true);
-  }, []);
+    L.DomEvent.disableScrollPropagation(node);
+
+    let ts: { x: number; y: number } | null = null;
+    const onStart = (e: TouchEvent) => {
+      ts = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (!ts) return;
+      const dx = e.changedTouches[0].clientX - ts.x;
+      const dy = e.changedTouches[0].clientY - ts.y;
+      ts = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        const dir = dx < 0 ? 1 : -1;
+        setIndex(prev => {
+          const t = posts.length;
+          return (prev + dir + t) % t;
+        });
+      }
+    };
+    touchHandlersRef.current = { start: onStart, end: onEnd };
+    node.addEventListener("touchstart", onStart, { passive: true });
+    node.addEventListener("touchend", onEnd, { passive: true });
+  }, [posts.length]);
 
   if (!post) return null;
 
+  const goPrev = () => setIndex(prev => (prev - 1 + total) % total);
+  const goNext = () => setIndex(prev => (prev + 1) % total);
+
   return (
-    <div ref={swipeRef} className="popup-animate-in">
+    <div ref={containerRef} className="popup-animate-in">
       {total > 1 && (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-2 border-b border-gray-200/50">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200/30 bg-gray-50/80 dark:bg-gray-800/50">
           <button
-            ref={prevRefCb}
             type="button"
-            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-transform"
+            onClick={goPrev}
+            className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 shadow flex items-center justify-center text-gray-600 dark:text-gray-300 cursor-pointer select-none active:scale-90 transition-transform"
             data-testid="button-carousel-prev"
           >
-            <ChevronDown className="w-4 h-4 rotate-90 pointer-events-none" />
+            <ChevronDown className="w-4 h-4 rotate-90" />
           </button>
-          <span className="text-xs font-bold text-gray-700 bg-white/60 px-2 py-0.5 rounded-full" data-testid="carousel-counter">{index + 1} / {total}</span>
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400" data-testid="carousel-counter">{index + 1} / {total}</span>
           <button
-            ref={nextRefCb}
             type="button"
-            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-transform"
+            onClick={goNext}
+            className="w-7 h-7 rounded-full bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 shadow flex items-center justify-center text-gray-600 dark:text-gray-300 cursor-pointer select-none active:scale-90 transition-transform"
             data-testid="button-carousel-next"
           >
-            <ChevronDown className="w-4 h-4 -rotate-90 pointer-events-none" />
+            <ChevronDown className="w-4 h-4 -rotate-90" />
           </button>
         </div>
       )}
 
-      <div className="flex items-center gap-2 p-3 pb-2">
-        <a href={`/user/${post.user.id}`} className="shrink-0">
-          <img
-            src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
-            className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20"
-            alt={post.user.name}
-          />
-        </a>
-        <div className="flex-1 min-w-0">
-          <a href={`/user/${post.user.id}`} className="font-semibold text-sm hover:text-primary transition-colors">{post.user.name}</a>
-          <p className="text-xs text-gray-500">@{post.user.username}</p>
-        </div>
-        {!expanded && (post.imageUrl || post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl))) && (
-          <img
-            src={post.imageUrl || `https://img.youtube.com/vi/${extractYouTubeId(post.linkUrl || post.videoUrl || "")}/mqdefault.jpg`}
-            className="w-12 h-12 rounded-lg object-cover shrink-0"
-            alt=""
-          />
-        )}
-        <button
-          ref={expandRef}
-          type="button"
-          className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 cursor-pointer shrink-0 transition-colors"
-          data-testid="button-expand-popup"
-        >
-          <ChevronDown className={`w-4 h-4 transition-transform duration-200 pointer-events-none ${expanded ? "rotate-180" : ""}`} />
-        </button>
-      </div>
-
-      {!expanded && (
-        <div className="px-3 pb-2">
-          <p className="text-xs text-gray-600 line-clamp-2">{post.content}</p>
-        </div>
-      )}
-
-      {expanded && (
-        <PostMapPopupExpanded
-          key={post.id}
-          post={post}
-          likedPosts={likedPosts}
-          pulsingPosts={pulsingPosts}
-          onLike={onLike}
-          onShare={onShare}
-        />
-      )}
-
-      {!expanded && (
-        <div className="flex items-center justify-between px-3 py-1.5 border-t border-gray-100 text-xs text-gray-400">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1"><Heart className={`w-3 h-3 ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} /> {post.likes}</span>
-            <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
-          </div>
-          {post.location && <span className="flex items-center gap-1 truncate max-w-[120px]"><MapPin className="w-3 h-3" /> {post.location}</span>}
-        </div>
-      )}
+      <PostMapPopupExpanded
+        key={post.id}
+        post={post}
+        likedPosts={likedPosts}
+        pulsingPosts={pulsingPosts}
+        onLike={onLike}
+        onShare={onShare}
+      />
 
       <PopupAutoClose />
     </div>
