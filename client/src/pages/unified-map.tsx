@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, Fragment } from "react";
+import { useEffect, useState, useCallback, useMemo, Fragment, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
@@ -241,35 +241,58 @@ function PostCarouselPopup({
   const [index, setIndex] = useState(0);
   const total = posts.length;
   const post = posts[index];
-  const containerRef = useCallback((node: HTMLDivElement | null) => {
+  const setIndexRef = useRef(setIndex);
+  setIndexRef.current = setIndex;
+  const totalRef = useRef(total);
+  totalRef.current = total;
+
+  const prevRefCb = useCallback((node: HTMLButtonElement | null) => {
     if (!node) return;
     L.DomEvent.disableClickPropagation(node);
-    L.DomEvent.disableScrollPropagation(node);
+    const handler = (ev: globalThis.Event) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      setIndexRef.current(prev => (prev - 1 + totalRef.current) % totalRef.current);
+    };
+    node.addEventListener("pointerdown", handler as EventListener, true);
+    node.addEventListener("click", handler as EventListener, true);
   }, []);
+
+  const nextRefCb = useCallback((node: HTMLButtonElement | null) => {
+    if (!node) return;
+    L.DomEvent.disableClickPropagation(node);
+    const handler = (ev: globalThis.Event) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      setIndexRef.current(prev => (prev + 1) % totalRef.current);
+    };
+    node.addEventListener("pointerdown", handler as EventListener, true);
+    node.addEventListener("click", handler as EventListener, true);
+  }, []);
+
   if (!post) return null;
 
-  const goPrev = () => setIndex((index - 1 + total) % total);
-  const goNext = () => setIndex((index + 1) % total);
-
   return (
-    <div ref={containerRef}>
+    <div>
       {total > 1 && (
         <div className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-2 border-b border-gray-200/50">
-          <div
-            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); goPrev(); }}
-            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-all"
+          <button
+            ref={prevRefCb}
+            type="button"
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none"
             data-testid="button-carousel-prev"
           >
-            <ChevronDown className="w-4 h-4 rotate-90" />
-          </div>
-          <span className="text-xs font-bold text-gray-700 bg-white/60 px-2 py-0.5 rounded-full">{index + 1} / {total}</span>
-          <div
-            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); goNext(); }}
-            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-all"
+            <ChevronDown className="w-4 h-4 rotate-90 pointer-events-none" />
+          </button>
+          <span className="text-xs font-bold text-gray-700 bg-white/60 px-2 py-0.5 rounded-full" data-testid="carousel-counter">{index + 1} / {total}</span>
+          <button
+            ref={nextRefCb}
+            type="button"
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none"
             data-testid="button-carousel-next"
           >
-            <ChevronDown className="w-4 h-4 -rotate-90" />
-          </div>
+            <ChevronDown className="w-4 h-4 -rotate-90 pointer-events-none" />
+          </button>
         </div>
       )}
       <PostMapPopup
