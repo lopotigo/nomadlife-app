@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
+import { useTheme } from "@/lib/theme";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, SkipForward, RotateCcw, X, Plane, Train, Car, Footprints, Bike, MapPin, Calendar, Star, Leaf, Route, Bed, ChevronRight, Maximize2, Minimize2, Gauge, Bus } from "lucide-react";
 import "leaflet/dist/leaflet.css";
@@ -492,6 +493,11 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
     [stops]
   );
 
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [phase, setPhase] = useState<"intro" | "traveling" | "arrived" | "summary">("intro");
@@ -675,7 +681,7 @@ export function TripReplay({ tripTitle, stops, userAvatar, userName, onClose }: 
           zoomControl={false}
           attributionControl={false}
         >
-          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+          <TileLayer url={tileUrl} />
           <StaticMapLayers
             stops={validStops}
             currentStopIndex={currentStopIndex}

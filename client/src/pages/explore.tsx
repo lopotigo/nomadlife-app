@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import { useLocation } from "wouter";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { CurvedRouteLine } from "@/components/map-route-line";
@@ -348,6 +349,10 @@ function calculateRoute(from: string, to: string): RouteResult | null {
 
 export default function Explore() {
   const { user, loading: authLoading } = useAuth();
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [, setLocation] = useLocation();
   const [selectedCity, setSelectedCity] = useState<typeof CITIES[0] | null>(null);
   const [showRoute, setShowRoute] = useState(false);
@@ -587,8 +592,8 @@ export default function Explore() {
             className="z-0"
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+              url={tileUrl}
             />
             
             {/* City Markers */}

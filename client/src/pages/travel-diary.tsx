@@ -26,6 +26,7 @@ import "leaflet/dist/leaflet.css";
 import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { useI18n } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 import { FloatingTip } from "@/components/contextual-tip";
 import { TripReplay } from "@/components/trip-replay";
 
@@ -154,6 +155,10 @@ function formatDuration(hours: number): string {
 export default function TravelDiary() {
   const { user, loading: authLoading } = useAuth();
   const { t } = useI18n();
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [, setLocation] = useLocation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [publicTrips, setPublicTrips] = useState<TripWithDetails[]>([]);
@@ -1867,6 +1872,10 @@ function ExploreTripsMap({
   onBack: () => void;
   highlightedTripId?: string;
 }) {
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [copyingStopId, setCopyingStopId] = useState<string | null>(null);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(highlightedTripId || null);
   
@@ -1915,8 +1924,8 @@ function ExploreTripsMap({
         className="rounded-lg overflow-hidden"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url={tileUrl}
         />
         
         {tripPolylines.map((polyline) => (
@@ -2097,6 +2106,10 @@ function TripPlannerMap({
   userAvatar?: string | null;
 }) {
   const [, setLocation] = useLocation();
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [pendingLocation, setPendingLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [cityName, setCityName] = useState("");
   const [countryName, setCountryName] = useState("");
@@ -2438,8 +2451,8 @@ function TripPlannerMap({
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url={tileUrl}
         />
         <MapClickHandler onMapClick={handleMapClick} />
         <UserLocationMarker position={userLocation} />

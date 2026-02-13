@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import { useLocation, Link } from "wouter";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -57,6 +58,10 @@ function MapEvents({ onMapClick }: { onMapClick: (lat: number, lng: number) => v
 
 export default function MapFeed() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -223,10 +228,10 @@ export default function MapFeed() {
               zoom={defaultZoom}
               className="w-full h-full"
               zoomControl={false}
-              style={{ background: "#0f172a" }}
+              style={{ background: theme === "dark" ? "#0f172a" : "#e8e8e8" }}
             >
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url={tileUrl}
                 attribution='&copy; <a href="https://carto.com/">CARTO</a>'
               />
               <MapEvents onMapClick={handleMapClick} />

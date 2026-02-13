@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import type { Post, User, Comment, Event, ChatGroup } from "@shared/schema";
 import { useI18n } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 import { searchFlights, searchHotels } from "@/lib/travelpayouts";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
@@ -537,6 +538,10 @@ export default function UnifiedMap() {
   const { user, loading: authLoading } = useAuth();
   const [location, setLocation] = useLocation();
   const { t } = useI18n();
+  const { theme } = useTheme();
+  const tileUrl = theme === "dark"
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [chatGroups, setChatGroups] = useState<ChatGroup[]>([]);
@@ -847,11 +852,11 @@ export default function UnifiedMap() {
             center={mapCenter}
             zoom={mapZoom}
             className="h-full w-full z-0"
-            style={{ background: "#1a1a2e" }}
+            style={{ background: theme === "dark" ? "#1a1a2e" : "#e8e8e8" }}
           >
             <TileLayer
               attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              url={tileUrl}
             />
             <MapClickHandler onMapClick={handleMapClick} />
             
