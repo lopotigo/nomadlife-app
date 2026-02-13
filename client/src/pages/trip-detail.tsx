@@ -3,7 +3,7 @@ import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
 import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShareQRModal } from "@/components/share-qr-modal";
+import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { TripReplay } from "@/components/trip-replay";
 import type { Trip, TripStop, User } from "@shared/schema";
 
@@ -98,7 +98,7 @@ export default function TripDetail() {
               <Play className="w-4 h-4 mr-1" />
               Replay
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowShare(true)} data-testid="button-share-trip">
+            <Button variant="outline" size="sm" onClick={() => handleShare("trip", trip.id, trip.title, () => setShowShare(true))} data-testid="button-share-trip">
               <Share2 className="w-4 h-4 mr-2" />
               Condividi
             </Button>

@@ -3,7 +3,7 @@ import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
 import { Heart, MessageCircle, MapPin, ArrowLeft, Share2, Calendar, Users, Send, Trash2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShareQRModal } from "@/components/share-qr-modal";
+import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { Input } from "@/components/ui/input";
 import type { Event, User } from "@shared/schema";
 
@@ -170,7 +170,7 @@ export default function EventDetail() {
               Indietro
             </Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={() => setShowShare(true)} data-testid="button-share-event">
+          <Button variant="outline" size="sm" onClick={() => handleShare("event", event.id, event.title, () => setShowShare(true))} data-testid="button-share-event">
             <Share2 className="w-4 h-4 mr-2" />
             Condividi
           </Button>

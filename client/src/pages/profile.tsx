@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
-import { ShareQRModal } from "@/components/share-qr-modal";
+import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/lib/theme";
 import { usePushNotifications } from "@/hooks/use-push-notifications";
@@ -170,16 +170,16 @@ export default function Profile() {
               <Mail className="w-5 h-5 text-muted-foreground" />
             </button>
             <button 
-              onClick={() => setShowShareQR(true)}
+              onClick={() => handleShare("invite", "auth", "Unisciti a NomadLife!", () => setShowShareQR(true))}
               className="p-2 rounded-2xl border border-primary bg-primary/10 hover:bg-primary/20 transition-colors"
               data-testid="button-share-profile"
             >
-              <QrCode className="w-5 h-5 text-primary" />
+              <Share2 className="w-5 h-5 text-primary" />
             </button>
           </div>
           
           <button
-            onClick={() => setShowShareQR(true)}
+            onClick={() => handleShare("invite", "auth", "Unisciti a NomadLife!", () => setShowShareQR(true))}
             className="mt-4 flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-bold hover:bg-primary/90 transition-colors"
             data-testid="button-share-profile-main"
           >

@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
-import { ShareQRModal } from "@/components/share-qr-modal";
+import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { EventPosterModal } from "@/components/event-poster-modal";
 import { WeatherWidget } from "@/components/weather-widget";
 import { FloatingTip } from "@/components/contextual-tip";
@@ -547,7 +547,7 @@ export default function UnifiedMap() {
   const [showNewPost, setShowNewPost] = useState(false);
   const [showNewEvent, setShowNewEvent] = useState(false);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite"; id: string; title: string } | null>(null);
+  const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite" | "event"; id: string; title: string } | null>(null);
   const [posterEvent, setPosterEvent] = useState<any | null>(null);
   const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
@@ -866,7 +866,7 @@ export default function UnifiedMap() {
                     likedPosts={likedPosts}
                     pulsingPosts={pulsingPosts}
                     onLike={handleLike}
-                    onShare={(p) => setShareModal({ open: true, type: "post", id: p.id, title: p.content.substring(0, 50) + "..." })}
+                    onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
                   />
                 </Popup>
               </Marker>
@@ -926,7 +926,7 @@ export default function UnifiedMap() {
                           <FileImage className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => setShareModal({ open: true, type: "invite", id: event.id, title: event.title })}
+                          onClick={() => handleShare("event", event.id, event.title, () => setShareModal({ open: true, type: "event", id: event.id, title: event.title }))}
                           className="p-1.5 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-600 transition-colors"
                           data-testid={`button-share-event-${event.id}`}
                           title="Condividi"
@@ -1145,7 +1145,7 @@ export default function UnifiedMap() {
                                 <Hotel className="w-3 h-3" />
                               </button>
                               <button
-                                onClick={() => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title })}
+                                onClick={() => handleShare("trip", trip.id, trip.title, () => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title }))}
                                 className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
                                 data-testid={`button-share-trip-${trip.id}`}
                               >
@@ -1378,7 +1378,7 @@ export default function UnifiedMap() {
                     likedPosts={likedPosts}
                     pulsingPosts={pulsingPosts}
                     onLike={handleLike}
-                    onShare={(p) => setShareModal({ open: true, type: "post", id: p.id, title: p.content.substring(0, 50) + "..." })}
+                    onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
                   />
                 );
               }

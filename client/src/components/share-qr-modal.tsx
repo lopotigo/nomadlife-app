@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download, Copy, Share2, Check } from "lucide-react";
+import { X, Download, Copy, Share2, Check, QrCode, ChevronDown, ChevronUp } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,23 +13,49 @@ interface ShareQRModalProps {
   title: string;
 }
 
+function getShareUrl(type: string, id: string) {
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+  switch (type) {
+    case "post": return `${baseUrl}/post/${id}`;
+    case "profile": return `${baseUrl}/user/${id}`;
+    case "trip": return `${baseUrl}/trip/${id}`;
+    case "event": return `${baseUrl}/event/${id}`;
+    case "invite": return `${baseUrl}/auth`;
+    default: return baseUrl;
+  }
+}
+
+export async function handleShare(
+  type: "post" | "profile" | "trip" | "invite" | "event",
+  id: string,
+  title: string,
+  openModal: () => void
+) {
+  const shareUrl = getShareUrl(type, id);
+
+  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    try {
+      await navigator.share({
+        title: `NomadLife - ${title || ""}`,
+        text: `Dai un'occhiata a questo su NomadLife!`,
+        url: shareUrl,
+      });
+      return;
+    } catch {
+      // user cancelled or share failed - fall through to modal
+    }
+  }
+
+  openModal();
+}
+
 export function ShareQRModal({ open, onClose, type, id, title }: ShareQRModalProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
 
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const getShareUrl = () => {
-    switch (type) {
-      case "post": return `${baseUrl}/post/${id}`;
-      case "profile": return `${baseUrl}/user/${id}`;
-      case "trip": return `${baseUrl}/trip/${id}`;
-      case "event": return `${baseUrl}/event/${id}`;
-      case "invite": return `${baseUrl}/auth`;
-      default: return baseUrl;
-    }
-  };
-  const shareUrl = getShareUrl();
+  const shareUrl = getShareUrl(type, id);
 
   const handleCopyLink = async () => {
     try {
@@ -105,62 +131,83 @@ export function ShareQRModal({ open, onClose, type, id, title }: ShareQRModalPro
           className="bg-card rounded-2xl max-w-sm w-full p-6"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Condividi</h2>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground" data-testid="button-close-share">
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex flex-col items-center">
-            <div ref={qrRef} className="bg-white p-4 rounded-xl mb-4" data-testid="qr-code-container">
-              <QRCodeSVG
-                value={shareUrl}
-                size={200}
-                level="H"
-                includeMargin={false}
-                fgColor="#000000"
-                bgColor="#ffffff"
-              />
-            </div>
+          <div className="bg-muted/50 rounded-xl p-3 mb-4">
+            <p className="text-sm font-medium truncate">{title}</p>
+            <p className="text-xs text-muted-foreground truncate mt-1">{shareUrl}</p>
+          </div>
 
-            <p className="text-sm text-muted-foreground mb-2 text-center">
-              Scansiona il QR code per aprire
-            </p>
-            <p className="text-xs text-primary font-medium mb-6 text-center break-all max-w-full px-4">
-              {title}
-            </p>
-
-            <div className="flex gap-3 w-full">
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={handleDownloadQR}
-                data-testid="button-download-qr"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Scarica
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={handleCopyLink}
-                data-testid="button-copy-link"
-              >
-                {copied ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
-                Copia
-              </Button>
-            </div>
-
+          <div className="flex flex-col gap-3">
             <Button 
-              className="w-full mt-3"
-              onClick={handleNativeShare}
-              data-testid="button-share"
+              className="w-full h-12 text-base"
+              onClick={handleCopyLink}
+              data-testid="button-copy-link"
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              Condividi
+              {copied ? <Check className="w-5 h-5 mr-2 text-green-300" /> : <Copy className="w-5 h-5 mr-2" />}
+              {copied ? "Copiato!" : "Copia link"}
             </Button>
+
+            {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
+              <Button 
+                variant="outline"
+                className="w-full h-12 text-base"
+                onClick={handleNativeShare}
+                data-testid="button-share"
+              >
+                <Share2 className="w-5 h-5 mr-2" />
+                Condividi
+              </Button>
+            )}
+
+            <button
+              className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground py-2 transition-colors"
+              onClick={() => setShowQR(!showQR)}
+              data-testid="button-toggle-qr"
+            >
+              <QrCode className="w-4 h-4" />
+              QR Code
+              {showQR ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+
+            <AnimatePresence>
+              {showQR && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-col items-center pt-2">
+                    <div ref={qrRef} className="bg-white p-4 rounded-xl mb-3" data-testid="qr-code-container">
+                      <QRCodeSVG
+                        value={shareUrl}
+                        size={160}
+                        level="H"
+                        includeMargin={false}
+                        fgColor="#000000"
+                        bgColor="#ffffff"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-3">Scansiona per aprire</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleDownloadQR}
+                      data-testid="button-download-qr"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Scarica QR
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </motion.div>

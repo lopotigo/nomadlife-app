@@ -419,6 +419,24 @@ function TravelingAnimation({
   return null;
 }
 
+function getZoomForDistance(distKm: number): number {
+  if (distKm < 10) return 12;
+  if (distKm < 50) return 10;
+  if (distKm < 200) return 8;
+  if (distKm < 500) return 7;
+  if (distKm < 1500) return 6;
+  if (distKm < 5000) return 5;
+  return 4;
+}
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 function MapFlyController({
   stops,
   currentStopIndex,
@@ -429,14 +447,7 @@ function MapFlyController({
   phase: string;
 }) {
   const map = useMap();
-  const zoomRef = useRef(6);
   const hasFlownRef = useRef<string>("");
-
-  useEffect(() => {
-    const onZoomEnd = () => { zoomRef.current = map.getZoom(); };
-    map.on("zoomend", onZoomEnd);
-    return () => { map.off("zoomend", onZoomEnd); };
-  }, [map]);
 
   useEffect(() => {
     if (phase === "intro") {
@@ -451,7 +462,23 @@ function MapFlyController({
     if (currentStopIndex < stops.length) {
       const target = stops[currentStopIndex];
       if (target.latitude != null && target.longitude != null) {
-        map.flyTo([target.latitude, target.longitude], zoomRef.current, { duration: 1.5 });
+        let zoom = 8;
+        if (currentStopIndex > 0) {
+          const prev = stops[currentStopIndex - 1];
+          if (prev.latitude != null && prev.longitude != null) {
+            const dist = haversineKm(prev.latitude, prev.longitude, target.latitude, target.longitude);
+            zoom = getZoomForDistance(dist);
+          }
+        } else {
+          if (stops.length > 1) {
+            const next = stops[1];
+            if (next.latitude != null && next.longitude != null) {
+              const dist = haversineKm(target.latitude, target.longitude, next.latitude, next.longitude);
+              zoom = getZoomForDistance(dist);
+            }
+          }
+        }
+        map.flyTo([target.latitude, target.longitude], zoom, { duration: 1.8, easeLinearity: 0.25 });
       }
     }
   }, [currentStopIndex, phase, stops, map]);
