@@ -30,7 +30,7 @@ import { EventPosterModal } from "@/components/event-poster-modal";
 import { WeatherWidget } from "@/components/weather-widget";
 import { FloatingTip } from "@/components/contextual-tip";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -229,6 +229,97 @@ function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
   );
 }
 
+const POPUP_AUTO_CLOSE_MS = 10000;
+
+function PopupAutoClose({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number }) {
+  const map = useMap();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(100);
+  const startTimeRef = useRef(Date.now());
+  const remainingRef = useRef(duration);
+  const rafRef = useRef<number | null>(null);
+
+  const closePopup = useCallback(() => {
+    map.closePopup();
+  }, [map]);
+
+  const tick = useCallback(() => {
+    if (paused) return;
+    const elapsed = Date.now() - startTimeRef.current;
+    const remaining = Math.max(0, remainingRef.current - elapsed);
+    const pct = (remaining / duration) * 100;
+    setProgress(pct);
+    if (remaining <= 0) {
+      closePopup();
+    } else {
+      rafRef.current = requestAnimationFrame(tick);
+    }
+  }, [paused, duration, closePopup]);
+
+  useEffect(() => {
+    if (paused) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      return;
+    }
+    startTimeRef.current = Date.now();
+    rafRef.current = requestAnimationFrame(tick);
+    timerRef.current = setTimeout(closePopup, remainingRef.current);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [paused, tick, closePopup]);
+
+  const pauseNodeRef = useRef<HTMLDivElement | null>(null);
+  const handlersRef = useRef<{ enter: () => void; leave: () => void } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      const node = pauseNodeRef.current;
+      const h = handlersRef.current;
+      if (node && h) {
+        node.removeEventListener("mouseenter", h.enter);
+        node.removeEventListener("mouseleave", h.leave);
+        node.removeEventListener("touchstart", h.enter);
+        node.removeEventListener("touchend", h.leave);
+      }
+    };
+  }, []);
+
+  const handlePause = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    pauseNodeRef.current = node;
+    L.DomEvent.disableClickPropagation(node);
+    const enter = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      remainingRef.current = Math.max(0, remainingRef.current - (Date.now() - startTimeRef.current));
+      setPaused(true);
+    };
+    const leave = () => {
+      setPaused(false);
+    };
+    handlersRef.current = { enter, leave };
+    node.addEventListener("mouseenter", enter);
+    node.addEventListener("mouseleave", leave);
+    node.addEventListener("touchstart", enter, { passive: true });
+    node.addEventListener("touchend", leave);
+  }, []);
+
+  return (
+    <div ref={handlePause} className="relative">
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gray-200/50 overflow-hidden rounded-b-xl">
+        <div
+          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-none"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function PostCarouselPopup({
   posts, likedPosts, pulsingPosts, onLike, onShare
 }: {
@@ -239,12 +330,14 @@ function PostCarouselPopup({
   onShare: (post: PostWithUser) => void;
 }) {
   const [index, setIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const total = posts.length;
   const post = posts[index];
   const setIndexRef = useRef(setIndex);
   setIndexRef.current = setIndex;
   const totalRef = useRef(total);
   totalRef.current = total;
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const prevRefCb = useCallback((node: HTMLButtonElement | null) => {
     if (!node) return;
@@ -270,16 +363,48 @@ function PostCarouselPopup({
     node.addEventListener("click", handler as EventListener, true);
   }, []);
 
+  const swipeRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    node.addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      touchStartRef.current = { x: t.clientX, y: t.clientY };
+    }, { passive: true });
+    node.addEventListener("touchend", (e) => {
+      if (!touchStartRef.current) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartRef.current.x;
+      const dy = t.clientY - touchStartRef.current.y;
+      touchStartRef.current = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) {
+          setIndexRef.current(prev => (prev + 1) % totalRef.current);
+        } else {
+          setIndexRef.current(prev => (prev - 1 + totalRef.current) % totalRef.current);
+        }
+      }
+    }, { passive: true });
+  }, []);
+
+  const expandRef = useCallback((node: HTMLButtonElement | null) => {
+    if (!node) return;
+    L.DomEvent.disableClickPropagation(node);
+    node.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      setExpanded(prev => !prev);
+    }, true);
+  }, []);
+
   if (!post) return null;
 
   return (
-    <div>
+    <div ref={swipeRef} className="popup-animate-in">
       {total > 1 && (
         <div className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-2 border-b border-gray-200/50">
           <button
             ref={prevRefCb}
             type="button"
-            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none"
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-transform"
             data-testid="button-carousel-prev"
           >
             <ChevronDown className="w-4 h-4 rotate-90 pointer-events-none" />
@@ -288,26 +413,81 @@ function PostCarouselPopup({
           <button
             ref={nextRefCb}
             type="button"
-            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none"
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-transform"
             data-testid="button-carousel-next"
           >
             <ChevronDown className="w-4 h-4 -rotate-90 pointer-events-none" />
           </button>
         </div>
       )}
-      <PostMapPopup
-        key={post.id}
-        post={post}
-        likedPosts={likedPosts}
-        pulsingPosts={pulsingPosts}
-        onLike={onLike}
-        onShare={onShare}
-      />
+
+      <div className="flex items-center gap-2 p-3 pb-2">
+        <a href={`/user/${post.user.id}`} className="shrink-0">
+          <img
+            src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
+            className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20"
+            alt={post.user.name}
+          />
+        </a>
+        <div className="flex-1 min-w-0">
+          <a href={`/user/${post.user.id}`} className="font-semibold text-sm hover:text-primary transition-colors">{post.user.name}</a>
+          <p className="text-xs text-gray-500">@{post.user.username}</p>
+        </div>
+        {!expanded && (post.imageUrl || post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl))) && (
+          <img
+            src={post.imageUrl || `https://img.youtube.com/vi/${extractYouTubeId(post.linkUrl || post.videoUrl || "")}/mqdefault.jpg`}
+            className="w-12 h-12 rounded-lg object-cover shrink-0"
+            alt=""
+          />
+        )}
+        <button
+          ref={expandRef}
+          type="button"
+          className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 cursor-pointer shrink-0 transition-colors"
+          data-testid="button-expand-popup"
+        >
+          <ChevronDown className={`w-4 h-4 transition-transform duration-200 pointer-events-none ${expanded ? "rotate-180" : ""}`} />
+        </button>
+      </div>
+
+      {!expanded && (
+        <div className="px-3 pb-2">
+          <p className="text-xs text-gray-600 line-clamp-2">{post.content}</p>
+        </div>
+      )}
+
+      {expanded && (
+        <PostMapPopupExpanded
+          key={post.id}
+          post={post}
+          likedPosts={likedPosts}
+          pulsingPosts={pulsingPosts}
+          onLike={onLike}
+          onShare={onShare}
+        />
+      )}
+
+      {!expanded && (
+        <div className="flex items-center justify-between px-3 py-1.5 border-t border-gray-100 text-xs text-gray-400">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1"><Heart className={`w-3 h-3 ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} /> {post.likes}</span>
+            <span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" /> {post.commentsCount}</span>
+          </div>
+          {post.location && <span className="flex items-center gap-1 truncate max-w-[120px]"><MapPin className="w-3 h-3" /> {post.location}</span>}
+        </div>
+      )}
+
+      <PopupAutoClose />
     </div>
   );
 }
 
-function PostMapPopup({ 
+function extractYouTubeId(url: string): string {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?#]+)/);
+  return match?.[1] || "";
+}
+
+function PostMapPopupExpanded({ 
   post, likedPosts, pulsingPosts, onLike, onShare 
 }: { 
   post: PostWithUser; 
@@ -353,24 +533,13 @@ function PostMapPopup({
 
   return (
     <div className="w-[280px]" data-testid={`popup-post-${post.id}`}>
-      <div className="flex items-center gap-2 p-3 pb-2">
-        <a href={`/user/${post.user.id}`} className="shrink-0">
-          <img 
-            src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
-            className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20"
-            alt={post.user.name}
-          />
-        </a>
-        <div className="flex-1 min-w-0">
-          <a href={`/user/${post.user.id}`} className="font-semibold text-sm hover:text-primary transition-colors">{post.user.name}</a>
-          <p className="text-xs text-gray-500">@{post.user.username}</p>
-        </div>
-        {post.tripId && (
-          <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+      {post.tripId && (
+        <div className="px-3 pt-1">
+          <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-semibold">
             <Plane className="w-3 h-3" /> Viaggio
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {post.imageUrl && (
         <img src={post.imageUrl} className="w-full h-28 object-cover" alt="" />
@@ -999,6 +1168,20 @@ export default function UnifiedMap() {
                       : createPostMarkerIcon(firstPost.imageUrl, firstPost.user?.avatar, !!firstPost.tripId, !!(firstPost.videoUrl || (firstPost.linkUrl && isYouTubeUrl(firstPost.linkUrl))))
                     }
                   >
+                    <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                      <div className="flex items-center gap-2 px-1 py-0.5">
+                        <img
+                          src={firstPost.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstPost.user?.username}`}
+                          className="w-6 h-6 rounded-full object-cover"
+                          alt=""
+                        />
+                        <div>
+                          <p className="text-xs font-semibold">{firstPost.user?.name}</p>
+                          <p className="text-[10px] text-gray-500 truncate max-w-[120px]">{firstPost.content?.substring(0, 40)}{(firstPost.content?.length || 0) > 40 ? "..." : ""}</p>
+                        </div>
+                        {hasMultiple && <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-full">+{group.posts.length - 1}</span>}
+                      </div>
+                    </Tooltip>
                     <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
                       <PostCarouselPopup
                         posts={group.posts}
@@ -1019,8 +1202,19 @@ export default function UnifiedMap() {
                 position={[event.latitude!, event.longitude!]}
                 icon={createEventMarkerIcon(event.imageUrl, event.color || "#a855f7")}
               >
+                <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                  <div className="flex items-center gap-2 px-1 py-0.5">
+                    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <Calendar className="w-3 h-3 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold">{event.title}</p>
+                      <p className="text-[10px] text-gray-500">{new Date(event.startDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}</p>
+                    </div>
+                  </div>
+                </Tooltip>
                 <Popup className="custom-popup" maxWidth={340} minWidth={260} autoPanPadding={[20, 20]} autoPan={true}>
-                  <div className="p-3 w-[260px]">
+                  <div className="popup-animate-in p-3 w-[260px]">
                     <Link href={`/event/${event.id}`} className="flex items-center gap-2 mb-2 hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors cursor-pointer">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                         <Calendar className="w-5 h-5 text-white" />
@@ -1077,6 +1271,7 @@ export default function UnifiedMap() {
                       </div>
                     </div>
                     <WeatherWidget latitude={event.latitude!} longitude={event.longitude!} />
+                    <PopupAutoClose />
                   </div>
                 </Popup>
               </Marker>
@@ -1090,8 +1285,19 @@ export default function UnifiedMap() {
                   position={[parseFloat(group.latitude!), parseFloat(group.longitude!)]}
                   icon={createGroupMarkerIcon()}
                 >
+                  <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                    <div className="flex items-center gap-2 px-1 py-0.5">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center">
+                        <Users className="w-3 h-3 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold">{group.name}</p>
+                        <p className="text-[10px] text-gray-500">{group.members} membri</p>
+                      </div>
+                    </div>
+                  </Tooltip>
                   <Popup className="custom-popup" maxWidth={300} minWidth={240} autoPanPadding={[20, 20]} autoPan={true}>
-                    <div className="p-3 w-[240px]" data-testid={`popup-group-${group.id}`}>
+                    <div className="popup-animate-in p-3 w-[240px]" data-testid={`popup-group-${group.id}`}>
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center">
                           <Users className="w-5 h-5 text-white" />
