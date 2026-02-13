@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Bell, Check, Heart, MessageCircle, UserPlus, Plane, MapPin, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
@@ -78,6 +78,8 @@ export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [, setLocation] = useLocation();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const fetchUnreadCount = async () => {
     try {
@@ -148,9 +150,44 @@ export function NotificationsDropdown() {
     }
   }, [isOpen]);
 
+  const updatePanelPosition = useCallback(() => {
+    if (!buttonRef.current || !panelRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const panel = panelRef.current;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const panelWidth = Math.min(384, vw - 16);
+    
+    let left = rect.right - panelWidth;
+    if (left < 8) left = 8;
+    if (left + panelWidth > vw - 8) left = vw - panelWidth - 8;
+    
+    const top = rect.bottom + 8;
+    const maxHeight = vh - top - 16;
+
+    panel.style.top = `${top}px`;
+    panel.style.left = `${left}px`;
+    panel.style.width = `${panelWidth}px`;
+    panel.style.maxHeight = `${Math.min(maxHeight, 448)}px`;
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      updatePanelPosition();
+      window.addEventListener("resize", updatePanelPosition);
+      window.addEventListener("scroll", updatePanelPosition, true);
+      return () => {
+        window.removeEventListener("resize", updatePanelPosition);
+        window.removeEventListener("scroll", updatePanelPosition, true);
+      };
+    }
+  }, [isOpen, updatePanelPosition]);
+
   return (
-    <div className="relative">
+    <>
       <Button
+        ref={buttonRef}
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
@@ -167,9 +204,12 @@ export function NotificationsDropdown() {
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[28rem] overflow-y-auto bg-card rounded-xl shadow-xl border border-border z-50">
-            <div className="p-3 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+          <div className="fixed inset-0 z-[9990]" onClick={() => setIsOpen(false)} />
+          <div
+            ref={panelRef}
+            className="fixed overflow-y-auto bg-card rounded-xl shadow-xl border border-border z-[9991]"
+          >
+            <div className="p-3 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10 rounded-t-xl">
               <h3 className="font-semibold text-sm">Notifiche</h3>
               {unreadCount > 0 && (
                 <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs h-7">
@@ -232,6 +272,6 @@ export function NotificationsDropdown() {
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }

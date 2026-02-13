@@ -30,9 +30,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           </div>
           <span className="font-display font-bold text-lg tracking-tight">NomadLife</span>
         </div>
-        <div className="relative">
-          <NotificationsDropdown />
-        </div>
+        <NotificationsDropdown />
       </header>
       
       <main className="md:pl-64 h-full overflow-y-auto pt-14 md:pt-0">
@@ -53,9 +51,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
             </div>
             <span className="font-display font-bold text-xl tracking-tight">NomadLife</span>
           </div>
-          <div className="relative">
-            <NotificationsDropdown />
-          </div>
+          <NotificationsDropdown />
         </div>
         
         <nav className="flex flex-col gap-2">
