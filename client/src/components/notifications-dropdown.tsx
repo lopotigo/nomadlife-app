@@ -147,6 +147,12 @@ export function NotificationsDropdown() {
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
+      if (unreadCount > 0) {
+        const timer = setTimeout(() => {
+          markAllAsRead();
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
     }
   }, [isOpen]);
 
