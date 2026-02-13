@@ -1162,7 +1162,7 @@ export default function UnifiedMap() {
             })}
           </MapContainer>
           
-          <div className="absolute top-4 left-4 z-[1000] bg-card/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg border border-border/50">
+          <div className="absolute top-4 left-4 z-[900] bg-card/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg border border-border/50">
             <h1 className="text-lg font-display font-bold flex items-center gap-2">
               <Compass className="w-5 h-5 text-primary" />
               NomadLife
@@ -1468,8 +1468,9 @@ export default function UnifiedMap() {
         .custom-stop-marker { background: transparent !important; border: none !important; }
         .route-anim-dots { animation: dashMove 1.5s linear infinite; }
         @keyframes dashMove { to { stroke-dashoffset: -18; } }
+        .leaflet-popup-pane { z-index: 1100 !important; }
         .custom-popup .leaflet-popup-content-wrapper { 
-          background: white; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); 
+          background: white; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.3); 
           padding: 0 !important; overflow: hidden;
         }
         .custom-popup .leaflet-popup-content { 
