@@ -610,13 +610,21 @@ export default function UnifiedMap() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [postsRes, eventsRes, groupsRes, myTripsRes, publicTripsRes] = await Promise.all([
+      const publicFetches = [
         fetch("/api/posts", { credentials: "include" }),
         fetch("/api/events", { credentials: "include" }),
-        fetch("/api/chat-groups", { credentials: "include" }),
-        fetch("/api/my-trips", { credentials: "include" }),
         fetch("/api/trips", { credentials: "include" }),
-      ]);
+      ];
+      const [postsRes, eventsRes, publicTripsRes] = await Promise.all(publicFetches);
+
+      let groupsRes: Response | null = null;
+      let myTripsRes: Response | null = null;
+      if (user) {
+        [groupsRes, myTripsRes] = await Promise.all([
+          fetch("/api/chat-groups", { credentials: "include" }),
+          fetch("/api/my-trips", { credentials: "include" }),
+        ]);
+      }
       
       if (postsRes.ok) {
         const postsData = await postsRes.json();
@@ -628,7 +636,7 @@ export default function UnifiedMap() {
         setEvents(eventsData);
       }
 
-      if (groupsRes.ok) {
+      if (groupsRes?.ok) {
         const groupsData = await groupsRes.json();
         setChatGroups(Array.isArray(groupsData) ? groupsData : []);
         const memberChecks = await Promise.all(
@@ -646,7 +654,7 @@ export default function UnifiedMap() {
         setJoinedGroupIds(new Set(memberChecks.filter(Boolean) as string[]));
       }
       
-      if (myTripsRes.ok) {
+      if (myTripsRes?.ok) {
         const myTripsData = await myTripsRes.json();
         const tripsWithDetails = await Promise.all(
           myTripsData.map(async (trip: any) => {
@@ -679,17 +687,17 @@ export default function UnifiedMap() {
 
   useEffect(() => {
     if (authLoading) return;
+    fetchData();
+  }, [user, authLoading, fetchData]);
+
+  const handleMapClick = useCallback((lat: number, lng: number) => {
     if (!user) {
       setLocation("/auth");
       return;
     }
-    fetchData();
-  }, [user, authLoading, setLocation, fetchData]);
-
-  const handleMapClick = useCallback((lat: number, lng: number) => {
     setClickedCoords({ lat, lng });
     setShowNewPost(true);
-  }, []);
+  }, [user, setLocation]);
 
   
   const postsWithCoords = useMemo(() => 
