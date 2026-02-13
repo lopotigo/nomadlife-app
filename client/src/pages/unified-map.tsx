@@ -352,7 +352,7 @@ function PostCarouselPopup({
   return (
     <div ref={containerRef} className="popup-animate-in">
       {total > 1 && (
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200/30 bg-gray-50/80 dark:bg-gray-800/50">
+        <div className="flex items-center justify-between pl-3 pr-8 py-1.5 border-b border-gray-200/30 bg-gray-50/80 dark:bg-gray-800/50">
           <button
             type="button"
             onClick={goPrev}
