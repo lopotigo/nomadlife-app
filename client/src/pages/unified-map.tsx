@@ -241,30 +241,39 @@ function PostCarouselPopup({
   const [index, setIndex] = useState(0);
   const total = posts.length;
   const post = posts[index];
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    L.DomEvent.disableClickPropagation(node);
+    L.DomEvent.disableScrollPropagation(node);
+  }, []);
   if (!post) return null;
 
+  const goPrev = () => setIndex((index - 1 + total) % total);
+  const goNext = () => setIndex((index + 1) % total);
+
   return (
-    <div>
+    <div ref={containerRef}>
       {total > 1 && (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-1.5 border-b border-gray-200/50">
-          <button
-            onClick={(e) => { e.stopPropagation(); setIndex((index - 1 + total) % total); }}
-            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center text-gray-600 hover:text-gray-900 transition-all"
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-3 py-2 border-b border-gray-200/50">
+          <div
+            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); goPrev(); }}
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-all"
             data-testid="button-carousel-prev"
           >
             <ChevronDown className="w-4 h-4 rotate-90" />
-          </button>
-          <span className="text-xs font-semibold text-gray-600">{index + 1} / {total}</span>
-          <button
-            onClick={(e) => { e.stopPropagation(); setIndex((index + 1) % total); }}
-            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center text-gray-600 hover:text-gray-900 transition-all"
+          </div>
+          <span className="text-xs font-bold text-gray-700 bg-white/60 px-2 py-0.5 rounded-full">{index + 1} / {total}</span>
+          <div
+            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); goNext(); }}
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 shadow-md flex items-center justify-center text-gray-700 cursor-pointer select-none active:scale-90 transition-all"
             data-testid="button-carousel-next"
           >
             <ChevronDown className="w-4 h-4 -rotate-90" />
-          </button>
+          </div>
         </div>
       )}
       <PostMapPopup
+        key={post.id}
         post={post}
         likedPosts={likedPosts}
         pulsingPosts={pulsingPosts}
