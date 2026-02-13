@@ -1611,6 +1611,28 @@ function CreatePostModal({
     if (!content.trim() || !user) return;
     setIsSubmitting(true);
     try {
+      let lat = latitude;
+      let lng = longitude;
+
+      if ((!lat || !lng) && location.trim()) {
+        try {
+          const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location.trim())}&format=json&limit=1`);
+          const geoData = await geoRes.json();
+          if (geoData && geoData[0]) {
+            lat = parseFloat(geoData[0].lat);
+            lng = parseFloat(geoData[0].lon);
+            setLatitude(lat);
+            setLongitude(lng);
+          }
+        } catch {}
+      }
+
+      if (!lat || !lng) {
+        toast({ title: "Posizione richiesta", description: "Scrivi una città o usa il pulsante Auto", variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+      }
+
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1622,8 +1644,8 @@ function CreatePostModal({
           linkUrl: linkUrl || null,
           tripId: selectedTripId || null,
           location: location.trim() || null,
-          latitude,
-          longitude,
+          latitude: lat,
+          longitude: lng,
         }),
       });
       if (res.ok) {
@@ -1833,7 +1855,7 @@ function CreatePostModal({
         <div className="flex justify-end">
           <Button
             onClick={handleSubmit}
-            disabled={!content.trim() || isSubmitting || isUploading || !latitude || !longitude}
+            disabled={!content.trim() || isSubmitting || isUploading || (!latitude && !longitude && !location.trim())}
             data-testid="button-submit-new-post"
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" />Pubblica</>}
