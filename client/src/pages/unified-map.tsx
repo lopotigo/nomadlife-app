@@ -2688,10 +2688,11 @@ function FeedPostCard({
         </button>
         <button 
           onClick={() => onSave(post.id)}
-          className={`ml-auto p-1 transition-colors ${savedPosts.has(post.id) ? 'text-primary' : 'hover:text-primary'}`}
+          className={`ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${savedPosts.has(post.id) ? 'bg-primary/15 text-primary' : 'hover:bg-muted hover:text-primary'}`}
           data-testid={`button-save-${post.id}`}
         >
           <Bookmark className={`w-4 h-4 ${savedPosts.has(post.id) ? 'fill-primary' : ''}`} />
+          <span>{savedPosts.has(post.id) ? 'Salvato' : 'Salva'}</span>
         </button>
         <button 
           onClick={() => onShare(post)}

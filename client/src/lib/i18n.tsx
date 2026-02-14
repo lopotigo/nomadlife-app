@@ -19,6 +19,7 @@ const translations: Record<Language, Translations> = {
     "nav.trips": "Viaggi",
     "nav.chat": "Chat",
     "nav.more": "Altro",
+    "nav.saved": "Salvati",
     
     "profile.my_travel_stats": "Le Mie Statistiche di Viaggio",
     "profile.my_journey": "Il Mio Viaggio",
@@ -161,6 +162,7 @@ const translations: Record<Language, Translations> = {
     "nav.trips": "Trips",
     "nav.chat": "Chat",
     "nav.more": "More",
+    "nav.saved": "Saved",
     
     "profile.my_travel_stats": "My Travel Statistics",
     "profile.my_journey": "My Journey",
@@ -303,6 +305,7 @@ const translations: Record<Language, Translations> = {
     "nav.trips": "Viajes",
     "nav.chat": "Chat",
     "nav.more": "Más",
+    "nav.saved": "Guardados",
     
     "profile.my_travel_stats": "Mis Estadísticas de Viaje",
     "profile.my_journey": "Mi Viaje",

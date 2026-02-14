@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
@@ -62,6 +62,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/chat" icon={MessageSquare} label={t("nav.messages")} active={location === "/chat"} />
           <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
+          <NavItem href="/saved" icon={Bookmark} label={t("nav.saved")} active={location === "/saved"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
           {adminCheck?.isAdmin && (
             <NavItem href="/admin" icon={ShieldCheck} label="Admin" active={location === "/admin"} />
@@ -103,7 +104,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
             exit={{ opacity: 0, y: 100 }}
             className="md:hidden fixed bottom-16 inset-x-0 bg-card border-t border-border p-4 z-40"
           >
-            <div className={`grid ${adminCheck?.isAdmin ? "grid-cols-5" : "grid-cols-4"} gap-4`}>
+            <div className={`grid ${adminCheck?.isAdmin ? "grid-cols-6" : "grid-cols-5"} gap-4`}>
               <Link href="/search" onClick={() => setShowMoreMenu(false)}>
                 <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/search" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                   <Search className="w-6 h-6" />
@@ -120,6 +121,12 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
                 <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/marketplace" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                   <ShoppingBag className="w-6 h-6" />
                   <span className="text-xs">{t("nav.marketplace")}</span>
+                </div>
+              </Link>
+              <Link href="/saved" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/saved" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <Bookmark className="w-6 h-6" />
+                  <span className="text-xs">{t("nav.saved")}</span>
                 </div>
               </Link>
               <Link href="/profile" onClick={() => setShowMoreMenu(false)}>
