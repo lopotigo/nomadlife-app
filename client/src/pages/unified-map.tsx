@@ -6,7 +6,7 @@ import {
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
-  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation
+  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -291,12 +291,14 @@ function PopupAutoClose({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number 
 }
 
 function PostCarouselPopup({
-  posts, likedPosts, pulsingPosts, onLike, onShare
+  posts, likedPosts, pulsingPosts, savedPosts, onLike, onSave, onShare
 }: {
   posts: PostWithUser[];
   likedPosts: Set<string>;
   pulsingPosts: Set<string>;
+  savedPosts: Set<string>;
   onLike: (id: string) => void;
+  onSave: (id: string) => void;
   onShare: (post: PostWithUser) => void;
 }) {
   const [index, setIndex] = useState(0);
@@ -378,7 +380,9 @@ function PostCarouselPopup({
         post={post}
         likedPosts={likedPosts}
         pulsingPosts={pulsingPosts}
+        savedPosts={savedPosts}
         onLike={onLike}
+        onSave={onSave}
         onShare={onShare}
       />
 
@@ -393,12 +397,14 @@ function extractYouTubeId(url: string): string {
 }
 
 function PostMapPopupExpanded({ 
-  post, likedPosts, pulsingPosts, onLike, onShare 
+  post, likedPosts, pulsingPosts, savedPosts, onLike, onSave, onShare 
 }: { 
   post: PostWithUser; 
   likedPosts: Set<string>; 
   pulsingPosts: Set<string>; 
+  savedPosts?: Set<string>;
   onLike: (id: string) => void; 
+  onSave?: (id: string) => void;
   onShare: (post: PostWithUser) => void;
 }) {
   const [tripData, setTripData] = useState<any>(null);
@@ -673,6 +679,15 @@ function PostMapPopupExpanded({
               <Send className="w-3.5 h-3.5" />
             </a>
           )}
+          {onSave && (
+            <button
+              onClick={() => onSave(post.id)}
+              className={`p-1.5 rounded-full transition-colors ${savedPosts?.has(post.id) ? 'bg-primary/20 text-primary' : 'bg-gray-100 hover:bg-gray-200 text-gray-500'}`}
+              data-testid={`button-save-popup-${post.id}`}
+            >
+              <Bookmark className={`w-3.5 h-3.5 ${savedPosts?.has(post.id) ? 'fill-primary' : ''}`} />
+            </button>
+          )}
           <button
             onClick={() => onShare(post)}
             className="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
@@ -710,6 +725,7 @@ export default function UnifiedMap() {
   const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [pulsingPosts, setPulsingPosts] = useState<Set<string>>(new Set());
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   
   useEffect(() => {
@@ -760,6 +776,27 @@ export default function UnifiedMap() {
     }
   }, [likedPosts]);
 
+  const handleSave = useCallback(async (postId: string) => {
+    if (!user) return;
+    const isSaved = savedPosts.has(postId);
+    try {
+      const res = await fetch(`/api/posts/${postId}/save`, {
+        method: isSaved ? "DELETE" : "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setSavedPosts(prev => {
+          const next = new Set(prev);
+          if (isSaved) next.delete(postId);
+          else next.add(postId);
+          return next;
+        });
+      }
+    } catch (error) {
+      console.error("Failed to save post:", error);
+    }
+  }, [user, savedPosts]);
+
   const fetchData = useCallback(async () => {
     try {
       const publicFetches = [
@@ -771,10 +808,12 @@ export default function UnifiedMap() {
 
       let groupsRes: Response | null = null;
       let myTripsRes: Response | null = null;
+      let savedIdsRes: Response | null = null;
       if (user) {
-        [groupsRes, myTripsRes] = await Promise.all([
+        [groupsRes, myTripsRes, savedIdsRes] = await Promise.all([
           fetch("/api/chat-groups", { credentials: "include" }),
           fetch("/api/my-trips", { credentials: "include" }),
+          fetch("/api/saved-posts/ids", { credentials: "include" }),
         ]);
       }
       
@@ -818,6 +857,11 @@ export default function UnifiedMap() {
         setMyTrips(tripsWithDetails);
       }
       
+      if (savedIdsRes?.ok) {
+        const ids = await savedIdsRes.json();
+        setSavedPosts(new Set(ids));
+      }
+
       if (publicTripsRes.ok) {
         const publicData = await publicTripsRes.json();
         const otherTrips = publicData.filter((t: Trip) => t.userId !== user?.id);
@@ -1092,7 +1136,9 @@ export default function UnifiedMap() {
                         posts={group.posts}
                         likedPosts={likedPosts}
                         pulsingPosts={pulsingPosts}
+                        savedPosts={savedPosts}
                         onLike={handleLike}
+                        onSave={handleSave}
                         onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
                       />
                     </Popup>
@@ -1629,7 +1675,9 @@ export default function UnifiedMap() {
                     currentUser={user}
                     likedPosts={likedPosts}
                     pulsingPosts={pulsingPosts}
+                    savedPosts={savedPosts}
                     onLike={handleLike}
+                    onSave={handleSave}
                     onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
                   />
                 );
@@ -2468,14 +2516,18 @@ function FeedPostCard({
   currentUser, 
   likedPosts, 
   pulsingPosts, 
+  savedPosts,
   onLike,
+  onSave,
   onShare 
 }: { 
   post: PostWithUser; 
   currentUser: User | null;
   likedPosts: Set<string>;
   pulsingPosts: Set<string>;
+  savedPosts: Set<string>;
   onLike: (id: string) => void;
+  onSave: (id: string) => void;
   onShare: (post: PostWithUser) => void;
 }) {
   const [showComments, setShowComments] = useState(false);
@@ -2635,8 +2687,15 @@ function FeedPostCard({
           <span>{commentsCount}</span>
         </button>
         <button 
+          onClick={() => onSave(post.id)}
+          className={`ml-auto p-1 transition-colors ${savedPosts.has(post.id) ? 'text-primary' : 'hover:text-primary'}`}
+          data-testid={`button-save-${post.id}`}
+        >
+          <Bookmark className={`w-4 h-4 ${savedPosts.has(post.id) ? 'fill-primary' : ''}`} />
+        </button>
+        <button 
           onClick={() => onShare(post)}
-          className="ml-auto p-1 hover:text-primary transition-colors"
+          className="p-1 hover:text-primary transition-colors"
         >
           <Share2 className="w-4 h-4" />
         </button>

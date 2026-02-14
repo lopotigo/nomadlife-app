@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -24,6 +24,8 @@ export default function Profile() {
   const { uploadFile, isUploading: uploadingPhoto } = useUpload();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [savedPostsData, setSavedPostsData] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"posts" | "saved">("posts");
   const [loading, setLoading] = useState(true);
   const [showShareQR, setShowShareQR] = useState(false);
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 });
@@ -43,15 +45,26 @@ export default function Profile() {
 
     Promise.all([
       fetch(`/api/posts/user/${user.id}`, { credentials: "include" }).then(r => r.json()),
-      fetch(`/api/users/${user.id}/follow-stats`, { credentials: "include" }).then(r => r.json())
+      fetch(`/api/users/${user.id}/follow-stats`, { credentials: "include" }).then(r => r.json()),
+      fetch(`/api/saved-posts`, { credentials: "include" }).then(r => r.ok ? r.json() : []),
     ])
-      .then(([postsData, statsData]) => {
+      .then(([postsData, statsData, savedData]) => {
         setPosts(postsData);
         setFollowStats(statsData);
+        setSavedPostsData(savedData);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user, authLoading, setLocation]);
+
+  const handleUnsave = async (postId: string) => {
+    try {
+      const res = await fetch(`/api/posts/${postId}/save`, { method: "DELETE", credentials: "include" });
+      if (res.ok) {
+        setSavedPostsData(prev => prev.filter(s => s.postId !== postId));
+      }
+    } catch (err) { console.error(err); }
+  };
 
   const openFollowModal = async (type: "followers" | "following") => {
     if (!user) return;
@@ -287,40 +300,105 @@ export default function Profile() {
             </div>
 
           <div className="w-full mt-10 space-y-8">
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-display font-bold">{t("profile.my_journey")}</h2>
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                  {posts.length} {t("profile.posts")}
-                </span>
-              </div>
-              {posts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No posts yet. Start sharing your journey!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {posts.map((post) => (
-                    <div 
-                      key={post.id} 
-                      className="aspect-square rounded-2xl overflow-hidden border border-border group relative"
-                      data-testid={`card-journey-${post.id}`}
-                    >
-                      {post.imageUrl ? (
-                        <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full bg-muted flex items-center justify-center p-4">
-                          <p className="text-xs text-center text-muted-foreground">{post.content.substring(0, 100)}</p>
+            <div className="flex border-b border-border">
+              <button
+                onClick={() => setActiveTab("posts")}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold transition-colors border-b-2 ${activeTab === "posts" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                data-testid="tab-my-posts"
+              >
+                <MessageSquare className="w-4 h-4" />
+                {t("profile.my_journey")} ({posts.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("saved")}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold transition-colors border-b-2 ${activeTab === "saved" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+                data-testid="tab-saved-posts"
+              >
+                <Bookmark className="w-4 h-4" />
+                Salvati ({savedPostsData.length})
+              </button>
+            </div>
+
+            {activeTab === "posts" && (
+              <section>
+                {posts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No posts yet. Start sharing your journey!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {posts.map((post) => (
+                      <div 
+                        key={post.id} 
+                        className="aspect-square rounded-2xl overflow-hidden border border-border group relative cursor-pointer"
+                        onClick={() => setLocation(`/post/${post.id}`)}
+                        data-testid={`card-journey-${post.id}`}
+                      >
+                        {post.imageUrl ? (
+                          <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full bg-muted flex items-center justify-center p-4">
+                            <p className="text-xs text-center text-muted-foreground">{post.content.substring(0, 100)}</p>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                          <Heart className="w-5 h-5" />
+                          <span className="ml-1 text-sm font-bold">{post.likes}</span>
                         </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                        <MessageSquare className="w-5 h-5" />
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeTab === "saved" && (
+              <section>
+                {savedPostsData.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Bookmark className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                    <p className="font-medium">Nessun post salvato</p>
+                    <p className="text-sm mt-1">Salva i post che ti interessano toccando l'icona segnalibro</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {savedPostsData.map((saved: any) => (
+                      <div 
+                        key={saved.id} 
+                        className="aspect-square rounded-2xl overflow-hidden border border-border group relative cursor-pointer"
+                        onClick={() => setLocation(`/post/${saved.postId}`)}
+                        data-testid={`card-saved-${saved.postId}`}
+                      >
+                        {saved.post?.imageUrl ? (
+                          <img src={saved.post.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full bg-muted flex items-center justify-center p-4">
+                            <p className="text-xs text-center text-muted-foreground">{saved.post?.content?.substring(0, 100) || ""}</p>
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 z-10">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleUnsave(saved.postId); }}
+                            className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-red-500/80 transition-colors"
+                            data-testid={`button-unsave-${saved.postId}`}
+                          >
+                            <Bookmark className="w-4 h-4 fill-white" />
+                          </button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                          <div className="flex items-center gap-2">
+                            {saved.post?.user?.avatar && (
+                              <img src={saved.post.user.avatar} className="w-5 h-5 rounded-full object-cover" />
+                            )}
+                            <span className="text-xs text-white font-medium truncate">{saved.post?.user?.name || ""}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         </div>
       </header>
