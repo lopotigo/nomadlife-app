@@ -276,6 +276,43 @@ export async function registerRoutes(
     }
   });
 
+  // ========== SAVED POSTS ROUTES ==========
+  app.get("/api/saved-posts", requireAuth, async (req, res) => {
+    try {
+      const saved = await storage.getSavedPosts((req.user as User).id);
+      res.send(saved);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/saved-posts/ids", requireAuth, async (req, res) => {
+    try {
+      const ids = await storage.getSavedPostIds((req.user as User).id);
+      res.send(ids);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/posts/:id/save", requireAuth, async (req, res) => {
+    try {
+      const saved = await storage.savePost((req.user as User).id, req.params.id);
+      res.status(201).send(saved);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/posts/:id/save", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.unsavePost((req.user as User).id, req.params.id);
+      res.send({ success });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== COMMENT ROUTES ==========
   app.get("/api/posts/:id/comments", async (req, res) => {
     try {
