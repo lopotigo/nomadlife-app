@@ -557,3 +557,18 @@ export const insertProductSchema = createInsertSchema(products).omit({
 });
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
+
+// Saved Posts table
+export const savedPosts = pgTable("saved_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  postId: varchar("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSavedPostSchema = createInsertSchema(savedPosts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSavedPost = z.infer<typeof insertSavedPostSchema>;
+export type SavedPost = typeof savedPosts.$inferSelect;

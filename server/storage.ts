@@ -204,6 +204,13 @@ export interface IStorage {
   updateProduct(id: string, product: Partial<schema.InsertProduct & { isFeatured?: boolean; isActive?: boolean }>): Promise<schema.Product | undefined>;
   deleteProduct(id: string): Promise<boolean>;
   getMarketplaceStats(): Promise<{ totalProducts: number; totalVendors: number; totalClicks: number; featuredCount: number }>;
+
+  // Saved Posts
+  savePost(userId: string, postId: string): Promise<schema.SavedPost>;
+  unsavePost(userId: string, postId: string): Promise<boolean>;
+  getSavedPosts(userId: string): Promise<(schema.SavedPost & { post: schema.Post & { user: schema.User } })[]>;
+  isPostSaved(userId: string, postId: string): Promise<boolean>;
+  getSavedPostIds(userId: string): Promise<string[]>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1572,6 +1579,47 @@ export class DrizzleStorage implements IStorage {
       totalClicks,
       featuredCount
     };
+  }
+
+  async savePost(userId: string, postId: string): Promise<schema.SavedPost> {
+    const existing = await this.db.select().from(schema.savedPosts)
+      .where(and(eq(schema.savedPosts.userId, userId), eq(schema.savedPosts.postId, postId)));
+    if (existing.length > 0) return existing[0];
+    const result = await this.db.insert(schema.savedPosts).values({ userId, postId }).returning();
+    return result[0];
+  }
+
+  async unsavePost(userId: string, postId: string): Promise<boolean> {
+    const result = await this.db.delete(schema.savedPosts)
+      .where(and(eq(schema.savedPosts.userId, userId), eq(schema.savedPosts.postId, postId))).returning();
+    return result.length > 0;
+  }
+
+  async getSavedPosts(userId: string): Promise<(schema.SavedPost & { post: schema.Post & { user: schema.User } })[]> {
+    const saved = await this.db.select().from(schema.savedPosts)
+      .where(eq(schema.savedPosts.userId, userId))
+      .orderBy(desc(schema.savedPosts.createdAt));
+    if (saved.length === 0) return [];
+    const postIds = saved.map(s => s.postId);
+    const postsWithUsers = await this.db.select().from(schema.posts)
+      .innerJoin(schema.users, eq(schema.posts.userId, schema.users.id))
+      .where(inArray(schema.posts.id, postIds));
+    const postMap = new Map(postsWithUsers.map(p => [p.posts.id, { ...p.posts, user: p.users }]));
+    return saved
+      .filter(s => postMap.has(s.postId))
+      .map(s => ({ ...s, post: postMap.get(s.postId)! }));
+  }
+
+  async isPostSaved(userId: string, postId: string): Promise<boolean> {
+    const result = await this.db.select().from(schema.savedPosts)
+      .where(and(eq(schema.savedPosts.userId, userId), eq(schema.savedPosts.postId, postId)));
+    return result.length > 0;
+  }
+
+  async getSavedPostIds(userId: string): Promise<string[]> {
+    const result = await this.db.select({ postId: schema.savedPosts.postId }).from(schema.savedPosts)
+      .where(eq(schema.savedPosts.userId, userId));
+    return result.map(r => r.postId);
   }
 }
 
