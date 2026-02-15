@@ -28,6 +28,7 @@ import { useUpload } from "@/hooks/use-upload";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { EventPosterModal } from "@/components/event-poster-modal";
 import { WeatherWidget } from "@/components/weather-widget";
+import { InFeedAd } from "@/components/ad-banner";
 import { FloatingTip } from "@/components/contextual-tip";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
@@ -1666,29 +1667,38 @@ export default function UnifiedMap() {
               return <p className="text-muted-foreground text-center py-8">Nessun contenuto ancora. Clicca sulla mappa per crearne uno!</p>;
             }
 
-            return feedItems.map((item) => {
-              if (item.type === "post") {
-                return (
-                  <FeedPostCard
-                    key={`post-${item.data.id}`}
-                    post={item.data}
-                    currentUser={user}
-                    likedPosts={likedPosts}
-                    pulsingPosts={pulsingPosts}
-                    savedPosts={savedPosts}
-                    onLike={handleLike}
-                    onSave={handleSave}
-                    onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
-                  />
-                );
-              }
-              if (item.type === "event") {
-                return <FeedEventCard key={`event-${item.data.id}`} event={item.data} currentUser={user} />;
-              }
-              if (item.type === "trip") {
-                return <FeedTripCard key={`trip-${item.data.id}`} trip={item.data} />;
-              }
-              return null;
+            return feedItems.map((item, idx) => {
+              const card = (() => {
+                if (item.type === "post") {
+                  return (
+                    <FeedPostCard
+                      key={`post-${item.data.id}`}
+                      post={item.data}
+                      currentUser={user}
+                      likedPosts={likedPosts}
+                      pulsingPosts={pulsingPosts}
+                      savedPosts={savedPosts}
+                      onLike={handleLike}
+                      onSave={handleSave}
+                      onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
+                    />
+                  );
+                }
+                if (item.type === "event") {
+                  return <FeedEventCard key={`event-${item.data.id}`} event={item.data} currentUser={user} />;
+                }
+                if (item.type === "trip") {
+                  return <FeedTripCard key={`trip-${item.data.id}`} trip={item.data} />;
+                }
+                return null;
+              })();
+
+              return (
+                <div key={`feed-${idx}`}>
+                  {card}
+                  {(idx + 1) % 4 === 0 && <InFeedAd />}
+                </div>
+              );
             });
           })()}
         </div>

@@ -52,3 +52,7 @@ integrations = ["javascript_object_storage:2.0.0", "github:1.0.0"]
 VAPID_PUBLIC_KEY = "BAu1UowOm6ix-AbcXKoewxxzGf7adudea0r600KR8MJcAtBrAyjvtjqWQHRtzeTZsKbvXskBe4QtmsnjHLKKKtw"
 VAPID_PRIVATE_KEY = "w2ncBeSnm3_Cl5eRz8g462Wt6Sn_ySlvM2WKMA279nU"
 VAPID_SUBJECT = "mailto:nomadlife@replit.app"
+VITE_ADSENSE_CLIENT = ""
+VITE_ADSENSE_SLOT_FEED = ""
+VITE_ADSENSE_SLOT_SIDEBAR = ""
+VITE_ADSENSE_SLOT_BANNER = ""

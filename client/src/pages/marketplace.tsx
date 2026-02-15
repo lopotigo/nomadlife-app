@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { apiRequest } from "@/lib/queryClient";
 import type { Product, Vendor } from "@shared/schema";
+import { AdBanner } from "@/components/ad-banner";
 
 const CATEGORIES = [
   { id: "all", label: "Tutto", icon: Package },
@@ -263,6 +264,8 @@ export default function Marketplace() {
                 })}
               </div>
             )}
+
+            <AdBanner format="horizontal" className="mt-6 rounded-xl" />
           </div>
         </div>
       </div>

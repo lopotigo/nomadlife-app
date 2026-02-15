@@ -2,7 +2,7 @@
 
 ## Overview
 
-NomadLife is a full-stack social platform designed for digital nomads to share travel experiences, discover coworking spaces, book accommodations, and connect with other remote workers globally. It offers a feed-based social experience, interactive exploration, real-time messaging, coworking space booking, and premium subscription management, aiming to be a central hub for the digital nomad community.
+NomadLife is a full-stack social platform for digital nomads to connect, share experiences, and discover resources globally. It provides a feed-based social experience, interactive exploration, real-time messaging, and premium subscription management, aiming to be a central hub for the digital nomad community. Key capabilities include sharing multi-format posts, planning and tracking trips with eco-routing, booking coworking spaces and accommodations, and discovering events. The platform also features monetization through AdSense integration, a marketplace for nomad-focused products, and affiliate integrations for flights and hotels, enhancing its market potential as a comprehensive solution for remote workers.
 
 ## User Preferences
 
@@ -12,197 +12,46 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend
 
-- **Framework**: React 18 with TypeScript
-- **Routing**: Wouter
-- **State Management**: TanStack React Query for server state, React Context for authentication
-- **Styling**: Tailwind CSS v4 with shadcn/ui (New York style)
-- **Animations**: Framer Motion
-- **Build Tool**: Vite
-- **Key Features**:
-    - Map-centered feed with interactive Leaflet markers for posts.
-    - User profiles with travel statistics.
-    - Travel Diary with "My Trips", "Followed" and "Explore" tabs.
-    - Coworking space browsing and booking.
-    - Group and private messaging.
-    - Premium subscription management.
-    - Interactive map for exploration with eco-routing.
-- **UI/UX Decisions**:
-    - New Home Layout (Design E): Left navigation sidebar, center interactive Leaflet map (dark theme), right column for nearby nomads and activity (desktop only), bottom tab navigation for mobile.
+The frontend is built with React 18, TypeScript, and Wouter for routing. State management uses TanStack React Query for server state and React Context for authentication. Styling is handled by Tailwind CSS v4 with shadcn/ui (New York style) and Framer Motion for animations. Vite is used as the build tool.
+
+**Key UI/UX and Features:**
+- A map-centered feed with interactive Leaflet markers, avatar-based markers for trip stops, and a "QUI ORA" badge for current locations.
+- User profiles with travel statistics, an avatar builder, and a dedicated Travel Diary for managing trips (planned, in progress, completed) with photo/video uploads for stops.
+- Interactive map for exploration with eco-routing, event markers, and "Indicazioni" for navigation.
+- Comprehensive social features including multi-format post creation (video, photo, link), QR code sharing, a comments system, and PWA support for offline access.
+- Integrated booking section for hotels, hostels, and coworking spaces, and an events system with a calendar view and poster generation.
+- Personal travel statistics dashboard showing total km, CO2 emitted/saved, and eco-transport percentage.
+- Onboarding system with interactive tutorials and contextual floating tips.
+- Dark/light mode theme toggle and multi-language support (Italian, English, Spanish).
 
 ### Backend
 
-- **Runtime**: Node.js with Express
-- **Language**: TypeScript
-- **Authentication**: Passport.js with local strategy, express-session (in-memory for development)
-- **Password Hashing**: bcryptjs (salt rounds 10)
-- **API**: RESTful conventions under `/api` with protected routes.
+The backend uses Node.js with Express and TypeScript. Authentication is session-based via Passport.js with a local strategy and bcryptjs for password hashing. The API follows RESTful conventions under `/api` with protected routes. A dual-build approach utilizes Vite for the client and esbuild for the server.
 
 ### Data Storage
 
-- **Database**: PostgreSQL (Neon-backed)
-- **ORM**: Drizzle ORM with drizzle-zod
-- **Schema**: Defined in `shared/schema.ts`
-- **Core Tables**: `users`, `posts`, `comments`, `places`, `events`, `event_registrations`, `bookings`, `chatGroups`, `messages`, `subscriptions`, `trips`, `trip_stops`, `trip_expenses`, `followers`, `notifications`.
-- **Storage Interface**: `server/storage.ts` provides comprehensive CRUD operations.
+PostgreSQL, backed by Neon, is the primary database. Drizzle ORM with drizzle-zod is used for schema definition and CRUD operations. Core tables include `users`, `posts`, `comments`, `places`, `events`, `bookings`, `subscriptions`, `trips`, `messages`, and `notifications`.
 
 ### Authentication Flow
 
-- Session-based authentication handles user login/signup, session creation, and protected route access, redirecting unauthenticated users.
-
-### API Routes
-
-- Comprehensive API for `auth`, `users`, `posts`, `places`, `bookings`, `events`, `chat-groups`, `messages`, and `subscription` management.
-
-### Build System
-
-- Dual-build approach using Vite for the client and esbuild for the server, optimizing for performance.
-- Database schema synchronization via `npm run db:push`.
+Session-based authentication manages user login, signup, and secure access to protected routes, redirecting unauthenticated users as needed.
 
 ### Key Features Implemented
 
-- User Authentication (session-based, secure hashing)
-- Social Feed (post creation with images/location, likes, engagement metrics)
-- **Multi-format Sharing** (video, photo, link, trip association, location-based posts)
-- **QR Code Sharing** (share posts, trips and profiles via scannable QR codes)
-- User Profiles (personal info, travel stats, profile editing)
-- Coworking Space Booking (search, filter, booking flow, history)
-- Events System (browse, register, manage events)
-- Group Messaging (city-based groups, private messaging, chat history)
-- Premium Subscription (subscribe/cancel, status tracking)
-- Explore & Discovery (interactive map, city markers, eco-routing)
-
-### Recent Updates
-
-- **Enhanced Trip Experience (Differentiating Feature)**:
-  - Avatar-based markers: Trip stops show user avatar as marker on map
-  - Larger avatar marker with "QUI ORA" badge for posts with trips attached (shows where user is now)
-  - Premium PostMapPopup: Expandable itinerary with star ratings, accommodation info, photo previews, trip stats (km, CO2, stops), copy trip button, direct link to trip diary
-  - Premium trip stop popup: Photo header with gradient overlay, star rating, accommodation card (name + type), weather widget, diary/booking/share buttons
-  - Copy trip API: POST /api/trips/:id/copy to duplicate public trips to own diary
-  - Trip detail page upgraded: Stats dashboard (total km, CO2 saved, stops count), expandable stops with ratings, accommodation details, user profile link
-  - Trip stops schema: Added rating (1-5 stars), accommodationName, accommodationType fields
-  - Travel diary stop creation: Star rating input, accommodation name/type fields
-- Added multi-format post creation: video upload, photo upload, link attachment, trip association
-- Implemented QR code sharing system with `qrcode.react` library
-- Created dedicated pages for viewing individual posts (`/post/:id`) and trips (`/trip/:id`)
-- Added share buttons to post and trip popups on the map
-- ShareQRModal component with download, copy and native share functionality
-- **Trip Planning System**: New trip status field (planned/in_progress/completed) with filter tabs
-- **Copy Stops from Public Trips**: Users can copy interesting stops from public trips to their planned trips
-- **Photo/Video Upload for Stops**: Trip stops now support media upload with progress indicator
-- **View on Map**: Click any trip to see it highlighted on the main map
-- **Hotel Search from Stops**: Each stop has a "Cerca alloggio" button linking to hotel search for that city
-- **Comments System**: Full commenting on posts with create/delete functionality, real-time count updates
-- **Search System**: Search for nomads by name/location and trips by destination (city/country)
-- **Notifications UI**: Dropdown with unread count badge, mark as read, notifications list
-- **Inline Comments in Feed**: Expandable comments section in post cards (both home feed and map feed)
-- **PWA (Progressive Web App)**: App is installable on mobile/desktop, with offline caching support
-- **Profile Photo Upload**: Users can upload/change profile photo by clicking camera icon on avatar
-- **Followers/Following UI**: Modal showing lists of followers and following with counts
-- **Dark/Light Mode**: Theme toggle in profile with `ThemeProvider` context and localStorage persistence
-- **Push Notifications**: Web Push API with VAPID keys, service worker push handler, subscribe/unsubscribe from profile
-- **Avatar Builder**: Customizable avatar creation page with DiceBear integration - 12 styles (cartoon, pixel art, robot, etc.), background colors, hair colors, accessories
-- **Unified Create Menu**: Single "+" button on map opens dropdown to create Post or Event
-- **Events on Map**: Events now appear as purple markers on the map with dedicated popup showing date, location, price, attendees
-- **Event Filtering**: Toggle events visibility in map filters panel
-- **Event Geocoding**: Automatic coordinate detection from city name using OpenStreetMap Nominatim
-- **Event Poster/Manifesto**: Generate downloadable poster image for events with QR code, date, location, and event details (uses html2canvas)
-- **Transport Mode Selection**: Two interfaces for selecting transport between trip stops:
-  - Manual: TransportSelector dropdown in trip stop list with CO2/distance display
-  - Map: Auto-showing transport panel in TripPlannerMap with large 2x2 grid buttons (walk/bike/train/car/plane)
-  - CO2 rates: walk/bike 0, train 0.041, car 0.171, plane 0.255 kg/km
-  - Distance filtering: walk ≤30km, bike ≤100km, car ≤2000km, plane >200km
-- **Trip Status & Visibility Controls**: Toggle buttons in TripDetails for:
-  - Status: Pianificato (planned), In corso (in_progress), Completato (completed)
-  - Visibility: Pubblico/Privato with instant save via PATCH /api/trips/:tripId
-- **Personal Travel Statistics**: Dashboard component (`PersonalStats`) showing:
-  - Total km traveled, countries/cities visited, trips completed
-  - CO2 emitted vs CO2 saved (compared to car travel)
-  - Eco-transport percentage
-  - Displayed in both Profile and Travel Diary pages
-- **Events Calendar**: Monthly calendar view (`/events-calendar`) with:
-  - Navigate between months
-  - See events you're registered for and events you organized
-  - Click any date to see events on that day
-  - Quick stats showing registered vs organized events
-- **Multi-language Support (i18n)**: 
-  - Italian (default), English, Spanish
-  - Language selector in Profile page
-  - All navigation labels and common UI elements translated
-  - Persisted to localStorage
-- **Mobile Header**: Fixed header on mobile with NomadLife branding and notifications bell
-- **Enhanced Search**: Trips searchable by title, description, and author name/username
-- **Onboarding System**: Comprehensive tutorial for new users:
-  - WelcomeTutorial: 4 interactive slides introducing map, sharing, travel diary, and community features
-  - Contextual FloatingTips: Appear on specific pages after tutorial completion with delays
-  - State persisted to localStorage with key "nomadlife_onboarding"
-  - Tips on: unified-map (map and feed tips), profile (customization tips), travel-diary (trip creation tips)
-- **Booking Section (formerly Coworking)**: Renamed from "Coworking" to "Booking" for broader scope
-  - Primary route: `/booking` (legacy `/coworking` still works)
-  - Includes hotels, hostels, and coworking spaces
-  - Trip stops have "Cerca alloggio" button linking directly to booking with city pre-selected
-  - **Map Integration**: Trip stop popups on the map now include a blue Hotel button for quick booking access
-- **Marketplace**: Monetization feature for nomad-focused products
-  - Vendor and product database tables with affiliate tracking
-  - Categories: eSIM, bags, clothing, insurance, tech, software
-  - Featured products, discount display, click tracking for affiliate revenue
-  - Category filtering, responsive design for mobile/desktop
-  - Accessible via bottom nav on mobile and sidebar on desktop
-- **Admin Panel** (`/admin`): Protected management interface
-  - Access restricted to users with `isAdmin = true` in database
-  - Dashboard with stats: total products, vendors, clicks, featured count
-  - Full CRUD for Vendors (name, logo, website, category)
-  - Full CRUD for Products (name, description, price, discount, affiliate URL, featured/active toggles)
-  - Amazon affiliate link integration for marketplace products
-  - Backend protection with `requireAdmin` middleware on all `/api/admin/*` routes
-
-- **Trip Replay** (`TripReplay` component): Animated fullscreen map replay of trips
-  - Intro screen with trip title, stop count, total km
-  - Animated line drawing between stops with transport-mode colored paths
-  - Camera fly-to transitions between stops
-  - Moving marker with user avatar and "IN VIAGGIO" badge
-  - Stop info cards with city, dates, rating, accommodation, notes
-  - Traveling progress bar showing km covered
-  - Play/Pause, Skip, Restart controls
-  - Speed selection (1x, 2x, 3x)
-  - Fullscreen toggle support
-  - Summary screen at end with total stats (stops, km, CO₂)
-  - Available from Trip Detail page and Travel Diary (TripDetails)
-- **YouTube Video Embeds**: Posts with YouTube/youtu.be links render as embedded iframe players in feed, map popups, and post detail pages
-- **Followed Trips**: Users can follow/unfollow public trips from other nomads
-  - Follow button on Trip Detail page (toggles "Segui"/"Seguendo")
-  - "Seguiti" tab in Travel Diary showing all followed trips with trip cards
-  - followed_trips table with unique constraint on (user_id, trip_id)
-  - API: POST/DELETE /api/trips/:id/follow, GET /api/followed-trips, GET /api/followed-trips/ids, GET /api/trips/:id/is-followed
-  - Saved Posts: Dedicated /saved page with chronological grouping, nav entry in sidebar and More menu
-
-### PWA Configuration
-
-- **Manifest**: `client/public/manifest.json` - App name, icons, theme colors, shortcuts
-- **Service Worker**: `client/public/sw.js` - Caches static assets, images, and API responses for offline use
-- **Icons**: 8 sizes (72x72 to 512x512) in `client/public/icons/`
-- **Installation**: Users can install NomadLife from the browser menu ("Add to Home Screen" on mobile, "Install app" on desktop)
-
-### Push Notifications
-- **VAPID Keys**: Configured as environment variables (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`)
-- **Service Worker**: `client/public/sw.js` handles push events, shows native notifications, handles click-to-navigate
-- **Frontend Hook**: `client/src/hooks/use-push-notifications.ts` manages subscribe/unsubscribe flow
-- **Backend Helper**: `sendPushToUser()` in `server/routes.ts` sends push to all user's devices, auto-cleans expired subscriptions (410)
-- **Push Triggers**: New follower, new trip, trip started, new stop added, new private message
-- **Subscribe/Unsubscribe**: Toggle in Profile page, endpoints at `/api/push/subscribe` and `/api/push/unsubscribe`
-
-- **Directions & Navigation**: "Indicazioni" button on map popups opens Google Maps (Android/PC) or Apple Maps (iOS) with destination coordinates for real navigation
-- **Travelpayouts Affiliate Integration**: Flight and hotel search with affiliate tracking
-  - Flights via Aviasales, hotels via Hotellook — both through Travelpayouts redirect
-  - Buttons in: map stop popups, expanded itinerary, travel diary stops, trip planner map
-  - Shared utility: `client/src/lib/travelpayouts.ts` (searchFlights, searchHotels)
-  - Config: `VITE_TRAVELPAYOUTS_MARKER` env var for partner tracking ID
-  - Fallback: If no marker set, links open Aviasales/Hotellook directly (no tracking)
-  - SubIDs: "flights" and "hotels" for per-category performance tracking
+- **User Authentication:** Session-based with secure hashing.
+- **Social Feed:** Post creation with images/location, likes, engagement metrics, and YouTube video embeds.
+- **Trip Planning & Management:** Detailed trip planning with status, visibility controls, copy public trips, and an animated Trip Replay feature.
+- **Booking & Events:** Search, filter, and book coworking spaces and accommodations; browse, register, and manage events with map integration and calendar view.
+- **Messaging:** Group and private messaging.
+- **Subscription & Monetization:** Premium subscription management, Google AdSense integration, and a marketplace for nomad-focused products with affiliate tracking.
+- **User Engagement:** Push notifications for new followers, trips, and messages; search functionality for nomads and trips; and an Admin Panel for product and vendor management.
+- **Internationalization:** Multi-language support for Italian, English, and Spanish.
 
 ## External Dependencies
 
-- **Database**: PostgreSQL (via `DATABASE_URL`)
-- **UI Components**: Radix UI primitives, shadcn/ui, Lucide React for icons
+- **Database**: PostgreSQL
+- **UI Components**: Radix UI primitives, shadcn/ui, Lucide React
 - **Authentication/Session**: `express-session`, `passport`, `passport-local`, `bcryptjs`
-- **Push Notifications**: `web-push` library with VAPID authentication
+- **Push Notifications**: `web-push` library
+- **Mapping**: Leaflet
+- **Affiliate Integrations**: Travelpayouts (Aviasales for flights, Hotellook for hotels)

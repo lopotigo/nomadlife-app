@@ -31,6 +31,7 @@ import { FloatingTip } from "@/components/contextual-tip";
 import { TripReplay } from "@/components/trip-replay";
 import { WeatherWidget } from "@/components/weather-widget";
 import { handleShare } from "@/components/share-qr-modal";
+import { InFeedAd } from "@/components/ad-banner";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -1401,8 +1402,9 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
         </div>
       ) : (
         filteredTrips.map((trip, index) => (
+          <div key={trip.id}>
+          {index > 0 && index % 3 === 0 && <InFeedAd />}
           <motion.div
-            key={trip.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -1447,6 +1449,7 @@ function TripsList({ trips, onSelectTrip, onPlanRoute }: { trips: Trip[]; onSele
             </button>
           </div>
         </motion.div>
+        </div>
         ))
       )}
     </div>
