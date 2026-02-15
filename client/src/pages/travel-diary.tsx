@@ -581,9 +581,9 @@ export default function TravelDiary() {
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; color: white; font-size: 14px;
           }
-          .leaflet-popup-content-wrapper { background: #1e293b; color: white; border-radius: 12px; }
-          .leaflet-popup-tip { background: #1e293b; }
-          .leaflet-popup-close-button { color: white !important; }
+          .leaflet-popup-content-wrapper { background: ${theme === "dark" ? "#1e293b" : "#ffffff"}; color: ${theme === "dark" ? "#e2e8f0" : "#1e293b"}; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+          .leaflet-popup-tip { background: ${theme === "dark" ? "#1e293b" : "#ffffff"}; }
+          .leaflet-popup-close-button { color: ${theme === "dark" ? "white" : "#64748b"} !important; }
         `}</style>
         
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 p-4">
@@ -2059,30 +2059,32 @@ function ExploreTripsMap({
             }}
           >
             <Popup>
-              <div className="min-w-[200px]">
-                <h3 className="font-bold text-base mb-1">{stop.city}, {stop.country}</h3>
-                <p className="text-xs text-foreground mb-2">
+              <div style={{ minWidth: 220, padding: 12, color: "inherit" }}>
+                <h3 style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{stop.city}, {stop.country}</h3>
+                <p style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
                   {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
                   {stop.departureDate && ` - ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
                 </p>
-                <div className="border-t border-border pt-2 mt-2">
-                  <p className="text-xs text-muted-foreground">Viaggio:</p>
-                  <p className="font-medium" style={{ color: stop.tripColor }}>{stop.trip.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">di {stop.trip.user.name}</p>
+                <div style={{ borderTop: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)"}`, paddingTop: 8, marginTop: 8 }}>
+                  <p style={{ fontSize: 11, opacity: 0.6, marginBottom: 2 }}>Viaggio:</p>
+                  <p style={{ fontWeight: 600, color: stop.tripColor }}>{stop.trip.title}</p>
+                  {stop.trip.user && (
+                    <p style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>di {stop.trip.user.name || stop.trip.user.username}</p>
+                  )}
                 </div>
                 {stop.notes && (
-                  <p className="text-xs text-foreground mt-2 italic">"{stop.notes}"</p>
+                  <p style={{ fontSize: 12, marginTop: 8, fontStyle: "italic", opacity: 0.85 }}>"{stop.notes}"</p>
                 )}
-                <div className="flex gap-2 mt-3">
+                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                   <button
                     onClick={() => onSelectTrip(stop.trip.id)}
-                    className="flex-1 bg-accent text-foreground text-xs py-1.5 px-2 rounded-lg hover:bg-muted"
+                    style={{ flex: 1, background: theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)", color: "inherit", fontSize: 12, padding: "6px 8px", borderRadius: 8, border: "none", cursor: "pointer" }}
                   >
                     Vedi dettagli
                   </button>
                   {userTrips.length > 0 && (
                     copyingStopId === stop.id ? (
-                      <div className="flex-1">
+                      <div style={{ flex: 1 }}>
                         <select
                           onChange={(e) => {
                             if (e.target.value) {
@@ -2090,7 +2092,7 @@ function ExploreTripsMap({
                               setCopyingStopId(null);
                             }
                           }}
-                          className="w-full bg-accent text-foreground text-xs py-1.5 px-2 rounded-lg"
+                          style={{ width: "100%", background: theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)", color: "inherit", fontSize: 12, padding: "6px 8px", borderRadius: 8, border: "none" }}
                           autoFocus
                         >
                           <option value="">Scegli viaggio...</option>
@@ -2102,9 +2104,9 @@ function ExploreTripsMap({
                     ) : (
                       <button
                         onClick={() => setCopyingStopId(stop.id)}
-                        className="flex-1 bg-blue-500 text-white text-xs py-1.5 px-2 rounded-lg hover:bg-blue-600"
+                        style={{ flex: 1, background: "#3b82f6", color: "white", fontSize: 12, padding: "6px 8px", borderRadius: 8, border: "none", cursor: "pointer" }}
                       >
-                        + Aggiungi al mio viaggio
+                        + Aggiungi al mio
                       </button>
                     )
                   )}
@@ -2146,7 +2148,7 @@ function ExploreTripsMap({
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{trip.title}</p>
-                  <p className="text-xs text-muted-foreground">{trip.user.name} • {trip.stops.length} tappe</p>
+                  <p className="text-xs text-muted-foreground">{trip.user?.name || trip.user?.username || "Nomade"} • {trip.stops?.length || 0} tappe</p>
                 </div>
                 <button
                   onClick={(e) => {
