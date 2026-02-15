@@ -2141,9 +2141,19 @@ export async function registerRoutes(
     }
   });
 
+  // SEO: Google Search Console verification file
+  app.get("/google:verificationCode.html", (req, res) => {
+    const code = req.params.verificationCode;
+    if (code && /^[a-zA-Z0-9_-]+$/.test(code)) {
+      res.send(`google-site-verification: google${code}.html`);
+    } else {
+      res.status(404).send("Not found");
+    }
+  });
+
   // SEO: Dynamic Sitemap
   app.get("/sitemap.xml", async (_req, res) => {
-    const baseUrl = "https://nomad-life.app";
+    const baseUrl = process.env.VITE_SITE_URL || "https://nomad-life.app";
     const staticPages = [
       { url: "/", priority: "1.0", changefreq: "daily" },
       { url: "/map", priority: "0.9", changefreq: "daily" },
