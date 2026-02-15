@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, X, Heart, Eye, MapPin, Send, Camera, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { Plus, X, Heart, Eye, MapPin, Send, Camera, ChevronLeft, ChevronRight, Trash2, Upload, RotateCcw, SwitchCamera, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Moment, User } from "@shared/schema";
@@ -390,15 +390,89 @@ function CreateMomentModal({
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [mode, setMode] = useState<"choose" | "camera" | "preview">("choose");
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  const startCamera = useCallback(async (facing: "user" | "environment") => {
+    stopCamera();
+    setCameraError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch {
+      setCameraError("Impossibile accedere alla fotocamera. Consenti i permessi.");
+    }
+  }, [stopCamera]);
+
+  useEffect(() => {
+    if (mode === "camera") {
+      startCamera(facingMode);
+    } else {
+      stopCamera();
+    }
+    return () => stopCamera();
+  }, [mode, facingMode, startCamera, stopCamera]);
+
+  const flipCamera = () => {
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    if (facingMode === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const captured = new File([blob], `moment_${Date.now()}.jpg`, { type: "image/jpeg" });
+      setFile(captured);
+      setPreview(URL.createObjectURL(blob));
+      setMode("preview");
+    }, "image/jpeg", 0.92);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
     setFile(f);
     const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
+    reader.onload = () => {
+      setPreview(reader.result as string);
+      setMode("preview");
+    };
     reader.readAsDataURL(f);
+  };
+
+  const resetMedia = () => {
+    setPreview(null);
+    setFile(null);
+    setMode("choose");
   };
 
   const handleSubmit = async () => {
@@ -467,24 +541,87 @@ function CreateMomentModal({
       className="fixed inset-0 z-[9999] bg-black flex flex-col"
       data-testid="create-moment-modal"
     >
+      <canvas ref={canvasRef} className="hidden" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        className="hidden"
+        onChange={handleFileSelect}
+        data-testid="input-moment-file"
+      />
+
       <div className="flex items-center justify-between p-4">
         <button onClick={onClose} className="text-white" data-testid="button-close-create-moment">
           <X className="w-6 h-6" />
         </button>
         <h2 className="text-white font-semibold text-lg">Nuovo Momento</h2>
-        <Button
-          onClick={handleSubmit}
-          disabled={!file || uploading}
-          size="sm"
-          className="bg-emerald-500 hover:bg-emerald-600 text-white"
-          data-testid="button-publish-moment"
-        >
-          {uploading ? "..." : "Pubblica"}
-        </Button>
+        {mode === "preview" ? (
+          <Button
+            onClick={handleSubmit}
+            disabled={!file || uploading}
+            size="sm"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white"
+            data-testid="button-publish-moment"
+          >
+            {uploading ? "..." : "Pubblica"}
+          </Button>
+        ) : (
+          <div className="w-16" />
+        )}
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
-        {preview ? (
+        {mode === "choose" && (
+          <div className="w-full max-w-sm space-y-4">
+            <button
+              onClick={() => setMode("camera")}
+              className="w-full h-44 rounded-2xl border-2 border-dashed border-white/30 flex flex-col items-center justify-center gap-3 text-white/60 hover:border-emerald-400 hover:text-emerald-400 transition-colors"
+              data-testid="button-open-camera"
+            >
+              <Camera className="w-12 h-12" />
+              <span className="text-sm font-medium">Scatta una foto</span>
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-44 rounded-2xl border-2 border-dashed border-white/30 flex flex-col items-center justify-center gap-3 text-white/60 hover:border-purple-400 hover:text-purple-400 transition-colors"
+              data-testid="button-select-media"
+            >
+              <Image className="w-12 h-12" />
+              <span className="text-sm font-medium">Scegli dalla galleria</span>
+            </button>
+          </div>
+        )}
+
+        {mode === "camera" && (
+          <div className="relative w-full max-w-sm">
+            {cameraError ? (
+              <div className="h-[60vh] rounded-2xl bg-white/5 flex flex-col items-center justify-center gap-4">
+                <Camera className="w-16 h-16 text-white/30" />
+                <p className="text-white/60 text-sm text-center px-4">{cameraError}</p>
+                <Button
+                  onClick={() => startCamera(facingMode)}
+                  variant="outline"
+                  size="sm"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
+                  Riprova
+                </Button>
+              </div>
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full rounded-2xl max-h-[60vh] object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
+                data-testid="camera-preview"
+              />
+            )}
+          </div>
+        )}
+
+        {mode === "preview" && preview && (
           <div className="relative w-full max-w-sm">
             {file?.type.startsWith("video/") ? (
               <video src={preview} className="w-full rounded-2xl max-h-[60vh] object-cover" autoPlay muted loop playsInline />
@@ -492,51 +629,63 @@ function CreateMomentModal({
               <img src={preview} alt="" className="w-full rounded-2xl max-h-[60vh] object-cover" />
             )}
             <button
-              onClick={() => { setPreview(null); setFile(null); }}
-              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white"
+              onClick={resetMedia}
+              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70"
+              data-testid="button-reset-media"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-        ) : (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full max-w-sm h-80 rounded-2xl border-2 border-dashed border-white/30 flex flex-col items-center justify-center gap-3 text-white/60 hover:border-white/50 hover:text-white/80 transition-colors"
-            data-testid="button-select-media"
-          >
-            <Camera className="w-12 h-12" />
-            <span className="text-sm">Tocca per scegliere foto o video</span>
-          </button>
         )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*,video/*"
-          className="hidden"
-          onChange={handleFileSelect}
-          data-testid="input-moment-file"
-        />
       </div>
 
-      <div className="p-4 space-y-3">
-        <input
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Aggiungi una didascalia..."
-          className="w-full bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-emerald-500"
-          data-testid="input-moment-caption"
-        />
-        <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-white/40" />
-          <input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Dove sei?"
-            className="flex-1 bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-emerald-500"
-            data-testid="input-moment-location"
-          />
+      {mode === "camera" && !cameraError && (
+        <div className="p-6 flex items-center justify-center gap-8">
+          <button
+            onClick={() => { setMode("choose"); fileInputRef.current?.click(); }}
+            className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            data-testid="button-gallery-from-camera"
+          >
+            <Image className="w-5 h-5" />
+          </button>
+          <button
+            onClick={capturePhoto}
+            className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform"
+            data-testid="button-capture"
+          >
+            <div className="w-16 h-16 rounded-full bg-white" />
+          </button>
+          <button
+            onClick={flipCamera}
+            className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            data-testid="button-flip-camera"
+          >
+            <SwitchCamera className="w-5 h-5" />
+          </button>
         </div>
-      </div>
+      )}
+
+      {mode === "preview" && (
+        <div className="p-4 space-y-3">
+          <input
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Aggiungi una didascalia..."
+            className="w-full bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-emerald-500"
+            data-testid="input-moment-caption"
+          />
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-white/40" />
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Dove sei?"
+              className="flex-1 bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-emerald-500"
+              data-testid="input-moment-location"
+            />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
