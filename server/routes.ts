@@ -313,6 +313,52 @@ export async function registerRoutes(
     }
   });
 
+  // ========== FOLLOWED TRIPS ROUTES ==========
+  app.get("/api/followed-trips", requireAuth, async (req, res) => {
+    try {
+      const followed = await storage.getFollowedTrips((req.user as User).id);
+      res.send(followed);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/followed-trips/ids", requireAuth, async (req, res) => {
+    try {
+      const ids = await storage.getFollowedTripIds((req.user as User).id);
+      res.send(ids);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/trips/:id/follow", requireAuth, async (req, res) => {
+    try {
+      const followed = await storage.followTrip((req.user as User).id, req.params.id);
+      res.status(201).send(followed);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/trips/:id/follow", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.unfollowTrip((req.user as User).id, req.params.id);
+      res.send({ success });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/trips/:id/is-followed", requireAuth, async (req, res) => {
+    try {
+      const isFollowed = await storage.isTripFollowed((req.user as User).id, req.params.id);
+      res.send({ isFollowed });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== COMMENT ROUTES ==========
   app.get("/api/posts/:id/comments", async (req, res) => {
     try {

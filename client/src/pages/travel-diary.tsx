@@ -168,7 +168,9 @@ export default function TravelDiary() {
   const [showNewStop, setShowNewStop] = useState(false);
   const [showNewExpense, setShowNewExpense] = useState<string | null>(null);
   const [expenseType, setExpenseType] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"my-trips" | "explore">("my-trips");
+  const [activeTab, setActiveTab] = useState<"my-trips" | "explore" | "followed">("my-trips");
+  const [followedTrips, setFollowedTrips] = useState<any[]>([]);
+  const [followedLoading, setFollowedLoading] = useState(false);
   const [showPlannerMap, setShowPlannerMap] = useState(false);
   const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -207,6 +209,20 @@ export default function TravelDiary() {
       }
     } catch (error) {
       console.error("Failed to fetch public trips:", error);
+    }
+  }, []);
+
+  const fetchFollowedTrips = useCallback(async () => {
+    setFollowedLoading(true);
+    try {
+      const res = await fetch("/api/followed-trips", { credentials: "include" });
+      if (res.ok) {
+        setFollowedTrips(await res.json());
+      }
+    } catch (error) {
+      console.error("Failed to fetch followed trips:", error);
+    } finally {
+      setFollowedLoading(false);
     }
   }, []);
 
@@ -281,7 +297,8 @@ export default function TravelDiary() {
     }
     fetchPublicTrips();
     fetchTrips();
-  }, [user, authLoading, setLocation, fetchTrips]);
+    fetchFollowedTrips();
+  }, [user, authLoading, setLocation, fetchTrips, fetchFollowedTrips]);
 
   const handleCreateTrip = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -726,6 +743,18 @@ export default function TravelDiary() {
               I Miei Viaggi
             </button>
             <button
+              onClick={() => setActiveTab("followed")}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                activeTab === "followed" 
+                  ? "bg-emerald-500 text-white" 
+                  : "bg-muted text-muted-foreground hover:bg-accent"
+              }`}
+              data-testid="tab-followed"
+            >
+              <Eye className="w-4 h-4 inline mr-2" />
+              Seguiti
+            </button>
+            <button
               onClick={() => setActiveTab("explore")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 activeTab === "explore" 
@@ -735,12 +764,12 @@ export default function TravelDiary() {
               data-testid="tab-explore"
             >
               <Globe className="w-4 h-4 inline mr-2" />
-              Esplora Viaggi
+              Esplora
             </button>
           </div>
         </header>
 
-        {activeTab === "my-trips" ? (
+        {activeTab === "my-trips" && (
           <div className="p-4 pb-24">
           {selectedTrip ? (
             <TripDetails 
@@ -775,7 +804,89 @@ export default function TravelDiary() {
             </>
           )}
         </div>
-        ) : (
+        )}
+
+        {activeTab === "followed" && (
+          <div className="p-4 pb-24">
+            {followedLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
+              </div>
+            ) : followedTrips.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Eye className="w-12 h-12 text-muted-foreground/30 mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">Nessun viaggio seguito</h3>
+                <p className="text-muted-foreground text-sm max-w-xs">
+                  Esplora i viaggi pubblici e segui quelli che ti interessano per ricevere aggiornamenti.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => setActiveTab("explore")}
+                  data-testid="button-go-explore"
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  Esplora Viaggi
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {followedTrips.map((ft: any) => {
+                  const trip = ft.trip;
+                  if (!trip) return null;
+                  const stopsCount = trip.stops?.length || 0;
+                  return (
+                    <Link key={ft.id} href={`/trip/${trip.id}`}>
+                      <div className="bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer border border-border/50" data-testid={`followed-trip-${trip.id}`}>
+                        {trip.imageUrl && (
+                          <div className="relative h-28">
+                            <img src={trip.imageUrl} className="w-full h-full object-cover" alt={trip.title} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <div className="absolute bottom-2 left-3 right-3">
+                              <h3 className="text-white font-semibold text-sm truncate">{trip.title}</h3>
+                            </div>
+                          </div>
+                        )}
+                        <div className="p-3">
+                          {!trip.imageUrl && (
+                            <h3 className="font-semibold text-foreground text-sm mb-1">{trip.title}</h3>
+                          )}
+                          {trip.description && (
+                            <p className="text-muted-foreground text-xs line-clamp-2 mb-2">{trip.description}</p>
+                          )}
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {trip.startLocation}
+                            </span>
+                            {stopsCount > 0 && (
+                              <span className="flex items-center gap-1">
+                                <Route className="w-3 h-3" />
+                                {stopsCount} tappe
+                              </span>
+                            )}
+                            {trip.user && (
+                              <span className="flex items-center gap-1 ml-auto">
+                                <img 
+                                  src={trip.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user.username}`}
+                                  className="w-4 h-4 rounded-full object-cover"
+                                  alt=""
+                                />
+                                <span className="truncate max-w-[80px]">{trip.user.name || trip.user.username}</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "explore" && (
           <ExploreTripsMap 
             trips={selectedTrip && !publicTrips.find(t => t.id === selectedTrip.id) 
               ? [...publicTrips, { ...selectedTrip, stops: selectedTrip.stops || [] }] 

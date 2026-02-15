@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
-import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play } from "lucide-react";
+import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { TripReplay } from "@/components/trip-replay";
@@ -26,14 +26,23 @@ export default function TripDetail() {
   const [showShare, setShowShare] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
   const [expandedStop, setExpandedStop] = useState<string | null>(null);
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     const fetchTrip = async () => {
       if (!params?.id) return;
       try {
-        const res = await fetch(`/api/trips/${params.id}`, { credentials: "include" });
-        if (res.ok) {
-          setTrip(await res.json());
+        const [tripRes, followRes] = await Promise.all([
+          fetch(`/api/trips/${params.id}`, { credentials: "include" }),
+          fetch(`/api/trips/${params.id}/is-followed`, { credentials: "include" }).catch(() => null),
+        ]);
+        if (tripRes.ok) {
+          setTrip(await tripRes.json());
+        }
+        if (followRes?.ok) {
+          const data = await followRes.json();
+          setIsFollowed(data.isFollowed);
         }
       } catch (err) {
         console.error(err);
@@ -43,6 +52,21 @@ export default function TripDetail() {
     };
     fetchTrip();
   }, [params?.id]);
+
+  const handleFollowTrip = async () => {
+    if (!params?.id || followLoading) return;
+    setFollowLoading(true);
+    try {
+      if (isFollowed) {
+        const res = await fetch(`/api/trips/${params.id}/follow`, { method: "DELETE", credentials: "include" });
+        if (res.ok) setIsFollowed(false);
+      } else {
+        const res = await fetch(`/api/trips/${params.id}/follow`, { method: "POST", credentials: "include" });
+        if (res.ok) setIsFollowed(true);
+      }
+    } catch (err) { console.error(err); }
+    finally { setFollowLoading(false); }
+  };
 
   if (loading) {
     return (
@@ -97,6 +121,17 @@ export default function TripDetail() {
             >
               <Play className="w-4 h-4 mr-1" />
               Replay
+            </Button>
+            <Button
+              variant={isFollowed ? "default" : "outline"}
+              size="sm"
+              onClick={handleFollowTrip}
+              disabled={followLoading}
+              className={isFollowed ? "bg-primary text-primary-foreground" : "border-primary/50 text-primary hover:bg-primary/10"}
+              data-testid="button-follow-trip"
+            >
+              {isFollowed ? <Eye className="w-4 h-4 mr-1" /> : <EyeOff className="w-4 h-4 mr-1" />}
+              {isFollowed ? "Seguendo" : "Segui"}
             </Button>
             <Button variant="outline" size="sm" onClick={() => handleShare("trip", trip.id, trip.title, () => setShowShare(true))} data-testid="button-share-trip">
               <Share2 className="w-4 h-4 mr-2" />

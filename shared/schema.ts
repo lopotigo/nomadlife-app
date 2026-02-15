@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, boolean, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, boolean, doublePrecision, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -572,3 +572,20 @@ export const insertSavedPostSchema = createInsertSchema(savedPosts).omit({
 });
 export type InsertSavedPost = z.infer<typeof insertSavedPostSchema>;
 export type SavedPost = typeof savedPosts.$inferSelect;
+
+// Followed Trips table
+export const followedTrips = pgTable("followed_trips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tripId: varchar("trip_id").notNull().references(() => trips.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("followed_trips_user_trip_idx").on(table.userId, table.tripId),
+]);
+
+export const insertFollowedTripSchema = createInsertSchema(followedTrips).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFollowedTrip = z.infer<typeof insertFollowedTripSchema>;
+export type FollowedTrip = typeof followedTrips.$inferSelect;

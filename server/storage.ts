@@ -211,6 +211,13 @@ export interface IStorage {
   getSavedPosts(userId: string): Promise<(schema.SavedPost & { post: schema.Post & { user: schema.User } })[]>;
   isPostSaved(userId: string, postId: string): Promise<boolean>;
   getSavedPostIds(userId: string): Promise<string[]>;
+
+  // Followed Trips
+  followTrip(userId: string, tripId: string): Promise<schema.FollowedTrip>;
+  unfollowTrip(userId: string, tripId: string): Promise<boolean>;
+  getFollowedTrips(userId: string): Promise<any[]>;
+  isTripFollowed(userId: string, tripId: string): Promise<boolean>;
+  getFollowedTripIds(userId: string): Promise<string[]>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1620,6 +1627,46 @@ export class DrizzleStorage implements IStorage {
     const result = await this.db.select({ postId: schema.savedPosts.postId }).from(schema.savedPosts)
       .where(eq(schema.savedPosts.userId, userId));
     return result.map(r => r.postId);
+  }
+
+  async followTrip(userId: string, tripId: string): Promise<schema.FollowedTrip> {
+    const result = await this.db.insert(schema.followedTrips).values({ userId, tripId }).returning();
+    return result[0];
+  }
+
+  async unfollowTrip(userId: string, tripId: string): Promise<boolean> {
+    const result = await this.db.delete(schema.followedTrips)
+      .where(and(eq(schema.followedTrips.userId, userId), eq(schema.followedTrips.tripId, tripId)));
+    return (result?.rowCount ?? 0) > 0;
+  }
+
+  async getFollowedTrips(userId: string): Promise<any[]> {
+    const result = await this.db.select().from(schema.followedTrips)
+      .where(eq(schema.followedTrips.userId, userId))
+      .orderBy(desc(schema.followedTrips.createdAt));
+
+    const tripsWithDetails = await Promise.all(
+      result.map(async (ft) => {
+        const trip = await this.db.select().from(schema.trips).where(eq(schema.trips.id, ft.tripId));
+        if (!trip[0]) return null;
+        const user = await this.db.select().from(schema.users).where(eq(schema.users.id, trip[0].userId));
+        const stops = await this.db.select().from(schema.tripStops).where(eq(schema.tripStops.tripId, ft.tripId)).orderBy(schema.tripStops.arrivalDate);
+        return { ...ft, trip: { ...trip[0], user: user[0], stops } };
+      })
+    );
+    return tripsWithDetails.filter(Boolean);
+  }
+
+  async isTripFollowed(userId: string, tripId: string): Promise<boolean> {
+    const result = await this.db.select().from(schema.followedTrips)
+      .where(and(eq(schema.followedTrips.userId, userId), eq(schema.followedTrips.tripId, tripId)));
+    return result.length > 0;
+  }
+
+  async getFollowedTripIds(userId: string): Promise<string[]> {
+    const result = await this.db.select({ tripId: schema.followedTrips.tripId }).from(schema.followedTrips)
+      .where(eq(schema.followedTrips.userId, userId));
+    return result.map(r => r.tripId);
   }
 }
 
