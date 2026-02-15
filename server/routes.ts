@@ -10,6 +10,7 @@ import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerChatRoutes } from "./replit_integrations/chat";
 import { registerImageRoutes } from "./replit_integrations/image";
+import { registerAiSocialHubRoutes } from "./ai-social-hub";
 import { createRepository, pushFile, getGitHubUser } from "./github";
 
 // Configure VAPID keys for push notifications
@@ -111,6 +112,7 @@ export async function registerRoutes(
   registerObjectStorageRoutes(app, requireAuth);
   registerChatRoutes(app);
   registerImageRoutes(app);
+  registerAiSocialHubRoutes(app);
   
   // ========== AUTH ROUTES ==========
   app.post("/api/auth/signup", async (req, res, next) => {
