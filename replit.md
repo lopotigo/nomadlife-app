@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 - **Key Features**:
     - Map-centered feed with interactive Leaflet markers for posts.
     - User profiles with travel statistics.
-    - Travel Diary with "My Trips" and "Explore" tabs.
+    - Travel Diary with "My Trips", "Followed" and "Explore" tabs.
     - Coworking space browsing and booking.
     - Group and private messaging.
     - Premium subscription management.
@@ -169,6 +169,12 @@ Preferred communication style: Simple, everyday language.
   - Summary screen at end with total stats (stops, km, CO₂)
   - Available from Trip Detail page and Travel Diary (TripDetails)
 - **YouTube Video Embeds**: Posts with YouTube/youtu.be links render as embedded iframe players in feed, map popups, and post detail pages
+- **Followed Trips**: Users can follow/unfollow public trips from other nomads
+  - Follow button on Trip Detail page (toggles "Segui"/"Seguendo")
+  - "Seguiti" tab in Travel Diary showing all followed trips with trip cards
+  - followed_trips table with unique constraint on (user_id, trip_id)
+  - API: POST/DELETE /api/trips/:id/follow, GET /api/followed-trips, GET /api/followed-trips/ids, GET /api/trips/:id/is-followed
+  - Saved Posts: Dedicated /saved page with chronological grouping, nav entry in sidebar and More menu
 
 ### PWA Configuration
 
