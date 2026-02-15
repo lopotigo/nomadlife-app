@@ -23,12 +23,14 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "re
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { FloatingTip } from "@/components/contextual-tip";
 import { TripReplay } from "@/components/trip-replay";
+import { WeatherWidget } from "@/components/weather-widget";
+import { handleShare } from "@/components/share-qr-modal";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -72,6 +74,9 @@ interface TripStop {
   transportMode?: string;
   distanceKm?: number;
   co2Kg?: number;
+  rating?: number;
+  accommodationName?: string;
+  accommodationType?: string;
   placeId?: string;
   sourceTripId?: string;
   place?: { id: string; name: string; type: string; imageUrl?: string };
@@ -581,9 +586,23 @@ export default function TravelDiary() {
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; color: white; font-size: 14px;
           }
-          .leaflet-popup-content-wrapper { background: ${theme === "dark" ? "#1e293b" : "#ffffff"}; color: ${theme === "dark" ? "#e2e8f0" : "#1e293b"}; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-          .leaflet-popup-tip { background: ${theme === "dark" ? "#1e293b" : "#ffffff"}; }
-          .leaflet-popup-close-button { color: ${theme === "dark" ? "white" : "#64748b"} !important; }
+          .custom-popup .leaflet-popup-content-wrapper { 
+            background: ${theme === "dark" ? "#1e293b" : "#ffffff"}; 
+            color: ${theme === "dark" ? "#e2e8f0" : "#1e293b"}; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15); 
+            overflow: hidden;
+            padding: 0;
+          }
+          .custom-popup .leaflet-popup-content { margin: 0 !important; width: auto !important; }
+          .custom-popup .leaflet-popup-tip { background: ${theme === "dark" ? "#1e293b" : "#ffffff"}; }
+          .custom-popup .leaflet-popup-close-button { 
+            color: ${theme === "dark" ? "white" : "#64748b"} !important; 
+            font-size: 20px !important;
+            top: 6px !important;
+            right: 8px !important;
+            z-index: 10;
+          }
         `}</style>
         
         <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 p-4">
@@ -1989,6 +2008,16 @@ function ExploreTripsMap({
     : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [copyingStopId, setCopyingStopId] = useState<string | null>(null);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(highlightedTripId || null);
+
+  const openDirections = (lat: number, lng: number, label?: string) => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const destination = `${lat},${lng}`;
+    if (isIOS) {
+      window.open(`maps://maps.apple.com/?daddr=${destination}&q=${encodeURIComponent(label || "")}`, "_blank");
+    } else {
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, "_blank");
+    }
+  };
   
   const allStopsWithCoords = trips.flatMap((trip, tripIndex) => 
     trip.stops
@@ -2049,42 +2078,160 @@ function ExploreTripsMap({
           />
         ))}
         
-        {allStopsWithCoords.map((stop, index) => (
+        {allStopsWithCoords.map((stop, index) => {
+          const trip = stop.trip;
+          const sortedTripStops = trip.stops
+            .filter(s => s.latitude && s.longitude)
+            .sort((a, b) => a.orderIndex - b.orderIndex);
+          const stopIdx = sortedTripStops.findIndex(s => s.id === stop.id);
+          return (
           <Marker
             key={stop.id}
             position={[stop.latitude!, stop.longitude!]}
-            icon={createStopMarkerIcon(stop.orderIndex, stop.tripColor, stop.trip.user?.avatar)}
+            icon={createStopMarkerIcon(stop.orderIndex, stop.tripColor, trip.user?.avatar, stop.imageUrl)}
             eventHandlers={{
-              click: () => setSelectedTripId(stop.trip.id),
+              click: () => setSelectedTripId(trip.id),
             }}
           >
-            <Popup>
-              <div style={{ minWidth: 220, padding: 12, color: "inherit" }}>
-                <h3 style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{stop.city}, {stop.country}</h3>
-                <p style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
-                  {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
-                  {stop.departureDate && ` - ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
-                </p>
-                <div style={{ borderTop: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)"}`, paddingTop: 8, marginTop: 8 }}>
-                  <p style={{ fontSize: 11, opacity: 0.6, marginBottom: 2 }}>Viaggio:</p>
-                  <p style={{ fontWeight: 600, color: stop.tripColor }}>{stop.trip.title}</p>
-                  {stop.trip.user && (
-                    <p style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>di {stop.trip.user.name || stop.trip.user.username}</p>
-                  )}
-                </div>
-                {stop.notes && (
-                  <p style={{ fontSize: 12, marginTop: 8, fontStyle: "italic", opacity: 0.85 }}>"{stop.notes}"</p>
+            <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
+              <div className="w-[280px]" data-testid={`popup-explore-stop-${stop.id}`}>
+                {stop.imageUrl ? (
+                  <div className="relative">
+                    <img src={stop.imageUrl} className="w-full h-32 object-cover" alt={stop.city} />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white font-bold text-sm">{stop.city}</p>
+                          <p className="text-white/70 text-xs">{stop.country}</p>
+                        </div>
+                        {stop.rating && (
+                          <div className="flex items-center gap-0.5">
+                            {[1,2,3,4,5].map(i => (
+                              <Star key={i} style={{width:14,height:14}} className={i <= (stop.rating||0) ? "fill-amber-400 text-amber-400" : "text-gray-300"} />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 pb-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div style={{ background: stop.tripColor }} className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                          {stop.orderIndex + 1}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">{stop.city}</p>
+                          <p className="text-xs text-gray-500">{stop.country}</p>
+                        </div>
+                      </div>
+                      {stop.rating && (
+                        <div className="flex items-center gap-0.5">
+                          {[1,2,3,4,5].map(i => (
+                            <Star key={i} style={{width:12,height:12}} className={i <= (stop.rating||0) ? "fill-amber-400 text-amber-400" : "text-gray-300"} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
-                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                  <button
-                    onClick={() => onSelectTrip(stop.trip.id)}
-                    style={{ flex: 1, background: theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)", color: "inherit", fontSize: 12, padding: "6px 8px", borderRadius: 8, border: "none", cursor: "pointer" }}
+
+                <div className="p-3 space-y-2">
+                  <a
+                    href={`/user/${trip.user?.id || trip.userId}`}
+                    className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-1 -m-1 transition-colors"
                   >
-                    Vedi dettagli
-                  </button>
+                    <img
+                      src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
+                      className="w-7 h-7 rounded-full object-cover ring-2 ring-emerald-500/20"
+                      alt={trip.user?.name || "User"}
+                    />
+                    <div>
+                      <p className="font-semibold text-xs text-emerald-600">{trip.user?.name || "Nomade"}</p>
+                      <p className="text-[10px] text-gray-400">{trip.title}</p>
+                    </div>
+                  </a>
+
+                  {stop.accommodationName && (
+                    <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg px-2.5 py-2">
+                      <Bed className="w-4 h-4 shrink-0" />
+                      <div>
+                        <p className="font-semibold text-xs">{stop.accommodationName}</p>
+                        {stop.accommodationType && <p className="text-blue-500 dark:text-blue-400 text-[10px] capitalize">{stop.accommodationType}</p>}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 text-[11px] text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
+                      {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
+                    </span>
+                  </div>
+
+                  {stop.notes && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">"{stop.notes}"</p>
+                  )}
+
+                  {stop.transportMode && (
+                    <div className="flex items-center gap-2 text-[11px] text-gray-500">
+                      <span className="capitalize">{stop.transportMode}</span>
+                      {stop.distanceKm && <span>· {stop.distanceKm} km</span>}
+                      {stop.co2Kg ? <span className="text-emerald-600">· {stop.co2Kg} kg CO₂</span> : null}
+                    </div>
+                  )}
+
+                  <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
+
+                  <div className="flex gap-1.5 pt-1 flex-wrap">
+                    <a
+                      href={`/trip/${trip.id}`}
+                      className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-[11px] font-semibold transition-colors min-w-[60px]"
+                      data-testid={`link-explore-diary-${stop.id}`}
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Diario
+                    </a>
+                    {stop.latitude && stop.longitude && (
+                      <button
+                        onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
+                        className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+                        data-testid={`button-explore-directions-${stop.id}`}
+                        title="Indicazioni"
+                      >
+                        <Navigation className="w-3 h-3" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => searchFlights(stopIdx > 0 ? sortedTripStops[stopIdx - 1].city : undefined, stop.city, stop.arrivalDate)}
+                      className="flex items-center justify-center gap-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+                      data-testid={`button-explore-flights-${stop.id}`}
+                      title="Cerca voli"
+                    >
+                      <Plane className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => searchHotels(stop.city, stop.arrivalDate, stop.departureDate)}
+                      className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+                      data-testid={`button-explore-hotel-${stop.id}`}
+                      title="Cerca hotel"
+                    >
+                      <Hotel className="w-3 h-3" />
+                    </button>
+                    <button
+                      onClick={() => handleShare("trip", trip.id, trip.title, () => {})}
+                      className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                      data-testid={`button-explore-share-${trip.id}`}
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
                   {userTrips.length > 0 && (
-                    copyingStopId === stop.id ? (
-                      <div style={{ flex: 1 }}>
+                    <div className="pt-1">
+                      {copyingStopId === stop.id ? (
                         <select
                           onChange={(e) => {
                             if (e.target.value) {
@@ -2092,29 +2239,32 @@ function ExploreTripsMap({
                               setCopyingStopId(null);
                             }
                           }}
-                          style={{ width: "100%", background: theme === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)", color: "inherit", fontSize: 12, padding: "6px 8px", borderRadius: 8, border: "none" }}
+                          className="w-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs py-1.5 px-2 rounded-lg border-none"
                           autoFocus
                         >
                           <option value="">Scegli viaggio...</option>
-                          {userTrips.filter(t => t.status === "planned").map(trip => (
-                            <option key={trip.id} value={trip.id}>{trip.title}</option>
+                          {userTrips.filter(t => t.status === "planned").map(t => (
+                            <option key={t.id} value={t.id}>{t.title}</option>
                           ))}
                         </select>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setCopyingStopId(stop.id)}
-                        style={{ flex: 1, background: "#3b82f6", color: "white", fontSize: 12, padding: "6px 8px", borderRadius: 8, border: "none", cursor: "pointer" }}
-                      >
-                        + Aggiungi al mio
-                      </button>
-                    )
+                      ) : (
+                        <button
+                          onClick={() => setCopyingStopId(stop.id)}
+                          className="w-full bg-violet-500 hover:bg-violet-600 text-white text-xs py-1.5 px-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1"
+                          data-testid={`button-explore-copy-${stop.id}`}
+                        >
+                          <Plus className="w-3 h-3" />
+                          Aggiungi al mio viaggio
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             </Popup>
           </Marker>
-        ))}
+          );
+        })}
       </MapContainer>
       
       {trips.length === 0 && (
