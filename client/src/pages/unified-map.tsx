@@ -6,11 +6,11 @@ import {
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
-  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark
+  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Post, User, Comment, Event, ChatGroup } from "@shared/schema";
+import type { Post, User, Comment, Event, ChatGroup, Moment } from "@shared/schema";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { searchFlights, searchHotels } from "@/lib/travelpayouts";
@@ -47,6 +47,7 @@ L.Icon.Default.mergeOptions({
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
 type EventWithHost = Event & { host: User };
+type MomentWithUser = Moment & { user: User };
 
 type FeedItem = 
   | { type: "post"; data: PostWithUser; createdAt: Date }
@@ -175,6 +176,29 @@ function createEventMarkerIcon(imageUrl: string | null, color: string = "#a855f7
     iconSize: [44, 44],
     iconAnchor: [22, 44],
     popupAnchor: [0, -44],
+  });
+}
+
+function createMomentMarkerIcon(mediaUrl: string | null, avatarUrl?: string | null) {
+  const avatarSrc = avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=moment";
+  const html = mediaUrl
+    ? `<div style="position:relative;width:44px;height:44px;">
+        <img src="${mediaUrl}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid #f97316;box-shadow:0 2px 10px rgba(249,115,22,0.5);" />
+        <div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;border:2px solid white;">
+          <svg viewBox="0 0 24 24" fill="white" width="10" height="10"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+      </div>`
+    : `<div style="position:relative;width:44px;height:44px;">
+        <img src="${avatarSrc}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid #f97316;box-shadow:0 2px 10px rgba(249,115,22,0.5);" />
+        <div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;border:2px solid white;">
+          <svg viewBox="0 0 24 24" fill="white" width="10" height="10"><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+      </div>`;
+  return L.divIcon({
+    html,
+    className: "",
+    iconSize: L.point(44, 44),
+    iconAnchor: L.point(22, 22),
   });
 }
 
@@ -713,6 +737,7 @@ export default function UnifiedMap() {
     : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
   const [posts, setPosts] = useState<PostWithUser[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [moments, setMoments] = useState<MomentWithUser[]>([]);
   const [chatGroups, setChatGroups] = useState<ChatGroup[]>([]);
   const [joinedGroupIds, setJoinedGroupIds] = useState<Set<string>>(new Set());
   const [myTrips, setMyTrips] = useState<Trip[]>([]);
@@ -739,6 +764,7 @@ export default function UnifiedMap() {
   const [filters, setFilters] = useState({
     showPosts: true,
     showEvents: true,
+    showMoments: true,
     showGroups: true,
     showMyTrips: true,
     showFollowingTrips: true,
@@ -805,8 +831,9 @@ export default function UnifiedMap() {
         fetch("/api/posts", { credentials: "include" }),
         fetch("/api/events", { credentials: "include" }),
         fetch("/api/trips", { credentials: "include" }),
+        fetch("/api/moments", { credentials: "include" }),
       ];
-      const [postsRes, eventsRes, publicTripsRes] = await Promise.all(publicFetches);
+      const [postsRes, eventsRes, publicTripsRes, momentsRes] = await Promise.all(publicFetches);
 
       let groupsRes: Response | null = null;
       let myTripsRes: Response | null = null;
@@ -827,6 +854,11 @@ export default function UnifiedMap() {
       if (eventsRes.ok) {
         const eventsData = await eventsRes.json();
         setEvents(eventsData);
+      }
+
+      if (momentsRes.ok) {
+        const momentsData = await momentsRes.json();
+        setMoments(Array.isArray(momentsData) ? momentsData : []);
       }
 
       if (groupsRes?.ok) {
@@ -930,6 +962,11 @@ export default function UnifiedMap() {
       return true;
     });
   }, [events, filters.showEvents, filters.maxBudget, filters.dateFrom, filters.dateTo]);
+
+  const momentsWithCoords = useMemo(() => {
+    if (!filters.showMoments) return [];
+    return moments.filter(m => m.latitude && m.longitude);
+  }, [moments, filters.showMoments]);
 
   const groupsWithCoords = useMemo(() => {
     if (!filters.showGroups) return [];
@@ -1224,6 +1261,58 @@ export default function UnifiedMap() {
                       </div>
                     </div>
                     <WeatherWidget latitude={event.latitude!} longitude={event.longitude!} />
+                    <PopupAutoClose />
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+            {momentsWithCoords.map((moment) => (
+              <Marker
+                key={`moment-${moment.id}`}
+                position={[moment.latitude!, moment.longitude!]}
+                icon={createMomentMarkerIcon(moment.mediaUrl, (moment as MomentWithUser).user?.avatar)}
+              >
+                <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                  <div className="flex items-center gap-2 px-1 py-0.5">
+                    {(moment as MomentWithUser).user?.avatar ? (
+                      <img src={(moment as MomentWithUser).user.avatar!} className="w-6 h-6 rounded-full object-cover" alt="" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                        <Camera className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-xs font-semibold">{(moment as MomentWithUser).user?.username || "Nomad"}</p>
+                      <p className="text-[10px] text-gray-500">{moment.caption?.substring(0, 30) || (moment.location || "Momento")}</p>
+                    </div>
+                  </div>
+                </Tooltip>
+                <Popup className="custom-popup" maxWidth={300} minWidth={240} autoPanPadding={[20, 20]} autoPan={true}>
+                  <div className="popup-animate-in w-[240px]">
+                    <div className="flex items-center gap-2 p-2">
+                      {(moment as MomentWithUser).user?.avatar ? (
+                        <img src={(moment as MomentWithUser).user.avatar!} className="w-8 h-8 rounded-full object-cover border border-orange-300" alt="" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold">
+                          {(moment as MomentWithUser).user?.name?.[0]?.toUpperCase() || "N"}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold text-sm">{(moment as MomentWithUser).user?.username}</p>
+                        {moment.location && <p className="text-[10px] text-gray-500 flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{moment.location}</p>}
+                      </div>
+                    </div>
+                    {moment.mediaType === "video" ? (
+                      <video src={moment.mediaUrl} className="w-full h-40 object-cover" autoPlay muted loop playsInline />
+                    ) : (
+                      <img src={moment.mediaUrl} className="w-full h-40 object-cover" alt="" />
+                    )}
+                    {moment.caption && <p className="text-xs text-gray-600 p-2">{moment.caption}</p>}
+                    <div className="flex items-center justify-between px-2 pb-2 pt-1 text-[10px] text-gray-400">
+                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{moment.views}</span>
+                      <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{moment.likes}</span>
+                    </div>
                     <PopupAutoClose />
                   </div>
                 </Popup>
@@ -1552,6 +1641,18 @@ export default function UnifiedMap() {
                       checked={filters.showEvents}
                       onCheckedChange={(v) => setFilters(f => ({ ...f, showEvents: v }))}
                       data-testid="switch-events"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Camera className="w-4 h-4 text-orange-400" />
+                      Momenti
+                    </label>
+                    <Switch
+                      checked={filters.showMoments}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showMoments: v }))}
+                      data-testid="switch-moments"
                     />
                   </div>
                   
