@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, X, Heart, Eye, MapPin, Send, Camera, ChevronLeft, ChevronRight, Trash2, Upload, RotateCcw, SwitchCamera, Image } from "lucide-react";
+import { Plus, X, Heart, Eye, MapPin, Send, Camera, ChevronLeft, ChevronRight, Trash2, Upload, RotateCcw, SwitchCamera, Image, Compass, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Moment, User } from "@shared/schema";
@@ -59,6 +59,8 @@ export function MomentsBar() {
     }
   }
 
+  const latestMoment = (group: GroupedMoments) => group.moments[group.moments.length - 1];
+
   return (
     <>
       <div className="relative">
@@ -71,54 +73,69 @@ export function MomentsBar() {
           {user && (
             <button
               onClick={() => setShowCreate(true)}
-              className="flex flex-col items-center gap-1 shrink-0 cursor-pointer"
+              className="shrink-0 cursor-pointer group"
               data-testid="button-create-moment"
             >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center relative">
-                {user.avatar ? (
-                  <img src={user.avatar} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-gray-900" />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-lg font-bold text-emerald-700">
-                    {user.name?.[0]?.toUpperCase()}
-                  </div>
-                )}
-                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white dark:border-gray-900 flex items-center justify-center">
-                  <Plus className="w-3 h-3 text-white" />
+              <div className="w-[72px] h-[96px] rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50 border-2 border-dashed border-emerald-300 dark:border-emerald-700 flex flex-col items-center justify-center gap-1.5 group-hover:border-emerald-500 group-hover:shadow-md transition-all relative overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                  <Plus className="w-4 h-4 text-white" />
                 </div>
+                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 leading-tight text-center px-1">
+                  Condividi
+                </span>
               </div>
-              <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate w-16 text-center">
-                {t("moments.your_moment") || "Il tuo momento"}
-              </span>
             </button>
           )}
 
-          {grouped.map((group) => (
-            <button
-              key={group.user.id}
-              onClick={() => setViewingGroup(group)}
-              className="flex flex-col items-center gap-1 shrink-0 cursor-pointer"
-              data-testid={`moment-avatar-${group.user.id}`}
-            >
-              <div className={`w-16 h-16 rounded-full p-[2px] ${
-                group.user.id === user?.id
-                  ? "bg-gradient-to-br from-emerald-400 to-teal-500"
-                  : "bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400"
-              }`}>
-                <div className="w-full h-full rounded-full bg-white dark:bg-gray-900 p-[2px]">
-                  {group.user.avatar ? (
-                    <img src={group.user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-bold text-gray-600">
-                      {group.user.name?.[0]?.toUpperCase()}
+          {grouped.map((group) => {
+            const latest = latestMoment(group);
+            return (
+              <button
+                key={group.user.id}
+                onClick={() => setViewingGroup(group)}
+                className="shrink-0 cursor-pointer group"
+                data-testid={`moment-avatar-${group.user.id}`}
+              >
+                <div className="w-[72px] h-[96px] rounded-lg overflow-hidden relative shadow-sm group-hover:shadow-lg transition-all group-hover:scale-[1.03] bg-gray-100 dark:bg-gray-800">
+                  <img
+                    src={latest.mediaUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+                  <div className="absolute top-1 left-1 right-1 flex items-center gap-1">
+                    {group.user.avatar ? (
+                      <img src={group.user.avatar} alt="" className="w-5 h-5 rounded-full object-cover border border-white/80 shadow-sm" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-[8px] font-bold text-white border border-white/80">
+                        {group.user.name?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    {group.moments.length > 1 && (
+                      <span className="text-[8px] font-bold text-white bg-black/40 px-1 rounded-full backdrop-blur-sm">
+                        {group.moments.length}
+                      </span>
+                    )}
+                  </div>
+                  <div className="absolute bottom-1 left-1 right-1">
+                    {latest.location ? (
+                      <div className="flex items-center gap-0.5 text-white">
+                        <MapPin className="w-2.5 h-2.5 shrink-0" />
+                        <span className="text-[8px] font-medium truncate leading-tight">{latest.location}</span>
+                      </div>
+                    ) : (
+                      <span className="text-[8px] font-medium text-white/80 truncate block">{group.user.username}</span>
+                    )}
+                  </div>
+                  {group.user.id === user?.id && (
+                    <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-emerald-500 border border-white flex items-center justify-center">
+                      <Compass className="w-2.5 h-2.5 text-white" />
                     </div>
                   )}
                 </div>
-              </div>
-              <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate w-16 text-center">
-                {group.user.username}
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -162,13 +179,15 @@ function MomentViewer({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [liked, setLiked] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const moment = group.moments[currentIndex];
-  const DURATION = 5000;
+  const DURATION = 6000;
 
   useEffect(() => {
     setProgress(0);
     setCurrentIndex(0);
+    setLiked(false);
   }, [group.user.id]);
 
   useEffect(() => {
@@ -201,6 +220,7 @@ function MomentViewer({
   }, [currentIndex, paused, group.user.id]);
 
   const goNext = () => {
+    setLiked(false);
     if (currentIndex < group.moments.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       setProgress(0);
@@ -215,6 +235,7 @@ function MomentViewer({
   };
 
   const goPrev = () => {
+    setLiked(false);
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1);
       setProgress(0);
@@ -228,6 +249,7 @@ function MomentViewer({
 
   const handleLike = async () => {
     if (!moment) return;
+    setLiked(true);
     try {
       await fetch(`/api/moments/${moment.id}/like`, {
         method: "POST",
@@ -262,15 +284,21 @@ function MomentViewer({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+      className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
       data-testid="moment-viewer"
     >
-      <div className="relative w-full h-full max-w-md mx-auto">
-        <div className="flex gap-1 px-2 pt-2 absolute top-0 left-0 right-0 z-20">
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden bg-gray-900 shadow-2xl"
+        style={{ maxHeight: "85vh" }}
+      >
+        <div className="flex gap-1 px-3 pt-3 relative z-20">
           {group.moments.map((_, i) => (
-            <div key={i} className="flex-1 h-[2px] bg-white/30 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white rounded-full transition-all"
+            <div key={i} className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-emerald-400 rounded-full"
                 style={{
                   width: `${i < currentIndex ? 100 : i === currentIndex ? progress : 0}%`,
                 }}
@@ -279,34 +307,34 @@ function MomentViewer({
           ))}
         </div>
 
-        <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-between px-3">
-          <div className="flex items-center gap-2">
+        <div className="absolute top-5 left-0 right-0 z-20 flex items-center justify-between px-3 mt-1">
+          <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md rounded-full py-1 pl-1 pr-3">
             {group.user.avatar ? (
-              <img src={group.user.avatar} alt="" className="w-8 h-8 rounded-full object-cover border border-white/50" />
+              <img src={group.user.avatar} alt="" className="w-7 h-7 rounded-full object-cover border border-emerald-400/50" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">
                 {group.user.name?.[0]}
               </div>
             )}
-            <div>
-              <p className="text-white text-sm font-semibold">{group.user.username}</p>
-              <p className="text-white/60 text-[10px]">{timeAgo}</p>
+            <div className="leading-tight">
+              <p className="text-white text-xs font-semibold">{group.user.username}</p>
+              <p className="text-white/50 text-[9px]">{timeAgo}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {currentUserId === group.user.id && (
-              <button onClick={handleDelete} className="text-white/80 hover:text-white p-1" data-testid="button-delete-moment">
-                <Trash2 className="w-5 h-5" />
+              <button onClick={handleDelete} className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-red-400 transition-colors" data-testid="button-delete-moment">
+                <Trash2 className="w-4 h-4" />
               </button>
             )}
-            <button onClick={onClose} className="text-white/80 hover:text-white p-1" data-testid="button-close-moment">
-              <X className="w-6 h-6" />
+            <button onClick={onClose} className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white transition-colors" data-testid="button-close-moment">
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         <div
-          className="w-full h-full flex items-center justify-center"
+          className="relative aspect-[3/4] max-h-[70vh]"
           onMouseDown={() => setPaused(true)}
           onMouseUp={() => setPaused(false)}
           onTouchStart={() => setPaused(true)}
@@ -327,52 +355,98 @@ function MomentViewer({
               className="w-full h-full object-cover"
             />
           )}
+
+          <button
+            onClick={goPrev}
+            className="absolute left-0 top-0 bottom-0 w-1/3 z-10"
+            data-testid="button-moment-prev"
+          />
+          <button
+            onClick={goNext}
+            className="absolute right-0 top-0 bottom-0 w-1/3 z-10"
+            data-testid="button-moment-next"
+          />
+
+          {group.moments.length > 1 && (
+            <>
+              {currentIndex > 0 && (
+                <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+                  <div className="w-6 h-6 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center">
+                    <ChevronLeft className="w-4 h-4 text-white/60" />
+                  </div>
+                </div>
+              )}
+              {currentIndex < group.moments.length - 1 && (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+                  <div className="w-6 h-6 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center">
+                    <ChevronRight className="w-4 h-4 text-white/60" />
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
-        <button
-          onClick={goPrev}
-          className="absolute left-0 top-1/4 bottom-1/4 w-1/3 z-10"
-          data-testid="button-moment-prev"
-        />
-        <button
-          onClick={goNext}
-          className="absolute right-0 top-1/4 bottom-1/4 w-1/3 z-10"
-          data-testid="button-moment-next"
-        />
-
-        <div className="absolute bottom-0 left-0 right-0 z-20 p-4 bg-gradient-to-t from-black/60 to-transparent">
-          {moment.caption && (
-            <p className="text-white text-sm mb-2">{moment.caption}</p>
-          )}
+        <div className="p-3 bg-gray-900">
           {moment.location && (
-            <div className="flex items-center gap-1 text-white/70 text-xs mb-3">
-              <MapPin className="w-3 h-3" />
-              {moment.location}
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 rounded-full px-2 py-0.5">
+                <Globe className="w-3 h-3" />
+                <span className="text-[10px] font-semibold">{moment.location}</span>
+              </div>
             </div>
+          )}
+          {moment.caption && (
+            <p className="text-white/90 text-sm mb-2 leading-snug">{moment.caption}</p>
           )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={handleLike} className="text-white hover:scale-110 transition-transform" data-testid="button-like-moment">
-                <Heart className="w-6 h-6" />
+              <button
+                onClick={handleLike}
+                className={`flex items-center gap-1 transition-all ${liked ? "text-red-400 scale-110" : "text-white/60 hover:text-red-400"}`}
+                data-testid="button-like-moment"
+              >
+                <Heart className={`w-5 h-5 ${liked ? "fill-red-400" : ""}`} />
+                <span className="text-xs">{moment.likes + (liked ? 1 : 0)}</span>
               </button>
               <button
                 onClick={() => {
                   const url = `${window.location.origin}/moment/${moment.id}`;
                   navigator.clipboard.writeText(url);
                 }}
-                className="text-white hover:scale-110 transition-transform"
+                className="text-white/60 hover:text-emerald-400 transition-colors"
                 data-testid="button-share-moment"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex items-center gap-1 text-white/60 text-xs">
-              <Eye className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1 text-white/40 text-xs">
+              <Eye className="w-3 h-3" />
               {moment.views}
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {allGroups.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+          {allGroups.map((g) => (
+            <button
+              key={g.user.id}
+              onClick={() => onNavigateGroup(g)}
+              className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all ${g.user.id === group.user.id ? "border-emerald-400 scale-110" : "border-white/20 opacity-60 hover:opacity-100"}`}
+            >
+              {g.user.avatar ? (
+                <img src={g.user.avatar} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gray-700 flex items-center justify-center text-[10px] text-white font-bold">
+                  {g.user.name?.[0]}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -524,7 +598,7 @@ function CreateMomentModal({
         }),
       });
 
-      toast({ title: "Momento pubblicato!" });
+      toast({ title: "Momento condiviso!" });
       onCreated();
     } catch (error: any) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -538,7 +612,7 @@ function CreateMomentModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9999] bg-black flex flex-col"
+      className="fixed inset-0 z-[9999] bg-black/95 flex flex-col"
       data-testid="create-moment-modal"
     >
       <canvas ref={canvasRef} className="hidden" />
@@ -552,19 +626,22 @@ function CreateMomentModal({
       />
 
       <div className="flex items-center justify-between p-4">
-        <button onClick={onClose} className="text-white" data-testid="button-close-create-moment">
+        <button onClick={onClose} className="text-white/70 hover:text-white transition-colors" data-testid="button-close-create-moment">
           <X className="w-6 h-6" />
         </button>
-        <h2 className="text-white font-semibold text-lg">Nuovo Momento</h2>
+        <div className="flex items-center gap-2">
+          <Compass className="w-5 h-5 text-emerald-400" />
+          <h2 className="text-white font-semibold">Nuovo Momento</h2>
+        </div>
         {mode === "preview" ? (
           <Button
             onClick={handleSubmit}
             disabled={!file || uploading}
             size="sm"
-            className="bg-emerald-500 hover:bg-emerald-600 text-white"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-4"
             data-testid="button-publish-moment"
           >
-            {uploading ? "..." : "Pubblica"}
+            {uploading ? "..." : "Condividi"}
           </Button>
         ) : (
           <div className="w-16" />
@@ -576,19 +653,29 @@ function CreateMomentModal({
           <div className="w-full max-w-sm space-y-4">
             <button
               onClick={() => setMode("camera")}
-              className="w-full h-44 rounded-2xl border-2 border-dashed border-white/30 flex flex-col items-center justify-center gap-3 text-white/60 hover:border-emerald-400 hover:text-emerald-400 transition-colors"
+              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-6 flex items-center gap-4 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all group"
               data-testid="button-open-camera"
             >
-              <Camera className="w-12 h-12" />
-              <span className="text-sm font-medium">Scatta una foto</span>
+              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                <Camera className="w-7 h-7 text-emerald-400" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-semibold">Scatta una foto</p>
+                <p className="text-white/40 text-xs mt-0.5">Cattura il tuo momento nomade</p>
+              </div>
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-44 rounded-2xl border-2 border-dashed border-white/30 flex flex-col items-center justify-center gap-3 text-white/60 hover:border-purple-400 hover:text-purple-400 transition-colors"
+              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-6 flex items-center gap-4 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/5 transition-all group"
               data-testid="button-select-media"
             >
-              <Image className="w-12 h-12" />
-              <span className="text-sm font-medium">Scegli dalla galleria</span>
+              <div className="w-14 h-14 rounded-xl bg-teal-500/10 flex items-center justify-center group-hover:bg-teal-500/20 transition-colors">
+                <Image className="w-7 h-7 text-teal-400" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-semibold">Dalla galleria</p>
+                <p className="text-white/40 text-xs mt-0.5">Scegli foto o video dal tuo dispositivo</p>
+              </div>
             </button>
           </div>
         )}
@@ -596,14 +683,14 @@ function CreateMomentModal({
         {mode === "camera" && (
           <div className="relative w-full max-w-sm">
             {cameraError ? (
-              <div className="h-[60vh] rounded-2xl bg-white/5 flex flex-col items-center justify-center gap-4">
-                <Camera className="w-16 h-16 text-white/30" />
-                <p className="text-white/60 text-sm text-center px-4">{cameraError}</p>
+              <div className="h-[60vh] rounded-2xl bg-gray-800 flex flex-col items-center justify-center gap-4">
+                <Camera className="w-16 h-16 text-white/20" />
+                <p className="text-white/50 text-sm text-center px-4">{cameraError}</p>
                 <Button
                   onClick={() => startCamera(facingMode)}
                   variant="outline"
                   size="sm"
-                  className="border-white/30 text-white hover:bg-white/10"
+                  className="border-white/20 text-white hover:bg-white/10"
                 >
                   Riprova
                 </Button>
@@ -630,7 +717,7 @@ function CreateMomentModal({
             )}
             <button
               onClick={resetMedia}
-              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70"
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-colors"
               data-testid="button-reset-media"
             >
               <X className="w-4 h-4" />
@@ -650,10 +737,10 @@ function CreateMomentModal({
           </button>
           <button
             onClick={capturePhoto}
-            className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center hover:scale-105 transition-transform"
+            className="w-[72px] h-[72px] rounded-full border-[3px] border-emerald-400 flex items-center justify-center hover:scale-105 transition-transform"
             data-testid="button-capture"
           >
-            <div className="w-16 h-16 rounded-full bg-white" />
+            <div className="w-[60px] h-[60px] rounded-full bg-emerald-400 hover:bg-emerald-300 transition-colors" />
           </button>
           <button
             onClick={flipCamera}
@@ -670,17 +757,19 @@ function CreateMomentModal({
           <input
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
-            placeholder="Aggiungi una didascalia..."
-            className="w-full bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-emerald-500"
+            placeholder="Racconta il tuo momento..."
+            className="w-full bg-white/5 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm outline-none focus:ring-1 focus:ring-emerald-500/50 border border-white/10"
             data-testid="input-moment-caption"
           />
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-white/40" />
+            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <MapPin className="w-4 h-4 text-emerald-400" />
+            </div>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Dove sei?"
-              className="flex-1 bg-white/10 text-white placeholder-white/40 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-emerald-500"
+              placeholder="Dove ti trovi?"
+              className="flex-1 bg-white/5 text-white placeholder-white/30 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-emerald-500/50 border border-white/10"
               data-testid="input-moment-location"
             />
           </div>
@@ -695,9 +784,9 @@ function getTimeAgo(dateStr: string | Date): string {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "ora";
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1) return "adesso";
+  if (minutes < 60) return `${minutes}min fa`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}g`;
+  if (hours < 24) return `${hours}h fa`;
+  return `${Math.floor(hours / 24)}g fa`;
 }
