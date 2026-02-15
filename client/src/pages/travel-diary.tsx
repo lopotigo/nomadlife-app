@@ -25,6 +25,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
+import { MomentsBar } from "@/components/moments";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { FloatingTip } from "@/components/contextual-tip";
@@ -788,6 +789,10 @@ export default function TravelDiary() {
             </button>
           </div>
         </header>
+
+        <div className="border-b border-border/30">
+          <MomentsBar />
+        </div>
 
         {activeTab === "my-trips" && (
           <div className="p-4 pb-24">
