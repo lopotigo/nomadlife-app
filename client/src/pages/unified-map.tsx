@@ -904,7 +904,7 @@ export default function UnifiedMap() {
 
   const groupedPosts = useMemo(() => {
     const groups: { lat: number; lng: number; posts: PostWithUser[] }[] = [];
-    const threshold = 0.0005;
+    const threshold = 0.005;
     postsWithCoords.forEach(post => {
       const existing = groups.find(g =>
         Math.abs(g.lat - post.latitude!) < threshold && Math.abs(g.lng - post.longitude!) < threshold
