@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /chat
+Disallow: /settings
+
+Sitemap: https://nomad-life.app/sitemap.xml

@@ -2141,5 +2141,62 @@ export async function registerRoutes(
     }
   });
 
+  // SEO: Dynamic Sitemap
+  app.get("/sitemap.xml", async (_req, res) => {
+    const baseUrl = "https://nomad-life.app";
+    const staticPages = [
+      { url: "/", priority: "1.0", changefreq: "daily" },
+      { url: "/map", priority: "0.9", changefreq: "daily" },
+      { url: "/explore", priority: "0.8", changefreq: "daily" },
+      { url: "/events", priority: "0.7", changefreq: "weekly" },
+      { url: "/marketplace", priority: "0.7", changefreq: "weekly" },
+      { url: "/coworking", priority: "0.7", changefreq: "weekly" },
+      { url: "/diary", priority: "0.6", changefreq: "weekly" },
+    ];
+
+    try {
+      const posts = await storage.getPosts(200);
+      const events = await storage.getEvents();
+
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+      for (const page of staticPages) {
+        xml += `
+  <url>
+    <loc>${baseUrl}${page.url}</loc>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`;
+      }
+
+      for (const post of posts.slice(0, 200)) {
+        xml += `
+  <url>
+    <loc>${baseUrl}/post/${post.id}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>`;
+      }
+
+      for (const event of events.slice(0, 100)) {
+        xml += `
+  <url>
+    <loc>${baseUrl}/event/${event.id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+      }
+
+      xml += `
+</urlset>`;
+
+      res.set("Content-Type", "application/xml");
+      res.send(xml);
+    } catch (error) {
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
   return httpServer;
 }
