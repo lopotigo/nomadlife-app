@@ -657,3 +657,59 @@ export const insertAiMessageSchema = createInsertSchema(aiMessages).omit({
 });
 export type AiMessage = typeof aiMessages.$inferSelect;
 export type InsertAiMessage = z.infer<typeof insertAiMessageSchema>;
+
+// User Interests - AI-derived profile tags from activity analysis
+export const userInterests = pgTable("user_interests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  category: text("category").notNull(), // "food", "lifestyle", "transport", "accommodation", "activity", "budget", "climate"
+  tag: text("tag").notNull(), // "vegetarian", "surfer", "budget_traveler", "beach_lover", etc.
+  confidence: doublePrecision("confidence").default(0.5).notNull(), // 0-1 how confident AI is
+  source: text("source").notNull(), // "post_analysis", "trip_data", "expense_data", "manual"
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserInterestSchema = createInsertSchema(userInterests).omit({
+  id: true,
+  updatedAt: true,
+  createdAt: true,
+});
+export type InsertUserInterest = z.infer<typeof insertUserInterestSchema>;
+export type UserInterest = typeof userInterests.$inferSelect;
+
+// User Activity Log - tracks user behavior for AI profiling
+export const userActivityLog = pgTable("user_activity_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  activityType: text("activity_type").notNull(), // "post_created", "trip_added", "place_booked", "product_clicked", "event_joined", "search", "moment_created"
+  metadata: text("metadata"), // JSON string with details
+  location: text("location"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type UserActivityLog = typeof userActivityLog.$inferSelect;
+
+// Nomad Check-ins - where nomads are or plan to be
+export const nomadCheckins = pgTable("nomad_checkins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  city: text("city").notNull(),
+  country: text("country").notNull(),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  status: text("status").notNull().default("here_now"), // "here_now", "arriving_soon", "planning"
+  arrivalDate: timestamp("arrival_date"),
+  departureDate: timestamp("departure_date"),
+  note: text("note"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertNomadCheckinSchema = createInsertSchema(nomadCheckins).omit({
+  id: true,
+  isActive: true,
+  createdAt: true,
+});
+export type InsertNomadCheckin = z.infer<typeof insertNomadCheckinSchema>;
+export type NomadCheckin = typeof nomadCheckins.$inferSelect;
