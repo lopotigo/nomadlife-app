@@ -276,6 +276,89 @@ export async function registerRoutes(
     }
   });
 
+  // ========== MOMENTS (STORIES) ROUTES ==========
+  app.get("/api/moments", async (_req, res) => {
+    try {
+      const moments = await storage.getActiveMoments();
+      res.send(moments);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/moments/user/:userId", async (req, res) => {
+    try {
+      const moments = await storage.getUserMoments(req.params.userId);
+      res.send(moments);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/moments/:id", async (req, res) => {
+    try {
+      const moment = await storage.getMoment(req.params.id);
+      if (!moment) return res.status(404).send({ error: "Moment not found" });
+      res.send(moment);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/moments", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const moment = await storage.createMoment({
+        ...req.body,
+        userId,
+        expiresAt,
+      });
+      res.send(moment);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/moments/:id/view", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as User).id;
+      await storage.viewMoment(req.params.id, userId);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/moments/:id/like", requireAuth, async (req, res) => {
+    try {
+      const moment = await storage.likeMoment(req.params.id);
+      if (!moment) return res.status(404).send({ error: "Moment not found" });
+      res.send(moment);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/moments/:id/viewers", requireAuth, async (req, res) => {
+    try {
+      const viewers = await storage.getMomentViewers(req.params.id);
+      res.send(viewers);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/moments/:id", requireAuth, async (req, res) => {
+    try {
+      const deleted = await storage.deleteMoment(req.params.id);
+      if (!deleted) return res.status(404).send({ error: "Moment not found" });
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== SAVED POSTS ROUTES ==========
   app.get("/api/saved-posts", requireAuth, async (req, res) => {
     try {

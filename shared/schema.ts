@@ -589,3 +589,40 @@ export const insertFollowedTripSchema = createInsertSchema(followedTrips).omit({
 });
 export type InsertFollowedTrip = z.infer<typeof insertFollowedTripSchema>;
 export type FollowedTrip = typeof followedTrips.$inferSelect;
+
+// Moments (Stories) table - ephemeral 24h content
+export const moments = pgTable("moments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  mediaUrl: text("media_url").notNull(),
+  mediaType: text("media_type").notNull().default("image"),
+  caption: text("caption"),
+  location: text("location"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  views: integer("views").default(0).notNull(),
+  likes: integer("likes").default(0).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertMomentSchema = createInsertSchema(moments).omit({
+  id: true,
+  views: true,
+  likes: true,
+  createdAt: true,
+});
+export type InsertMoment = z.infer<typeof insertMomentSchema>;
+export type Moment = typeof moments.$inferSelect;
+
+// Moment Views table
+export const momentViews = pgTable("moment_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  momentId: varchar("moment_id").notNull().references(() => moments.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("moment_views_moment_user_idx").on(table.momentId, table.userId),
+]);
+
+export type MomentView = typeof momentViews.$inferSelect;

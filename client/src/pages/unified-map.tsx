@@ -29,6 +29,7 @@ import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { EventPosterModal } from "@/components/event-poster-modal";
 import { WeatherWidget } from "@/components/weather-widget";
 import { InFeedAd } from "@/components/ad-banner";
+import { MomentsBar } from "@/components/moments";
 import { FloatingTip } from "@/components/contextual-tip";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
@@ -1651,6 +1652,9 @@ export default function UnifiedMap() {
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+          <div className="border-b border-gray-200/50 dark:border-gray-700/50 -mx-4 mb-2">
+            <MomentsBar />
+          </div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Heart className="w-5 h-5 text-red-400" />
             Feed

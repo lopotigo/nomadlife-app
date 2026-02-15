@@ -218,6 +218,17 @@ export interface IStorage {
   getFollowedTrips(userId: string): Promise<any[]>;
   isTripFollowed(userId: string, tripId: string): Promise<boolean>;
   getFollowedTripIds(userId: string): Promise<string[]>;
+
+  // Moments (Stories)
+  getActiveMoments(): Promise<(schema.Moment & { user: User })[]>;
+  getUserMoments(userId: string): Promise<schema.Moment[]>;
+  getMoment(id: string): Promise<(schema.Moment & { user: User }) | undefined>;
+  createMoment(moment: schema.InsertMoment): Promise<schema.Moment>;
+  deleteMoment(id: string): Promise<boolean>;
+  viewMoment(momentId: string, userId: string): Promise<void>;
+  likeMoment(momentId: string): Promise<schema.Moment | undefined>;
+  getMomentViewers(momentId: string): Promise<User[]>;
+  cleanExpiredMoments(): Promise<number>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1667,6 +1678,83 @@ export class DrizzleStorage implements IStorage {
     const result = await this.db.select({ tripId: schema.followedTrips.tripId }).from(schema.followedTrips)
       .where(eq(schema.followedTrips.userId, userId));
     return result.map(r => r.tripId);
+  }
+
+  // Moments (Stories) implementation
+  async getActiveMoments(): Promise<(schema.Moment & { user: User })[]> {
+    const now = new Date();
+    const result = await this.db
+      .select()
+      .from(schema.moments)
+      .innerJoin(schema.users, eq(schema.moments.userId, schema.users.id))
+      .where(sql`${schema.moments.expiresAt} > ${now}`)
+      .orderBy(desc(schema.moments.createdAt));
+    return result.map((r) => ({ ...r.moments, user: r.users }));
+  }
+
+  async getUserMoments(userId: string): Promise<schema.Moment[]> {
+    const now = new Date();
+    return this.db
+      .select()
+      .from(schema.moments)
+      .where(and(eq(schema.moments.userId, userId), sql`${schema.moments.expiresAt} > ${now}`))
+      .orderBy(desc(schema.moments.createdAt));
+  }
+
+  async getMoment(id: string): Promise<(schema.Moment & { user: User }) | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.moments)
+      .innerJoin(schema.users, eq(schema.moments.userId, schema.users.id))
+      .where(eq(schema.moments.id, id));
+    if (!result[0]) return undefined;
+    return { ...result[0].moments, user: result[0].users };
+  }
+
+  async createMoment(moment: schema.InsertMoment): Promise<schema.Moment> {
+    const result = await this.db.insert(schema.moments).values(moment).returning();
+    return result[0];
+  }
+
+  async deleteMoment(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.moments).where(eq(schema.moments.id, id));
+    return (result?.rowCount ?? 0) > 0;
+  }
+
+  async viewMoment(momentId: string, userId: string): Promise<void> {
+    try {
+      await this.db.insert(schema.momentViews).values({ momentId, userId });
+      await this.db
+        .update(schema.moments)
+        .set({ views: sql`${schema.moments.views} + 1` })
+        .where(eq(schema.moments.id, momentId));
+    } catch (e: any) {
+      if (e.code !== "23505") throw e;
+    }
+  }
+
+  async likeMoment(momentId: string): Promise<schema.Moment | undefined> {
+    const result = await this.db
+      .update(schema.moments)
+      .set({ likes: sql`${schema.moments.likes} + 1` })
+      .where(eq(schema.moments.id, momentId))
+      .returning();
+    return result[0];
+  }
+
+  async getMomentViewers(momentId: string): Promise<User[]> {
+    const result = await this.db
+      .select()
+      .from(schema.momentViews)
+      .innerJoin(schema.users, eq(schema.momentViews.userId, schema.users.id))
+      .where(eq(schema.momentViews.momentId, momentId));
+    return result.map((r) => r.users);
+  }
+
+  async cleanExpiredMoments(): Promise<number> {
+    const now = new Date();
+    const result = await this.db.delete(schema.moments).where(sql`${schema.moments.expiresAt} <= ${now}`);
+    return result?.rowCount ?? 0;
   }
 }
 
