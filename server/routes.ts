@@ -8,6 +8,8 @@ import webpush from "web-push";
 import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema, insertPlaceReviewSchema, updateTripStopSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { registerChatRoutes } from "./replit_integrations/chat";
+import { registerImageRoutes } from "./replit_integrations/image";
 import { createRepository, pushFile, getGitHubUser } from "./github";
 
 // Configure VAPID keys for push notifications
@@ -106,8 +108,9 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
-  // Register Object Storage routes for file uploads (with authentication)
   registerObjectStorageRoutes(app, requireAuth);
+  registerChatRoutes(app);
+  registerImageRoutes(app);
   
   // ========== AUTH ROUTES ==========
   app.post("/api/auth/signup", async (req, res, next) => {

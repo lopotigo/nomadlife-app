@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { I18nProvider } from "@/lib/i18n";
 import { OnboardingProvider } from "@/lib/onboarding";
 import { WelcomeTutorial } from "@/components/welcome-tutorial";
+import { AiChatbot } from "@/components/ai-chatbot";
 
 import MapFeed from "@/pages/map-feed";
 import Profile from "@/pages/profile";
@@ -71,6 +72,7 @@ function App() {
                 <Toaster />
                 <WelcomeTutorial />
                 <Router />
+                <AiChatbot />
               </TooltipProvider>
             </OnboardingProvider>
           </AuthProvider>

@@ -46,6 +46,12 @@ Session-based authentication manages user login, signup, and secure access to pr
 - **Subscription & Monetization:** Premium subscription management, Google AdSense integration, and a marketplace for nomad-focused products with affiliate tracking.
 - **User Engagement:** Push notifications for new followers, trips, and messages; search functionality for nomads and trips; and an Admin Panel for product and vendor management.
 - **Internationalization:** Multi-language support for Italian, English, and Spanish.
+- **AI Chatbot (NomadBot):** Floating AI assistant powered by OpenAI (via Replit AI Integrations). Features: streaming responses, conversation history, quick prompts, trip/destination recommendations. Routes under `/api/ai/*`. Schema: `ai_conversations` and `ai_messages` tables.
+- **AI Recommendations:** Endpoint `/api/ai/recommendations` generates destination, trip, and marketplace suggestions.
+- **AI Image Generation:** Endpoint `/api/generate-image` for AI-powered image creation.
+- **Moments (Stories):** Ephemeral 24h content with media upload, views tracking, fullscreen viewer with progress bars.
+- **SEO:** Dynamic sitemap, robots.txt, JSON-LD structured data, Open Graph meta tags.
+- **Social Sharing:** Reusable component for WhatsApp, Telegram, X/Twitter, copy link.
 
 ## External Dependencies
 
