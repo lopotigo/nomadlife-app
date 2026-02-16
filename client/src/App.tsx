@@ -22,6 +22,7 @@ import DesignPreview from "@/pages/design-preview";
 import MobilePreview from "@/pages/mobile-preview";
 import TravelDiary from "@/pages/travel-diary";
 import UnifiedMap from "@/pages/unified-map";
+import Home from "@/pages/home";
 import PostDetail from "@/pages/post-detail";
 import TripDetail from "@/pages/trip-detail";
 import SearchPage from "@/pages/search";
@@ -37,7 +38,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={Auth} />
-      <Route path="/" component={UnifiedMap} />
+      <Route path="/" component={Home} />
+      <Route path="/explore" component={UnifiedMap} />
       <Route path="/feed" component={MapFeed} />
       <Route path="/booking" component={Booking} />
       <Route path="/coworking" component={Booking} />

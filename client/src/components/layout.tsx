@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark } from "lucide-react";
+import { Home, Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
@@ -55,7 +55,8 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         </div>
         
         <nav className="flex flex-col gap-2">
-          <NavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
+          <NavItem href="/" icon={Home} label="Home" active={location === "/"} />
+          <NavItem href="/explore" icon={Map} label={t("nav.map")} active={location === "/explore"} />
           <NavItem href="/search" icon={Search} label={t("nav.search")} active={location === "/search"} />
           <NavItem href="/travel-diary" icon={Plane} label={t("nav.travel_diary")} active={location === "/travel-diary"} />
           <NavItem href="/events-calendar" icon={Calendar} label={t("nav.events_calendar")} active={location === "/events-calendar"} />
@@ -82,7 +83,8 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-1 z-50">
-        <MobileNavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
+        <MobileNavItem href="/" icon={Home} label="Home" active={location === "/"} />
+        <MobileNavItem href="/explore" icon={Map} label={t("nav.map")} active={location === "/explore"} />
         <MobileNavItem href="/travel-diary" icon={Plane} label={t("nav.trips")} active={location === "/travel-diary"} />
         <MobileNavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label={t("nav.chat")} active={location === "/chat"} />
