@@ -31,6 +31,7 @@ import EventDetail from "@/pages/event-detail";
 import Marketplace from "@/pages/marketplace";
 import Admin from "@/pages/admin";
 import SavedPosts from "@/pages/saved-posts";
+import AiSocialHub from "@/pages/ai-social-hub";
 
 function Router() {
   return (
@@ -55,6 +56,7 @@ function Router() {
       <Route path="/event/:id" component={EventDetail} />
       <Route path="/marketplace" component={Marketplace} />
       <Route path="/saved" component={SavedPosts} />
+      <Route path="/ai-hub" component={AiSocialHub} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

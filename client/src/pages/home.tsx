@@ -8,6 +8,7 @@ import type { Post, User, Comment, Trip, TripStop, TripExpense, Event } from "@s
 import { CreatePostForm } from "@/components/CreatePostForm";
 import { QRCodeSVG } from "qrcode.react";
 import { MomentsBar } from "@/components/moments";
+import { SmartProductsWidget } from "@/components/smart-products-widget";
 
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
@@ -137,17 +138,25 @@ export default function Home() {
               <p className="text-muted-foreground">No posts yet. Start exploring!</p>
             </div>
           ) : (
-            feedItems.map((item) => {
-              if (item.type === "post") {
-                return <PostCard key={`post-${item.data.id}`} post={item.data} onLike={handleLike} currentUser={user} />;
-              }
-              if (item.type === "event") {
-                return <EventManifestoCard key={`event-${item.data.id}`} event={item.data} />;
-              }
-              if (item.type === "trip") {
-                return <TripFeedCard key={`trip-${item.data.id}`} trip={item.data} />;
-              }
-              return null;
+            feedItems.map((item, index) => {
+              const card = (() => {
+                if (item.type === "post") {
+                  return <PostCard key={`post-${item.data.id}`} post={item.data} onLike={handleLike} currentUser={user} />;
+                }
+                if (item.type === "event") {
+                  return <EventManifestoCard key={`event-${item.data.id}`} event={item.data} />;
+                }
+                if (item.type === "trip") {
+                  return <TripFeedCard key={`trip-${item.data.id}`} trip={item.data} />;
+                }
+                return null;
+              })();
+              return (
+                <>
+                  {card}
+                  {index === 2 && <SmartProductsWidget key="smart-widget" />}
+                </>
+              );
             })
           )}
         </div>
