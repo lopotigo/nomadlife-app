@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, X, Heart, Eye, MapPin, Send, Camera, ChevronLeft, ChevronRight, Trash2, Upload, RotateCcw, SwitchCamera, Image, Compass, Globe } from "lucide-react";
+import { Plus, X, Heart, Eye, MapPin, Send, Camera, ChevronLeft, ChevronRight, Trash2, Upload, RotateCcw, SwitchCamera, Image, Compass, Globe, Video, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Moment, User } from "@shared/schema";
@@ -467,16 +467,34 @@ function CreateMomentModal({
   const [mode, setMode] = useState<"choose" | "camera" | "preview">("choose");
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [cameraTab, setCameraTab] = useState<"photo" | "video">("photo");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const MAX_RECORD_SECONDS = 30;
 
   const stopCamera = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    mediaRecorderRef.current = null;
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
+    setIsRecording(false);
+    setRecordingTime(0);
   }, []);
 
   const startCamera = useCallback(async (facing: "user" | "environment") => {
@@ -485,7 +503,7 @@ function CreateMomentModal({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
-        audio: false,
+        audio: cameraTab === "video",
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -494,7 +512,7 @@ function CreateMomentModal({
     } catch {
       setCameraError("Impossibile accedere alla fotocamera. Consenti i permessi.");
     }
-  }, [stopCamera]);
+  }, [stopCamera, cameraTab]);
 
   useEffect(() => {
     if (mode === "camera") {
@@ -529,6 +547,61 @@ function CreateMomentModal({
       setPreview(URL.createObjectURL(blob));
       setMode("preview");
     }, "image/jpeg", 0.92);
+  };
+
+  const startRecording = () => {
+    if (!streamRef.current) return;
+    recordedChunksRef.current = [];
+    const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+      ? "video/webm;codecs=vp9,opus"
+      : MediaRecorder.isTypeSupported("video/webm")
+        ? "video/webm"
+        : "video/mp4";
+    try {
+      const recorder = new MediaRecorder(streamRef.current, { mimeType });
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: mimeType });
+        const ext = mimeType.includes("mp4") ? "mp4" : "webm";
+        const recorded = new File([blob], `moment_${Date.now()}.${ext}`, { type: mimeType });
+        setFile(recorded);
+        setPreview(URL.createObjectURL(blob));
+        setMode("preview");
+        setIsRecording(false);
+        setRecordingTime(0);
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+      };
+      recorder.start(100);
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      setRecordingTime(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime((prev) => {
+          if (prev >= MAX_RECORD_SECONDS - 1) {
+            stopRecording();
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } catch {
+      toast({ title: "Errore", description: "Impossibile avviare la registrazione video.", variant: "destructive" });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -650,30 +723,43 @@ function CreateMomentModal({
 
       <div className="flex-1 flex items-center justify-center px-4">
         {mode === "choose" && (
-          <div className="w-full max-w-sm space-y-4">
+          <div className="w-full max-w-sm space-y-3">
             <button
-              onClick={() => setMode("camera")}
-              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-6 flex items-center gap-4 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all group"
+              onClick={() => { setCameraTab("photo"); setMode("camera"); }}
+              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-5 flex items-center gap-4 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/5 transition-all group"
               data-testid="button-open-camera"
             >
-              <div className="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
-                <Camera className="w-7 h-7 text-emerald-400" />
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                <Camera className="w-6 h-6 text-emerald-400" />
               </div>
               <div className="text-left">
-                <p className="text-white font-semibold">Scatta una foto</p>
+                <p className="text-white font-semibold text-sm">Scatta una foto</p>
                 <p className="text-white/40 text-xs mt-0.5">Cattura il tuo momento nomade</p>
               </div>
             </button>
             <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-6 flex items-center gap-4 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/5 transition-all group"
-              data-testid="button-select-media"
+              onClick={() => { setCameraTab("video"); setMode("camera"); }}
+              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-5 flex items-center gap-4 hover:border-red-500/50 hover:shadow-lg hover:shadow-red-500/5 transition-all group"
+              data-testid="button-open-video-camera"
             >
-              <div className="w-14 h-14 rounded-xl bg-teal-500/10 flex items-center justify-center group-hover:bg-teal-500/20 transition-colors">
-                <Image className="w-7 h-7 text-teal-400" />
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                <Video className="w-6 h-6 text-red-400" />
               </div>
               <div className="text-left">
-                <p className="text-white font-semibold">Dalla galleria</p>
+                <p className="text-white font-semibold text-sm">Registra un video</p>
+                <p className="text-white/40 text-xs mt-0.5">Fino a {MAX_RECORD_SECONDS} secondi</p>
+              </div>
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-5 flex items-center gap-4 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/5 transition-all group"
+              data-testid="button-select-media"
+            >
+              <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center group-hover:bg-teal-500/20 transition-colors">
+                <Image className="w-6 h-6 text-teal-400" />
+              </div>
+              <div className="text-left">
+                <p className="text-white font-semibold text-sm">Dalla galleria</p>
                 <p className="text-white/40 text-xs mt-0.5">Scegli foto o video dal tuo dispositivo</p>
               </div>
             </button>
@@ -696,14 +782,31 @@ function CreateMomentModal({
                 </Button>
               </div>
             ) : (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className={`w-full rounded-2xl max-h-[60vh] object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
-                data-testid="camera-preview"
-              />
+              <>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className={`w-full rounded-2xl max-h-[60vh] object-cover ${facingMode === "user" ? "scale-x-[-1]" : ""}`}
+                  data-testid="camera-preview"
+                />
+                {isRecording && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-white text-xs font-mono font-semibold">
+                      {String(Math.floor(recordingTime / 60)).padStart(2, "0")}:{String(recordingTime % 60).padStart(2, "0")}
+                    </span>
+                    <span className="text-white/40 text-xs">/ {MAX_RECORD_SECONDS}s</span>
+                  </div>
+                )}
+                {cameraTab === "video" && !isRecording && (
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-red-500/80 backdrop-blur-md rounded-full px-3 py-1">
+                    <Video className="w-3 h-3 text-white" />
+                    <span className="text-white text-[10px] font-semibold uppercase tracking-wider">Video</span>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -727,28 +830,68 @@ function CreateMomentModal({
       </div>
 
       {mode === "camera" && !cameraError && (
-        <div className="p-6 flex items-center justify-center gap-8">
-          <button
-            onClick={() => { setMode("choose"); fileInputRef.current?.click(); }}
-            className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-            data-testid="button-gallery-from-camera"
-          >
-            <Image className="w-5 h-5" />
-          </button>
-          <button
-            onClick={capturePhoto}
-            className="w-[72px] h-[72px] rounded-full border-[3px] border-emerald-400 flex items-center justify-center hover:scale-105 transition-transform"
-            data-testid="button-capture"
-          >
-            <div className="w-[60px] h-[60px] rounded-full bg-emerald-400 hover:bg-emerald-300 transition-colors" />
-          </button>
-          <button
-            onClick={flipCamera}
-            className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-            data-testid="button-flip-camera"
-          >
-            <SwitchCamera className="w-5 h-5" />
-          </button>
+        <div className="p-6 flex flex-col items-center gap-4">
+          {!isRecording && (
+            <div className="flex items-center gap-1 bg-white/5 rounded-full p-1">
+              <button
+                onClick={() => { setCameraTab("photo"); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${cameraTab === "photo" ? "bg-emerald-500 text-white" : "text-white/50 hover:text-white/80"}`}
+                data-testid="button-tab-photo"
+              >
+                Foto
+              </button>
+              <button
+                onClick={() => { setCameraTab("video"); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${cameraTab === "video" ? "bg-red-500 text-white" : "text-white/50 hover:text-white/80"}`}
+                data-testid="button-tab-video"
+              >
+                Video
+              </button>
+            </div>
+          )}
+          <div className="flex items-center justify-center gap-8">
+            <button
+              onClick={() => { if (!isRecording) { setMode("choose"); fileInputRef.current?.click(); } }}
+              className={`w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white transition-colors ${isRecording ? "opacity-30" : "hover:bg-white/20"}`}
+              disabled={isRecording}
+              data-testid="button-gallery-from-camera"
+            >
+              <Image className="w-5 h-5" />
+            </button>
+            {cameraTab === "photo" ? (
+              <button
+                onClick={capturePhoto}
+                className="w-[72px] h-[72px] rounded-full border-[3px] border-emerald-400 flex items-center justify-center hover:scale-105 transition-transform"
+                data-testid="button-capture"
+              >
+                <div className="w-[60px] h-[60px] rounded-full bg-emerald-400 hover:bg-emerald-300 transition-colors" />
+              </button>
+            ) : isRecording ? (
+              <button
+                onClick={stopRecording}
+                className="w-[72px] h-[72px] rounded-full border-[3px] border-red-400 flex items-center justify-center hover:scale-105 transition-transform animate-pulse"
+                data-testid="button-stop-recording"
+              >
+                <div className="w-7 h-7 rounded-sm bg-red-500" />
+              </button>
+            ) : (
+              <button
+                onClick={startRecording}
+                className="w-[72px] h-[72px] rounded-full border-[3px] border-red-400 flex items-center justify-center hover:scale-105 transition-transform"
+                data-testid="button-start-recording"
+              >
+                <div className="w-[60px] h-[60px] rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
+              </button>
+            )}
+            <button
+              onClick={() => { if (!isRecording) flipCamera(); }}
+              className={`w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white transition-colors ${isRecording ? "opacity-30" : "hover:bg-white/20"}`}
+              disabled={isRecording}
+              data-testid="button-flip-camera"
+            >
+              <SwitchCamera className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       )}
 
