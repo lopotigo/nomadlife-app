@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag, Play } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -17,6 +17,22 @@ import { Languages } from "lucide-react";
 import { FloatingTip } from "@/components/contextual-tip";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+
+function getYouTubeThumbnail(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
+
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
+}
+
+function getPostThumbnail(post: Post): string | null {
+  if (post.imageUrl) return post.imageUrl;
+  const ytUrl = post.videoUrl || post.linkUrl;
+  if (ytUrl && isYouTubeUrl(ytUrl)) return getYouTubeThumbnail(ytUrl);
+  return null;
+}
 
 export default function Profile() {
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
@@ -382,13 +398,27 @@ export default function Profile() {
                         onClick={() => setLocation(`/post/${post.id}`)}
                         data-testid={`card-journey-${post.id}`}
                       >
-                        {post.imageUrl ? (
-                          <img src={post.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                        ) : (
-                          <div className="w-full h-full bg-muted flex items-center justify-center p-4">
-                            <p className="text-xs text-center text-muted-foreground">{post.content.substring(0, 100)}</p>
-                          </div>
-                        )}
+                        {(() => {
+                          const thumb = getPostThumbnail(post);
+                          const hasVideo = !!(post.videoUrl || (post.linkUrl && isYouTubeUrl(post.linkUrl)));
+                          if (thumb) return (
+                            <div className="relative w-full h-full">
+                              <img src={thumb} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                              {hasVideo && !post.imageUrl && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                  <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+                                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                          return (
+                            <div className="w-full h-full bg-muted flex items-center justify-center p-4">
+                              <p className="text-xs text-center text-muted-foreground">{post.content.substring(0, 100)}</p>
+                            </div>
+                          );
+                        })()}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                           <Heart className="w-5 h-5" />
                           <span className="ml-1 text-sm font-bold">{post.likes}</span>
