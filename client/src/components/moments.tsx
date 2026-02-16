@@ -475,6 +475,8 @@ function CreateMomentModal({
   const { toast } = useToast();
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
+  const [geoCoords, setGeoCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -493,6 +495,36 @@ function CreateMomentModal({
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const MAX_RECORD_SECONDS = 30;
+
+  useEffect(() => {
+    setLoadingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setGeoCoords({ lat: latitude, lng: longitude });
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&accept-language=it`
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const addr = data.address || {};
+            const city = addr.city || addr.town || addr.village || addr.municipality || "";
+            const country = addr.country || "";
+            const locationName = [city, country].filter(Boolean).join(", ");
+            if (locationName) {
+              setLocation(locationName);
+            }
+          }
+        } catch {}
+        setLoadingLocation(false);
+      },
+      () => {
+        setLoadingLocation(false);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }, []);
 
   const stopCamera = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
@@ -667,16 +699,6 @@ function CreateMomentModal({
       const mediaUrl = objectPath;
       const mediaType = file.type.startsWith("video/") ? "video" : "image";
 
-      let lat: number | undefined;
-      let lng: number | undefined;
-      try {
-        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-        });
-        lat = pos.coords.latitude;
-        lng = pos.coords.longitude;
-      } catch (e) {}
-
       await fetch("/api/moments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -686,8 +708,8 @@ function CreateMomentModal({
           mediaType,
           caption: caption || undefined,
           location: location || undefined,
-          latitude: lat,
-          longitude: lng,
+          latitude: geoCoords?.lat,
+          longitude: geoCoords?.lng,
         }),
       });
 
@@ -925,13 +947,48 @@ function CreateMomentModal({
             data-testid="input-moment-caption"
           />
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-emerald-400" />
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (geoCoords) return;
+                setLoadingLocation(true);
+                navigator.geolocation.getCurrentPosition(
+                  async (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    setGeoCoords({ lat: latitude, lng: longitude });
+                    try {
+                      const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&accept-language=it`
+                      );
+                      if (res.ok) {
+                        const data = await res.json();
+                        const addr = data.address || {};
+                        const city = addr.city || addr.town || addr.village || addr.municipality || "";
+                        const country = addr.country || "";
+                        const locationName = [city, country].filter(Boolean).join(", ");
+                        if (locationName) setLocation(locationName);
+                      }
+                    } catch {}
+                    setLoadingLocation(false);
+                  },
+                  () => setLoadingLocation(false),
+                  { timeout: 10000, enableHighAccuracy: true }
+                );
+              }}
+              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
+                geoCoords ? "bg-emerald-500/20" : "bg-white/5 hover:bg-emerald-500/10"
+              }`}
+            >
+              {loadingLocation ? (
+                <Globe className="w-4 h-4 text-emerald-400 animate-spin" />
+              ) : (
+                <MapPin className={`w-4 h-4 ${geoCoords ? "text-emerald-400" : "text-white/50"}`} />
+              )}
+            </button>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Dove ti trovi?"
+              placeholder={loadingLocation ? "Rilevamento posizione..." : "Dove ti trovi?"}
               className="flex-1 bg-white/5 text-white placeholder-white/30 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-emerald-500/50 border border-white/10"
               data-testid="input-moment-location"
             />
