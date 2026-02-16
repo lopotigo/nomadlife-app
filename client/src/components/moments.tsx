@@ -15,7 +15,7 @@ interface GroupedMoments {
   hasUnviewed?: boolean;
 }
 
-export function MomentsBar() {
+export function MomentsBar({ onMomentCreated }: { onMomentCreated?: () => void } = {}) {
   const { user } = useAuth();
   const { t } = useI18n();
   const [moments, setMoments] = useState<MomentWithUser[]>([]);
@@ -64,9 +64,16 @@ export function MomentsBar() {
   return (
     <>
       <div className="relative">
+        <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+          <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+          <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Momenti</span>
+          {moments.length > 0 && (
+            <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded-full font-medium">{moments.length}</span>
+          )}
+        </div>
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto py-3 px-4 scrollbar-hide"
+          className="flex gap-3 overflow-x-auto py-2 px-4 scrollbar-hide"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           data-testid="moments-bar"
         >
@@ -97,11 +104,17 @@ export function MomentsBar() {
                 data-testid={`moment-avatar-${group.user.id}`}
               >
                 <div className="w-[72px] h-[96px] rounded-lg overflow-hidden relative shadow-sm group-hover:shadow-lg transition-all group-hover:scale-[1.03] bg-gray-100 dark:bg-gray-800">
-                  <img
-                    src={latest.mediaUrl}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
+                  {latest.mediaType === "video" ? (
+                    <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                      <Video className="w-6 h-6 text-white/90" />
+                    </div>
+                  ) : (
+                    <img
+                      src={latest.mediaUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
                   <div className="absolute top-1 left-1 right-1 flex items-center gap-1">
                     {group.user.avatar ? (
@@ -155,6 +168,7 @@ export function MomentsBar() {
             onCreated={() => {
               setShowCreate(false);
               fetchMoments();
+              onMomentCreated?.();
             }}
           />
         )}

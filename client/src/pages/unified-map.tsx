@@ -179,26 +179,25 @@ function createEventMarkerIcon(imageUrl: string | null, color: string = "#a855f7
   });
 }
 
-function createMomentMarkerIcon(mediaUrl: string | null, avatarUrl?: string | null) {
+function createMomentMarkerIcon(mediaUrl: string | null, mediaType: string | null, avatarUrl?: string | null) {
   const avatarSrc = avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=moment";
-  const html = mediaUrl
-    ? `<div style="position:relative;width:44px;height:44px;">
-        <img src="${mediaUrl}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid #f97316;box-shadow:0 2px 10px rgba(249,115,22,0.5);" />
-        <div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;border:2px solid white;">
-          <svg viewBox="0 0 24 24" fill="white" width="10" height="10"><circle cx="12" cy="12" r="10"/></svg>
-        </div>
-      </div>`
-    : `<div style="position:relative;width:44px;height:44px;">
-        <img src="${avatarSrc}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:3px solid #f97316;box-shadow:0 2px 10px rgba(249,115,22,0.5);" />
-        <div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;border:2px solid white;">
-          <svg viewBox="0 0 24 24" fill="white" width="10" height="10"><circle cx="12" cy="12" r="10"/></svg>
-        </div>
-      </div>`;
+  const isImage = mediaType === "image" && mediaUrl;
+  const imgSrc = isImage ? mediaUrl : avatarSrc;
+  const isVideo = mediaType === "video";
+  const html = `<div style="position:relative;width:52px;height:52px;">
+      <div style="position:absolute;inset:-4px;border-radius:50%;border:2px solid #f97316;animation:momentPulse 2s ease-in-out infinite;"></div>
+      <img src="${imgSrc}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:3px solid #f97316;box-shadow:0 2px 12px rgba(249,115,22,0.6);" onerror="this.src='${avatarSrc}'" />
+      <div style="position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);">
+        ${isVideo
+          ? '<svg viewBox="0 0 24 24" fill="white" width="10" height="10"><polygon points="5,3 19,12 5,21"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="white" width="10" height="10"><circle cx="12" cy="12" r="5"/><path d="M12 2a10 10 0 100 20 10 10 0 000-20z" fill="none" stroke="white" stroke-width="2"/></svg>'}
+      </div>
+    </div>`;
   return L.divIcon({
     html,
     className: "",
-    iconSize: L.point(44, 44),
-    iconAnchor: L.point(22, 22),
+    iconSize: L.point(52, 52),
+    iconAnchor: L.point(26, 26),
   });
 }
 
@@ -1271,7 +1270,7 @@ export default function UnifiedMap() {
               <Marker
                 key={`moment-${moment.id}`}
                 position={[moment.latitude!, moment.longitude!]}
-                icon={createMomentMarkerIcon(moment.mediaUrl, (moment as MomentWithUser).user?.avatar)}
+                icon={createMomentMarkerIcon(moment.mediaUrl, moment.mediaType, (moment as MomentWithUser).user?.avatar)}
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
                   <div className="flex items-center gap-2 px-1 py-0.5">
@@ -1754,7 +1753,7 @@ export default function UnifiedMap() {
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
           <div className="border-b border-gray-200/50 dark:border-gray-700/50 -mx-4 mb-2">
-            <MomentsBar />
+            <MomentsBar onMomentCreated={fetchData} />
           </div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Heart className="w-5 h-5 text-red-400" />

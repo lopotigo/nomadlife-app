@@ -171,6 +171,11 @@
   to { stroke-dashoffset: -18; }
 }
 
+@keyframes momentPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
 @keyframes popupSlideIn {
   from { opacity: 0; transform: translateY(8px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
