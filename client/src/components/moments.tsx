@@ -627,24 +627,30 @@ function CreateMomentModal({
     setUploading(true);
 
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const objectKey = `uploads/${crypto.randomUUID()}.${ext}`;
-
-      const presignRes = await fetch("/api/objects/presigned-url", {
+      const uploadRes = await fetch("/api/uploads/request-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ key: objectKey, contentType: file.type }),
+        body: JSON.stringify({
+          name: file.name,
+          size: file.size,
+          contentType: file.type || "application/octet-stream",
+        }),
       });
-      const { url: uploadUrl } = await presignRes.json();
 
-      await fetch(uploadUrl, {
+      if (!uploadRes.ok) {
+        throw new Error("Impossibile ottenere URL di caricamento");
+      }
+
+      const { uploadURL, objectPath } = await uploadRes.json();
+
+      await fetch(uploadURL, {
         method: "PUT",
         headers: { "Content-Type": file.type },
         body: file,
       });
 
-      const mediaUrl = `/objects/${objectKey}`;
+      const mediaUrl = objectPath;
       const mediaType = file.type.startsWith("video/") ? "video" : "image";
 
       let lat: number | undefined;
