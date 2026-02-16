@@ -38,8 +38,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={Auth} />
-      <Route path="/" component={Home} />
-      <Route path="/explore" component={UnifiedMap} />
+      <Route path="/" component={UnifiedMap} />
       <Route path="/feed" component={MapFeed} />
       <Route path="/booking" component={Booking} />
       <Route path="/coworking" component={Booking} />
