@@ -23,7 +23,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "re
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed, Sparkles } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { MomentsBar } from "@/components/moments";
 import { useI18n } from "@/lib/i18n";
@@ -181,6 +181,9 @@ export default function TravelDiary() {
   const [showPlannerMap, setShowPlannerMap] = useState(false);
   const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false);
   const { toast } = useToast();
   
   const { uploadFile, isUploading: isUploadingStopMedia, progress: uploadProgress } = useUpload({
@@ -283,6 +286,26 @@ export default function TravelDiary() {
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, [toast]);
+
+  const fetchAiSuggestions = async () => {
+    setAiSuggestionsLoading(true);
+    try {
+      const res = await fetch("/api/ai/travel-suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({}),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiSuggestions(data.suggestions || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAiSuggestionsLoading(false);
+    }
+  };
 
   const fetchTripDetails = useCallback(async (tripId: string) => {
     try {
@@ -636,6 +659,68 @@ export default function TravelDiary() {
                     Crea Nuovo Viaggio
                   </DialogTitle>
                 </DialogHeader>
+                <div className="mb-4">
+                  {!showAiSuggestions ? (
+                    <button
+                      type="button"
+                      onClick={() => { setShowAiSuggestions(true); fetchAiSuggestions(); }}
+                      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-sm font-medium hover:from-emerald-100 hover:to-teal-100 dark:hover:from-emerald-950/30 dark:hover:to-teal-950/30 transition-all"
+                      data-testid="button-ai-suggest-destination"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Suggeriscimi una destinazione
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-emerald-500" />
+                          Destinazioni suggerite
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAiSuggestions(false)}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          Chiudi
+                        </button>
+                      </div>
+                      {aiSuggestionsLoading ? (
+                        <div className="flex items-center justify-center py-6">
+                          <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+                          <span className="ml-2 text-sm text-muted-foreground">L'AI sta pensando...</span>
+                        </div>
+                      ) : aiSuggestions.length > 0 ? (
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {aiSuggestions.map((s: any, i: number) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => {
+                                const form = document.querySelector('form');
+                                const endInput = form?.querySelector('[name="endLocation"]') as HTMLInputElement;
+                                const titleInput = form?.querySelector('[name="title"]') as HTMLInputElement;
+                                if (endInput) endInput.value = s.city;
+                                if (titleInput && !titleInput.value) titleInput.value = `Viaggio a ${s.city}`;
+                                setShowAiSuggestions(false);
+                              }}
+                              className="w-full text-left p-3 rounded-lg bg-accent hover:bg-accent/80 transition-colors"
+                              data-testid={`ai-suggestion-${i}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-sm">{s.city}, {s.country}</span>
+                                <span className="text-xs text-emerald-600 dark:text-emerald-400">~${s.dailyBudget}/giorno</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.reason}</p>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">Nessun suggerimento disponibile</p>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <form onSubmit={handleCreateTrip} className="space-y-4">
                   <div>
                     <Label htmlFor="title">Titolo del viaggio</Label>

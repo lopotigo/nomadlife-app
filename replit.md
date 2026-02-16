@@ -47,7 +47,13 @@ Session-based authentication manages user login, signup, and secure access to pr
 - **User Engagement:** Push notifications for new followers, trips, and messages; search functionality for nomads and trips; and an Admin Panel for product and vendor management.
 - **Internationalization:** Multi-language support for Italian, English, and Spanish.
 - **AI Chatbot (NomadBot):** Floating AI assistant powered by OpenAI (via Replit AI Integrations). Features: streaming responses, conversation history, quick prompts, trip/destination recommendations. Routes under `/api/ai/*`. Schema: `ai_conversations` and `ai_messages` tables.
-- **AI Recommendations:** Endpoint `/api/ai/recommendations` generates destination, trip, and marketplace suggestions.
+- **AI Social Intelligence (Unified):** AI features are integrated directly into existing sections (no separate AI Hub page):
+  - **Marketplace**: "Consigliati per te" AI-powered product recommendations at top of product listing
+  - **Profile**: "I tuoi interessi" section showing AI-analyzed interest tags with confidence scores
+  - **Search**: Check-in badges (Qui ora, In arrivo, Pianifica) on nomad search results
+  - **Travel Diary**: "Suggeriscimi una destinazione" AI panel in new trip dialog
+  - **Home Feed**: "Nomadi che potresti conoscere" suggested connections card, SmartProductsWidget with personalized products
+  - Backend: Profile analysis via OpenAI GPT-4o, nomad check-in system, smart product matching, travel suggestions, connection matching. Schema: `userInterests`, `userActivityLog`, `nomadCheckins` tables.
 - **AI Image Generation:** Endpoint `/api/generate-image` for AI-powered image creation.
 - **Moments (Stories):** Ephemeral 24h content with media upload, views tracking, fullscreen viewer with progress bars.
 - **SEO:** Dynamic sitemap, robots.txt, JSON-LD structured data, Open Graph meta tags.

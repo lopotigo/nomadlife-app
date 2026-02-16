@@ -2,7 +2,7 @@ import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
-import { Sparkles, ShoppingBag, ChevronRight, ExternalLink, Brain } from "lucide-react";
+import { Sparkles, ShoppingBag, ChevronRight, ExternalLink } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 type SmartProduct = Product & { aiReason?: string; matchScore?: number };
@@ -35,10 +35,9 @@ export function SmartProductsWidget() {
             <span className="text-[9px] bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full font-medium">AI</span>
           )}
         </div>
-        <Link href="/ai-hub">
-          <button className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium">
-            <Brain className="w-3 h-3" />
-            Hub AI
+        <Link href="/marketplace">
+          <button className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 font-medium" data-testid="link-marketplace-from-widget">
+            Vedi tutti
             <ChevronRight className="w-3 h-3" />
           </button>
         </Link>

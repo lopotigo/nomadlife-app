@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -15,6 +15,8 @@ import { useI18n, languageNames, languageFlags, Language } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Languages } from "lucide-react";
 import { FloatingTip } from "@/components/contextual-tip";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Profile() {
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
@@ -34,6 +36,17 @@ export default function Profile() {
   const [loadingFollowList, setLoadingFollowList] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const { data: aiProfile } = useQuery<{ interests: Array<{ id: string; category: string; tag: string; confidence: number }> }>({
+    queryKey: ["/api/ai/my-profile"],
+    queryFn: () => apiRequest("GET", "/api/ai/my-profile").then(r => r.json()),
+    enabled: !!user,
+  });
+
+  const analyzeMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/ai/analyze-profile").then(r => r.json()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/ai/my-profile"] }),
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -298,6 +311,41 @@ export default function Profile() {
               <h3 className="text-lg font-display font-bold mb-4">{t("profile.my_travel_stats")}</h3>
               <PersonalStats userId={user.id} />
             </div>
+
+          <div className="w-full mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-emerald-500" />
+                <h3 className="text-lg font-display font-bold">I tuoi interessi</h3>
+              </div>
+              <button
+                onClick={() => analyzeMutation.mutate()}
+                disabled={analyzeMutation.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                data-testid="button-analyze-profile"
+              >
+                <RefreshCw className={`w-3 h-3 ${analyzeMutation.isPending ? "animate-spin" : ""}`} />
+                {analyzeMutation.isPending ? "Analizzo..." : "Aggiorna"}
+              </button>
+            </div>
+            {aiProfile?.interests && aiProfile.interests.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {aiProfile.interests.map(interest => (
+                  <div
+                    key={interest.id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+                    data-testid={`interest-tag-${interest.tag}`}
+                  >
+                    <Tag className="w-3 h-3" />
+                    {interest.tag.replace(/_/g, " ")}
+                    <span className="text-[9px] opacity-60">{Math.round(interest.confidence * 100)}%</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Premi "Aggiorna" per far analizzare le tue attività all'AI e scoprire i tuoi interessi.</p>
+            )}
+          </div>
 
           <div className="w-full mt-10 space-y-8">
             <div className="flex border-b border-border">

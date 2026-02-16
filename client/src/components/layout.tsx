@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark, Brain } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
@@ -62,7 +62,6 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/chat" icon={MessageSquare} label={t("nav.messages")} active={location === "/chat"} />
           <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
-          <NavItem href="/ai-hub" icon={Brain} label="AI Hub" active={location === "/ai-hub"} />
           <NavItem href="/saved" icon={Bookmark} label={t("nav.saved")} active={location === "/saved"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
           {adminCheck?.isAdmin && (
@@ -122,12 +121,6 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
                 <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/marketplace" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                   <ShoppingBag className="w-6 h-6" />
                   <span className="text-xs">{t("nav.marketplace")}</span>
-                </div>
-              </Link>
-              <Link href="/ai-hub" onClick={() => setShowMoreMenu(false)}>
-                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/ai-hub" ? "bg-emerald-500/10 text-emerald-500" : "text-muted-foreground"}`}>
-                  <Brain className="w-6 h-6" />
-                  <span className="text-xs">AI Hub</span>
                 </div>
               </Link>
               <Link href="/saved" onClick={() => setShowMoreMenu(false)}>

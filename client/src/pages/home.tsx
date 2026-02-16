@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Post, User, Comment, Trip, TripStop, TripExpense, Event } from "@shared/schema";
 import { CreatePostForm } from "@/components/CreatePostForm";
@@ -155,6 +157,7 @@ export default function Home() {
                 <>
                   {card}
                   {index === 2 && <SmartProductsWidget key="smart-widget" />}
+                  {index === 4 && <SuggestedNomads key="suggested-nomads" />}
                 </>
               );
             })
@@ -677,5 +680,53 @@ function TripFeedCard({ trip }: { trip: PublicTrip }) {
         </div>
       </motion.div>
     </Link>
+  );
+}
+
+function SuggestedNomads() {
+  const { user } = useAuth();
+
+  const { data } = useQuery<{ connections: Array<{ user: { id: string; username: string; name: string; avatar: string | null; bio: string | null }; checkin: { city: string; country: string; status: string }; reason: string; matchScore: number }> }>({
+    queryKey: ["/api/ai/suggest-connections"],
+    queryFn: () => apiRequest("POST", "/api/ai/suggest-connections").then(r => r.json()),
+    enabled: !!user,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const connections = data?.connections?.slice(0, 3) || [];
+  if (connections.length === 0) return null;
+
+  return (
+    <div className="rounded-xl border bg-card overflow-hidden" data-testid="suggested-nomads-widget">
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20">
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-pink-500" />
+          <span className="text-sm font-semibold">Nomadi che potresti conoscere</span>
+        </div>
+      </div>
+      <div className="divide-y">
+        {connections.map(conn => (
+          <Link key={conn.user.id} href={`/user/${conn.user.id}`}>
+            <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer" data-testid={`suggested-nomad-${conn.user.id}`}>
+              {conn.user.avatar ? (
+                <img src={conn.user.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-sm">
+                  {conn.user.name?.[0]?.toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{conn.user.username}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{conn.reason}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <MapPin className="w-2.5 h-2.5 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">{conn.checkin.city}, {conn.checkin.country}</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
