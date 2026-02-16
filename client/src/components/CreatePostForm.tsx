@@ -5,10 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Image, MapPin, Send, X, Loader2, Plane, ChevronDown } from "lucide-react";
+import { Image, MapPin, Send, X, Loader2, Plane, ChevronDown, Link as LinkIcon, Video } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUpload } from "@/hooks/use-upload";
 import { useI18n } from "@/lib/i18n";
+
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
+}
+
+function extractUrlFromText(text: string): string | null {
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  const matches = text.match(urlPattern);
+  if (!matches) return null;
+  const youtubeUrl = matches.find((u) => isYouTubeUrl(u));
+  return youtubeUrl || matches[0];
+}
+
+function getYouTubeThumb(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
 
 interface CreatePostFormProps {
   onPostCreated: () => void;
@@ -21,6 +38,8 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
   const [content, setContent] = useState("");
   const [location, setLocation] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [showLinkInput, setShowLinkInput] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [showTripSelect, setShowTripSelect] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -56,6 +75,19 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
 
     setIsSubmitting(true);
     try {
+      let finalLinkUrl = linkUrl.trim() || null;
+      let finalVideoUrl: string | null = null;
+
+      if (!finalLinkUrl) {
+        const extracted = extractUrlFromText(content);
+        if (extracted) finalLinkUrl = extracted;
+      }
+
+      if (finalLinkUrl && isYouTubeUrl(finalLinkUrl)) {
+        finalVideoUrl = finalLinkUrl;
+        finalLinkUrl = null;
+      }
+
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,6 +95,8 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
         body: JSON.stringify({
           content: content.trim(),
           imageUrl: imageUrl || null,
+          videoUrl: finalVideoUrl,
+          linkUrl: finalLinkUrl,
           location: location.trim() || null,
           tripId: selectedTripId || null,
         }),
@@ -72,6 +106,8 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
         setContent("");
         setLocation("");
         setImageUrl("");
+        setLinkUrl("");
+        setShowLinkInput(false);
         setSelectedTripId(null);
         setIsExpanded(false);
         toast({ title: "Post condiviso!", description: "Il tuo post è ora visibile a tutti." });
@@ -166,6 +202,46 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                   </div>
                 )}
 
+                {showLinkInput && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <Input
+                        placeholder="Incolla link YouTube o URL..."
+                        value={linkUrl}
+                        onChange={(e) => setLinkUrl(e.target.value)}
+                        className="flex-1 h-8 text-xs border-none bg-muted/50"
+                        data-testid="input-post-link"
+                      />
+                      <button
+                        onClick={() => { setShowLinkInput(false); setLinkUrl(""); }}
+                        className="text-muted-foreground hover:text-foreground"
+                        data-testid="button-close-link-input"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {linkUrl && isYouTubeUrl(linkUrl) && (
+                      <div className="relative rounded-xl overflow-hidden bg-muted/30 border border-border">
+                        <div className="flex items-center gap-3 p-2">
+                          <img
+                            src={getYouTubeThumb(linkUrl) || ""}
+                            alt="YouTube"
+                            className="w-24 h-16 object-cover rounded-lg"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <Video className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                              <span className="text-xs font-semibold text-red-500">YouTube</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{linkUrl}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {selectedTrip && (
                   <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2">
                     <Plane className="w-4 h-4 text-primary" />
@@ -216,6 +292,18 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                         <span className="text-xs font-medium">Foto</span>
                       </div>
                     </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowLinkInput(!showLinkInput)}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-xl transition-colors ${
+                        showLinkInput || linkUrl ? "bg-red-500/10 text-red-500" : "bg-muted hover:bg-muted/80"
+                      }`}
+                      data-testid="button-attach-link"
+                    >
+                      <Video className="w-4 h-4" />
+                      <span className="text-xs font-medium">Video/Link</span>
+                    </button>
 
                     <div className="relative">
                       <button
@@ -289,6 +377,8 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                         setContent("");
                         setLocation("");
                         setImageUrl("");
+                        setLinkUrl("");
+                        setShowLinkInput(false);
                         setSelectedTripId(null);
                         setShowTripSelect(false);
                       }}
