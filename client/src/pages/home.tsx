@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane, ChevronRight, LinkIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,15 @@ import { CreatePostForm } from "@/components/CreatePostForm";
 import { QRCodeSVG } from "qrcode.react";
 import { MomentsBar } from "@/components/moments";
 import { SmartProductsWidget } from "@/components/smart-products-widget";
+
+function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
+}
+
+function getYouTubeEmbedUrl(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
 
 type PostWithUser = Post & { user: User };
 type CommentWithUser = Comment & { user: User };
@@ -288,6 +297,41 @@ function PostCard({ post, onLike, currentUser }: { post: PostWithUser; onLike: (
               {post.location}
             </div>
           )}
+        </div>
+      )}
+
+      {!post.imageUrl && post.videoUrl && (
+        isYouTubeUrl(post.videoUrl)
+          ? <div className="w-full aspect-video" data-testid={`video-embed-${post.id}`}>
+              <iframe
+                src={getYouTubeEmbedUrl(post.videoUrl)!}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="YouTube video"
+              />
+            </div>
+          : <video src={post.videoUrl} controls className="w-full aspect-video object-cover" data-testid={`video-native-${post.id}`} />
+      )}
+
+      {!post.imageUrl && !post.videoUrl && post.linkUrl && isYouTubeUrl(post.linkUrl) && (
+        <div className="w-full aspect-video" data-testid={`video-embed-${post.id}`}>
+          <iframe
+            src={getYouTubeEmbedUrl(post.linkUrl)!}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title="YouTube video"
+          />
+        </div>
+      )}
+
+      {post.linkUrl && !isYouTubeUrl(post.linkUrl) && (
+        <div className="px-4 pt-2">
+          <a href={post.linkUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2.5 bg-muted rounded-xl hover:bg-muted/80 transition-colors" data-testid={`link-external-${post.id}`}>
+            <LinkIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+            <span className="text-sm text-blue-500 truncate">{post.linkUrl}</span>
+          </a>
         </div>
       )}
 
