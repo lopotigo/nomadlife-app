@@ -482,6 +482,69 @@ export async function registerRoutes(
     }
   });
 
+  // ========== OVERPASS / REAL PLACES ==========
+  app.get("/api/places/overpass", async (req, res) => {
+    try {
+      const { queryOverpass, geocodeCity, mergeWithLocal } = await import("./overpass");
+      const { lat, lng, city, radius, type } = req.query;
+
+      let coords: { lat: number; lng: number } | null = null;
+
+      if (lat && lng) {
+        const parsedLat = parseFloat(lat as string);
+        const parsedLng = parseFloat(lng as string);
+        if (isNaN(parsedLat) || isNaN(parsedLng) || parsedLat < -90 || parsedLat > 90 || parsedLng < -180 || parsedLng > 180) {
+          return res.status(400).send({ error: "Invalid lat/lng values" });
+        }
+        coords = { lat: parsedLat, lng: parsedLng };
+      } else if (city) {
+        if (typeof city !== "string" || (city as string).length < 2 || (city as string).length > 100) {
+          return res.status(400).send({ error: "City name must be 2-100 characters" });
+        }
+        coords = await geocodeCity(city as string);
+      }
+
+      if (!coords) {
+        return res.status(400).send({ error: "Provide lat/lng or a valid city name" });
+      }
+
+      const r = radius ? Math.min(Math.max(parseInt(radius as string) || 5000, 500), 50000) : 5000;
+      const placeType = (type as string) || "all";
+
+      const overpassResults = await queryOverpass(coords.lat, coords.lng, r, placeType as any);
+
+      const localPlaces = await storage.searchPlaces({
+        city: city as string || undefined,
+        type: placeType !== "all" ? placeType : undefined,
+      });
+
+      const merged = mergeWithLocal(overpassResults, localPlaces);
+
+      res.send({
+        source: "overpass+local",
+        coords,
+        radius: r,
+        total: merged.length,
+        osmCount: overpassResults.length,
+        localCount: localPlaces.length,
+        results: merged,
+      });
+    } catch (error: any) {
+      console.error("Overpass API error:", error);
+      try {
+        const fallback = await storage.getPlaces();
+        res.send({
+          source: "local-fallback",
+          total: fallback.length,
+          results: fallback,
+          error: error.message,
+        });
+      } catch {
+        res.status(500).send({ error: error.message });
+      }
+    }
+  });
+
   // ========== PLACE ROUTES ==========
   app.get("/api/places", async (req, res) => {
     try {
