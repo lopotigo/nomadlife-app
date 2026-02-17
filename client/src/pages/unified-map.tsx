@@ -1498,7 +1498,7 @@ export default function UnifiedMap() {
                         <span className="text-[10px] text-gray-400 flex items-center gap-1">
                           <MapPin className="w-3 h-3" />{guide.city}, {guide.country}
                         </span>
-                        <Link href="/city-guides" className="text-xs font-semibold text-violet-600 hover:underline" data-testid={`link-cityguide-detail-${guide.id}`}>
+                        <Link href="/search" className="text-xs font-semibold text-violet-600 hover:underline" data-testid={`link-cityguide-detail-${guide.id}`}>
                           Vedi dettagli
                         </Link>
                       </div>

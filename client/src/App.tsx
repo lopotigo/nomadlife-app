@@ -18,8 +18,6 @@ import Chat from "@/pages/chat";
 import Booking from "@/pages/coworking";
 import Subscription from "@/pages/subscription";
 import Auth from "@/pages/auth";
-import DesignPreview from "@/pages/design-preview";
-import MobilePreview from "@/pages/mobile-preview";
 import TravelDiary from "@/pages/travel-diary";
 import UnifiedMap from "@/pages/unified-map";
 import Home from "@/pages/home";
@@ -32,8 +30,6 @@ import EventDetail from "@/pages/event-detail";
 import Marketplace from "@/pages/marketplace";
 import Admin from "@/pages/admin";
 import SavedPosts from "@/pages/saved-posts";
-import LocalMarketplace from "@/pages/local-marketplace";
-import CityGuides from "@/pages/city-guides";
 import Matchmaking from "@/pages/matchmaking";
 
 
@@ -52,16 +48,12 @@ function Router() {
       <Route path="/post/:id" component={PostDetail} />
       <Route path="/trip/:id" component={TripDetail} />
       <Route path="/search" component={SearchPage} />
-      <Route path="/design-preview" component={DesignPreview} />
-      <Route path="/mobile-preview" component={MobilePreview} />
       <Route path="/travel-diary" component={TravelDiary} />
       <Route path="/avatar-builder" component={AvatarBuilder} />
       <Route path="/events-calendar" component={EventsCalendar} />
       <Route path="/event/:id" component={EventDetail} />
       <Route path="/marketplace" component={Marketplace} />
       <Route path="/saved" component={SavedPosts} />
-      <Route path="/local-marketplace" component={LocalMarketplace} />
-      <Route path="/city-guides" component={CityGuides} />
       <Route path="/matchmaking" component={Matchmaking} />
 
       <Route path="/admin" component={Admin} />

@@ -3,13 +3,37 @@ import Layout from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles, UserPlus, UserCheck, Eye } from "lucide-react";
+import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles, UserPlus, UserCheck, Eye, Compass, Wifi, Briefcase, FileText, UtensilsCrossed, Heart, Star, Navigation, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import type { User, Trip, TripStop, City } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import type { User, Trip, TripStop, City, CityGuide } from "@shared/schema";
 
 type TripWithUser = Trip & { user: User; stops: TripStop[] };
+
+const guideCategories = [
+  { value: "", label: "Tutti", icon: Compass },
+  { value: "wifi", label: "WiFi", icon: Wifi },
+  { value: "coworking", label: "Coworking", icon: Briefcase },
+  { value: "visa", label: "Visa", icon: FileText },
+  { value: "food", label: "Food", icon: UtensilsCrossed },
+  { value: "lifestyle", label: "Lifestyle", icon: Heart },
+];
+
+const guideCategoryColors: Record<string, string> = {
+  wifi: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  coworking: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  visa: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
+  food: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  lifestyle: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+};
+
+function getGuideCategoryIcon(cat: string) {
+  const found = guideCategories.find(c => c.value === cat);
+  return found ? found.icon : Compass;
+}
 
 export default function SearchPage() {
   const { user: currentUser } = useAuth();
@@ -27,7 +51,20 @@ export default function SearchPage() {
   const [searchedCities, setSearchedCities] = useState<City[]>([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
 
-  // Check following status for trip authors
+  const [selectedGuideCity, setSelectedGuideCity] = useState("");
+  const [selectedGuideCategory, setSelectedGuideCategory] = useState("");
+  const [guideNearbyMode, setGuideNearbyMode] = useState(false);
+  const [guideCoords, setGuideCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!guideNearbyMode || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setGuideCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setGuideNearbyMode(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [guideNearbyMode]);
+
   useEffect(() => {
     if (!currentUser || trips.length === 0) return;
     const userIds = Array.from(new Set(trips.map(t => t.user.id).filter(id => id !== currentUser.id)));
@@ -64,7 +101,6 @@ export default function SearchPage() {
       .catch(console.error);
   }, []);
 
-  // Search cities when query changes (includes Teleport API)
   useEffect(() => {
     if (query.length < 2) {
       setSearchedCities([]);
@@ -79,7 +115,6 @@ export default function SearchPage() {
       .finally(() => setCitiesLoading(false));
   }, [query]);
 
-  // Show searched cities if query exists, otherwise show all cities
   const displayedCities = query.length >= 2 ? searchedCities : cities;
 
   const handleSearch = async () => {
@@ -119,6 +154,37 @@ export default function SearchPage() {
     return { min, max };
   };
 
+  const { data: guideCitiesList = [] } = useQuery<string[]>({
+    queryKey: ["/api/city-guides/cities"],
+    queryFn: () => apiRequest("GET", "/api/city-guides/cities").then(r => r.json()),
+    enabled: activeTab === "guides",
+  });
+
+  const { data: guides = [], isLoading: loadingGuides } = useQuery<CityGuide[]>({
+    queryKey: ["/api/city-guides", selectedGuideCity, selectedGuideCategory],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (selectedGuideCity) params.set("city", selectedGuideCity);
+      if (selectedGuideCategory) params.set("category", selectedGuideCategory);
+      return apiRequest("GET", `/api/city-guides?${params}`).then(r => r.json());
+    },
+    enabled: activeTab === "guides" && !guideNearbyMode,
+  });
+
+  const { data: nearbyGuides = [], isLoading: loadingNearbyGuides } = useQuery<CityGuide[]>({
+    queryKey: ["/api/city-guides/nearby", guideCoords?.lat, guideCoords?.lng],
+    queryFn: () =>
+      apiRequest("GET", `/api/city-guides/nearby?lat=${guideCoords!.lat}&lng=${guideCoords!.lng}&radius=50`).then(r => r.json()),
+    enabled: activeTab === "guides" && guideNearbyMode && !!guideCoords,
+  });
+
+  const displayGuides = guideNearbyMode ? nearbyGuides : guides;
+  const guidesLoading = guideNearbyMode ? loadingNearbyGuides : loadingGuides;
+
+  const filteredGuides = selectedGuideCategory
+    ? displayGuides.filter(g => g.category === selectedGuideCategory)
+    : displayGuides;
+
   return (
     <Layout>
       <div className="max-w-2xl mx-auto p-4">
@@ -143,6 +209,10 @@ export default function SearchPage() {
             <TabsTrigger value="cities" className="flex-1">
               <MapPin className="w-4 h-4 mr-2" />
               Città
+            </TabsTrigger>
+            <TabsTrigger value="guides" className="flex-1" data-testid="tab-guides">
+              <Compass className="w-4 h-4 mr-2" />
+              Guide AI
             </TabsTrigger>
             <TabsTrigger value="trips" className="flex-1">
               <Plane className="w-4 h-4 mr-2" />
@@ -199,6 +269,155 @@ export default function SearchPage() {
             )}
           </TabsContent>
 
+          <TabsContent value="guides">
+            <div className="space-y-4">
+              <div className="flex items-center justify-end">
+                <button
+                  data-testid="button-guide-nearby"
+                  onClick={() => setGuideNearbyMode(!guideNearbyMode)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    guideNearbyMode
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  <Navigation className="w-4 h-4" />
+                  Vicino a me
+                </button>
+              </div>
+
+              {!guideNearbyMode && (
+              <div className="overflow-x-auto pb-2 -mx-4 px-4">
+                <div className="flex gap-2 min-w-max">
+                  <button
+                    data-testid="button-guide-city-all"
+                    onClick={() => setSelectedGuideCity("")}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                      !selectedGuideCity
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    Tutte le città
+                  </button>
+                  {guideCitiesList.map(city => (
+                    <button
+                      key={city}
+                      data-testid={`button-guide-city-${city.toLowerCase().replace(/\s/g, "-")}`}
+                      onClick={() => setSelectedGuideCity(city)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                        selectedGuideCity === city
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      }`}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              )}
+
+              <div className="overflow-x-auto pb-2 -mx-4 px-4">
+                <div className="flex gap-2 min-w-max">
+                  {guideCategories.map(cat => {
+                    const Icon = cat.icon;
+                    return (
+                      <button
+                        key={cat.value}
+                        data-testid={`button-guide-category-${cat.value || "all"}`}
+                        onClick={() => setSelectedGuideCategory(cat.value)}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+                          selectedGuideCategory === cat.value
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {cat.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {guidesLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : filteredGuides.length === 0 ? (
+                <div className="text-center py-12" data-testid="text-guides-empty">
+                  <Compass className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+                  <p className="text-muted-foreground font-medium">Nessuna guida trovata</p>
+                  <p className="text-muted-foreground/70 text-sm mt-1">Prova a cambiare filtri o città</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredGuides.map((guide, i) => {
+                    const CatIcon = getGuideCategoryIcon(guide.category);
+                    const colorClass = guideCategoryColors[guide.category] || "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+                    return (
+                      <motion.div
+                        key={guide.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-shadow"
+                        data-testid={`card-guide-${guide.id}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-xl ${colorClass}`}>
+                            <CatIcon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm leading-snug" data-testid={`text-guide-title-${guide.id}`}>
+                              {guide.title}
+                            </h3>
+                            <p className="text-muted-foreground text-xs mt-0.5">
+                              {guide.city}, {guide.country}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground mt-3 line-clamp-3" data-testid={`text-guide-content-${guide.id}`}>
+                          {guide.content}
+                        </p>
+
+                        {guide.rating != null && guide.rating > 0 && (
+                          <div className="flex items-center gap-1 mt-3" data-testid={`rating-guide-${guide.id}`}>
+                            {Array.from({ length: 5 }).map((_, idx) => (
+                              <Star
+                                key={idx}
+                                className={`w-3.5 h-3.5 ${
+                                  idx < Math.round(guide.rating!) ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                            <span className="text-xs text-muted-foreground ml-1">{guide.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+
+                        {guide.tags && guide.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-3">
+                            {guide.tags.map(tag => (
+                              <span
+                                key={tag}
+                                className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-md"
+                                data-testid={`tag-${tag}`}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
           <TabsContent value="trips">
             {loading ? (
               <div className="flex justify-center py-8">
@@ -246,7 +465,6 @@ export default function SearchPage() {
                             </div>
                           )}
                           
-                          {/* Action buttons */}
                           <div className="flex gap-2 mt-3">
                             <Link href={`/trip/${trip.id}`}>
                               <Button size="sm" variant="default" className="gap-1" data-testid={`view-trip-${trip.id}`}>
@@ -354,11 +572,9 @@ export default function SearchPage() {
               className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-card dark:to-background rounded-3xl p-6 max-w-sm w-full shadow-2xl border-4 border-amber-200 dark:border-border relative overflow-hidden"
               data-testid="city-popup"
             >
-              {/* Decorative elements */}
               <div className="absolute -top-6 -right-6 text-8xl opacity-20">{selectedCity.emoji || "🌍"}</div>
               <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-primary/10 rounded-full blur-xl" />
               
-              {/* Close button */}
               <button
                 onClick={() => setSelectedCity(null)}
                 className="absolute top-3 right-3 w-8 h-8 bg-white dark:bg-muted rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
@@ -367,7 +583,6 @@ export default function SearchPage() {
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Header */}
               <div className="relative z-10 text-center mb-4">
                 <motion.div 
                   className="text-6xl mb-2"
@@ -380,7 +595,6 @@ export default function SearchPage() {
                 <p className="text-muted-foreground font-medium">{selectedCity.country}</p>
               </div>
 
-              {/* Nomads count - Big and fun */}
               <motion.div 
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -395,7 +609,6 @@ export default function SearchPage() {
                 <div className="text-sm opacity-90">nomadi digitali qui!</div>
               </motion.div>
 
-              {/* Weather & Internet */}
               <div className="flex gap-3 mb-4">
                 <motion.div 
                   initial={{ y: 20, opacity: 0 }}
@@ -426,7 +639,6 @@ export default function SearchPage() {
                 </motion.div>
               </div>
 
-              {/* Costs breakdown - Fun cards */}
               <div className="space-y-2">
                 <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">Costo giornaliero</h3>
                 
@@ -455,7 +667,6 @@ export default function SearchPage() {
                   </motion.div>
                 ))}
 
-                {/* Total */}
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
