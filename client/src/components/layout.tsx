@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark, Store, Compass, Users } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
@@ -63,6 +63,9 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
           <NavItem href="/saved" icon={Bookmark} label={t("nav.saved")} active={location === "/saved"} />
+          <NavItem href="/local-marketplace" icon={Store} label="Mercato Locale" active={location === "/local-marketplace"} />
+          <NavItem href="/city-guides" icon={Compass} label="Guide Città" active={location === "/city-guides"} />
+          <NavItem href="/matchmaking" icon={Users} label="Matchmaking" active={location === "/matchmaking"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
           {adminCheck?.isAdmin && (
             <NavItem href="/admin" icon={ShieldCheck} label="Admin" active={location === "/admin"} />
@@ -127,6 +130,24 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
                 <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/saved" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                   <Bookmark className="w-6 h-6" />
                   <span className="text-xs">{t("nav.saved")}</span>
+                </div>
+              </Link>
+              <Link href="/local-marketplace" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/local-marketplace" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <Store className="w-6 h-6" />
+                  <span className="text-xs">Mercato</span>
+                </div>
+              </Link>
+              <Link href="/city-guides" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/city-guides" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <Compass className="w-6 h-6" />
+                  <span className="text-xs">Guide</span>
+                </div>
+              </Link>
+              <Link href="/matchmaking" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/matchmaking" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <Users className="w-6 h-6" />
+                  <span className="text-xs">Match</span>
                 </div>
               </Link>
               <Link href="/profile" onClick={() => setShowMoreMenu(false)}>

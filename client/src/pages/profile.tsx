@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag, Play } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag, Play, Shield, X, Plus, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -47,6 +47,11 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [showShareQR, setShowShareQR] = useState(false);
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 });
+  const [privacyMode, setPrivacyMode] = useState<string>("visible");
+  const [profession, setProfession] = useState("");
+  const [lookingFor, setLookingFor] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState("");
   const [showFollowModal, setShowFollowModal] = useState<"followers" | "following" | null>(null);
   const [followList, setFollowList] = useState<any[]>([]);
   const [loadingFollowList, setLoadingFollowList] = useState(false);
@@ -81,6 +86,12 @@ export default function Profile() {
         setPosts(postsData);
         setFollowStats(statsData);
         setSavedPostsData(savedData);
+        if (user) {
+          setPrivacyMode(user.privacyMode || "visible");
+          setProfession(user.profession || "");
+          setLookingFor(user.lookingFor || "");
+          setSkills(user.skills || []);
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -361,6 +372,172 @@ export default function Profile() {
             ) : (
               <p className="text-sm text-muted-foreground">Premi "Aggiorna" per far analizzare le tue attività all'AI e scoprire i tuoi interessi.</p>
             )}
+          </div>
+
+          <div className="w-full mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className="w-5 h-5 text-blue-500" />
+              <h3 className="text-lg font-display font-bold">Modalità Privacy</h3>
+            </div>
+            <div className="space-y-3">
+              {([
+                { value: "visible", label: "Visibile", desc: "La tua posizione è visibile a tutti", color: "bg-green-500" },
+                { value: "approximate", label: "Approssimata", desc: "Posizione randomizzata ±2km", color: "bg-yellow-500" },
+                { value: "hidden", label: "Invisibile", desc: "Non visibile sulla mappa", color: "bg-red-500" },
+              ] as const).map((mode) => (
+                <button
+                  key={mode.value}
+                  onClick={async () => {
+                    try {
+                      await apiRequest("PATCH", `/api/users/${user.id}/privacy`, { privacyMode: mode.value });
+                      setPrivacyMode(mode.value);
+                      if (refreshUser) await refreshUser();
+                      toast({ title: "Privacy aggiornata", description: `Modalità: ${mode.label}` });
+                    } catch {
+                      toast({ title: "Errore", description: "Impossibile aggiornare la privacy", variant: "destructive" });
+                    }
+                  }}
+                  className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all ${
+                    privacyMode === mode.value
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover:bg-muted"
+                  }`}
+                  data-testid={`button-privacy-${mode.value}`}
+                >
+                  <div className={`w-3 h-3 rounded-full ${mode.color}`} />
+                  <div className="text-left flex-1">
+                    <p className="font-medium text-sm">{mode.label}</p>
+                    <p className="text-xs text-muted-foreground">{mode.desc}</p>
+                  </div>
+                  {privacyMode === mode.value && (
+                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs">✓</span>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="w-full mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Briefcase className="w-5 h-5 text-indigo-500" />
+              <h3 className="text-lg font-display font-bold">Competenze & Professione</h3>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">Professione</label>
+                <input
+                  type="text"
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  onBlur={async () => {
+                    try {
+                      await apiRequest("PATCH", `/api/users/${user.id}`, { profession });
+                      if (refreshUser) await refreshUser();
+                      toast({ title: "Professione aggiornata" });
+                    } catch {
+                      toast({ title: "Errore", description: "Impossibile aggiornare", variant: "destructive" });
+                    }
+                  }}
+                  placeholder="Es. Full Stack Developer"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  data-testid="input-profession"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">Cosa cerchi</label>
+                <input
+                  type="text"
+                  value={lookingFor}
+                  onChange={(e) => setLookingFor(e.target.value)}
+                  onBlur={async () => {
+                    try {
+                      await apiRequest("PATCH", `/api/users/${user.id}`, { lookingFor });
+                      if (refreshUser) await refreshUser();
+                      toast({ title: "Preferenze aggiornate" });
+                    } catch {
+                      toast({ title: "Errore", description: "Impossibile aggiornare", variant: "destructive" });
+                    }
+                  }}
+                  placeholder="Es. Co-founder, Networking, Progetti"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  data-testid="input-looking-for"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">Competenze</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {skills.map((skill, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
+                      data-testid={`skill-tag-${i}`}
+                    >
+                      {skill}
+                      <button
+                        onClick={async () => {
+                          const updated = skills.filter((_, idx) => idx !== i);
+                          setSkills(updated);
+                          try {
+                            await apiRequest("PATCH", `/api/users/${user.id}`, { skills: updated });
+                            if (refreshUser) await refreshUser();
+                          } catch {
+                            toast({ title: "Errore", variant: "destructive" });
+                          }
+                        }}
+                        className="ml-0.5 hover:text-red-500"
+                        data-testid={`button-remove-skill-${i}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newSkill}
+                    onChange={(e) => setNewSkill(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter" && newSkill.trim()) {
+                        e.preventDefault();
+                        const updated = [...skills, newSkill.trim()];
+                        setSkills(updated);
+                        setNewSkill("");
+                        try {
+                          await apiRequest("PATCH", `/api/users/${user.id}`, { skills: updated });
+                          if (refreshUser) await refreshUser();
+                        } catch {
+                          toast({ title: "Errore", variant: "destructive" });
+                        }
+                      }
+                    }}
+                    placeholder="Aggiungi competenza..."
+                    className="flex-1 px-4 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    data-testid="input-new-skill"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!newSkill.trim()) return;
+                      const updated = [...skills, newSkill.trim()];
+                      setSkills(updated);
+                      setNewSkill("");
+                      try {
+                        await apiRequest("PATCH", `/api/users/${user.id}`, { skills: updated });
+                        if (refreshUser) await refreshUser();
+                      } catch {
+                        toast({ title: "Errore", variant: "destructive" });
+                      }
+                    }}
+                    className="px-3 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    data-testid="button-add-skill"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="w-full mt-10 space-y-8">

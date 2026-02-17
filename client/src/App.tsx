@@ -32,6 +32,9 @@ import EventDetail from "@/pages/event-detail";
 import Marketplace from "@/pages/marketplace";
 import Admin from "@/pages/admin";
 import SavedPosts from "@/pages/saved-posts";
+import LocalMarketplace from "@/pages/local-marketplace";
+import CityGuides from "@/pages/city-guides";
+import Matchmaking from "@/pages/matchmaking";
 
 
 function Router() {
@@ -57,6 +60,9 @@ function Router() {
       <Route path="/event/:id" component={EventDetail} />
       <Route path="/marketplace" component={Marketplace} />
       <Route path="/saved" component={SavedPosts} />
+      <Route path="/local-marketplace" component={LocalMarketplace} />
+      <Route path="/city-guides" component={CityGuides} />
+      <Route path="/matchmaking" component={Matchmaking} />
 
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />

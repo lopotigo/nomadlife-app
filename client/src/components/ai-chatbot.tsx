@@ -25,6 +25,10 @@ const QUICK_PROMPTS = [
   { icon: "💰", label: "Budget tips", prompt: "Tips for living on a budget as a digital nomad?" },
   { icon: "🏠", label: "Coworking spaces", prompt: "How to find good coworking spaces while traveling?" },
   { icon: "✈️", label: "Visa info", prompt: "Which countries offer digital nomad visas?" },
+  { icon: "🗺️", label: "City guide", prompt: "Show me city guide tips for nearby nomad hubs based on my current location" },
+  { icon: "🤝", label: "Find collaborators", prompt: "Find digital nomads near me with complementary skills for collaboration" },
+  { icon: "🛒", label: "Local deals", prompt: "What items are available in the local marketplace near me?" },
+  { icon: "🌱", label: "Eco travel", prompt: "Help me plan an eco-friendly trip and calculate my carbon footprint savings" },
 ];
 
 export function AiChatbot() {

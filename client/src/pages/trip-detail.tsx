@@ -5,6 +5,7 @@ import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Be
 import { Button } from "@/components/ui/button";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { TripReplay } from "@/components/trip-replay";
+import { EcoTripButton } from "@/components/eco-trip-card";
 import type { Trip, TripStop, User } from "@shared/schema";
 
 type TripWithDetails = Trip & { stops: TripStop[]; user?: User };
@@ -137,6 +138,7 @@ export default function TripDetail() {
               <Share2 className="w-4 h-4 mr-2" />
               Condividi
             </Button>
+            <EcoTripButton trip={{ title: trip.title, stops: sortedStops.map(s => ({ city: s.city, country: s.country, distanceKm: s.distanceKm ?? undefined, co2Kg: s.co2Kg ?? undefined, transportMode: s.transportMode ?? undefined })) }} userName={trip.user?.name || "Nomad"} />
           </div>
         </div>
 

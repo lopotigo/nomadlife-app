@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Post, User, Comment, Event, ChatGroup, Moment } from "@shared/schema";
+import type { Post, User, Comment, Event, ChatGroup, Moment, CityGuide } from "@shared/schema";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { searchFlights, searchHotels } from "@/lib/travelpayouts";
@@ -198,6 +198,28 @@ function createMomentMarkerIcon(mediaUrl: string | null, mediaType: string | nul
     className: "",
     iconSize: L.point(52, 52),
     iconAnchor: L.point(26, 26),
+  });
+}
+
+function createCityGuideMarkerIcon(category: string) {
+  const emojiMap: Record<string, string> = {
+    wifi: "📶",
+    coworking: "🏢",
+    visa: "🛂",
+    food: "🍜",
+    lifestyle: "🌴",
+  };
+  const emoji = emojiMap[category] || "📖";
+  return L.divIcon({
+    html: `<div style="position:relative;">
+      <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:3px solid white;box-shadow:0 4px 14px rgba(139,92,246,0.4);display:flex;align-items:center;justify-content:center;font-size:20px;">
+        ${emoji}
+      </div>
+    </div>`,
+    className: "custom-cityguide-marker",
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
   });
 }
 
@@ -767,6 +789,7 @@ export default function UnifiedMap() {
     showGroups: true,
     showMyTrips: true,
     showFollowingTrips: true,
+    showCityGuides: true,
     maxBudget: 500,
     dateFrom: "",
     dateTo: "",
@@ -971,6 +994,20 @@ export default function UnifiedMap() {
     if (!filters.showGroups) return [];
     return chatGroups.filter(g => g.latitude && g.longitude);
   }, [chatGroups, filters.showGroups]);
+
+  const { data: cityGuidesData } = useQuery<CityGuide[]>({
+    queryKey: ["/api/city-guides"],
+    queryFn: async () => {
+      const res = await fetch("/api/city-guides", { credentials: "include" });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const cityGuidesWithCoords = useMemo(() => {
+    if (!filters.showCityGuides || !cityGuidesData) return [];
+    return cityGuidesData.filter(g => g.latitude && g.longitude);
+  }, [cityGuidesData, filters.showCityGuides]);
 
   const handleJoinGroup = async (groupId: string) => {
     try {
@@ -1396,6 +1433,81 @@ export default function UnifiedMap() {
                 </Marker>
               );
             })}
+
+            {cityGuidesWithCoords.map((guide) => {
+              const categoryColors: Record<string, string> = {
+                wifi: "#3b82f6",
+                coworking: "#f59e0b",
+                visa: "#ef4444",
+                food: "#10b981",
+                lifestyle: "#8b5cf6",
+              };
+              const categoryLabels: Record<string, string> = {
+                wifi: "WiFi",
+                coworking: "Coworking",
+                visa: "Visa",
+                food: "Food",
+                lifestyle: "Lifestyle",
+              };
+              const badgeColor = categoryColors[guide.category] || "#6b7280";
+              const badgeLabel = categoryLabels[guide.category] || guide.category;
+              return (
+                <Marker
+                  key={`cityguide-${guide.id}`}
+                  position={[guide.latitude, guide.longitude]}
+                  icon={createCityGuideMarkerIcon(guide.category)}
+                >
+                  <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                    <div className="flex items-center gap-2 px-1 py-0.5">
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: badgeColor }}>
+                        <Compass className="w-3 h-3 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold">{guide.title}</p>
+                        <p className="text-[10px] text-gray-500">{guide.city}, {guide.country}</p>
+                      </div>
+                    </div>
+                  </Tooltip>
+                  <Popup className="custom-popup" maxWidth={300} minWidth={260} autoPanPadding={[20, 20]} autoPan={true}>
+                    <div className="popup-animate-in p-3 w-[260px]" data-testid={`popup-cityguide-${guide.id}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                          style={{ background: badgeColor }}
+                        >
+                          {badgeLabel}
+                        </span>
+                        {guide.rating != null && guide.rating > 0 && (
+                          <StarRating rating={Math.round(guide.rating)} size={12} />
+                        )}
+                      </div>
+                      <p className="font-bold text-sm mb-1">{guide.title}</p>
+                      <p className="text-xs text-gray-600 mb-2">
+                        {guide.content.length > 150 ? guide.content.substring(0, 150) + "..." : guide.content}
+                      </p>
+                      {guide.tags && guide.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {guide.tags.slice(0, 5).map((tag, i) => (
+                            <span key={i} className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                        <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />{guide.city}, {guide.country}
+                        </span>
+                        <Link href="/city-guides" className="text-xs font-semibold text-violet-600 hover:underline" data-testid={`link-cityguide-detail-${guide.id}`}>
+                          Vedi dettagli
+                        </Link>
+                      </div>
+                      <PopupAutoClose />
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
             
             {tripsToShow.map((trip) => {
               const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
@@ -1691,6 +1803,18 @@ export default function UnifiedMap() {
                     />
                   </div>
                   
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Compass className="w-4 h-4 text-violet-400" />
+                      Guide Città
+                    </label>
+                    <Switch
+                      checked={filters.showCityGuides}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showCityGuides: v }))}
+                      data-testid="switch-city-guides"
+                    />
+                  </div>
+                  
                   <div className="border-t border-border/50 pt-3 mt-3 space-y-3">
                     <p className="text-xs font-semibold text-muted-foreground uppercase">Filtri avanzati</p>
                     
@@ -1870,6 +1994,7 @@ export default function UnifiedMap() {
         }
         .post-marker img { width: 100%; height: 100%; object-fit: cover; transform: rotate(45deg) scale(1.4); }
         .post-marker-text svg { transform: rotate(45deg); color: white; width: 16px; height: 16px; }
+        .custom-cityguide-marker { background: transparent !important; border: none !important; }
         .custom-event-marker { background: transparent !important; border: none !important; }
         .event-marker {
           width: 44px; height: 44px; border-radius: 50% 50% 50% 0;

@@ -2296,5 +2296,180 @@ export async function registerRoutes(
     }
   });
 
+  // ========== LOCAL LISTINGS (PROXIMITY MARKETPLACE) ==========
+  app.get("/api/local-listings", async (req, res) => {
+    try {
+      const { category, city, status } = req.query;
+      const listings = await storage.getLocalListings({
+        category: category as string,
+        city: city as string,
+        status: status as string,
+      });
+      res.send(listings);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/local-listings/nearby", async (req, res) => {
+    try {
+      const { lat, lng, radius, category } = req.query;
+      if (!lat || !lng) return res.status(400).send({ error: "lat and lng required" });
+      const radiusKm = parseFloat(radius as string) || 5;
+      const listings = await storage.getNearbyListings(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        radiusKm,
+        category as string
+      );
+      res.send(listings);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/local-listings/:id", async (req, res) => {
+    try {
+      const listing = await storage.getLocalListingById(req.params.id);
+      if (!listing) return res.status(404).send({ error: "Listing not found" });
+      res.send(listing);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/local-listings", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const listing = await storage.createLocalListing({
+        ...req.body,
+        sellerId: user.id,
+      });
+      res.status(201).send(listing);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.patch("/api/local-listings/:id", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const existing = await storage.getLocalListingById(req.params.id);
+      if (!existing) return res.status(404).send({ error: "Listing not found" });
+      if (existing.sellerId !== user.id) return res.status(403).send({ error: "Forbidden" });
+      const updated = await storage.updateLocalListing(req.params.id, req.body);
+      res.send(updated);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/local-listings/:id", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const existing = await storage.getLocalListingById(req.params.id);
+      if (!existing) return res.status(404).send({ error: "Listing not found" });
+      if (existing.sellerId !== user.id) return res.status(403).send({ error: "Forbidden" });
+      await storage.deleteLocalListing(req.params.id);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/local-listings/user/:userId", requireAuth, async (req, res) => {
+    try {
+      const listings = await storage.getUserListings(req.params.userId);
+      res.send(listings);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== CITY GUIDES ==========
+  app.get("/api/city-guides", async (req, res) => {
+    try {
+      const { city, category } = req.query;
+      const guides = await storage.getCityGuides(city as string, category as string);
+      res.send(guides);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/city-guides/cities", async (req, res) => {
+    try {
+      const cities = await storage.getCityGuideCities();
+      res.send(cities);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/city-guides/nearby", async (req, res) => {
+    try {
+      const { lat, lng, radius } = req.query;
+      if (!lat || !lng) return res.status(400).send({ error: "lat and lng required" });
+      const guides = await storage.getNearbyCityGuides(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        parseFloat(radius as string) || 50
+      );
+      res.send(guides);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/city-guides/:id", async (req, res) => {
+    try {
+      const guide = await storage.getCityGuideById(req.params.id);
+      if (!guide) return res.status(404).send({ error: "Guide not found" });
+      res.send(guide);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== SKILLS MATCHMAKING ==========
+  app.get("/api/matchmaking/nearby", requireAuth, async (req, res) => {
+    try {
+      const { lat, lng, radius, skills } = req.query;
+      if (!lat || !lng) return res.status(400).send({ error: "lat and lng required" });
+      const skillsArr = skills ? (skills as string).split(",").map(s => s.trim()) : undefined;
+      const nomads = await storage.getNearbyNomadsWithSkills(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        parseFloat(radius as string) || 5,
+        skillsArr
+      );
+      const user = req.user as User;
+      const filtered = nomads
+        .filter(n => n.id !== user.id)
+        .map(({ password, ...n }) => n);
+      res.send(filtered);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== PRIVACY SETTINGS ==========
+  app.patch("/api/users/:id/privacy", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (req.params.id !== user.id) return res.status(403).send({ error: "Forbidden" });
+      const { privacyMode } = req.body;
+      if (!['visible', 'approximate', 'hidden'].includes(privacyMode)) {
+        return res.status(400).send({ error: "Invalid privacy mode" });
+      }
+      const updated = await storage.updateUser(user.id, { privacyMode });
+      if (!updated) return res.status(404).send({ error: "User not found" });
+      const { password, ...safe } = updated;
+      res.send(safe);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   return httpServer;
 }

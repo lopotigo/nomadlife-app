@@ -229,6 +229,24 @@ export interface IStorage {
   likeMoment(momentId: string): Promise<schema.Moment | undefined>;
   getMomentViewers(momentId: string): Promise<User[]>;
   cleanExpiredMoments(): Promise<number>;
+
+  // Local Listings (Proximity Marketplace)
+  getLocalListings(filters?: { category?: string; city?: string; status?: string }): Promise<(schema.LocalListing & { seller: User })[]>;
+  getLocalListingById(id: string): Promise<(schema.LocalListing & { seller: User }) | undefined>;
+  getNearbyListings(lat: number, lng: number, radiusKm: number, category?: string): Promise<(schema.LocalListing & { seller: User; distance: number })[]>;
+  createLocalListing(listing: schema.InsertLocalListing): Promise<schema.LocalListing>;
+  updateLocalListing(id: string, updates: Partial<schema.LocalListing>): Promise<schema.LocalListing | undefined>;
+  deleteLocalListing(id: string): Promise<boolean>;
+  getUserListings(userId: string): Promise<schema.LocalListing[]>;
+
+  // City Guides
+  getCityGuides(city?: string, category?: string): Promise<schema.CityGuide[]>;
+  getCityGuideById(id: string): Promise<schema.CityGuide | undefined>;
+  getNearbyCityGuides(lat: number, lng: number, radiusKm: number): Promise<schema.CityGuide[]>;
+  getCityGuideCities(): Promise<string[]>;
+
+  // Skills Matchmaking
+  getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[]): Promise<(User & { distance: number })[]>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1755,6 +1773,136 @@ export class DrizzleStorage implements IStorage {
     const now = new Date();
     const result = await this.db.delete(schema.moments).where(sql`${schema.moments.expiresAt} <= ${now}`);
     return result?.rowCount ?? 0;
+  }
+
+  // ========== LOCAL LISTINGS ==========
+  async getLocalListings(filters?: { category?: string; city?: string; status?: string }): Promise<(schema.LocalListing & { seller: User })[]> {
+    const conditions = [eq(schema.localListings.status, filters?.status || 'active')];
+    if (filters?.category) conditions.push(eq(schema.localListings.category, filters.category));
+    if (filters?.city) conditions.push(eq(schema.localListings.city, filters.city));
+    
+    const result = await this.db
+      .select()
+      .from(schema.localListings)
+      .innerJoin(schema.users, eq(schema.localListings.sellerId, schema.users.id))
+      .where(and(...conditions))
+      .orderBy(desc(schema.localListings.createdAt));
+    return result.map(r => ({ ...r.local_listings, seller: r.users }));
+  }
+
+  async getLocalListingById(id: string): Promise<(schema.LocalListing & { seller: User }) | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.localListings)
+      .innerJoin(schema.users, eq(schema.localListings.sellerId, schema.users.id))
+      .where(eq(schema.localListings.id, id));
+    if (!result[0]) return undefined;
+    return { ...result[0].local_listings, seller: result[0].users };
+  }
+
+  async getNearbyListings(lat: number, lng: number, radiusKm: number, category?: string): Promise<(schema.LocalListing & { seller: User; distance: number })[]> {
+    const conditions = [eq(schema.localListings.status, 'active')];
+    if (category) conditions.push(eq(schema.localListings.category, category));
+
+    const distanceExpr = sql<number>`(6371 * acos(cos(radians(${lat})) * cos(radians(${schema.localListings.latitude})) * cos(radians(${schema.localListings.longitude}) - radians(${lng})) + sin(radians(${lat})) * sin(radians(${schema.localListings.latitude}))))`;
+
+    const result = await this.db
+      .select({
+        listing: schema.localListings,
+        seller: schema.users,
+        distance: distanceExpr,
+      })
+      .from(schema.localListings)
+      .innerJoin(schema.users, eq(schema.localListings.sellerId, schema.users.id))
+      .where(and(...conditions, sql`${schema.localListings.latitude} IS NOT NULL`))
+      .orderBy(distanceExpr);
+
+    return result
+      .filter(r => r.distance <= radiusKm)
+      .map(r => ({ ...r.listing, seller: r.seller, distance: Math.round(r.distance * 100) / 100 }));
+  }
+
+  async createLocalListing(listing: schema.InsertLocalListing): Promise<schema.LocalListing> {
+    const result = await this.db.insert(schema.localListings).values(listing).returning();
+    return result[0];
+  }
+
+  async updateLocalListing(id: string, updates: Partial<schema.LocalListing>): Promise<schema.LocalListing | undefined> {
+    const result = await this.db.update(schema.localListings).set(updates).where(eq(schema.localListings.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteLocalListing(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.localListings).where(eq(schema.localListings.id, id));
+    return (result?.rowCount ?? 0) > 0;
+  }
+
+  async getUserListings(userId: string): Promise<schema.LocalListing[]> {
+    return this.db.select().from(schema.localListings).where(eq(schema.localListings.sellerId, userId)).orderBy(desc(schema.localListings.createdAt));
+  }
+
+  // ========== CITY GUIDES ==========
+  async getCityGuides(city?: string, category?: string): Promise<schema.CityGuide[]> {
+    const conditions: any[] = [];
+    if (city) conditions.push(sql`LOWER(${schema.cityGuides.city}) = LOWER(${city})`);
+    if (category) conditions.push(eq(schema.cityGuides.category, category));
+    
+    const query = conditions.length > 0
+      ? this.db.select().from(schema.cityGuides).where(and(...conditions))
+      : this.db.select().from(schema.cityGuides);
+    return query.orderBy(schema.cityGuides.city);
+  }
+
+  async getCityGuideById(id: string): Promise<schema.CityGuide | undefined> {
+    const result = await this.db.select().from(schema.cityGuides).where(eq(schema.cityGuides.id, id));
+    return result[0];
+  }
+
+  async getNearbyCityGuides(lat: number, lng: number, radiusKm: number): Promise<schema.CityGuide[]> {
+    const distanceExpr = sql`(6371 * acos(cos(radians(${lat})) * cos(radians(${schema.cityGuides.latitude})) * cos(radians(${schema.cityGuides.longitude}) - radians(${lng})) + sin(radians(${lat})) * sin(radians(${schema.cityGuides.latitude}))))`;
+    const result = await this.db
+      .select()
+      .from(schema.cityGuides)
+      .where(sql`${distanceExpr} <= ${radiusKm}`)
+      .orderBy(distanceExpr);
+    return result;
+  }
+
+  async getCityGuideCities(): Promise<string[]> {
+    const result = await this.db
+      .selectDistinct({ city: schema.cityGuides.city })
+      .from(schema.cityGuides)
+      .orderBy(schema.cityGuides.city);
+    return result.map(r => r.city);
+  }
+
+  // ========== SKILLS MATCHMAKING ==========
+  async getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[]): Promise<(User & { distance: number })[]> {
+    const distanceExpr = sql<number>`(6371 * acos(cos(radians(${lat})) * cos(radians(${schema.users.latitude})) * cos(radians(${schema.users.longitude}) - radians(${lng})) + sin(radians(${lat})) * sin(radians(${schema.users.latitude}))))`;
+    
+    const conditions = [
+      sql`${schema.users.latitude} IS NOT NULL`,
+      sql`${schema.users.longitude} IS NOT NULL`,
+      sql`${schema.users.privacyMode} != 'hidden'`,
+    ];
+
+    const result = await this.db
+      .select({
+        user: schema.users,
+        distance: distanceExpr,
+      })
+      .from(schema.users)
+      .where(and(...conditions))
+      .orderBy(distanceExpr);
+
+    return result
+      .filter(r => r.distance <= radiusKm)
+      .filter(r => {
+        if (!skills || skills.length === 0) return true;
+        const userSkills = (r.user as any).skills || [];
+        return skills.some(s => userSkills.some((us: string) => us.toLowerCase().includes(s.toLowerCase())));
+      })
+      .map(r => ({ ...r.user, distance: Math.round(r.distance * 100) / 100 }));
   }
 }
 

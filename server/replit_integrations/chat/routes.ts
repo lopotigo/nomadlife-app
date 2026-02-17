@@ -1,21 +1,64 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import OpenAI from "openai";
 import { chatStorage } from "./storage";
+import { storage } from "../../storage";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
-const SYSTEM_PROMPT = `You are NomadBot, the AI travel assistant for NomadLife - a social platform for digital nomads. You help users with:
+const BASE_SYSTEM_PROMPT = `You are NomadBot, the AI travel assistant for NomadLife - a social platform for digital nomads. You help users with:
 
 - Trip planning: suggest destinations, itineraries, costs, and best times to visit
 - Digital nomad lifestyle: visa info, coworking spaces, internet quality, cost of living
 - Local tips: food, culture, safety, transport, hidden gems
 - Budget planning: accommodation costs, daily expenses by city
 - Community: connecting with other nomads, events, meetups
+- Platform features: city guides, local marketplace, skill matchmaking, eco-routing
 
-Be friendly, concise, and practical. Use emojis sparingly. If asked about the platform's features, explain how NomadLife helps nomads connect and share experiences. Answer in the same language the user writes in (Italian, English, Spanish, etc.).`;
+You have access to LIVE platform data about events, places, city guides, and community. Use this data to give specific, actionable recommendations. Be proactive - suggest relevant events, nearby nomads, or city guide tips when appropriate.
+
+Be friendly, concise, and practical. Use emojis sparingly. Answer in the same language the user writes in (Italian, English, Spanish, etc.).`;
+
+async function buildContextualPrompt(userId: string): Promise<string> {
+  try {
+    const [events, places, cityGuides, user] = await Promise.all([
+      storage.getEvents({}).catch(() => []),
+      storage.getPlaces({}).catch(() => []),
+      storage.getCityGuides().catch(() => []),
+      storage.getUser(userId).catch(() => null),
+    ]);
+
+    let context = BASE_SYSTEM_PROMPT;
+
+    if (user) {
+      context += `\n\nCURRENT USER: ${user.name} (@${user.username}), location: ${user.location || 'unknown'}`;
+      if (user.profession) context += `, profession: ${user.profession}`;
+      if (user.skills?.length) context += `, skills: ${user.skills.join(', ')}`;
+      if (user.lookingFor) context += `, looking for: ${user.lookingFor}`;
+    }
+
+    if (events.length > 0) {
+      const upcoming = events.slice(0, 5).map(e => `${e.title} in ${e.city} (${(e as any).startDate || (e as any).date || 'soon'})`).join('; ');
+      context += `\n\nUPCOMING EVENTS ON PLATFORM: ${upcoming}`;
+    }
+
+    if (places.length > 0) {
+      const topPlaces = places.slice(0, 5).map(p => `${p.name} (${p.type}) in ${p.city}`).join('; ');
+      context += `\n\nPOPULAR PLACES: ${topPlaces}`;
+    }
+
+    const cities = Array.from(new Set(cityGuides.map(g => g.city)));
+    if (cities.length > 0) {
+      context += `\n\nCITY GUIDES AVAILABLE: ${cities.join(', ')} - You can reference specific tips from these guides.`;
+    }
+
+    return context;
+  } catch {
+    return BASE_SYSTEM_PROMPT;
+  }
+}
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (req.isAuthenticated && req.isAuthenticated()) {
@@ -101,9 +144,10 @@ export function registerChatRoutes(app: Express): void {
 
       await chatStorage.createMessage(conversationId, "user", content.trim());
 
+      const contextualPrompt = await buildContextualPrompt(userId);
       const messages = await chatStorage.getMessagesByConversation(conversationId);
       const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: contextualPrompt },
         ...messages.map((m) => ({
           role: m.role as "user" | "assistant",
           content: m.content,
@@ -160,7 +204,7 @@ export function registerChatRoutes(app: Express): void {
       const stream = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: BASE_SYSTEM_PROMPT },
           { role: "user", content: question.trim() },
         ],
         stream: true,

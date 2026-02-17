@@ -18,6 +18,12 @@ export const users = pgTable("users", {
   countriesVisited: integer("countries_visited").default(0).notNull(),
   citiesVisited: integer("cities_visited").default(0).notNull(),
   coworkingSpaces: integer("coworking_spaces").default(0).notNull(),
+  privacyMode: text("privacy_mode").default("visible").notNull(),
+  skills: text("skills").array(),
+  profession: text("profession"),
+  lookingFor: text("looking_for"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -539,7 +545,7 @@ export const products = pgTable("products", {
   currency: text("currency").default("EUR"),
   originalPrice: doublePrecision("original_price"),
   discountPercent: integer("discount_percent"),
-  category: text("category").notNull(), // "esim", "bags", "clothing", "insurance", "tech", "software"
+  category: text("category").notNull(),
   affiliateUrl: text("affiliate_url"),
   tags: text("tags").array(),
   isFeatured: boolean("is_featured").default(false).notNull(),
@@ -547,6 +553,33 @@ export const products = pgTable("products", {
   clicks: integer("clicks").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Local Listings - User-to-user marketplace with GPS
+export const localListings = pgTable("local_listings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sellerId: varchar("seller_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  price: doublePrecision("price").notNull(),
+  currency: text("currency").default("EUR"),
+  category: text("category").notNull(),
+  condition: text("condition").default("good"),
+  city: text("city"),
+  country: text("country"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  status: text("status").default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLocalListingSchema = createInsertSchema(localListings).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+export type InsertLocalListing = z.infer<typeof insertLocalListingSchema>;
+export type LocalListing = typeof localListings.$inferSelect;
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
@@ -713,3 +746,26 @@ export const insertNomadCheckinSchema = createInsertSchema(nomadCheckins).omit({
 });
 export type InsertNomadCheckin = z.infer<typeof insertNomadCheckinSchema>;
 export type NomadCheckin = typeof nomadCheckins.$inferSelect;
+
+// City Guides - AI-generated content for major nomad hubs
+export const cityGuides = pgTable("city_guides", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  city: text("city").notNull(),
+  country: text("country").notNull(),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  category: text("category").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  icon: text("icon"),
+  rating: doublePrecision("rating"),
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCityGuideSchema = createInsertSchema(cityGuides).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCityGuide = z.infer<typeof insertCityGuideSchema>;
+export type CityGuide = typeof cityGuides.$inferSelect;
