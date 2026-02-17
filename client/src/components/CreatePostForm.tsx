@@ -44,6 +44,7 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
   const [showTripSelect, setShowTripSelect] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   
   const { data: myTrips = [] } = useQuery<any[]>({
     queryKey: ["/api/my-trips"],
@@ -123,27 +124,42 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
   };
 
   const handleGetLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-            );
-            const data = await response.json();
-            const city = data.address?.city || data.address?.town || data.address?.village || "";
-            const country = data.address?.country || "";
-            setLocation(city && country ? `${city}, ${country}` : data.display_name?.split(",").slice(0, 2).join(",") || "");
-          } catch {
-            setLocation(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`);
-          }
-        },
-        () => {
-          toast({ title: "Accesso posizione negato", description: "Abilita l'accesso alla posizione o inseriscila manualmente.", variant: "destructive" });
-        }
-      );
+    if (!navigator.geolocation) {
+      toast({ title: "GPS non disponibile", description: "Il tuo browser non supporta la geolocalizzazione. Inserisci la posizione manualmente.", variant: "destructive" });
+      return;
     }
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+          );
+          const data = await response.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || "";
+          const country = data.address?.country || "";
+          setLocation(city && country ? `${city}, ${country}` : data.display_name?.split(",").slice(0, 2).join(",") || "");
+          toast({ title: "Posizione trovata!", description: city && country ? `${city}, ${country}` : "Coordinate impostate" });
+        } catch {
+          setLocation(`${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`);
+          toast({ title: "Posizione trovata!", description: "Coordinate GPS impostate" });
+        } finally {
+          setIsGettingLocation(false);
+        }
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          toast({ title: "Accesso posizione negato", description: "Abilita la posizione nelle impostazioni del browser, oppure inseriscila manualmente.", variant: "destructive" });
+        } else if (error.code === error.TIMEOUT) {
+          toast({ title: "Timeout posizione", description: "Non è stato possibile ottenere la posizione in tempo. Riprova o inseriscila manualmente.", variant: "destructive" });
+        } else {
+          toast({ title: "Errore posizione", description: "Impossibile ottenere la posizione. Inseriscila manualmente.", variant: "destructive" });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    );
   };
 
   return (
@@ -271,9 +287,15 @@ export function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
                     variant="ghost"
                     size="sm"
                     onClick={handleGetLocation}
+                    disabled={isGettingLocation}
                     className="text-xs h-8"
+                    data-testid="button-auto-location"
                   >
-                    Auto
+                    {isGettingLocation ? (
+                      <><Loader2 className="w-3 h-3 animate-spin mr-1" /> GPS...</>
+                    ) : (
+                      <><MapPin className="w-3 h-3 mr-1" /> Auto</>
+                    )}
                   </Button>
                 </div>
 
