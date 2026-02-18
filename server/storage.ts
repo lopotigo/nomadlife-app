@@ -247,6 +247,11 @@ export interface IStorage {
 
   // Skills Matchmaking
   getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[]): Promise<(User & { distance: number })[]>;
+
+  // Crowdsourced Locations (Spots)
+  getLocations(): Promise<(schema.Location & { user: User })[]>;
+  getLocationById(id: string): Promise<(schema.Location & { user: User }) | undefined>;
+  createLocation(location: schema.InsertLocation): Promise<schema.Location>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1903,6 +1908,32 @@ export class DrizzleStorage implements IStorage {
         return skills.some(s => userSkills.some((us: string) => us.toLowerCase().includes(s.toLowerCase())));
       })
       .map(r => ({ ...r.user, distance: Math.round(r.distance * 100) / 100 }));
+  }
+
+  // Crowdsourced Locations (Spots)
+  async getLocations(): Promise<(schema.Location & { user: User })[]> {
+    const result = await this.db
+      .select()
+      .from(schema.locations)
+      .innerJoin(schema.users, eq(schema.locations.userId, schema.users.id))
+      .orderBy(desc(schema.locations.createdAt));
+    return result.map(r => ({ ...r.locations, user: r.users }));
+  }
+
+  async getLocationById(id: string): Promise<(schema.Location & { user: User }) | undefined> {
+    const result = await this.db
+      .select()
+      .from(schema.locations)
+      .innerJoin(schema.users, eq(schema.locations.userId, schema.users.id))
+      .where(eq(schema.locations.id, id))
+      .limit(1);
+    if (result.length === 0) return undefined;
+    return { ...result[0].locations, user: result[0].users };
+  }
+
+  async createLocation(location: schema.InsertLocation): Promise<schema.Location> {
+    const [newLocation] = await this.db.insert(schema.locations).values(location).returning();
+    return newLocation;
   }
 }
 

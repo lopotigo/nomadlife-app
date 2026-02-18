@@ -545,6 +545,51 @@ export async function registerRoutes(
     }
   });
 
+  // ========== CROWDSOURCED LOCATIONS (SPOTS) ==========
+  app.get("/api/locations", async (_req, res) => {
+    try {
+      const locations = await storage.getLocations();
+      res.send(locations);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/locations", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send({ error: "Non autenticato" });
+    try {
+      const { name, category, wifiQuality, powerOutlets, notes, latitude, longitude } = req.body;
+      if (!name || !category || wifiQuality == null || latitude == null || longitude == null) {
+        return res.status(400).send({ error: "Campi obbligatori mancanti" });
+      }
+      if (typeof name !== "string" || name.length < 2 || name.length > 100) {
+        return res.status(400).send({ error: "Nome deve essere tra 2 e 100 caratteri" });
+      }
+      if (!["cafe", "coworking", "biblioteca"].includes(category)) {
+        return res.status(400).send({ error: "Categoria non valida" });
+      }
+      if (typeof wifiQuality !== "number" || wifiQuality < 1 || wifiQuality > 5) {
+        return res.status(400).send({ error: "Qualità Wi-Fi deve essere tra 1 e 5" });
+      }
+      if (typeof latitude !== "number" || latitude < -90 || latitude > 90 || typeof longitude !== "number" || longitude < -180 || longitude > 180) {
+        return res.status(400).send({ error: "Coordinate non valide" });
+      }
+      const location = await storage.createLocation({
+        userId: (req.user as any).id,
+        name: name.trim(),
+        category,
+        wifiQuality,
+        powerOutlets: !!powerOutlets,
+        notes: notes?.trim() || null,
+        latitude,
+        longitude,
+      });
+      res.status(201).send(location);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // ========== PLACE ROUTES ==========
   app.get("/api/places", async (req, res) => {
     try {
