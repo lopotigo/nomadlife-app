@@ -6,11 +6,12 @@ import {
   Heart, MapPin, Loader2, Plus, Users, Compass, 
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
-  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye
+  Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye,
+  Pencil, Wifi, Zap, BookOpen, Coffee
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import type { Post, User, Comment, Event, ChatGroup, Moment, CityGuide } from "@shared/schema";
+import type { Post, User, Comment, Event, ChatGroup, Moment, CityGuide, Location } from "@shared/schema";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { searchFlights, searchHotels } from "@/lib/travelpayouts";
@@ -767,6 +768,9 @@ export default function UnifiedMap() {
   const [showFilters, setShowFilters] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [showNewEvent, setShowNewEvent] = useState(false);
+  const [showAddSpot, setShowAddSpot] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
+  const [spotLocations, setSpotLocations] = useState<(Location & { user: User })[]>([]);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite" | "event"; id: string; title: string } | null>(null);
   const [posterEvent, setPosterEvent] = useState<any | null>(null);
@@ -790,6 +794,7 @@ export default function UnifiedMap() {
     showMyTrips: true,
     showFollowingTrips: true,
     showCityGuides: true,
+    showSpots: true,
     maxBudget: 500,
     dateFrom: "",
     dateTo: "",
@@ -854,8 +859,9 @@ export default function UnifiedMap() {
         fetch("/api/events", { credentials: "include" }),
         fetch("/api/trips", { credentials: "include" }),
         fetch("/api/moments", { credentials: "include" }),
+        fetch("/api/locations", { credentials: "include" }),
       ];
-      const [postsRes, eventsRes, publicTripsRes, momentsRes] = await Promise.all(publicFetches);
+      const [postsRes, eventsRes, publicTripsRes, momentsRes, locationsRes] = await Promise.all(publicFetches);
 
       let groupsRes: Response | null = null;
       let myTripsRes: Response | null = null;
@@ -881,6 +887,11 @@ export default function UnifiedMap() {
       if (momentsRes.ok) {
         const momentsData = await momentsRes.json();
         setMoments(Array.isArray(momentsData) ? momentsData : []);
+      }
+
+      if (locationsRes.ok) {
+        const locationsData = await locationsRes.json();
+        setSpotLocations(Array.isArray(locationsData) ? locationsData : []);
       }
 
       if (groupsRes?.ok) {
@@ -1509,6 +1520,77 @@ export default function UnifiedMap() {
               );
             })}
             
+            {filters.showSpots && spotLocations.map((spot) => (
+              <Marker
+                key={`spot-${spot.id}`}
+                position={[spot.latitude, spot.longitude]}
+                icon={L.divIcon({
+                  html: `<div style="width:36px;height:36px;border-radius:50%;background:${spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : '#6366f1'};color:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      ${spot.category === 'cafe' ? '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>' : spot.category === 'coworking' ? '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>' : '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/>'}
+                    </svg>
+                  </div>`,
+                  className: "",
+                  iconSize: L.point(36, 36),
+                  iconAnchor: L.point(18, 18),
+                })}
+              >
+                <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                  <div className="flex items-center gap-2 px-1 py-0.5">
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : '#6366f1' }}>
+                      {spot.category === 'cafe' ? <Coffee className="w-3 h-3 text-white" /> : spot.category === 'coworking' ? <Wifi className="w-3 h-3 text-white" /> : <BookOpen className="w-3 h-3 text-white" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold">{spot.name}</p>
+                      <p className="text-[10px] text-gray-500">{spot.category === 'cafe' ? 'Café' : spot.category === 'coworking' ? 'Coworking' : 'Biblioteca'}</p>
+                    </div>
+                  </div>
+                </Tooltip>
+                <Popup className="custom-popup" maxWidth={300} minWidth={260} autoPanPadding={[20, 20]} autoPan={true}>
+                  <div className="popup-animate-in p-3 w-[260px]" data-testid={`popup-spot-${spot.id}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : '#6366f1' }}>
+                        {spot.category === 'cafe' ? 'Café' : spot.category === 'coworking' ? 'Coworking' : 'Biblioteca'}
+                      </span>
+                    </div>
+                    <p className="font-bold text-sm mb-1">{spot.name}</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-1">
+                        <Wifi className="w-3 h-3 text-blue-500" />
+                        <span className="text-xs text-gray-600">Wi-Fi:</span>
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} className={`w-3 h-3 ${s <= spot.wifiQuality ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 mb-2">
+                      <Zap className={`w-3 h-3 ${spot.powerOutlets ? 'text-green-500' : 'text-gray-400'}`} />
+                      <span className="text-xs text-gray-600">
+                        Prese: {spot.powerOutlets ? 'Disponibili' : 'Non disponibili'}
+                      </span>
+                    </div>
+                    {spot.notes && (
+                      <p className="text-xs text-gray-500 mb-2 italic">"{spot.notes}"</p>
+                    )}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                      <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {spot.latitude.toFixed(4)}, {spot.longitude.toFixed(4)}
+                      </span>
+                      {spot.user && (
+                        <span className="text-[10px] text-gray-400">
+                          di {spot.user.name || spot.user.username}
+                        </span>
+                      )}
+                    </div>
+                    <PopupAutoClose />
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
             {tripsToShow.map((trip) => {
               const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
               const positions: [number, number][] = validStops.map(s => [s.latitude!, s.longitude!]);
@@ -1682,38 +1764,72 @@ export default function UnifiedMap() {
           </div>
           
           <div className="absolute bottom-4 right-4 z-[1000]">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-                  data-testid="button-create-menu"
-                >
-                  <Plus className="w-6 h-6" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 mb-2">
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setClickedCoords(null);
-                    setShowNewPost(true);
-                  }}
-                  className="cursor-pointer"
-                  data-testid="menu-new-post"
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Crea Post
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setShowNewEvent(true)}
-                  className="cursor-pointer"
-                  data-testid="menu-new-event"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Crea Evento
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="relative">
+              <AnimatePresence>
+                {fabOpen && (
+                  <>
+                    <motion.button
+                      initial={{ opacity: 0, y: 0, scale: 0.3 }}
+                      animate={{ opacity: 1, y: -180, scale: 1 }}
+                      exit={{ opacity: 0, y: 0, scale: 0.3 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.05 }}
+                      className="absolute bottom-0 right-0 flex items-center gap-2 cursor-pointer"
+                      onClick={() => { setFabOpen(false); setShowAddSpot(true); }}
+                      data-testid="menu-add-spot"
+                    >
+                      <span className="bg-card text-card-foreground text-xs font-medium px-2 py-1 rounded-lg shadow-md whitespace-nowrap">Aggiungi Spot</span>
+                      <div className="w-11 h-11 rounded-full bg-emerald-500 text-white shadow-lg flex items-center justify-center">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0, y: 0, scale: 0.3 }}
+                      animate={{ opacity: 1, y: -120, scale: 1 }}
+                      exit={{ opacity: 0, y: 0, scale: 0.3 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.02 }}
+                      className="absolute bottom-0 right-0 flex items-center gap-2 cursor-pointer"
+                      onClick={() => { setFabOpen(false); setShowNewEvent(true); }}
+                      data-testid="menu-new-event"
+                    >
+                      <span className="bg-card text-card-foreground text-xs font-medium px-2 py-1 rounded-lg shadow-md whitespace-nowrap">Crea Evento</span>
+                      <div className="w-11 h-11 rounded-full bg-purple-500 text-white shadow-lg flex items-center justify-center">
+                        <Calendar className="w-5 h-5" />
+                      </div>
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0, y: 0, scale: 0.3 }}
+                      animate={{ opacity: 1, y: -60, scale: 1 }}
+                      exit={{ opacity: 0, y: 0, scale: 0.3 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className="absolute bottom-0 right-0 flex items-center gap-2 cursor-pointer"
+                      onClick={() => { setFabOpen(false); setClickedCoords(null); setShowNewPost(true); }}
+                      data-testid="menu-new-post"
+                    >
+                      <span className="bg-card text-card-foreground text-xs font-medium px-2 py-1 rounded-lg shadow-md whitespace-nowrap">Nuovo Post</span>
+                      <div className="w-11 h-11 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center">
+                        <Pencil className="w-5 h-5" />
+                      </div>
+                    </motion.button>
+                  </>
+                )}
+              </AnimatePresence>
+              <motion.button
+                animate={{ rotate: fabOpen ? 45 : 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform relative z-10"
+                onClick={() => setFabOpen(!fabOpen)}
+                data-testid="button-create-menu"
+              >
+                <Plus className="w-6 h-6" />
+              </motion.button>
+            </div>
           </div>
+          {fabOpen && (
+            <div 
+              className="absolute inset-0 z-[999]" 
+              onClick={() => setFabOpen(false)}
+            />
+          )}
           
           <AnimatePresence>
             {showFilters && (
@@ -1812,6 +1928,18 @@ export default function UnifiedMap() {
                       checked={filters.showCityGuides}
                       onCheckedChange={(v) => setFilters(f => ({ ...f, showCityGuides: v }))}
                       data-testid="switch-city-guides"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <MapPin className="w-4 h-4 text-emerald-400" />
+                      Spot
+                    </label>
+                    <Switch
+                      checked={filters.showSpots}
+                      onCheckedChange={(v) => setFilters(f => ({ ...f, showSpots: v }))}
+                      data-testid="switch-spots"
                     />
                   </div>
                   
@@ -1965,6 +2093,24 @@ export default function UnifiedMap() {
         }}
       />
       
+      <AddSpotModal
+        open={showAddSpot}
+        onClose={() => setShowAddSpot(false)}
+        onSpotCreated={async () => {
+          setShowAddSpot(false);
+          toast({ title: "Spot aggiunto!", description: "Il tuo spot è ora visibile sulla mappa" });
+          try {
+            const locRes = await fetch("/api/locations", { credentials: "include" });
+            if (locRes.ok) {
+              const locData = await locRes.json();
+              setSpotLocations(Array.isArray(locData) ? locData : []);
+            }
+          } catch (err) {
+            console.error("Error reloading locations:", err);
+          }
+        }}
+      />
+
       {shareModal && (
         <ShareQRModal
           open={shareModal.open}
@@ -2406,6 +2552,209 @@ function CreatePostModal({
         </div>
       </motion.div>
     </motion.div>
+  );
+}
+
+function AddSpotModal({
+  open,
+  onClose,
+  onSpotCreated,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSpotCreated: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("cafe");
+  const [wifiQuality, setWifiQuality] = useState(3);
+  const [powerOutlets, setPowerOutlets] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (open && !coords) {
+      setGpsLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setGpsLoading(false);
+        },
+        () => {
+          toast({ title: "GPS non disponibile", description: "Attiva la geolocalizzazione", variant: "destructive" });
+          setGpsLoading(false);
+        },
+        { timeout: 15000, enableHighAccuracy: true }
+      );
+    }
+  }, [open]);
+
+  const resetForm = () => {
+    setName("");
+    setCategory("cafe");
+    setWifiQuality(3);
+    setPowerOutlets(false);
+    setNotes("");
+    setCoords(null);
+  };
+
+  const handleSubmit = async () => {
+    if (!name.trim()) {
+      toast({ title: "Errore", description: "Inserisci il nome del posto", variant: "destructive" });
+      return;
+    }
+    if (!coords) {
+      toast({ title: "Errore", description: "Posizione GPS non disponibile", variant: "destructive" });
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/locations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: name.trim(),
+          category,
+          wifiQuality,
+          powerOutlets,
+          notes: notes.trim() || null,
+          latitude: coords.lat,
+          longitude: coords.lng,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Errore nel salvataggio");
+      }
+      resetForm();
+      onSpotCreated();
+    } catch (err: any) {
+      toast({ title: "Errore", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { resetForm(); onClose(); } }}>
+      <DialogContent className="sm:max-w-md" data-testid="dialog-add-spot">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-emerald-500" />
+            Aggiungi Spot
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="spot-name">Nome del posto</Label>
+            <Input
+              id="spot-name"
+              placeholder="Es. Café Roma"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              data-testid="input-spot-name"
+            />
+          </div>
+
+          <div>
+            <Label>Categoria</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger data-testid="select-spot-category">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cafe">
+                  <span className="flex items-center gap-2"><Coffee className="w-4 h-4" /> Café</span>
+                </SelectItem>
+                <SelectItem value="coworking">
+                  <span className="flex items-center gap-2"><Wifi className="w-4 h-4" /> Coworking</span>
+                </SelectItem>
+                <SelectItem value="biblioteca">
+                  <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Biblioteca</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Qualità Wi-Fi</Label>
+            <div className="flex gap-1 mt-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setWifiQuality(s)}
+                  className="p-1 transition-transform hover:scale-110"
+                  data-testid={`star-wifi-${s}`}
+                >
+                  <Star className={`w-6 h-6 ${s <= wifiQuality ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-yellow-500" />
+              Prese elettriche
+            </Label>
+            <Switch
+              checked={powerOutlets}
+              onCheckedChange={setPowerOutlets}
+              data-testid="switch-power-outlets"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="spot-notes">Note (opzionale)</Label>
+            <Textarea
+              id="spot-notes"
+              placeholder="Wi-Fi veloce, silenzioso, buon caffè..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              data-testid="input-spot-notes"
+            />
+          </div>
+
+          <div className="bg-muted/50 rounded-lg p-3">
+            <Label className="flex items-center gap-2 mb-1">
+              <Navigation className="w-4 h-4 text-blue-500" />
+              Posizione
+            </Label>
+            {gpsLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" /> Rilevamento GPS...
+              </div>
+            ) : coords ? (
+              <p className="text-sm text-green-600 font-medium" data-testid="text-spot-coords">
+                {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+              </p>
+            ) : (
+              <p className="text-sm text-red-500">GPS non disponibile</p>
+            )}
+          </div>
+
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !coords || !name.trim()}
+            data-testid="button-submit-spot"
+          >
+            {isSubmitting ? (
+              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Salvataggio...</>
+            ) : (
+              <><MapPin className="w-4 h-4 mr-2" /> Salva Spot</>
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
