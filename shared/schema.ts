@@ -769,3 +769,24 @@ export const insertCityGuideSchema = createInsertSchema(cityGuides).omit({
 });
 export type InsertCityGuide = z.infer<typeof insertCityGuideSchema>;
 export type CityGuide = typeof cityGuides.$inferSelect;
+
+// Crowdsourced Locations (Spots)
+export const locations = pgTable("locations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  wifiQuality: integer("wifi_quality").notNull(),
+  powerOutlets: boolean("power_outlets").default(false).notNull(),
+  notes: text("notes"),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLocationSchema = createInsertSchema(locations).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertLocation = z.infer<typeof insertLocationSchema>;
+export type Location = typeof locations.$inferSelect;
