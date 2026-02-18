@@ -8,50 +8,267 @@ const openai = new OpenAI({
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
-const BASE_SYSTEM_PROMPT = `You are NomadBot, the AI travel assistant for NomadLife - a social platform for digital nomads. You help users with:
+const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
+  {
+    type: "function",
+    function: {
+      name: "search_places",
+      description: "Search for hotels, hostels, coworking spaces in the NomadLife database. Use this when the user asks about accommodations, places to stay, or work spaces in a city.",
+      parameters: {
+        type: "object",
+        properties: {
+          city: { type: "string", description: "City name to search in (e.g. Bangkok, Lisbon, Bali)" },
+          type: { type: "string", enum: ["hotel", "hostel", "coworking"], description: "Type of place to search for" },
+        },
+        required: ["city"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_place_reviews",
+      description: "Get reviews and ratings for a specific place by its ID. Use this when the user wants more details or reviews about a specific place.",
+      parameters: {
+        type: "object",
+        properties: {
+          placeId: { type: "string", description: "The ID of the place to get reviews for" },
+        },
+        required: ["placeId"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_booking",
+      description: "Create a booking/reservation for a place. Use this when the user confirms they want to book a specific place. Always confirm the place name and check-in date with the user before calling this.",
+      parameters: {
+        type: "object",
+        properties: {
+          placeId: { type: "string", description: "The ID of the place to book" },
+          checkInDate: { type: "string", description: "Check-in date in ISO format (YYYY-MM-DD)" },
+          guestName: { type: "string", description: "Name of the guest for the booking" },
+        },
+        required: ["placeId", "checkInDate", "guestName"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_affiliate",
+      description: "Generate Travelpayouts affiliate links for flights and hotels when no results are found in the local database, or when the user specifically asks for flight/hotel booking links.",
+      parameters: {
+        type: "object",
+        properties: {
+          city: { type: "string", description: "Destination city" },
+          type: { type: "string", enum: ["hotels", "flights"], description: "Type of affiliate link to generate" },
+          checkIn: { type: "string", description: "Check-in date (YYYY-MM-DD) for hotels" },
+          checkOut: { type: "string", description: "Check-out date (YYYY-MM-DD) for hotels" },
+        },
+        required: ["city", "type"],
+      },
+    },
+  },
+];
 
-- Trip planning: suggest destinations, itineraries, costs, and best times to visit
-- Digital nomad lifestyle: visa info, coworking spaces, internet quality, cost of living
-- Local tips: food, culture, safety, transport, hidden gems
-- Budget planning: accommodation costs, daily expenses by city
-- Community: connecting with other nomads, events, meetups
-- Platform features: city guides, local marketplace, skill matchmaking, eco-routing
+const TRAVELPAYOUTS_MARKER = "578583";
 
-You have access to LIVE platform data about events, places, city guides, and community. Use this data to give specific, actionable recommendations. Be proactive - suggest relevant events, nearby nomads, or city guide tips when appropriate.
+async function executeToolCall(
+  toolName: string,
+  args: any,
+  userId: string
+): Promise<string> {
+  try {
+    switch (toolName) {
+      case "search_places": {
+        const { city, type } = args;
+        if (!city || typeof city !== "string" || city.trim().length < 2) {
+          return JSON.stringify({ error: "Parametro 'city' non valido. Specifica una città." });
+        }
+        const cityTrimmed = city.trim();
 
-Be friendly, concise, and practical. Use emojis sparingly. Answer in the same language the user writes in (Italian, English, Spanish, etc.).`;
+        const filters: any = { city: cityTrimmed };
+        if (type && ["hotel", "hostel", "coworking"].includes(type)) {
+          filters.type = type;
+        }
+
+        const places = await storage.searchPlaces(filters);
+
+        if (places.length === 0) {
+          return JSON.stringify({
+            found: false,
+            message: `Nessun risultato trovato nel database per "${city}"${type ? ` (tipo: ${type})` : ""}. Usa search_affiliate per mostrare link di prenotazione esterni.`,
+          });
+        }
+
+        const results = await Promise.all(
+          places.map(async (p) => {
+            let avgRatings = null;
+            try {
+              avgRatings = await storage.getPlaceAverageRatings(p.id);
+            } catch {}
+            return {
+              id: p.id,
+              name: p.name,
+              type: p.type,
+              city: p.city,
+              country: p.country,
+              location: p.location,
+              price: p.price,
+              pricePerNight: p.pricePerNight,
+              pricePerHour: p.pricePerHour,
+              currency: p.currency,
+              rating: p.rating,
+              reviewCount: p.reviews,
+              amenities: p.amenities,
+              tags: p.tags,
+              avgRatings: avgRatings && avgRatings.count > 0
+                ? { wifi: avgRatings.wifi, noise: avgRatings.noise, price: avgRatings.price, clean: avgRatings.clean, overall: avgRatings.overall, reviewCount: avgRatings.count }
+                : null,
+            };
+          })
+        );
+
+        return JSON.stringify({ found: true, count: results.length, places: results });
+      }
+
+      case "get_place_reviews": {
+        const { placeId } = args;
+        const place = await storage.getPlace(placeId);
+        if (!place) return JSON.stringify({ error: "Posto non trovato" });
+
+        const [reviews, ratings] = await Promise.all([
+          storage.getPlaceReviews(placeId),
+          storage.getPlaceAverageRatings(placeId),
+        ]);
+
+        return JSON.stringify({
+          place: { id: place.id, name: place.name, type: place.type, city: place.city, price: place.price },
+          averageRatings: ratings,
+          reviews: reviews.slice(0, 5).map((r) => ({
+            user: r.user.username,
+            overall: r.overallRating,
+            wifi: r.wifiRating,
+            noise: r.noiseRating,
+            price: r.priceRating,
+            clean: r.cleanRating,
+            comment: r.comment,
+            date: r.createdAt,
+          })),
+        });
+      }
+
+      case "create_booking": {
+        const { placeId, checkInDate, guestName } = args;
+        if (!placeId) return JSON.stringify({ error: "placeId mancante" });
+        if (!guestName || typeof guestName !== "string" || guestName.trim().length < 1) {
+          return JSON.stringify({ error: "guestName mancante o non valido" });
+        }
+        if (!checkInDate || typeof checkInDate !== "string") {
+          return JSON.stringify({ error: "checkInDate mancante. Usa formato YYYY-MM-DD" });
+        }
+        const parsedDate = new Date(checkInDate);
+        if (isNaN(parsedDate.getTime())) {
+          return JSON.stringify({ error: `Data non valida: "${checkInDate}". Usa formato YYYY-MM-DD` });
+        }
+
+        const place = await storage.getPlace(placeId);
+        if (!place) return JSON.stringify({ error: "Posto non trovato nel database" });
+
+        const booking = await storage.createBooking({
+          userId,
+          placeId,
+          checkInDate: parsedDate,
+          guestName: guestName.trim(),
+        });
+
+        return JSON.stringify({
+          success: true,
+          booking: {
+            id: booking.id,
+            status: booking.status,
+            checkInDate: booking.checkInDate,
+            guestName: booking.guestName,
+          },
+          place: {
+            name: place.name,
+            type: place.type,
+            city: place.city,
+            location: place.location,
+            price: place.price,
+          },
+        });
+      }
+
+      case "search_affiliate": {
+        const { city, type, checkIn, checkOut } = args;
+        const cityEncoded = encodeURIComponent(city);
+
+        if (type === "hotels") {
+          const baseUrl = `https://search.hotellook.com/?destination=${cityEncoded}&marker=${TRAVELPAYOUTS_MARKER}`;
+          const dateParams = checkIn ? `&checkIn=${checkIn}` : "";
+          const dateParams2 = checkOut ? `&checkOut=${checkOut}` : "";
+          return JSON.stringify({
+            type: "affiliate_link",
+            provider: "Hotellook (Travelpayouts)",
+            url: `${baseUrl}${dateParams}${dateParams2}`,
+            city,
+            message: `Cerca hotel a ${city} su Hotellook`,
+          });
+        } else {
+          const baseUrl = `https://www.aviasales.com/search?destination=${cityEncoded}&marker=${TRAVELPAYOUTS_MARKER}`;
+          return JSON.stringify({
+            type: "affiliate_link",
+            provider: "Aviasales (Travelpayouts)",
+            url: baseUrl,
+            city,
+            message: `Cerca voli per ${city} su Aviasales`,
+          });
+        }
+      }
+
+      default:
+        return JSON.stringify({ error: "Funzione non riconosciuta" });
+    }
+  } catch (error: any) {
+    console.error(`Tool call error (${toolName}):`, error);
+    return JSON.stringify({ error: error.message });
+  }
+}
+
+const BASE_SYSTEM_PROMPT = `You are NomadBot, the AI travel assistant for NomadLife - a database-connected agent for digital nomads.
+
+YOU HAVE ACCESS TO THE REAL DATABASE. You MUST use your tools to answer questions about places, hotels, hostels, coworking spaces. NEVER invent or guess data.
+
+YOUR WORKFLOW:
+1. When the user asks about accommodations or places in a city → call search_places with the city name
+2. Present the REAL results from the database with names, prices, ratings
+3. If the user asks for reviews or more details → call get_place_reviews
+4. If the user says "prenota", "book", "reserva" or confirms a booking → call create_booking
+5. If NO results are found in the database → call search_affiliate to provide external booking links via Travelpayouts
+6. After booking, show a confirmation summary: "✅ Prenotazione effettuata per [Nome Hotel], check-in [data], stato: confermata"
+
+IMPORTANT RULES:
+- ALWAYS search the database first before responding about places/accommodations
+- Show real prices, ratings, and amenities from the database
+- For bookings, ALWAYS confirm place name, date, and guest name before creating
+- When showing affiliate links, format them as clickable: [Cerca hotel a City](url)
+- Answer in the same language the user writes in (Italian, English, Spanish, etc.)
+- Be friendly, concise, and practical. Use emojis sparingly.
+- When presenting places, format them clearly with name, type, price, rating
+- If the user asks about flights, use search_affiliate with type "flights"`;
 
 async function buildContextualPrompt(userId: string): Promise<string> {
   try {
-    const [events, places, cityGuides, user] = await Promise.all([
-      storage.getEvents({}).catch(() => []),
-      storage.getPlaces({}).catch(() => []),
-      storage.getCityGuides().catch(() => []),
-      storage.getUser(userId).catch(() => null),
-    ]);
-
+    const user = await storage.getUser(userId).catch(() => null);
     let context = BASE_SYSTEM_PROMPT;
 
     if (user) {
       context += `\n\nCURRENT USER: ${user.name} (@${user.username}), location: ${user.location || 'unknown'}`;
       if (user.profession) context += `, profession: ${user.profession}`;
       if (user.skills?.length) context += `, skills: ${user.skills.join(', ')}`;
-      if (user.lookingFor) context += `, looking for: ${user.lookingFor}`;
-    }
-
-    if (events.length > 0) {
-      const upcoming = events.slice(0, 5).map(e => `${e.title} in ${e.city} (${(e as any).startDate || (e as any).date || 'soon'})`).join('; ');
-      context += `\n\nUPCOMING EVENTS ON PLATFORM: ${upcoming}`;
-    }
-
-    if (places.length > 0) {
-      const topPlaces = places.slice(0, 5).map(p => `${p.name} (${p.type}) in ${p.city}`).join('; ');
-      context += `\n\nPOPULAR PLACES: ${topPlaces}`;
-    }
-
-    const cities = Array.from(new Set(cityGuides.map(g => g.city)));
-    if (cities.length > 0) {
-      context += `\n\nCITY GUIDES AVAILABLE: ${cities.join(', ')} - You can reference specific tips from these guides.`;
     }
 
     return context;
@@ -158,21 +375,73 @@ export function registerChatRoutes(app: Express): void {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      const stream = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: chatMessages,
-        stream: true,
-        max_tokens: 4096,
-      });
-
       let fullResponse = "";
+      const MAX_TOOL_ROUNDS = 5;
 
-      for await (const chunk of stream) {
-        const c = chunk.choices[0]?.delta?.content || "";
-        if (c) {
-          fullResponse += c;
-          res.write(`data: ${JSON.stringify({ content: c })}\n\n`);
+      for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: chatMessages,
+          tools: TOOLS,
+          tool_choice: "auto",
+          max_tokens: 4096,
+        });
+
+        const choice = response.choices[0];
+        const msg = choice.message;
+
+        if (msg.tool_calls && msg.tool_calls.length > 0) {
+          chatMessages.push(msg as any);
+
+          res.write(`data: ${JSON.stringify({ content: "🔍 " })}\n\n`);
+
+          for (const toolCall of msg.tool_calls) {
+            const tc = toolCall as any;
+            const fnName = tc.function.name;
+            let fnArgs: any;
+            try {
+              fnArgs = JSON.parse(tc.function.arguments);
+            } catch {
+              fnArgs = {};
+            }
+
+            const toolStatusMap: Record<string, string> = {
+              search_places: "Cerco nel database...",
+              get_place_reviews: "Carico recensioni...",
+              create_booking: "Creo prenotazione...",
+              search_affiliate: "Cerco link esterni...",
+            };
+            const statusMsg = toolStatusMap[fnName] || "Elaboro...";
+            res.write(`data: ${JSON.stringify({ content: statusMsg + "\n" })}\n\n`);
+            fullResponse += "🔍 " + statusMsg + "\n";
+
+            const result = await executeToolCall(fnName, fnArgs, userId);
+
+            chatMessages.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: result,
+            } as any);
+          }
+          continue;
         }
+
+        if (msg.content) {
+          const tokens = msg.content;
+          fullResponse += tokens;
+          const chunkSize = 20;
+          for (let i = 0; i < tokens.length; i += chunkSize) {
+            const chunk = tokens.slice(i, i + chunkSize);
+            res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+          }
+        }
+        break;
+      }
+
+      if (!fullResponse.replace(/🔍[^\n]*\n/g, "").trim()) {
+        const fallbackMsg = "Mi dispiace, non sono riuscito a elaborare la risposta. Puoi riprovare con una domanda diversa?";
+        fullResponse += fallbackMsg;
+        res.write(`data: ${JSON.stringify({ content: fallbackMsg })}\n\n`);
       }
 
       await chatStorage.createMessage(conversationId, "assistant", fullResponse);
@@ -253,9 +522,9 @@ export function registerChatRoutes(app: Express): void {
         response_format: { type: "json_object" },
       });
 
-      const content = response.choices[0]?.message?.content || "{}";
+      const resContent = response.choices[0]?.message?.content || "{}";
       try {
-        const parsed = JSON.parse(content);
+        const parsed = JSON.parse(resContent);
         res.json(parsed);
       } catch {
         res.json({ recommendations: [] });

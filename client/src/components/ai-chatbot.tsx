@@ -21,14 +21,14 @@ interface AiMessage {
 }
 
 const QUICK_PROMPTS = [
-  { icon: "🌍", label: "Best nomad cities", prompt: "What are the best cities for digital nomads in 2026?" },
-  { icon: "💰", label: "Budget tips", prompt: "Tips for living on a budget as a digital nomad?" },
-  { icon: "🏠", label: "Coworking spaces", prompt: "How to find good coworking spaces while traveling?" },
-  { icon: "✈️", label: "Visa info", prompt: "Which countries offer digital nomad visas?" },
-  { icon: "🗺️", label: "City guide", prompt: "Show me city guide tips for nearby nomad hubs based on my current location" },
-  { icon: "🤝", label: "Find collaborators", prompt: "Find digital nomads near me with complementary skills for collaboration" },
-  { icon: "🛒", label: "Local deals", prompt: "What items are available in the local marketplace near me?" },
-  { icon: "🌱", label: "Eco travel", prompt: "Help me plan an eco-friendly trip and calculate my carbon footprint savings" },
+  { icon: "🏨", label: "Hotel a Bangkok", prompt: "Cercami hotel a Bangkok con prezzi e recensioni" },
+  { icon: "💻", label: "Coworking Bali", prompt: "Quali coworking ci sono a Bali? Mostrami prezzi e Wi-Fi" },
+  { icon: "🏠", label: "Ostelli Lisbona", prompt: "Cercami ostelli a Lisbon con prezzi e valutazioni" },
+  { icon: "✈️", label: "Voli economici", prompt: "Trovami link per voli economici per Bangkok" },
+  { icon: "📋", label: "Prenota", prompt: "Voglio prenotare un hotel a Milano, cosa hai disponibile?" },
+  { icon: "🌍", label: "Nomad cities", prompt: "Quali sono le migliori città per nomadi digitali nel tuo database?" },
+  { icon: "🤝", label: "Collaboratori", prompt: "Trova nomadi vicino a me con skill complementari" },
+  { icon: "🌱", label: "Viaggio eco", prompt: "Aiutami a pianificare un viaggio eco-friendly" },
 ];
 
 export function AiChatbot() {
@@ -218,27 +218,64 @@ export function AiChatbot() {
     }
   };
 
+  const formatInline = (text: string, keyPrefix: string) => {
+    const parts = text.split(/(\*\*[^*]+\*\*|\[([^\]]+)\]\(([^)]+)\))/g);
+    const elements: React.ReactNode[] = [];
+    let idx = 0;
+    for (let k = 0; k < parts.length; k++) {
+      const part = parts[k];
+      if (!part) continue;
+      if (part.startsWith("**") && part.endsWith("**")) {
+        elements.push(<strong key={`${keyPrefix}-${idx++}`}>{part.slice(2, -2)}</strong>);
+      } else if (part.startsWith("[")) {
+        const linkText = parts[k + 1];
+        const linkUrl = parts[k + 2];
+        if (linkText && linkUrl) {
+          elements.push(
+            <a key={`${keyPrefix}-${idx++}`} href={linkUrl} target="_blank" rel="noopener noreferrer"
+              className="text-violet-500 underline hover:text-violet-400 break-all" data-testid="chatbot-link">
+              {linkText}
+            </a>
+          );
+          k += 2;
+        }
+      } else {
+        elements.push(<span key={`${keyPrefix}-${idx++}`}>{part}</span>);
+      }
+    }
+    return elements;
+  };
+
   const formatContent = (content: string) => {
     return content.split("\n").map((line, i) => {
+      if (!line.trim()) return <br key={i} />;
+
+      if (line.startsWith("✅")) {
+        return (
+          <div key={i} className="bg-emerald-500/15 border border-emerald-500/30 rounded-lg px-3 py-2 my-1" data-testid="booking-confirmation">
+            <p className="font-semibold text-emerald-700 dark:text-emerald-400">{formatInline(line, `confirm-${i}`)}</p>
+          </div>
+        );
+      }
+
+      if (line.startsWith("🔍")) {
+        return (
+          <p key={i} className="text-xs text-muted-foreground italic">{line}</p>
+        );
+      }
+
       if (line.startsWith("**") && line.endsWith("**")) {
         return <p key={i} className="font-semibold">{line.slice(2, -2)}</p>;
       }
       if (line.startsWith("- ") || line.startsWith("• ")) {
-        return <p key={i} className="ml-3">• {line.slice(2)}</p>;
+        return <p key={i} className="ml-3">• {formatInline(line.slice(2), `li-${i}`)}</p>;
       }
       if (line.match(/^\d+\.\s/)) {
-        return <p key={i} className="ml-3">{line}</p>;
+        return <p key={i} className="ml-3">{formatInline(line, `ol-${i}`)}</p>;
       }
-      const parts = line.split(/(\*\*[^*]+\*\*)/g);
       return (
         <p key={i}>
-          {parts.map((part, j) =>
-            part.startsWith("**") && part.endsWith("**") ? (
-              <strong key={j}>{part.slice(2, -2)}</strong>
-            ) : (
-              <span key={j}>{part}</span>
-            )
-          )}
+          {formatInline(line, `p-${i}`)}
         </p>
       );
     });
