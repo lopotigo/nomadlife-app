@@ -1,10 +1,7 @@
-const CACHE_NAME = 'nomadlife-v4';
+const CACHE_NAME = 'nomadlife-v5';
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
-  '/favicon.png',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/favicon.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -29,7 +26,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Handle push notifications
 self.addEventListener('push', (event) => {
   const options = {
     icon: '/icons/icon-192x192.png',
@@ -54,7 +50,6 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Handle notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
@@ -80,20 +75,13 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
   if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
-        .then((response) => {
-          if (response.ok && url.pathname.startsWith('/api/posts')) {
-            const clonedResponse = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, clonedResponse);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          return caches.match(event.request);
-        })
+        .catch(() => caches.match('/'))
     );
     return;
   }
@@ -116,26 +104,9 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-  
+
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        if (response.ok && response.type === 'basic') {
-          const clonedResponse = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clonedResponse);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cached) => {
-          if (cached) return cached;
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-          return new Response('Offline', { status: 503 });
-        });
-      })
+      .catch(() => caches.match(event.request))
   );
 });
