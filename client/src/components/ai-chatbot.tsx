@@ -290,7 +290,7 @@ export function AiChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-4 md:bottom-6 md:right-6 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] md:h-[560px] bg-card border border-border rounded-2xl shadow-2xl flex flex-col z-[60] overflow-hidden"
+            className="fixed bottom-[8.5rem] right-4 md:bottom-6 md:right-6 w-[calc(100vw-2rem)] md:w-[400px] h-[calc(100vh-10rem)] max-h-[500px] md:max-h-[560px] md:h-[560px] bg-card border border-border rounded-2xl shadow-2xl flex flex-col z-[60] overflow-hidden"
             data-testid="ai-chatbot-panel"
           >
             <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white">
