@@ -65,6 +65,7 @@ Session-based authentication manages user login, signup, and secure access to pr
 - **Proactive AI Chatbot:** Enhanced NomadBot with platform context awareness (events, places, city guides, user profile). GPS-based quick prompts for city guides, collaborators, local deals, eco travel.
 - **Eco Trip Card:** Shareable eco-trip card with CO2 stats, eco score (A+/A/B/C), circular progress, social sharing. Component: `EcoTripButton` in trip detail pages.
 - **Overpass API Integration:** Real coworking/hotel/hostel/café data from OpenStreetMap via Overpass API. Route: `GET /api/places/overpass?city=X&type=Y&radius=Z` or `?lat=X&lng=Y`. Multi-endpoint failover (kumi, de, mail.ru). In-memory cache (30min TTL). Merges with local DB places (local priority). Service: `server/overpass.ts`. Coworking page updated with GPS nearby search, city quick-search pills, radius slider, source badges (OSM/local), Google Maps links.
+- **Crowdsourcing Spot:** Users can add new work spots (Café, Coworking, Biblioteca) to the map via FAB menu. Form: name, category, Wi-Fi quality (1-5 stars), power outlets toggle, GPS auto-position, optional notes. Animated radial FAB menu with 3 options: Aggiungi Spot, Crea Evento, Nuovo Post. Spots render as colored markers (amber/green/indigo) with clickable popups showing details. Routes: `GET/POST /api/locations`. Schema: `locations` table. Filter toggle in map filters panel.
 
 ## External Dependencies
 
