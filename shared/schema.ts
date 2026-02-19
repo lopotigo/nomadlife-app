@@ -770,6 +770,32 @@ export const insertCityGuideSchema = createInsertSchema(cityGuides).omit({
 export type InsertCityGuide = z.infer<typeof insertCityGuideSchema>;
 export type CityGuide = typeof cityGuides.$inferSelect;
 
+// Blog Posts - Travel guides, tips, and articles for SEO
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  excerpt: text("excerpt").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull(),
+  city: text("city"),
+  country: text("country"),
+  imageUrl: text("image_url"),
+  tags: text("tags").array(),
+  author: text("author").default("NomadLife Team").notNull(),
+  published: boolean("published").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
+
 // Crowdsourced Locations (Spots)
 export const locations = pgTable("locations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
