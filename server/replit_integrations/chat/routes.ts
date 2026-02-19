@@ -63,7 +63,7 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
         type: "object",
         properties: {
           city: { type: "string", description: "Destination city" },
-          type: { type: "string", enum: ["hotels", "flights", "cars", "transfers", "insurance", "all"], description: "Type of service: hotels, flights, cars, transfers, insurance, or all for a complete list" },
+          type: { type: "string", enum: ["hotels", "flights", "cars", "transfers", "insurance", "vpn", "all"], description: "Type of service: hotels, flights, cars, transfers, insurance, vpn, or all for a complete list" },
           checkIn: { type: "string", description: "Check-in date (YYYY-MM-DD) for hotels" },
           checkOut: { type: "string", description: "Check-out date (YYYY-MM-DD) for hotels" },
         },
@@ -218,6 +218,7 @@ async function executeToolCall(
             { provider: "Rentalcars", label: `🚗 Noleggio auto a ${city}`, url: buildLink(`https://www.rentalcars.com/search-results?location=${cityEncoded}`, "rentalcars") },
             { provider: "GetTransfer", label: `🚐 Transfer da ${city}`, url: buildLink(`https://www.gettransfer.com/en?from=${cityEncoded}`, "transfer") },
             { provider: "Insubuy", label: `🛡️ Assicurazione viaggio`, url: buildLink("https://www.insubuy.com/travel-medical-insurance/", "insurance") },
+            { provider: "NordVPN", label: `🔒 VPN per WiFi sicuro`, url: buildLink("https://nordvpn.com/", "nordvpn") },
           ];
           return JSON.stringify({ type: "affiliate_links", city, links });
         }
@@ -243,7 +244,12 @@ async function executeToolCall(
           return JSON.stringify({ type: "affiliate_link", provider: "Insubuy", url, city: "", message: "Assicurazione viaggio internazionale" });
         }
 
-        return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, all" });
+        if (type === "vpn") {
+          const url = buildLink("https://nordvpn.com/", "nordvpn");
+          return JSON.stringify({ type: "affiliate_link", provider: "NordVPN", url, city: "", message: "NordVPN - Proteggi la tua connessione WiFi in viaggio" });
+        }
+
+        return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, vpn, all" });
       }
 
       default:

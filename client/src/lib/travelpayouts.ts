@@ -64,6 +64,12 @@ export function searchInsurance() {
   window.open(url, "_blank");
 }
 
+export function openNordVPN() {
+  const targetUrl = "https://nordvpn.com/";
+  const url = TP_MARKER ? buildTpRedirect(targetUrl, "nordvpn") : targetUrl;
+  window.open(url, "_blank");
+}
+
 export function getAffiliateLinks(city: string, checkin?: string, checkout?: string) {
   const cityEnc = encodeURIComponent(city);
   const links = [];
@@ -121,6 +127,14 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
     url: TP_MARKER ? buildTpRedirect("https://www.insubuy.com/travel-medical-insurance/", "insurance") : "https://www.insubuy.com/travel-medical-insurance/",
     label: "Assicurazione viaggio",
     icon: "shield",
+  });
+
+  links.push({
+    provider: "NordVPN",
+    category: "vpn",
+    url: TP_MARKER ? buildTpRedirect("https://nordvpn.com/", "nordvpn") : "https://nordvpn.com/",
+    label: "VPN per WiFi sicuro",
+    icon: "lock",
   });
 
   return links;

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink, Plane, Car, Bus, Shield } from "lucide-react";
+import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink, Plane, Car, Bus, Shield, Lock } from "lucide-react";
 import { getAffiliateLinks } from "@/lib/travelpayouts";
 import { PlaceReviews } from "@/components/place-reviews";
 import { motion, AnimatePresence } from "framer-motion";
@@ -481,7 +481,7 @@ export default function Coworking() {
                   </h3>
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {getAffiliateLinks(searchQuery).map((link) => {
-                      const iconMap: Record<string, any> = { hotel: Hotel, plane: Plane, car: Car, bus: Bus, shield: Shield };
+                      const iconMap: Record<string, any> = { hotel: Hotel, plane: Plane, car: Car, bus: Bus, shield: Shield, lock: Lock };
                       const Icon = iconMap[link.icon] || ExternalLink;
                       return (
                         <a
