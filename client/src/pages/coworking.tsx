@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink } from "lucide-react";
+import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink, Plane, Car, Bus, Shield } from "lucide-react";
+import { getAffiliateLinks } from "@/lib/travelpayouts";
 import { PlaceReviews } from "@/components/place-reviews";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -46,8 +47,9 @@ const PLACE_TYPES = [
 const AMENITIES = ["WiFi", "Coffee", "Meeting Rooms", "24/7 Access", "Kitchen", "Parking", "Air Conditioning", "Outdoor Seating"];
 
 const POPULAR_CITIES = [
-  "Bangkok", "Bali", "Lisbona", "Chiang Mai", "Barcelona", "Berlin",
-  "Milano", "Roma", "Tokyo", "Medellin", "Budapest", "Praga",
+  "Bangkok", "Bali", "Lisbon", "Chiang Mai", "Berlin", "Medellín",
+  "Mexico City", "Buenos Aires", "Porto", "Tbilisi", "Da Nang",
+  "Cape Town", "Tulum", "Playa del Carmen",
 ];
 
 interface OverpassResult {
@@ -470,6 +472,34 @@ export default function Coworking() {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {searchQuery.length >= 2 && (
+                <div className="bg-gradient-to-r from-teal-500/10 to-blue-500/10 border border-teal-500/20 rounded-2xl p-4" data-testid="travel-services-panel">
+                  <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                    <ExternalLink className="w-4 h-4 text-teal-500" />
+                    Servizi di viaggio per {searchQuery}
+                  </h3>
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {getAffiliateLinks(searchQuery).map((link) => {
+                      const iconMap: Record<string, any> = { hotel: Hotel, plane: Plane, car: Car, bus: Bus, shield: Shield };
+                      const Icon = iconMap[link.icon] || ExternalLink;
+                      return (
+                        <a
+                          key={link.provider}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-2 bg-background/80 hover:bg-teal-500/20 border border-border hover:border-teal-500/40 rounded-xl text-xs font-medium whitespace-nowrap transition-all"
+                          data-testid={`affiliate-link-${link.provider.toLowerCase()}`}
+                        >
+                          <Icon className="w-3.5 h-3.5 text-teal-500" />
+                          {link.label}
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">

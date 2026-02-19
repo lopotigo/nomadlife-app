@@ -58,12 +58,12 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "search_affiliate",
-      description: "Generate Travelpayouts affiliate links for flights and hotels when no results are found in the local database, or when the user specifically asks for flight/hotel booking links.",
+      description: "Generate Travelpayouts affiliate links for flights, hotels, car rentals, transfers, and travel insurance. Use when no local DB results, or when user asks for booking/travel services.",
       parameters: {
         type: "object",
         properties: {
           city: { type: "string", description: "Destination city" },
-          type: { type: "string", enum: ["hotels", "flights"], description: "Type of affiliate link to generate" },
+          type: { type: "string", enum: ["hotels", "flights", "cars", "transfers", "insurance", "all"], description: "Type of service: hotels, flights, cars, transfers, insurance, or all for a complete list" },
           checkIn: { type: "string", description: "Check-in date (YYYY-MM-DD) for hotels" },
           checkOut: { type: "string", description: "Check-out date (YYYY-MM-DD) for hotels" },
         },
@@ -73,7 +73,7 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   },
 ];
 
-const TRAVELPAYOUTS_MARKER = "578583";
+const TRAVELPAYOUTS_MARKER = process.env.VITE_TRAVELPAYOUTS_MARKER || "578583";
 
 async function executeToolCall(
   toolName: string,
@@ -205,28 +205,45 @@ async function executeToolCall(
       case "search_affiliate": {
         const { city, type, checkIn, checkOut } = args;
         const cityEncoded = encodeURIComponent(city);
+        const m = TRAVELPAYOUTS_MARKER;
+
+        const buildLink = (targetUrl: string, subId: string) =>
+          `https://tp.media/r?marker=${m}.${subId}&trs=nomadlife&p=4370&u=${encodeURIComponent(targetUrl)}`;
+
+        if (type === "all") {
+          const links = [
+            { provider: "Hotellook", label: `🏨 Hotel a ${city}`, url: buildLink(`https://search.hotellook.com/?destination=${cityEncoded}&adults=1${checkIn ? `&checkIn=${checkIn}` : ""}${checkOut ? `&checkOut=${checkOut}` : ""}`, "hotels") },
+            { provider: "Aviasales", label: `✈️ Voli per ${city}`, url: buildLink(`https://www.aviasales.com/search?destination_name=${cityEncoded}&adults=1`, "flights") },
+            { provider: "Kiwi.com", label: `🛫 Voli low-cost per ${city}`, url: buildLink(`https://www.kiwi.com/en/search/results?to=${cityEncoded}`, "kiwi") },
+            { provider: "Rentalcars", label: `🚗 Noleggio auto a ${city}`, url: buildLink(`https://www.rentalcars.com/search-results?location=${cityEncoded}`, "rentalcars") },
+            { provider: "GetTransfer", label: `🚐 Transfer da ${city}`, url: buildLink(`https://www.gettransfer.com/en?from=${cityEncoded}`, "transfer") },
+            { provider: "Insubuy", label: `🛡️ Assicurazione viaggio`, url: buildLink("https://www.insubuy.com/travel-medical-insurance/", "insurance") },
+          ];
+          return JSON.stringify({ type: "affiliate_links", city, links });
+        }
 
         if (type === "hotels") {
-          const baseUrl = `https://search.hotellook.com/?destination=${cityEncoded}&marker=${TRAVELPAYOUTS_MARKER}`;
-          const dateParams = checkIn ? `&checkIn=${checkIn}` : "";
-          const dateParams2 = checkOut ? `&checkOut=${checkOut}` : "";
-          return JSON.stringify({
-            type: "affiliate_link",
-            provider: "Hotellook (Travelpayouts)",
-            url: `${baseUrl}${dateParams}${dateParams2}`,
-            city,
-            message: `Cerca hotel a ${city} su Hotellook`,
-          });
-        } else {
-          const baseUrl = `https://www.aviasales.com/search?destination=${cityEncoded}&marker=${TRAVELPAYOUTS_MARKER}`;
-          return JSON.stringify({
-            type: "affiliate_link",
-            provider: "Aviasales (Travelpayouts)",
-            url: baseUrl,
-            city,
-            message: `Cerca voli per ${city} su Aviasales`,
-          });
+          const url = buildLink(`https://search.hotellook.com/?destination=${cityEncoded}&adults=1${checkIn ? `&checkIn=${checkIn}` : ""}${checkOut ? `&checkOut=${checkOut}` : ""}`, "hotels");
+          return JSON.stringify({ type: "affiliate_link", provider: "Hotellook", url, city, message: `Cerca hotel a ${city} su Hotellook` });
         }
+        if (type === "flights") {
+          const url = buildLink(`https://www.aviasales.com/search?destination_name=${cityEncoded}&adults=1`, "flights");
+          return JSON.stringify({ type: "affiliate_link", provider: "Aviasales", url, city, message: `Cerca voli per ${city} su Aviasales` });
+        }
+        if (type === "cars") {
+          const url = buildLink(`https://www.rentalcars.com/search-results?location=${cityEncoded}`, "rentalcars");
+          return JSON.stringify({ type: "affiliate_link", provider: "Rentalcars", url, city, message: `Noleggio auto a ${city}` });
+        }
+        if (type === "transfers") {
+          const url = buildLink(`https://www.gettransfer.com/en?from=${cityEncoded}`, "transfer");
+          return JSON.stringify({ type: "affiliate_link", provider: "GetTransfer", url, city, message: `Transfer da ${city}` });
+        }
+        if (type === "insurance") {
+          const url = buildLink("https://www.insubuy.com/travel-medical-insurance/", "insurance");
+          return JSON.stringify({ type: "affiliate_link", provider: "Insubuy", url, city: "", message: "Assicurazione viaggio internazionale" });
+        }
+
+        return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, all" });
       }
 
       default:
@@ -247,18 +264,23 @@ YOUR WORKFLOW:
 2. Present the REAL results from the database with names, prices, ratings
 3. If the user asks for reviews or more details → call get_place_reviews
 4. If the user says "prenota", "book", "reserva" or confirms a booking → call create_booking
-5. If NO results are found in the database → call search_affiliate to provide external booking links via Travelpayouts
+5. If NO results are found in the database → call search_affiliate with type "all" to provide a complete set of booking links
 6. After booking, show a confirmation summary: "✅ Prenotazione effettuata per [Nome Hotel], check-in [data], stato: confermata"
+7. For flights → use search_affiliate with type "flights" (Aviasales + Kiwi.com)
+8. For car rentals → use search_affiliate with type "cars" (Rentalcars)
+9. For airport/city transfers → use search_affiliate with type "transfers" (GetTransfer)
+10. For travel insurance → use search_affiliate with type "insurance" (Insubuy)
 
 IMPORTANT RULES:
 - ALWAYS search the database first before responding about places/accommodations
 - Show real prices, ratings, and amenities from the database
 - For bookings, ALWAYS confirm place name, date, and guest name before creating
-- When showing affiliate links, format them as clickable: [Cerca hotel a City](url)
+- When showing affiliate links, format them as clickable markdown links: [Label](url)
 - Answer in the same language the user writes in (Italian, English, Spanish, etc.)
 - Be friendly, concise, and practical. Use emojis sparingly.
 - When presenting places, format them clearly with name, type, price, rating
-- If the user asks about flights, use search_affiliate with type "flights"`;
+- When the user asks about a city, proactively offer ALL useful services (hotels, flights, cars, transfers, insurance) using search_affiliate with type "all"
+- Available affiliate services: Hotellook (hotels), Aviasales (flights), Kiwi.com (low-cost flights), Rentalcars (car rental), GetTransfer (transfers), Insubuy (travel insurance)`;
 
 async function buildContextualPrompt(userId: string): Promise<string> {
   try {
