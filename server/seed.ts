@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { db } from "./db";
-import { blogPosts, places, events, users, posts, chatGroups, messages } from "@shared/schema";
+import { blogPosts, places, events, users, posts, chatGroups, messages, vendors, products } from "@shared/schema";
 import { sql } from "drizzle-orm";
 import seedData from "./seed-data.json";
 
@@ -159,6 +159,48 @@ export async function autoSeed() {
         });
       }
       console.log(`Created ${seedData.events.length} events`);
+    }
+
+    const [{ count: vendorCount }] = await db.select({ count: sql<number>`count(*)` }).from(vendors);
+    if (Number(vendorCount) === 0 && (seedData as any).vendors?.length > 0) {
+      const vendorMap: Record<string, string> = {};
+      for (const v of (seedData as any).vendors) {
+        const [created] = await db.insert(vendors).values({
+          name: v.name,
+          description: v.description || null,
+          logo: v.logo || null,
+          website: v.website || null,
+          email: v.email || null,
+          category: v.category,
+          isVerified: v.is_verified ?? false,
+          isActive: v.is_active ?? true,
+        }).returning();
+        vendorMap[v.name] = created.id;
+      }
+      console.log(`Created ${(seedData as any).vendors.length} vendors`);
+
+      if ((seedData as any).products?.length > 0) {
+        for (const p of (seedData as any).products) {
+          const vendorId = vendorMap[p.vendor_name];
+          if (!vendorId) continue;
+          await db.insert(products).values({
+            vendorId,
+            name: p.name,
+            description: p.description || null,
+            imageUrl: p.image_url || null,
+            price: p.price || null,
+            currency: p.currency || "EUR",
+            originalPrice: p.original_price || null,
+            discountPercent: p.discount_percent || null,
+            category: p.category,
+            affiliateUrl: p.affiliate_url || null,
+            tags: p.tags || null,
+            isFeatured: p.is_featured ?? false,
+            isActive: p.is_active ?? true,
+          });
+        }
+        console.log(`Created ${(seedData as any).products.length} products`);
+      }
     }
 
     console.log("Auto-seed completed successfully!");

@@ -1407,5 +1407,361 @@
       "latitude": 40.9232659,
       "longitude": 9.5027442
     }
+  ],
+  "vendors": [
+    {
+      "name": "Airalo",
+      "description": "eSIM globali per viaggiatori. Connettiti in oltre 190 paesi.",
+      "logo": "https://images.unsplash.com/photo-1596558450268-9c27524ba856?w=100",
+      "website": "https://www.airalo.com",
+      "email": null,
+      "category": "esim",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "Holafly",
+      "description": "eSIM internazionali con dati illimitati in oltre 60 destinazioni.",
+      "logo": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=100",
+      "website": "https://www.holafly.com",
+      "email": null,
+      "category": "esim",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "Nomatic",
+      "description": "Zaini e bagagli progettati per nomadi digitali e viaggiatori frequenti.",
+      "logo": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=100",
+      "website": "https://www.nomatic.com",
+      "email": null,
+      "category": "bags",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "SafetyWing",
+      "description": "Assicurazione sanitaria e viaggi per nomadi digitali e remote workers.",
+      "logo": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=100",
+      "website": "https://www.safetywing.com",
+      "email": null,
+      "category": "insurance",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "Anker",
+      "description": "Accessori tech di qualità: power bank, caricatori e cavi.",
+      "logo": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=100",
+      "website": "https://www.anker.com",
+      "email": null,
+      "category": "tech",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "Notion",
+      "description": "Lo spazio di lavoro all-in-one per appunti, progetti e database.",
+      "logo": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=100",
+      "website": "https://www.notion.so",
+      "email": null,
+      "category": "software",
+      "is_verified": false,
+      "is_active": true
+    },
+    {
+      "name": "Amazon Test cSiHkA",
+      "description": "",
+      "logo": "",
+      "website": "",
+      "email": "",
+      "category": "tech",
+      "is_verified": false,
+      "is_active": true
+    },
+    {
+      "name": "World Nomads",
+      "description": "Assicurazione viaggio per avventurieri e nomadi. Copertura in 200+ paesi con attività sportive incluse.",
+      "logo": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=100",
+      "website": "https://www.worldnomads.com",
+      "email": null,
+      "category": "insurance",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "Genki",
+      "description": "Assicurazione sanitaria internazionale pensata per nomadi digitali e freelancer. Flessibile e mensile.",
+      "logo": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=100",
+      "website": "https://www.genki.world",
+      "email": null,
+      "category": "insurance",
+      "is_verified": true,
+      "is_active": true
+    },
+    {
+      "name": "PassportCard",
+      "description": "Assicurazione sanitaria premium per expat e nomadi digitali con pagamento diretto in tutto il mondo.",
+      "logo": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=100",
+      "website": "https://www.passportcard.com",
+      "email": null,
+      "category": "insurance",
+      "is_verified": true,
+      "is_active": true
+    }
+  ],
+  "products": [
+    {
+      "name": "Travel Pack 30L",
+      "description": "Zaino da viaggio espandibile da 20L a 30L. Scomparto laptop 16\", organizer accessori tech.",
+      "image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400",
+      "price": 249.99,
+      "currency": "EUR",
+      "original_price": 299.99,
+      "discount_percent": 17,
+      "category": "bags",
+      "affiliate_url": "https://www.nomatic.com/travel-pack",
+      "tags": [
+        "zaino",
+        "laptop",
+        "viaggio",
+        "tech"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "Nomatic"
+    },
+    {
+      "name": "Navigator Carry-All 35L",
+      "description": "Borsone convertibile zaino/valigetta. Perfetto per nomadi digitali.",
+      "image_url": "https://images.unsplash.com/photo-1622260614153-03223fb72052?w=400",
+      "price": 189.99,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "bags",
+      "affiliate_url": "https://www.nomatic.com/navigator",
+      "tags": [
+        "borsone",
+        "convertibile",
+        "viaggio"
+      ],
+      "is_featured": false,
+      "is_active": true,
+      "vendor_name": "Nomatic"
+    },
+    {
+      "name": "Anker PowerCore 26800",
+      "description": "Power bank da 26800mAh con 3 porte USB. Ricarica iPhone fino a 7 volte.",
+      "image_url": "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400",
+      "price": 45.99,
+      "currency": "EUR",
+      "original_price": 59.99,
+      "discount_percent": 23,
+      "category": "tech",
+      "affiliate_url": "https://www.anker.com/powercore",
+      "tags": [
+        "powerbank",
+        "batteria",
+        "usb"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "Anker"
+    },
+    {
+      "name": "Notion Plus",
+      "description": "Workspace illimitato per team e progetti. Integra documenti, database e calendario.",
+      "image_url": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400",
+      "price": 8,
+      "currency": "EUR",
+      "original_price": 10,
+      "discount_percent": 20,
+      "category": "software",
+      "affiliate_url": "https://www.notion.so/pricing",
+      "tags": [
+        "produttività",
+        "note",
+        "progetti"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "Notion"
+    },
+    {
+      "name": "Nomad Insurance",
+      "description": "Assicurazione sanitaria mensile per nomadi digitali. Include COVID-19 e attività avventura.",
+      "image_url": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400",
+      "price": 45.08,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.safetywing.com/nomad-insurance",
+      "tags": [
+        "assicurazione",
+        "salute",
+        "nomadi"
+      ],
+      "is_featured": false,
+      "is_active": true,
+      "vendor_name": "SafetyWing"
+    },
+    {
+      "name": "Anker Nano II 65W",
+      "description": "Caricatore USB-C compatto da 65W. Ricarica laptop e smartphone velocemente.",
+      "image_url": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400",
+      "price": 35.99,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "tech",
+      "affiliate_url": "https://www.anker.com/nano",
+      "tags": [
+        "caricatore",
+        "usb-c",
+        "laptop"
+      ],
+      "is_featured": false,
+      "is_active": true,
+      "vendor_name": "Anker"
+    },
+    {
+      "name": "Remote Health",
+      "description": "Assicurazione sanitaria completa per remote workers. Copertura mondiale.",
+      "image_url": "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=400",
+      "price": 156,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.safetywing.com/remote-health",
+      "tags": [
+        "assicurazione",
+        "salute",
+        "premium"
+      ],
+      "is_featured": false,
+      "is_active": true,
+      "vendor_name": "SafetyWing"
+    },
+    {
+      "name": "eSIM Discover Global",
+      "description": "Connettiti in oltre 100 paesi con una sola eSIM. Ideale per viaggi multi-destinazione.",
+      "image_url": "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400",
+      "price": 19.99,
+      "currency": "EUR",
+      "original_price": 24.99,
+      "discount_percent": 20,
+      "category": "esim",
+      "affiliate_url": "https://www.airalo.com/global-esim",
+      "tags": [
+        "esim",
+        "global",
+        "viaggio"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "Airalo"
+    },
+    {
+      "name": "Nomad Insurance Travel",
+      "description": "Copertura viaggio completa: ritardi voli, bagaglio perso, responsabilità civile. Complementare all'assicurazione sanitaria.",
+      "image_url": "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=400",
+      "price": 11,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.safetywing.com/nomad-insurance",
+      "tags": [
+        "assicurazione",
+        "viaggio",
+        "bagaglio",
+        "voli"
+      ],
+      "is_featured": false,
+      "is_active": true,
+      "vendor_name": "SafetyWing"
+    },
+    {
+      "name": "Standard Plan",
+      "description": "Assicurazione viaggio con copertura medica, bagaglio smarrito, cancellazione volo e 200+ attività avventura incluse.",
+      "image_url": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400",
+      "price": 35,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.worldnomads.com",
+      "tags": [
+        "assicurazione",
+        "viaggio",
+        "avventura"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "World Nomads"
+    },
+    {
+      "name": "World Explorer",
+      "description": "Assicurazione sanitaria mensile senza contratto. Cancella quando vuoi. Copertura mondiale incluso USA.",
+      "image_url": "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400",
+      "price": 35.7,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.genki.world/explorer",
+      "tags": [
+        "assicurazione",
+        "salute",
+        "mensile",
+        "flessibile"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "Genki"
+    },
+    {
+      "name": "Resident",
+      "description": "Assicurazione sanitaria per chi vive all'estero a lungo termine. Copertura completa con dentista e oculista.",
+      "image_url": "https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=400",
+      "price": 95,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.genki.world/resident",
+      "tags": [
+        "assicurazione",
+        "salute",
+        "expat",
+        "lungo-termine"
+      ],
+      "is_featured": false,
+      "is_active": true,
+      "vendor_name": "Genki"
+    },
+    {
+      "name": "Nomad Plan",
+      "description": "Assicurazione sanitaria con carta di pagamento diretto. Niente anticipo, paghi con la card in ospedale ovunque nel mondo.",
+      "image_url": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400",
+      "price": 120,
+      "currency": "EUR",
+      "original_price": null,
+      "discount_percent": null,
+      "category": "insurance",
+      "affiliate_url": "https://www.passportcard.com",
+      "tags": [
+        "assicurazione",
+        "salute",
+        "carta",
+        "pagamento-diretto"
+      ],
+      "is_featured": true,
+      "is_active": true,
+      "vendor_name": "PassportCard"
+    }
   ]
 }
