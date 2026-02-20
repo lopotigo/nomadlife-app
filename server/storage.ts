@@ -252,6 +252,15 @@ export interface IStorage {
   getLocations(): Promise<(schema.Location & { user: User })[]>;
   getLocationById(id: string): Promise<(schema.Location & { user: User }) | undefined>;
   createLocation(location: schema.InsertLocation): Promise<schema.Location>;
+
+  // Blog Posts
+  getBlogPosts(filters?: { category?: string; city?: string; published?: boolean }): Promise<schema.BlogPost[]>;
+  getBlogPostBySlug(slug: string): Promise<schema.BlogPost | undefined>;
+  getBlogPostById(id: string): Promise<schema.BlogPost | undefined>;
+  createBlogPost(post: schema.InsertBlogPost): Promise<schema.BlogPost>;
+  updateBlogPost(id: string, updates: Partial<schema.BlogPost>): Promise<schema.BlogPost | undefined>;
+  deleteBlogPost(id: string): Promise<boolean>;
+  getBlogCategories(): Promise<string[]>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -1934,6 +1943,53 @@ export class DrizzleStorage implements IStorage {
   async createLocation(location: schema.InsertLocation): Promise<schema.Location> {
     const [newLocation] = await this.db.insert(schema.locations).values(location).returning();
     return newLocation;
+  }
+
+  // Blog Posts
+  async getBlogPosts(filters?: { category?: string; city?: string; published?: boolean }): Promise<schema.BlogPost[]> {
+    const conditions = [];
+    if (filters?.category) conditions.push(eq(schema.blogPosts.category, filters.category));
+    if (filters?.city) conditions.push(eq(schema.blogPosts.city, filters.city));
+    if (filters?.published !== undefined) conditions.push(eq(schema.blogPosts.published, filters.published));
+    else conditions.push(eq(schema.blogPosts.published, true));
+
+    const result = await this.db.select().from(schema.blogPosts)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(schema.blogPosts.createdAt));
+    return result;
+  }
+
+  async getBlogPostBySlug(slug: string): Promise<schema.BlogPost | undefined> {
+    const result = await this.db.select().from(schema.blogPosts).where(eq(schema.blogPosts.slug, slug)).limit(1);
+    return result[0];
+  }
+
+  async getBlogPostById(id: string): Promise<schema.BlogPost | undefined> {
+    const result = await this.db.select().from(schema.blogPosts).where(eq(schema.blogPosts.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createBlogPost(post: schema.InsertBlogPost): Promise<schema.BlogPost> {
+    const [newPost] = await this.db.insert(schema.blogPosts).values(post).returning();
+    return newPost;
+  }
+
+  async updateBlogPost(id: string, updates: Partial<schema.BlogPost>): Promise<schema.BlogPost | undefined> {
+    const [updated] = await this.db.update(schema.blogPosts).set({ ...updates, updatedAt: new Date() }).where(eq(schema.blogPosts.id, id)).returning();
+    return updated;
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.blogPosts).where(eq(schema.blogPosts.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getBlogCategories(): Promise<string[]> {
+    const result = await this.db
+      .selectDistinct({ category: schema.blogPosts.category })
+      .from(schema.blogPosts)
+      .where(eq(schema.blogPosts.published, true));
+    return result.map(r => r.category);
   }
 }
 

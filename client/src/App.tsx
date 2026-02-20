@@ -31,6 +31,8 @@ import Marketplace from "@/pages/marketplace";
 import Admin from "@/pages/admin";
 import SavedPosts from "@/pages/saved-posts";
 import Matchmaking from "@/pages/matchmaking";
+import Blog from "@/pages/blog";
+import BlogArticle from "@/pages/blog-article";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -71,6 +73,8 @@ function Router() {
       <Route path="/saved">{() => <ProtectedRoute component={SavedPosts} />}</Route>
       <Route path="/matchmaking">{() => <ProtectedRoute component={Matchmaking} />}</Route>
       <Route path="/admin">{() => <ProtectedRoute component={Admin} />}</Route>
+      <Route path="/blog" component={Blog} />
+      <Route path="/blog/:slug" component={BlogArticle} />
       <Route component={NotFound} />
     </Switch>
   );

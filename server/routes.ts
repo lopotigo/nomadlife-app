@@ -5,7 +5,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import webpush from "web-push";
-import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema, insertPlaceReviewSchema, updateTripStopSchema } from "@shared/schema";
+import { insertUserSchema, insertPostSchema, insertPlaceSchema, insertBookingSchema, insertChatGroupSchema, insertMessageSchema, insertSubscriptionSchema, insertEventSchema, insertEventRegistrationSchema, insertTripSchema, insertTripStopSchema, insertTripExpenseSchema, insertNotificationSchema, insertCitySchema, insertCityFeedbackSchema, insertPushSubscriptionSchema, insertPlaceReviewSchema, updateTripStopSchema, insertBlogPostSchema } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { registerChatRoutes } from "./replit_integrations/chat";
@@ -2363,6 +2363,7 @@ export async function registerRoutes(
     try {
       const posts = await storage.getPosts(200);
       const events = await storage.getEvents();
+      const blogPosts = await storage.getBlogPosts({ published: true });
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
@@ -2373,6 +2374,23 @@ export async function registerRoutes(
     <loc>${baseUrl}${page.url}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
+  </url>`;
+      }
+
+      xml += `
+  <url>
+    <loc>${baseUrl}/blog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+
+      for (const bp of blogPosts) {
+        xml += `
+  <url>
+    <loc>${baseUrl}/blog/${bp.slug}</loc>
+    <lastmod>${bp.updatedAt.toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>`;
       }
 
@@ -2556,6 +2574,53 @@ export async function registerRoutes(
         .filter(n => n.id !== user.id)
         .map(({ password, ...n }) => n);
       res.send(filtered);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== BLOG POSTS (PUBLIC - NO AUTH REQUIRED) ==========
+  app.get("/api/blog", async (req, res) => {
+    try {
+      const { category, city } = req.query;
+      const posts = await storage.getBlogPosts({
+        category: category as string,
+        city: city as string,
+        published: true,
+      });
+      res.send(posts);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/blog/categories", async (_req, res) => {
+    try {
+      const categories = await storage.getBlogCategories();
+      res.send(categories);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/blog/:slug", async (req, res) => {
+    try {
+      const post = await storage.getBlogPostBySlug(req.params.slug);
+      if (!post || !post.published) return res.status(404).send({ error: "Article not found" });
+      res.send(post);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/blog", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
+      const parsed = insertBlogPostSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).send({ error: parsed.error.message });
+      const post = await storage.createBlogPost(parsed.data);
+      res.status(201).send(post);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

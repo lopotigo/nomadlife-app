@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark, Users } from "lucide-react";
+import { Map, Briefcase, User, MessageSquare, Plane, Search, Calendar, ShoppingBag, MoreHorizontal, ShieldCheck, Bookmark, Users, BookOpen } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
@@ -63,6 +63,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
           <NavItem href="/matchmaking" icon={Users} label="Matchmaking" active={location === "/matchmaking"} />
+          <NavItem href="/blog" icon={BookOpen} label="Blog" active={location === "/blog" || location.startsWith("/blog/")} />
           <NavItem href="/saved" icon={Bookmark} label={t("nav.saved")} active={location === "/saved"} />
           <NavItem href="/profile" icon={User} label={t("nav.profile")} active={location === "/profile"} />
           {adminCheck?.isAdmin && (
@@ -122,6 +123,12 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
                 <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/marketplace" ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
                   <ShoppingBag className="w-6 h-6" />
                   <span className="text-xs">{t("nav.marketplace")}</span>
+                </div>
+              </Link>
+              <Link href="/blog" onClick={() => setShowMoreMenu(false)}>
+                <div className={`flex flex-col items-center gap-1 p-2 rounded-xl ${location === "/blog" || location.startsWith("/blog/") ? "bg-primary/10 text-primary" : "text-muted-foreground"}`}>
+                  <BookOpen className="w-6 h-6" />
+                  <span className="text-xs">Blog</span>
                 </div>
               </Link>
               <Link href="/saved" onClick={() => setShowMoreMenu(false)}>
