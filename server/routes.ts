@@ -2605,6 +2605,16 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/blog/my-posts", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const posts = await storage.getBlogPostsByUserId(user.id);
+      res.send(posts);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/blog/categories", async (_req, res) => {
     try {
       const categories = await storage.getBlogCategories();
@@ -2627,8 +2637,11 @@ export async function registerRoutes(
   app.post("/api/blog", requireAuth, async (req, res) => {
     try {
       const user = req.user as User;
-      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
-      const parsed = insertBlogPostSchema.safeParse(req.body);
+      const parsed = insertBlogPostSchema.safeParse({
+        ...req.body,
+        userId: user.id,
+        author: req.body.author || user.name || user.username,
+      });
       if (!parsed.success) return res.status(400).send({ error: parsed.error.message });
       const post = await storage.createBlogPost(parsed.data);
       res.status(201).send(post);
@@ -2640,9 +2653,22 @@ export async function registerRoutes(
   app.put("/api/blog/:id", requireAuth, async (req, res) => {
     try {
       const user = req.user as User;
-      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
-      const updated = await storage.updateBlogPost(req.params.id, req.body);
-      if (!updated) return res.status(404).send({ error: "Post not found" });
+      const post = await storage.getBlogPostById(req.params.id);
+      if (!post) return res.status(404).send({ error: "Post not found" });
+      if (post.userId !== user.id && !user.isAdmin) return res.status(403).send({ error: "Non autorizzato" });
+      const { title, slug, excerpt, content, category, city, country, imageUrl, tags, published } = req.body;
+      const allowedUpdates: any = {};
+      if (title !== undefined) allowedUpdates.title = title;
+      if (slug !== undefined) allowedUpdates.slug = slug;
+      if (excerpt !== undefined) allowedUpdates.excerpt = excerpt;
+      if (content !== undefined) allowedUpdates.content = content;
+      if (category !== undefined) allowedUpdates.category = category;
+      if (city !== undefined) allowedUpdates.city = city;
+      if (country !== undefined) allowedUpdates.country = country;
+      if (imageUrl !== undefined) allowedUpdates.imageUrl = imageUrl;
+      if (tags !== undefined) allowedUpdates.tags = tags;
+      if (published !== undefined) allowedUpdates.published = published;
+      const updated = await storage.updateBlogPost(req.params.id, allowedUpdates);
       res.send(updated);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
@@ -2652,9 +2678,10 @@ export async function registerRoutes(
   app.delete("/api/blog/:id", requireAuth, async (req, res) => {
     try {
       const user = req.user as User;
-      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
+      const post = await storage.getBlogPostById(req.params.id);
+      if (!post) return res.status(404).send({ error: "Post not found" });
+      if (post.userId !== user.id && !user.isAdmin) return res.status(403).send({ error: "Non autorizzato" });
       const deleted = await storage.deleteBlogPost(req.params.id);
-      if (!deleted) return res.status(404).send({ error: "Post not found" });
       res.send({ success: true });
     } catch (error: any) {
       res.status(500).send({ error: error.message });

@@ -254,9 +254,10 @@ export interface IStorage {
   createLocation(location: schema.InsertLocation): Promise<schema.Location>;
 
   // Blog Posts
-  getBlogPosts(filters?: { category?: string; city?: string; published?: boolean }): Promise<schema.BlogPost[]>;
+  getBlogPosts(filters?: { category?: string; city?: string; published?: boolean; userId?: string }): Promise<schema.BlogPost[]>;
   getBlogPostBySlug(slug: string): Promise<schema.BlogPost | undefined>;
   getBlogPostById(id: string): Promise<schema.BlogPost | undefined>;
+  getBlogPostsByUserId(userId: string): Promise<schema.BlogPost[]>;
   createBlogPost(post: schema.InsertBlogPost): Promise<schema.BlogPost>;
   updateBlogPost(id: string, updates: Partial<schema.BlogPost>): Promise<schema.BlogPost | undefined>;
   deleteBlogPost(id: string): Promise<boolean>;
@@ -1946,17 +1947,24 @@ export class DrizzleStorage implements IStorage {
   }
 
   // Blog Posts
-  async getBlogPosts(filters?: { category?: string; city?: string; published?: boolean }): Promise<schema.BlogPost[]> {
+  async getBlogPosts(filters?: { category?: string; city?: string; published?: boolean; userId?: string }): Promise<schema.BlogPost[]> {
     const conditions = [];
     if (filters?.category) conditions.push(eq(schema.blogPosts.category, filters.category));
     if (filters?.city) conditions.push(eq(schema.blogPosts.city, filters.city));
+    if (filters?.userId) conditions.push(eq(schema.blogPosts.userId, filters.userId));
     if (filters?.published !== undefined) conditions.push(eq(schema.blogPosts.published, filters.published));
-    else conditions.push(eq(schema.blogPosts.published, true));
+    else if (!filters?.userId) conditions.push(eq(schema.blogPosts.published, true));
 
     const result = await this.db.select().from(schema.blogPosts)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(schema.blogPosts.createdAt));
     return result;
+  }
+
+  async getBlogPostsByUserId(userId: string): Promise<schema.BlogPost[]> {
+    return this.db.select().from(schema.blogPosts)
+      .where(eq(schema.blogPosts.userId, userId))
+      .orderBy(desc(schema.blogPosts.createdAt));
   }
 
   async getBlogPostBySlug(slug: string): Promise<schema.BlogPost | undefined> {

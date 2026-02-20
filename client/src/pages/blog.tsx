@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Search, BookOpen, MapPin, Globe, Plane, Shield, Wallet, Wifi, Calendar, ChevronRight, ArrowLeft } from "lucide-react";
+import { Search, BookOpen, MapPin, Globe, Plane, Shield, Wallet, Wifi, Calendar, ChevronRight, ArrowLeft, PenLine } from "lucide-react";
 import { motion } from "framer-motion";
 
 type BlogPost = {
   id: string;
+  userId: string | null;
   slug: string;
   title: string;
   excerpt: string;
@@ -100,11 +101,13 @@ export default function Blog() {
                 <p className="text-sm text-muted-foreground">Esperienze, consigli e guide per nomadi digitali</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
-                N
-              </div>
-              <span className="font-bold text-lg hidden sm:block">NomadLife</span>
+            <div className="flex items-center gap-3">
+              <Link href="/blog/editor">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer" data-testid="button-write-article">
+                  <PenLine className="w-4 h-4" />
+                  <span className="hidden sm:inline">Scrivi</span>
+                </button>
+              </Link>
             </div>
           </div>
 

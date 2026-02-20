@@ -773,6 +773,7 @@ export type CityGuide = typeof cityGuides.$inferSelect;
 // Blog Posts - Travel guides, tips, and articles for SEO
 export const blogPosts = pgTable("blog_posts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull(),
