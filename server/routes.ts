@@ -2594,6 +2594,17 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/blog/all", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
+      const posts = await storage.getBlogPosts({});
+      res.send(posts);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/blog/categories", async (_req, res) => {
     try {
       const categories = await storage.getBlogCategories();
@@ -2621,6 +2632,30 @@ export async function registerRoutes(
       if (!parsed.success) return res.status(400).send({ error: parsed.error.message });
       const post = await storage.createBlogPost(parsed.data);
       res.status(201).send(post);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.put("/api/blog/:id", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
+      const updated = await storage.updateBlogPost(req.params.id, req.body);
+      if (!updated) return res.status(404).send({ error: "Post not found" });
+      res.send(updated);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/blog/:id", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
+      const deleted = await storage.deleteBlogPost(req.params.id);
+      if (!deleted) return res.status(404).send({ error: "Post not found" });
+      res.send({ success: true });
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

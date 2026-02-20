@@ -44,7 +44,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
       {/* Desktop Sidebar (hidden on mobile) */}
       <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-64 border-r border-border bg-card p-6">
-        <div className="flex items-center justify-between mb-10 px-2">
+        <div className="flex items-center justify-between mb-6 px-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-display font-bold text-xl">
               N
@@ -54,7 +54,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           <NotificationsDropdown />
         </div>
         
-        <nav className="flex flex-col gap-2">
+        <nav className="flex flex-col gap-1 overflow-y-auto flex-1 min-h-0 pr-1">
           <NavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
           <NavItem href="/search" icon={Search} label={t("nav.search")} active={location === "/search"} />
           <NavItem href="/travel-diary" icon={Plane} label={t("nav.travel_diary")} active={location === "/travel-diary"} />
@@ -71,7 +71,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
           )}
         </nav>
 
-        <div className="mt-auto p-4 bg-secondary/50 rounded-xl">
+        <div className="flex-shrink-0 mt-4 p-4 bg-secondary/50 rounded-xl">
           <p className="text-xs font-medium text-secondary-foreground mb-1">{t("premium.title")}</p>
           <p className="text-xs text-muted-foreground mb-3">{t("premium.subtitle")}</p>
           <Link href="/subscription">

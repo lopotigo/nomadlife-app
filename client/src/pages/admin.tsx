@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShieldCheck, Package, Store, Plus, Trash2, Edit, Eye, EyeOff, Star, 
-  BarChart3, MousePointer, ArrowLeft, Save, X, ExternalLink, Image
+  BarChart3, MousePointer, ArrowLeft, Save, X, ExternalLink, Image, BookOpen, MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
-import type { Product, Vendor } from "@shared/schema";
+import type { Product, Vendor, BlogPost } from "@shared/schema";
 
 interface AdminCheckResponse {
   isAdmin: boolean;
@@ -40,11 +40,13 @@ const categories = [
 export default function AdminPage() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"products" | "vendors" | "stats">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "vendors" | "stats" | "blog">("products");
   const [showProductForm, setShowProductForm] = useState(false);
   const [showVendorForm, setShowVendorForm] = useState(false);
+  const [showBlogForm, setShowBlogForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
+  const [editingBlogPost, setEditingBlogPost] = useState<BlogPost | null>(null);
 
   const { data: adminCheck, isLoading: checkingAdmin } = useQuery<AdminCheckResponse>({
     queryKey: ["/api/admin/check"],
@@ -62,6 +64,11 @@ export default function AdminPage() {
 
   const { data: stats } = useQuery<MarketplaceStats>({
     queryKey: ["/api/admin/stats"],
+    enabled: adminCheck?.isAdmin,
+  });
+
+  const { data: blogPosts = [] } = useQuery<BlogPost[]>({
+    queryKey: ["/api/blog/all"],
     enabled: adminCheck?.isAdmin,
   });
 
@@ -96,7 +103,7 @@ export default function AdminPage() {
               <ShieldCheck className="w-6 h-6 text-primary" />
               Admin Panel
             </h1>
-            <p className="text-muted-foreground text-sm">Gestione Marketplace</p>
+            <p className="text-muted-foreground text-sm">Gestione Marketplace & Blog</p>
           </div>
         </div>
 
@@ -166,6 +173,14 @@ export default function AdminPage() {
             <Store className="w-4 h-4 mr-2" />
             Vendor
           </Button>
+          <Button
+            variant={activeTab === "blog" ? "default" : "outline"}
+            onClick={() => setActiveTab("blog")}
+            data-testid="button-tab-blog"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            Blog
+          </Button>
         </div>
 
         {/* Products Tab */}
@@ -230,6 +245,37 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Blog Tab */}
+        {activeTab === "blog" && (
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Articoli Blog ({blogPosts.length})</h2>
+              <Button onClick={() => { setEditingBlogPost(null); setShowBlogForm(true); }} data-testid="button-new-blog">
+                <Plus className="w-4 h-4 mr-2" />
+                Nuovo Articolo
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {blogPosts.map((post) => (
+                <BlogPostCard
+                  key={post.id}
+                  post={post}
+                  onEdit={() => { setEditingBlogPost(post); setShowBlogForm(true); }}
+                  onRefresh={() => queryClient.invalidateQueries({ queryKey: ["/api/blog/all"] })}
+                />
+              ))}
+              {blogPosts.length === 0 && (
+                <Card>
+                  <CardContent className="p-8 text-center text-muted-foreground">
+                    Nessun articolo. Clicca "Nuovo Articolo" per iniziare.
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Product Form Modal */}
         <AnimatePresence>
           {showProductForm && (
@@ -258,6 +304,22 @@ export default function AdminPage() {
                 setEditingVendor(null);
                 queryClient.invalidateQueries({ queryKey: ["/api/marketplace/vendors"] });
                 queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Blog Form Modal */}
+        <AnimatePresence>
+          {showBlogForm && (
+            <BlogFormModal
+              post={editingBlogPost}
+              onClose={() => { setShowBlogForm(false); setEditingBlogPost(null); }}
+              onSuccess={() => {
+                setShowBlogForm(false);
+                setEditingBlogPost(null);
+                queryClient.invalidateQueries({ queryKey: ["/api/blog/all"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/blog"] });
               }}
             />
           )}
@@ -705,6 +767,309 @@ function VendorFormModal({ vendor, onClose, onSuccess }: {
               <>
                 <Save className="w-4 h-4 mr-2" />
                 {vendor ? "Aggiorna" : "Crea"} Vendor
+              </>
+            )}
+          </Button>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+const blogCategories = [
+  { value: "guide", label: "Guide Città" },
+  { value: "tips", label: "Consigli Pratici" },
+  { value: "lifestyle", label: "Vita Nomade" },
+  { value: "finance", label: "Finanza & Budget" },
+  { value: "tech", label: "Tech & Lavoro" },
+  { value: "travel", label: "Viaggi" },
+  { value: "events", label: "Eventi" },
+  { value: "review", label: "Recensioni" },
+];
+
+function BlogPostCard({ post, onEdit, onRefresh }: { post: BlogPost; onEdit: () => void; onRefresh: () => void }) {
+  const deleteMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/blog/${post.id}`),
+    onSuccess: onRefresh,
+  });
+
+  const togglePublishMutation = useMutation({
+    mutationFn: () => apiRequest("PUT", `/api/blog/${post.id}`, { published: !post.published }),
+    onSuccess: onRefresh,
+  });
+
+  return (
+    <Card className={`${!post.published ? "opacity-60" : ""}`}>
+      <CardContent className="p-4">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold">{post.title}</h3>
+                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">{blogCategories.find(c => c.value === post.category)?.label || post.category}</Badge>
+                  {post.city && (
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {post.city}</span>
+                  )}
+                  <span>{post.author}</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {!post.published && <Badge variant="outline">Bozza</Badge>}
+              </div>
+            </div>
+            <p className="text-sm mt-2 line-clamp-2 text-muted-foreground">{post.excerpt}</p>
+            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+              <span>Slug: /{post.slug}</span>
+              <span>·</span>
+              <span>{new Date(post.createdAt).toLocaleDateString("it-IT")}</span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="icon" onClick={onEdit} data-testid={`edit-blog-${post.id}`}>
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => togglePublishMutation.mutate()}
+              data-testid={`toggle-publish-${post.id}`}
+            >
+              {post.published ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+              data-testid={`preview-blog-${post.id}`}
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => { if (confirm("Eliminare questo articolo?")) deleteMutation.mutate(); }}
+              data-testid={`delete-blog-${post.id}`}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function BlogFormModal({ post, onClose, onSuccess }: {
+  post: BlogPost | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [formData, setFormData] = useState({
+    slug: post?.slug || "",
+    title: post?.title || "",
+    excerpt: post?.excerpt || "",
+    content: post?.content || "",
+    category: post?.category || "guide",
+    city: post?.city || "",
+    country: post?.country || "",
+    imageUrl: post?.imageUrl || "",
+    tags: post?.tags?.join(", ") || "",
+    author: post?.author || "NomadLife Team",
+    published: post?.published ?? true,
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => {
+      if (post) {
+        return apiRequest("PUT", `/api/blog/${post.id}`, data);
+      }
+      return apiRequest("POST", "/api/blog", data);
+    },
+    onSuccess,
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = {
+      ...formData,
+      city: formData.city || null,
+      country: formData.country || null,
+      imageUrl: formData.imageUrl || null,
+      tags: formData.tags ? formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : null,
+    };
+    mutation.mutate(payload);
+  };
+
+  const generateSlug = () => {
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[àáâãäå]/g, "a")
+      .replace(/[èéêë]/g, "e")
+      .replace(/[ìíîï]/g, "i")
+      .replace(/[òóôõö]/g, "o")
+      .replace(/[ùúûü]/g, "u")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    setFormData({ ...formData, slug });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-card rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">{post ? "Modifica Articolo" : "Nuovo Articolo"}</h2>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Titolo *</Label>
+            <Input
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="es. Guida Completa a Bangkok per Nomadi Digitali"
+              required
+              data-testid="input-blog-title"
+            />
+          </div>
+
+          <div>
+            <Label>Slug URL *</Label>
+            <div className="flex gap-2">
+              <Input
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                placeholder="guida-nomade-bangkok"
+                required
+                data-testid="input-blog-slug"
+              />
+              <Button type="button" variant="outline" onClick={generateSlug} data-testid="button-generate-slug">
+                Auto
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">/blog/{formData.slug || "..."}</p>
+          </div>
+
+          <div>
+            <Label>Estratto *</Label>
+            <Textarea
+              value={formData.excerpt}
+              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+              placeholder="Breve descrizione che appare nell'anteprima..."
+              rows={2}
+              required
+              data-testid="input-blog-excerpt"
+            />
+          </div>
+
+          <div>
+            <Label>Contenuto * (Markdown supportato)</Label>
+            <Textarea
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              placeholder="Scrivi il contenuto dell'articolo in Markdown..."
+              rows={12}
+              required
+              className="font-mono text-sm"
+              data-testid="input-blog-content"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Categoria *</Label>
+              <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+                <SelectTrigger data-testid="select-blog-category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {blogCategories.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Autore</Label>
+              <Input
+                value={formData.author}
+                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                placeholder="NomadLife Team"
+                data-testid="input-blog-author"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Città</Label>
+              <Input
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                placeholder="es. Bangkok"
+                data-testid="input-blog-city"
+              />
+            </div>
+            <div>
+              <Label>Paese</Label>
+              <Input
+                value={formData.country}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                placeholder="es. Thailandia"
+                data-testid="input-blog-country"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label>URL Immagine di copertina</Label>
+            <Input
+              value={formData.imageUrl}
+              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              placeholder="https://..."
+              data-testid="input-blog-image"
+            />
+          </div>
+
+          <div>
+            <Label>Tag (separati da virgola)</Label>
+            <Input
+              value={formData.tags}
+              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              placeholder="es. nomade, guida, asia, coworking"
+              data-testid="input-blog-tags"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={formData.published}
+              onCheckedChange={(v) => setFormData({ ...formData, published: v })}
+              data-testid="switch-blog-published"
+            />
+            <Label>Pubblicato</Label>
+          </div>
+
+          <Button type="submit" className="w-full" disabled={mutation.isPending} data-testid="button-save-blog">
+            {mutation.isPending ? "Salvataggio..." : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                {post ? "Aggiorna" : "Crea"} Articolo
               </>
             )}
           </Button>
