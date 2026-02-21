@@ -113,7 +113,20 @@ export async function registerRoutes(
   registerChatRoutes(app);
   registerImageRoutes(app);
   registerAiSocialHubRoutes(app);
-  
+
+  // ========== SEO: robots.txt (served explicitly to avoid platform override) ==========
+  app.get("/robots.txt", (_req, res) => {
+    res.set("Content-Type", "text/plain");
+    res.send(`User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /chat
+Disallow: /settings
+
+Sitemap: https://nomad-life.app/sitemap.xml
+`);
+  });
+
   // ========== AUTH ROUTES ==========
   app.post("/api/auth/signup", async (req, res, next) => {
     try {
