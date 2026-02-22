@@ -24,7 +24,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "re
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed, Sparkles } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed, Sparkles, Camera } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { MomentsBar } from "@/components/moments";
 import { useI18n } from "@/lib/i18n";
@@ -2152,11 +2152,24 @@ function StopCard({
               )}
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">{stop.expenses.length} spese</p>
-            <p className="font-semibold text-emerald-400">
-              {currencySymbol}{(totalStopExpenses / 100).toFixed(2)}
-            </p>
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center" title="Galleria foto">
+                <Camera className="w-3 h-3 text-blue-400" />
+              </div>
+              <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center" title="Recensioni">
+                <Star className="w-3 h-3 text-amber-400" />
+              </div>
+              <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center" title="Incontri">
+                <Users className="w-3 h-3 text-purple-400" />
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">{stop.expenses.length} spese</p>
+              <p className="font-semibold text-emerald-400">
+                {currencySymbol}{(totalStopExpenses / 100).toFixed(2)}
+              </p>
+            </div>
           </div>
           <ChevronRight className={`w-5 h-5 text-muted-foreground transition-transform ${expanded ? 'rotate-90' : ''}`} />
         </div>
@@ -2209,27 +2222,34 @@ function StopCard({
                 </div>
               )}
 
-              {allPhotos.length > 0 && (
-                <div data-testid={`photo-gallery-${stop.id}`}>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Galleria foto</p>
+              <div data-testid={`photo-gallery-${stop.id}`} className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(6,182,212,0.15))', border: '1px solid rgba(59,130,246,0.3)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Camera className="w-4 h-4 text-blue-400" />
+                  <p className="text-sm font-semibold text-blue-400">Galleria Foto</p>
+                  <span className="text-xs text-muted-foreground">({allPhotos.length})</span>
+                </div>
+                {allPhotos.length > 0 ? (
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {allPhotos.map((photo, idx) => (
                       <img
                         key={idx}
                         src={photo}
                         alt={`${stop.city} foto ${idx + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0 border border-border/50"
+                        className="w-24 h-24 object-cover rounded-lg flex-shrink-0 border-2 border-blue-500/30 hover:border-blue-400 transition-colors cursor-pointer"
                         data-testid={`photo-thumb-${stop.id}-${idx}`}
                       />
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="text-xs text-muted-foreground">Nessuna foto ancora. Aggiungi foto quando crei una nuova tappa!</p>
+                )}
+              </div>
 
-              <div data-testid={`reviews-section-${stop.id}`}>
+              <div data-testid={`reviews-section-${stop.id}`} className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.15))', border: '1px solid rgba(245,158,11,0.3)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recensioni</p>
+                    <Star className="w-4 h-4 text-amber-400" />
+                    <p className="text-sm font-semibold text-amber-400">Recensioni Community</p>
                     {avgRating && (
                       <div className="flex items-center gap-1">
                         <div className="flex items-center">
@@ -2242,18 +2262,20 @@ function StopCard({
                       </div>
                     )}
                     {reviews.length === 0 && (
-                      <span className="text-xs text-muted-foreground">Nessuna recensione</span>
+                      <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">0 recensioni</span>
                     )}
                   </div>
                   {!showReviewForm && !isOwner && user && (
-                    <button
+                    <Button
                       onClick={(e) => { e.stopPropagation(); setShowReviewForm(true); }}
-                      className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
                       data-testid={`button-leave-review-${stop.id}`}
                     >
-                      <MessageCircle className="w-3 h-3" />
+                      <MessageCircle className="w-3 h-3 mr-1" />
                       Lascia recensione
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -2327,9 +2349,15 @@ function StopCard({
                 )}
               </div>
 
-              {!isOwner && tripUserId && (
-                <div data-testid={`meetup-section-${stop.id}`}>
-                  {!showMeetupForm ? (
+              {tripUserId && (
+                <div data-testid={`meetup-section-${stop.id}`} className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.15))', border: '1px solid rgba(168,85,247,0.3)' }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="w-4 h-4 text-purple-400" />
+                    <p className="text-sm font-semibold text-purple-400">Incontri tra Nomadi</p>
+                  </div>
+                  {isOwner ? (
+                    <p className="text-xs text-muted-foreground">Gli altri nomadi potranno chiederti di incontrarsi in questa tappa. Riceverai una notifica!</p>
+                  ) : !showMeetupForm ? (
                     <Button
                       onClick={(e) => { e.stopPropagation(); setShowMeetupForm(true); }}
                       variant="outline"
