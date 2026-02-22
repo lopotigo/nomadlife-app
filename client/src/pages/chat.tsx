@@ -697,7 +697,7 @@ export default function Chat() {
                                 </div>
                               </div>
                               <div className="flex gap-1 opacity-0 group-hover/member:opacity-100 transition-opacity">
-                                <Link href={`/profile/${member.id}`}>
+                                <Link href={`/user/${member.id}`}>
                                   <button
                                     className="w-7 h-7 bg-accent hover:bg-violet-500 rounded-lg flex items-center justify-center text-foreground hover:text-white transition-colors"
                                     title={t("chat.view_profile")}
@@ -785,7 +785,7 @@ export default function Chat() {
                           {!isOwn && (
                             <div className="w-9 mr-2 flex-shrink-0">
                               {showAvatar ? (
-                                <Link href={`/profile/${msg.senderId}`}>
+                                <Link href={`/user/${msg.senderId}`}>
                                   <div className="cursor-pointer">
                                     {senderAvatar ? (
                                       <img src={senderAvatar} alt={senderName || ""} className="w-8 h-8 rounded-full object-cover" />

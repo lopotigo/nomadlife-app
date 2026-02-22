@@ -8,22 +8,22 @@ function getNotificationRoute(notification: Notification): string | null {
   switch (notification.type) {
     case "new_follower":
     case "follow":
-      return notification.relatedUserId ? `/profile/${notification.relatedUserId}` : null;
+      return notification.relatedUserId ? `/user/${notification.relatedUserId}` : null;
     case "new_trip":
     case "trip_started":
       return notification.relatedTripId ? `/trip/${notification.relatedTripId}` : null;
     case "new_stop":
       return notification.relatedTripId ? `/trip/${notification.relatedTripId}` : null;
     case "message":
-      return "/messages";
+      return "/chat";
     case "like":
     case "comment":
-      return notification.relatedUserId ? `/profile/${notification.relatedUserId}` : null;
+      return notification.relatedUserId ? `/user/${notification.relatedUserId}` : null;
     default:
       return notification.relatedTripId
         ? `/trip/${notification.relatedTripId}`
         : notification.relatedUserId
-        ? `/profile/${notification.relatedUserId}`
+        ? `/user/${notification.relatedUserId}`
         : null;
   }
 }
