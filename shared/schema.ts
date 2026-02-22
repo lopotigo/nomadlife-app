@@ -797,6 +797,60 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 
+// Stop Photos (multi-photo gallery per trip stop)
+export const stopPhotos = pgTable("stop_photos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  stopId: varchar("stop_id").notNull().references(() => tripStops.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  caption: text("caption"),
+  orderIndex: integer("order_index").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertStopPhotoSchema = createInsertSchema(stopPhotos).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertStopPhoto = z.infer<typeof insertStopPhotoSchema>;
+export type StopPhoto = typeof stopPhotos.$inferSelect;
+
+// Meetup Requests (nomad-to-nomad meetings at trip stops)
+export const meetupRequests = pgTable("meetup_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  stopId: varchar("stop_id").notNull().references(() => tripStops.id, { onDelete: "cascade" }),
+  requesterId: varchar("requester_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  hostId: varchar("host_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").default("pending").notNull(), // pending, accepted, declined, cancelled
+  message: text("message"),
+  proposedDate: timestamp("proposed_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertMeetupRequestSchema = createInsertSchema(meetupRequests).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+export type InsertMeetupRequest = z.infer<typeof insertMeetupRequestSchema>;
+export type MeetupRequest = typeof meetupRequests.$inferSelect;
+
+// Stop Reviews (community ratings for trip stops / places visited)
+export const stopReviews = pgTable("stop_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  stopId: varchar("stop_id").notNull().references(() => tripStops.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // 1-5
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertStopReviewSchema = createInsertSchema(stopReviews).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertStopReview = z.infer<typeof insertStopReviewSchema>;
+export type StopReview = typeof stopReviews.$inferSelect;
+
 // Crowdsourced Locations (Spots)
 export const locations = pgTable("locations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

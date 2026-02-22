@@ -38,6 +38,12 @@ import type {
   InsertCity,
   CityFeedback,
   InsertCityFeedback,
+  StopPhoto,
+  InsertStopPhoto,
+  MeetupRequest,
+  InsertMeetupRequest,
+  StopReview,
+  InsertStopReview,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -252,6 +258,25 @@ export interface IStorage {
   getLocations(): Promise<(schema.Location & { user: User })[]>;
   getLocationById(id: string): Promise<(schema.Location & { user: User }) | undefined>;
   createLocation(location: schema.InsertLocation): Promise<schema.Location>;
+
+  // Stop Photos
+  getStopPhotos(stopId: string): Promise<schema.StopPhoto[]>;
+  addStopPhoto(photo: schema.InsertStopPhoto): Promise<schema.StopPhoto>;
+  deleteStopPhoto(id: string): Promise<boolean>;
+
+  // Meetup Requests
+  createMeetupRequest(request: schema.InsertMeetupRequest): Promise<schema.MeetupRequest>;
+  getMeetupRequestsByStop(stopId: string): Promise<(schema.MeetupRequest & { requester: User; host: User })[]>;
+  getMeetupRequestsForUser(userId: string): Promise<(schema.MeetupRequest & { requester: User; host: User; stop: schema.TripStop })[]>;
+  updateMeetupRequestStatus(id: string, status: string): Promise<schema.MeetupRequest | undefined>;
+
+  // Stop Reviews
+  getStopReviews(stopId: string): Promise<(schema.StopReview & { user: User })[]>;
+  createStopReview(review: schema.InsertStopReview): Promise<schema.StopReview>;
+  getStopAverageRating(stopId: string): Promise<{ average: number; count: number }>;
+
+  // Followed users' trips for map
+  getFollowedUsersTrips(userId: string): Promise<(Trip & { user: User; stops: TripStop[] })[]>;
 
   // Blog Posts
   getBlogPosts(filters?: { category?: string; city?: string; published?: boolean; userId?: string }): Promise<schema.BlogPost[]>;
@@ -1998,6 +2023,150 @@ export class DrizzleStorage implements IStorage {
       .from(schema.blogPosts)
       .where(eq(schema.blogPosts.published, true));
     return result.map(r => r.category);
+  }
+
+  // Stop Photos
+  async getStopPhotos(stopId: string): Promise<schema.StopPhoto[]> {
+    return this.db.select().from(schema.stopPhotos)
+      .where(eq(schema.stopPhotos.stopId, stopId))
+      .orderBy(schema.stopPhotos.orderIndex);
+  }
+
+  async addStopPhoto(photo: schema.InsertStopPhoto): Promise<schema.StopPhoto> {
+    const [created] = await this.db.insert(schema.stopPhotos).values(photo).returning();
+    return created;
+  }
+
+  async deleteStopPhoto(id: string): Promise<boolean> {
+    const result = await this.db.delete(schema.stopPhotos).where(eq(schema.stopPhotos.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Meetup Requests
+  async createMeetupRequest(request: schema.InsertMeetupRequest): Promise<schema.MeetupRequest> {
+    const [created] = await this.db.insert(schema.meetupRequests).values(request).returning();
+    return created;
+  }
+
+  async getMeetupRequestsByStop(stopId: string): Promise<(schema.MeetupRequest & { requester: User; host: User })[]> {
+    const results = await this.db.select()
+      .from(schema.meetupRequests)
+      .where(eq(schema.meetupRequests.stopId, stopId))
+      .orderBy(desc(schema.meetupRequests.createdAt));
+    
+    const enriched = [];
+    for (const r of results) {
+      const requester = await this.getUser(r.requesterId);
+      const host = await this.getUser(r.hostId);
+      if (requester && host) {
+        enriched.push({ ...r, requester, host });
+      }
+    }
+    return enriched;
+  }
+
+  async getMeetupRequestsForUser(userId: string): Promise<(schema.MeetupRequest & { requester: User; host: User; stop: schema.TripStop })[]> {
+    const results = await this.db.select()
+      .from(schema.meetupRequests)
+      .where(or(
+        eq(schema.meetupRequests.requesterId, userId),
+        eq(schema.meetupRequests.hostId, userId)
+      ))
+      .orderBy(desc(schema.meetupRequests.createdAt));
+    
+    const enriched = [];
+    for (const r of results) {
+      const requester = await this.getUser(r.requesterId);
+      const host = await this.getUser(r.hostId);
+      const stop = await this.getTripStop(r.stopId);
+      if (requester && host && stop) {
+        enriched.push({ ...r, requester, host, stop });
+      }
+    }
+    return enriched;
+  }
+
+  async updateMeetupRequestStatus(id: string, status: string): Promise<schema.MeetupRequest | undefined> {
+    const [updated] = await this.db.update(schema.meetupRequests)
+      .set({ status })
+      .where(eq(schema.meetupRequests.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Stop Reviews
+  async getStopReviews(stopId: string): Promise<(schema.StopReview & { user: User })[]> {
+    const results = await this.db.select()
+      .from(schema.stopReviews)
+      .where(eq(schema.stopReviews.stopId, stopId))
+      .orderBy(desc(schema.stopReviews.createdAt));
+    
+    const enriched = [];
+    for (const r of results) {
+      const user = await this.getUser(r.userId);
+      if (user) enriched.push({ ...r, user });
+    }
+    return enriched;
+  }
+
+  async createStopReview(review: schema.InsertStopReview): Promise<schema.StopReview> {
+    const [created] = await this.db.insert(schema.stopReviews).values(review).returning();
+    return created;
+  }
+
+  async getStopAverageRating(stopId: string): Promise<{ average: number; count: number }> {
+    const result = await this.db
+      .select({
+        avg: sql<number>`COALESCE(AVG(${schema.stopReviews.rating}), 0)`,
+        count: sql<number>`COUNT(*)`,
+      })
+      .from(schema.stopReviews)
+      .where(eq(schema.stopReviews.stopId, stopId));
+    return { average: Number(result[0]?.avg || 0), count: Number(result[0]?.count || 0) };
+  }
+
+  // Followed users' public trips with stops for map
+  async getFollowedUsersTrips(userId: string): Promise<(Trip & { user: User; stops: TripStop[] })[]> {
+    const following = await this.db.select({ followingId: schema.followers.followingId })
+      .from(schema.followers)
+      .where(eq(schema.followers.followerId, userId));
+    
+    if (following.length === 0) return [];
+    
+    const followingIds = following.map(f => f.followingId);
+    
+    const trips = await this.db.select()
+      .from(schema.trips)
+      .leftJoin(schema.users, eq(schema.trips.userId, schema.users.id))
+      .where(
+        and(
+          inArray(schema.trips.userId, followingIds),
+          eq(schema.trips.isPublic, true)
+        )
+      )
+      .orderBy(desc(schema.trips.createdAt))
+      .limit(50);
+    
+    if (trips.length === 0) return [];
+    
+    const tripIds = trips.map(t => t.trips.id);
+    const allStops = await this.db.select().from(schema.tripStops)
+      .where(inArray(schema.tripStops.tripId, tripIds))
+      .orderBy(schema.tripStops.orderIndex);
+    
+    const stopsByTrip = new Map<string, TripStop[]>();
+    for (const stop of allStops) {
+      if (!stopsByTrip.has(stop.tripId)) stopsByTrip.set(stop.tripId, []);
+      stopsByTrip.get(stop.tripId)!.push(stop);
+    }
+    
+    return trips
+      .filter(t => t.users)
+      .map(t => ({
+        ...t.trips,
+        user: t.users!,
+        stops: stopsByTrip.get(t.trips.id) || [],
+      }));
   }
 }
 

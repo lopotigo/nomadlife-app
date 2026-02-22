@@ -764,6 +764,7 @@ export default function UnifiedMap() {
   const [joinedGroupIds, setJoinedGroupIds] = useState<Set<string>>(new Set());
   const [myTrips, setMyTrips] = useState<Trip[]>([]);
   const [followingTrips, setFollowingTrips] = useState<Trip[]>([]);
+  const [followedUsersTrips, setFollowedUsersTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
@@ -866,11 +867,13 @@ export default function UnifiedMap() {
       let groupsRes: Response | null = null;
       let myTripsRes: Response | null = null;
       let savedIdsRes: Response | null = null;
+      let followedUsersTripsRes: Response | null = null;
       if (user) {
-        [groupsRes, myTripsRes, savedIdsRes] = await Promise.all([
+        [groupsRes, myTripsRes, savedIdsRes, followedUsersTripsRes] = await Promise.all([
           fetch("/api/chat-groups", { credentials: "include" }),
           fetch("/api/my-trips", { credentials: "include" }),
           fetch("/api/saved-posts/ids", { credentials: "include" }),
+          fetch("/api/followed-users-trips", { credentials: "include" }),
         ]);
       }
       
@@ -927,6 +930,11 @@ export default function UnifiedMap() {
       if (savedIdsRes?.ok) {
         const ids = await savedIdsRes.json();
         setSavedPosts(new Set(ids));
+      }
+
+      if (followedUsersTripsRes?.ok) {
+        const followedData = await followedUsersTripsRes.json();
+        setFollowedUsersTrips(Array.isArray(followedData) ? followedData : []);
       }
 
       if (publicTripsRes.ok) {
@@ -1068,15 +1076,21 @@ export default function UnifiedMap() {
     }
     
     if (filters.showFollowingTrips) {
+      const followedIds = new Set(followedUsersTrips.map(t => t.id));
       followingTrips.forEach(t => {
         if (t.stops && t.stops.length > 0) {
-          result.push({ ...t, isOwn: false, color: "#3b82f6" });
+          result.push({ ...t, isOwn: false, color: followedIds.has(t.id) ? "#10b981" : "#3b82f6" });
+        }
+      });
+      followedUsersTrips.forEach(t => {
+        if (t.stops && t.stops.length > 0 && !result.some(r => r.id === t.id)) {
+          result.push({ ...t, isOwn: false, color: "#10b981" });
         }
       });
     }
     
     return result;
-  }, [myTrips, followingTrips, filters]);
+  }, [myTrips, followingTrips, followedUsersTrips, filters]);
 
   const { mapCenter, mapZoom } = useMemo(() => {
     if (highlightedTripId) {

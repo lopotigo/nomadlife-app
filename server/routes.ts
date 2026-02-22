@@ -1528,6 +1528,28 @@ Sitemap: https://nomad-life.app/sitemap.xml
         departureDate: req.body.departureDate ? new Date(req.body.departureDate) : undefined,
       });
       const stop = await storage.createTripStop(data);
+
+      // Save additional photos if provided
+      const photos: string[] = req.body.photos || [];
+      for (let i = 0; i < photos.length; i++) {
+        await storage.addStopPhoto({ stopId: stop.id, url: photos[i], orderIndex: i });
+      }
+      
+      // Auto-create a post in the feed for public trips
+      if (trip.isPublic) {
+        const emoji = stop.transportMode === "plane" ? "✈️" : stop.transportMode === "train" ? "🚂" : stop.transportMode === "car" ? "🚗" : "📍";
+        const content = `${emoji} Nuova tappa: **${stop.city}, ${stop.country}**\n🗺️ Viaggio: "${trip.title}"${stop.notes ? `\n💬 ${stop.notes}` : ""}${stop.rating ? `\n⭐ ${stop.rating}/5` : ""}`;
+        
+        await storage.createPost({
+          userId: (req.user as User).id,
+          content,
+          imageUrl: stop.imageUrl || (photos.length > 0 ? photos[0] : null),
+          tripId: trip.id,
+          location: `${stop.city}, ${stop.country}`,
+          latitude: stop.latitude || undefined,
+          longitude: stop.longitude || undefined,
+        });
+      }
       
       // Notify followers about new stop
       if (trip.isPublic) {
@@ -1754,6 +1776,154 @@ Sitemap: https://nomad-life.app/sitemap.xml
       
       await storage.deleteTripExpense(req.params.id);
       res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== STOP PHOTOS ==========
+  app.get("/api/stops/:stopId/photos", async (req, res) => {
+    try {
+      const photos = await storage.getStopPhotos(req.params.stopId);
+      res.send(photos);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/stops/:stopId/photos", requireAuth, async (req, res) => {
+    try {
+      const stop = await storage.getTripStop(req.params.stopId);
+      if (!stop) return res.status(404).send({ error: "Stop not found" });
+      const trip = await storage.getTrip(stop.tripId);
+      if (!trip || trip.userId !== (req.user as User).id) return res.status(403).send({ error: "Forbidden" });
+      
+      const { url, caption, orderIndex } = req.body;
+      if (!url) return res.status(400).send({ error: "URL is required" });
+      
+      const photo = await storage.addStopPhoto({ stopId: req.params.stopId, url, caption, orderIndex: orderIndex || 0 });
+      res.status(201).send(photo);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.delete("/api/stop-photos/:id", requireAuth, async (req, res) => {
+    try {
+      await storage.deleteStopPhoto(req.params.id);
+      res.send({ success: true });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== MEETUP REQUESTS ==========
+  app.post("/api/stops/:stopId/meetup", requireAuth, async (req, res) => {
+    try {
+      const stop = await storage.getTripStop(req.params.stopId);
+      if (!stop) return res.status(404).send({ error: "Stop not found" });
+      const trip = await storage.getTrip(stop.tripId);
+      if (!trip) return res.status(404).send({ error: "Trip not found" });
+      if (trip.userId === (req.user as User).id) return res.status(400).send({ error: "Non puoi richiedere un incontro con te stesso" });
+      
+      const meetup = await storage.createMeetupRequest({
+        stopId: req.params.stopId,
+        requesterId: (req.user as User).id,
+        hostId: trip.userId,
+        message: req.body.message || null,
+        proposedDate: req.body.proposedDate ? new Date(req.body.proposedDate) : null,
+      });
+
+      await storage.createNotification({
+        userId: trip.userId,
+        type: "meetup_request",
+        message: `${(req.user as User).name} vuole incontrarti a ${stop.city}, ${stop.country}!`,
+        relatedUserId: (req.user as User).id,
+        relatedTripId: trip.id,
+      });
+      sendPushToUser(trip.userId, "NomadLife", `${(req.user as User).name} vuole incontrarti a ${stop.city}!`, `/trip/${trip.id}`);
+
+      res.status(201).send(meetup);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/meetups", requireAuth, async (req, res) => {
+    try {
+      const meetups = await storage.getMeetupRequestsForUser((req.user as User).id);
+      res.send(meetups);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/stops/:stopId/meetups", async (req, res) => {
+    try {
+      const meetups = await storage.getMeetupRequestsByStop(req.params.stopId);
+      res.send(meetups);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.patch("/api/meetups/:id", requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!["accepted", "declined", "cancelled"].includes(status)) {
+        return res.status(400).send({ error: "Invalid status" });
+      }
+      const meetup = await storage.updateMeetupRequestStatus(req.params.id, status);
+      if (!meetup) return res.status(404).send({ error: "Meetup not found" });
+
+      const targetUserId = meetup.requesterId === (req.user as User).id ? meetup.hostId : meetup.requesterId;
+      const statusText = status === "accepted" ? "accettato" : status === "declined" ? "rifiutato" : "annullato";
+      await storage.createNotification({
+        userId: targetUserId,
+        type: "meetup_update",
+        message: `${(req.user as User).name} ha ${statusText} la richiesta di incontro`,
+        relatedUserId: (req.user as User).id,
+      });
+
+      res.send(meetup);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== STOP REVIEWS ==========
+  app.get("/api/stops/:stopId/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getStopReviews(req.params.stopId);
+      const avg = await storage.getStopAverageRating(req.params.stopId);
+      res.send({ reviews, average: avg.average, count: avg.count });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/stops/:stopId/reviews", requireAuth, async (req, res) => {
+    try {
+      const { rating, comment } = req.body;
+      if (!rating || rating < 1 || rating > 5) return res.status(400).send({ error: "Rating deve essere tra 1 e 5" });
+      
+      const review = await storage.createStopReview({
+        stopId: req.params.stopId,
+        userId: (req.user as User).id,
+        rating,
+        comment: comment || null,
+      });
+      res.status(201).send(review);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== FOLLOWED USERS' TRIPS FOR MAP ==========
+  app.get("/api/followed-users-trips", requireAuth, async (req, res) => {
+    try {
+      const trips = await storage.getFollowedUsersTrips((req.user as User).id);
+      res.send(trips);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }

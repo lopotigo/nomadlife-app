@@ -7,7 +7,8 @@ import {
   Plus, MapPin, Calendar, Wallet, Star, ChevronRight, 
   Loader2, Plane, Hotel, Coffee, Utensils, Car, MoreHorizontal,
   Globe, X, Check, Edit, Trash2, Eye, Users, Image, Video, LocateFixed,
-  Home, Building2, ShoppingCart, Beer, Ticket, Wifi, Heart, Briefcase
+  Home, Building2, ShoppingCart, Beer, Ticket, Wifi, Heart, Briefcase,
+  MessageCircle
 } from "lucide-react";
 import { useUpload } from "@/hooks/use-upload";
 import { motion, AnimatePresence } from "framer-motion";
@@ -180,6 +181,7 @@ export default function TravelDiary() {
   const [followedLoading, setFollowedLoading] = useState(false);
   const [showPlannerMap, setShowPlannerMap] = useState(false);
   const [stopImageUrl, setStopImageUrl] = useState<string | null>(null);
+  const [stopPhotos, setStopPhotos] = useState<string[]>([]);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showAiSuggestions, setShowAiSuggestions] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
@@ -190,6 +192,16 @@ export default function TravelDiary() {
     onSuccess: (response) => {
       setStopImageUrl(response.objectPath);
       toast({ title: "Media caricato!" });
+    },
+    onError: (error) => {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const { uploadFile: uploadGalleryFile, isUploading: isUploadingGallery, progress: galleryUploadProgress } = useUpload({
+    onSuccess: (response) => {
+      setStopPhotos(prev => [...prev, response.objectPath]);
+      toast({ title: "Foto aggiunta alla galleria!" });
     },
     onError: (error) => {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -403,6 +415,7 @@ export default function TravelDiary() {
           departureDate: formData.get("departureDate") || undefined,
           notes: formData.get("notes") || undefined,
           imageUrl: stopImageUrl || undefined,
+          photos: stopPhotos.length > 0 ? stopPhotos : undefined,
           orderIndex: nextOrderIndex,
           rating: parseInt(formData.get("rating") as string) || undefined,
           accommodationName: formData.get("accommodationName") || undefined,
@@ -414,6 +427,7 @@ export default function TravelDiary() {
         toast({ title: "Tappa aggiunta!" });
         setShowNewStop(false);
         setStopImageUrl(null);
+        setStopPhotos([]);
         fetchTripDetails(selectedTrip.id);
       } else {
         const error = await res.json();
@@ -1013,7 +1027,7 @@ export default function TravelDiary() {
           />
         )}
 
-        <Dialog open={showNewStop} onOpenChange={(open) => { setShowNewStop(open); if (!open) setStopImageUrl(null); }}>
+        <Dialog open={showNewStop} onOpenChange={(open) => { setShowNewStop(open); if (!open) { setStopImageUrl(null); setStopPhotos([]); } }}>
           <DialogContent className="bg-muted border-border text-foreground max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -1211,12 +1225,60 @@ export default function TravelDiary() {
                   )}
                 </div>
               </div>
+
+              <div>
+                <Label>Altre foto (opzionale)</Label>
+                <div className="mt-2 space-y-2">
+                  {stopPhotos.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {stopPhotos.map((photo, idx) => (
+                        <div key={idx} className="relative w-16 h-16">
+                          <img src={photo} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover rounded-lg" />
+                          <button
+                            type="button"
+                            onClick={() => setStopPhotos(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute -top-1 -right-1 p-0.5 bg-red-500 rounded-full text-white"
+                            data-testid={`button-remove-gallery-photo-${idx}`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <label className="flex items-center justify-center w-full h-12 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-emerald-500 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) await uploadGalleryFile(file);
+                        e.target.value = "";
+                      }}
+                      className="hidden"
+                      disabled={isUploadingGallery}
+                      data-testid="input-gallery-photos"
+                    />
+                    {isUploadingGallery ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                        <span className="text-xs text-muted-foreground">{galleryUploadProgress}%</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Image className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Aggiungi foto alla galleria</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
               
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-emerald-500 to-teal-600"
                 data-testid="button-submit-stop"
-                disabled={isUploadingStopMedia}
+                disabled={isUploadingStopMedia || isUploadingGallery}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Aggiungi Tappa
@@ -1788,6 +1850,7 @@ function TripDetails({
                 currency={trip.currency}
                 onAddExpense={() => onAddExpense(stop.id)}
                 prevCity={index > 0 ? trip.stops[index - 1].city : undefined}
+                tripUserId={trip.userId}
               />
             </div>
           ))}
@@ -1932,17 +1995,137 @@ function StopCard({
   index, 
   currency,
   onAddExpense,
-  prevCity
+  prevCity,
+  tripUserId
 }: { 
   stop: TripStop & { expenses: TripExpense[] }; 
   index: number;
   currency: string;
   onAddExpense: () => void;
   prevCity?: string;
+  tripUserId?: string;
 }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [photosLoaded, setPhotosLoaded] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoaded, setReviewsLoaded] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [showMeetupForm, setShowMeetupForm] = useState(false);
+  const [meetupMessage, setMeetupMessage] = useState("");
+  const [meetupDate, setMeetupDate] = useState("");
+  const [submittingMeetup, setSubmittingMeetup] = useState(false);
   const currencySymbol = currency === "EUR" ? "€" : currency === "USD" ? "$" : currency;
   const totalStopExpenses = stop.expenses.reduce((sum, e) => sum + e.cost, 0);
+
+  const fetchPhotos = async () => {
+    if (photosLoaded) return;
+    try {
+      const res = await fetch(`/api/stops/${stop.id}/photos`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setPhotos(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch photos:", err);
+    }
+    setPhotosLoaded(true);
+  };
+
+  const fetchReviews = async () => {
+    if (reviewsLoaded) return;
+    try {
+      const res = await fetch(`/api/stops/${stop.id}/reviews`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setReviews(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
+    }
+    setReviewsLoaded(true);
+  };
+
+  const handleExpand = () => {
+    const newExpanded = !expanded;
+    setExpanded(newExpanded);
+    if (newExpanded) {
+      fetchPhotos();
+      fetchReviews();
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (reviewRating === 0) {
+      toast({ title: "Seleziona una valutazione", variant: "destructive" });
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/stops/${stop.id}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ rating: reviewRating, comment: reviewComment || undefined }),
+      });
+      if (res.ok) {
+        const newReview = await res.json();
+        setReviews(prev => [...prev, newReview]);
+        setShowReviewForm(false);
+        setReviewRating(0);
+        setReviewComment("");
+        toast({ title: "Recensione pubblicata!" });
+      } else {
+        toast({ title: "Errore", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+    setSubmittingReview(false);
+  };
+
+  const handleSubmitMeetup = async () => {
+    if (!meetupMessage.trim()) {
+      toast({ title: "Scrivi un messaggio", variant: "destructive" });
+      return;
+    }
+    setSubmittingMeetup(true);
+    try {
+      const res = await fetch(`/api/stops/${stop.id}/meetup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ message: meetupMessage, date: meetupDate || undefined }),
+      });
+      if (res.ok) {
+        setShowMeetupForm(false);
+        setMeetupMessage("");
+        setMeetupDate("");
+        toast({ title: "Richiesta di incontro inviata!" });
+      } else {
+        toast({ title: "Errore", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+    setSubmittingMeetup(false);
+  };
+
+  const allPhotos = [
+    ...(stop.imageUrl ? [stop.imageUrl] : []),
+    ...photos.map((p: any) => typeof p === 'string' ? p : p.url),
+  ];
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+    : null;
+
+  const isOwner = user?.id === tripUserId;
 
   return (
     <motion.div
@@ -1954,7 +2137,7 @@ function StopCard({
     >
       <div 
         className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
+        onClick={handleExpand}
       >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-foreground font-bold">
@@ -2023,6 +2206,182 @@ function StopCard({
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {allPhotos.length > 0 && (
+                <div data-testid={`photo-gallery-${stop.id}`}>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Galleria foto</p>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {allPhotos.map((photo, idx) => (
+                      <img
+                        key={idx}
+                        src={photo}
+                        alt={`${stop.city} foto ${idx + 1}`}
+                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0 border border-border/50"
+                        data-testid={`photo-thumb-${stop.id}-${idx}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div data-testid={`reviews-section-${stop.id}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recensioni</p>
+                    {avgRating && (
+                      <div className="flex items-center gap-1">
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map(i => (
+                            <Star key={i} className={`w-3 h-3 ${i <= Math.round(Number(avgRating)) ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
+                          ))}
+                        </div>
+                        <span className="text-xs text-foreground font-medium">{avgRating}</span>
+                        <span className="text-xs text-muted-foreground">({reviews.length})</span>
+                      </div>
+                    )}
+                    {reviews.length === 0 && (
+                      <span className="text-xs text-muted-foreground">Nessuna recensione</span>
+                    )}
+                  </div>
+                  {!showReviewForm && !isOwner && user && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowReviewForm(true); }}
+                      className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                      data-testid={`button-leave-review-${stop.id}`}
+                    >
+                      <MessageCircle className="w-3 h-3" />
+                      Lascia recensione
+                    </button>
+                  )}
+                </div>
+
+                {reviews.length > 0 && (
+                  <div className="space-y-1.5 mb-2">
+                    {reviews.slice(0, 3).map((review: any, idx: number) => (
+                      <div key={idx} className="p-2 bg-accent/30 rounded-lg">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map(i => (
+                              <Star key={i} className={`w-3 h-3 ${i <= (review.rating || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
+                            ))}
+                          </div>
+                          {review.user && (
+                            <span className="text-xs font-medium text-foreground/70">{review.user.name || review.user.username}</span>
+                          )}
+                        </div>
+                        {review.comment && (
+                          <p className="text-xs text-muted-foreground">{review.comment}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {showReviewForm && (
+                  <div className="p-3 bg-accent/30 rounded-lg space-y-2" data-testid={`review-form-${stop.id}`}>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setReviewRating(star); }}
+                          className="p-0.5 hover:scale-110 transition-transform"
+                          data-testid={`review-star-${stop.id}-${star}`}
+                        >
+                          <Star className={`w-5 h-5 ${star <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
+                        </button>
+                      ))}
+                    </div>
+                    <Textarea
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="Commento (opzionale)..."
+                      className="bg-accent border-border text-sm"
+                      rows={2}
+                      onClick={(e) => e.stopPropagation()}
+                      data-testid={`review-comment-${stop.id}`}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => { e.stopPropagation(); setShowReviewForm(false); setReviewRating(0); setReviewComment(""); }}
+                        className="flex-1"
+                        data-testid={`button-cancel-review-${stop.id}`}
+                      >
+                        Annulla
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); handleSubmitReview(); }}
+                        disabled={submittingReview || reviewRating === 0}
+                        className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+                        data-testid={`button-submit-review-${stop.id}`}
+                      >
+                        {submittingReview ? <Loader2 className="w-3 h-3 animate-spin" /> : "Pubblica"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {!isOwner && tripUserId && (
+                <div data-testid={`meetup-section-${stop.id}`}>
+                  {!showMeetupForm ? (
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); setShowMeetupForm(true); }}
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                      data-testid={`button-meetup-${stop.id}`}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      Incontriamoci!
+                    </Button>
+                  ) : (
+                    <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-2" data-testid={`meetup-form-${stop.id}`}>
+                      <p className="text-xs font-medium text-purple-400">Richiesta di incontro</p>
+                      <Textarea
+                        value={meetupMessage}
+                        onChange={(e) => setMeetupMessage(e.target.value)}
+                        placeholder="Ciao! Mi piacerebbe incontrarci a..."
+                        className="bg-accent border-border text-sm"
+                        rows={2}
+                        onClick={(e) => e.stopPropagation()}
+                        data-testid={`meetup-message-${stop.id}`}
+                      />
+                      <Input
+                        type="date"
+                        value={meetupDate}
+                        onChange={(e) => setMeetupDate(e.target.value)}
+                        className="bg-accent border-border text-sm"
+                        onClick={(e) => e.stopPropagation()}
+                        data-testid={`meetup-date-${stop.id}`}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => { e.stopPropagation(); setShowMeetupForm(false); setMeetupMessage(""); setMeetupDate(""); }}
+                          className="flex-1"
+                          data-testid={`button-cancel-meetup-${stop.id}`}
+                        >
+                          Annulla
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); handleSubmitMeetup(); }}
+                          disabled={submittingMeetup || !meetupMessage.trim()}
+                          className="flex-1 bg-purple-500 hover:bg-purple-600"
+                          data-testid={`button-submit-meetup-${stop.id}`}
+                        >
+                          {submittingMeetup ? <Loader2 className="w-3 h-3 animate-spin" /> : "Invia"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
