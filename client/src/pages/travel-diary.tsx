@@ -2183,11 +2183,101 @@ function StopCard({
             exit={{ height: 0, opacity: 0 }}
             className="border-t border-border/50"
           >
-            <div className="p-4 space-y-3">
+            <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
               {stop.notes && (
                 <p className="text-sm text-muted-foreground italic">"{stop.notes}"</p>
               )}
-              
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" data-testid={`social-sections-${stop.id}`}>
+                <div data-testid={`photo-gallery-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(6,182,212,0.18))', border: '1.5px solid rgba(59,130,246,0.4)' }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Camera className="w-4 h-4 text-blue-400" />
+                    <p className="text-xs font-bold text-blue-400">Foto</p>
+                    <span className="text-[10px] text-blue-300/70 ml-auto">{allPhotos.length}</span>
+                  </div>
+                  {allPhotos.length > 0 ? (
+                    <div className="flex gap-1 overflow-x-auto">
+                      {allPhotos.slice(0, 4).map((photo, idx) => (
+                        <img key={idx} src={photo} alt="" className="w-12 h-12 object-cover rounded flex-shrink-0 border border-blue-500/30" data-testid={`photo-thumb-${stop.id}-${idx}`} />
+                      ))}
+                      {allPhotos.length > 4 && <span className="text-xs text-blue-300 self-center ml-1">+{allPhotos.length - 4}</span>}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground leading-tight">Aggiungi foto dalla creazione tappa</p>
+                  )}
+                </div>
+
+                <div data-testid={`reviews-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(249,115,22,0.18))', border: '1.5px solid rgba(245,158,11,0.4)' }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Star className="w-4 h-4 text-amber-400" />
+                    <p className="text-xs font-bold text-amber-400">Recensioni</p>
+                    {avgRating ? (
+                      <span className="text-[10px] text-amber-300 ml-auto">{avgRating} ({reviews.length})</span>
+                    ) : (
+                      <span className="text-[10px] text-amber-300/70 ml-auto">0</span>
+                    )}
+                  </div>
+                  {reviews.length > 0 ? (
+                    <div className="space-y-1">
+                      {reviews.slice(0, 2).map((review: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-1">
+                          <div className="flex">{[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= (review.rating||0) ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />)}</div>
+                          {review.user && <span className="text-[10px] text-foreground/60 truncate">{review.user.name?.split(' ')[0]}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground leading-tight">Nessuna ancora</p>
+                  )}
+                  {!isOwner && user && !showReviewForm && (
+                    <button onClick={(e) => { e.stopPropagation(); setShowReviewForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-leave-review-${stop.id}`}>⭐ Recensisci</button>
+                  )}
+                </div>
+
+                {tripUserId && (
+                <div data-testid={`meetup-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(236,72,153,0.18))', border: '1.5px solid rgba(168,85,247,0.4)' }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Users className="w-4 h-4 text-purple-400" />
+                    <p className="text-xs font-bold text-purple-400">Incontri</p>
+                  </div>
+                  {isOwner ? (
+                    <p className="text-[11px] text-muted-foreground leading-tight">I nomadi potranno chiederti un incontro qui</p>
+                  ) : !showMeetupForm ? (
+                    <button onClick={(e) => { e.stopPropagation(); setShowMeetupForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-meetup-${stop.id}`}>🤝 Incontriamoci!</button>
+                  ) : null}
+                </div>
+                )}
+              </div>
+
+              {showReviewForm && (
+                <div className="p-3 rounded-lg space-y-2" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }} data-testid={`review-form-${stop.id}`}>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button key={star} type="button" onClick={(e) => { e.stopPropagation(); setReviewRating(star); }} className="p-0.5 hover:scale-110 transition-transform" data-testid={`review-star-${stop.id}-${star}`}>
+                        <Star className={`w-5 h-5 ${star <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
+                      </button>
+                    ))}
+                  </div>
+                  <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="Commento (opzionale)..." className="bg-accent border-border text-sm" rows={2} onClick={(e) => e.stopPropagation()} data-testid={`review-comment-${stop.id}`} />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setShowReviewForm(false); setReviewRating(0); setReviewComment(""); }} className="flex-1" data-testid={`button-cancel-review-${stop.id}`}>Annulla</Button>
+                    <Button size="sm" onClick={(e) => { e.stopPropagation(); handleSubmitReview(); }} disabled={submittingReview || reviewRating === 0} className="flex-1 bg-emerald-500 hover:bg-emerald-600" data-testid={`button-submit-review-${stop.id}`}>{submittingReview ? <Loader2 className="w-3 h-3 animate-spin" /> : "Pubblica"}</Button>
+                  </div>
+                </div>
+              )}
+
+              {showMeetupForm && (
+                <div className="p-3 rounded-lg space-y-2" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }} data-testid={`meetup-form-${stop.id}`}>
+                  <p className="text-xs font-medium text-purple-400">Richiesta di incontro</p>
+                  <Textarea value={meetupMessage} onChange={(e) => setMeetupMessage(e.target.value)} placeholder="Ciao! Mi piacerebbe incontrarci a..." className="bg-accent border-border text-sm" rows={2} onClick={(e) => e.stopPropagation()} data-testid={`meetup-message-${stop.id}`} />
+                  <Input type="date" value={meetupDate} onChange={(e) => setMeetupDate(e.target.value)} className="bg-accent border-border text-sm" onClick={(e) => e.stopPropagation()} data-testid={`meetup-date-${stop.id}`} />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setShowMeetupForm(false); setMeetupMessage(""); setMeetupDate(""); }} className="flex-1" data-testid={`button-cancel-meetup-${stop.id}`}>Annulla</Button>
+                    <Button size="sm" onClick={(e) => { e.stopPropagation(); handleSubmitMeetup(); }} disabled={submittingMeetup || !meetupMessage.trim()} className="flex-1 bg-purple-500 hover:bg-purple-600" data-testid={`button-submit-meetup-${stop.id}`}>{submittingMeetup ? <Loader2 className="w-3 h-3 animate-spin" /> : "Invia"}</Button>
+                  </div>
+                </div>
+              )}
+
               {stop.expenses.length > 0 && (
                 <div className="space-y-2">
                   {stop.expenses.map((expense) => {
@@ -2202,8 +2292,8 @@ function StopCard({
                         <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
                           <Icon className="w-4 h-4 text-foreground" />
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-foreground">{expense.name}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{expense.name}</p>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">{expenseType?.label}</span>
                             {expense.rating && (
@@ -2219,197 +2309,6 @@ function StopCard({
                       </div>
                     );
                   })}
-                </div>
-              )}
-
-              <div data-testid={`photo-gallery-${stop.id}`} className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(6,182,212,0.15))', border: '1px solid rgba(59,130,246,0.3)' }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Camera className="w-4 h-4 text-blue-400" />
-                  <p className="text-sm font-semibold text-blue-400">Galleria Foto</p>
-                  <span className="text-xs text-muted-foreground">({allPhotos.length})</span>
-                </div>
-                {allPhotos.length > 0 ? (
-                  <div className="flex gap-2 overflow-x-auto pb-2">
-                    {allPhotos.map((photo, idx) => (
-                      <img
-                        key={idx}
-                        src={photo}
-                        alt={`${stop.city} foto ${idx + 1}`}
-                        className="w-24 h-24 object-cover rounded-lg flex-shrink-0 border-2 border-blue-500/30 hover:border-blue-400 transition-colors cursor-pointer"
-                        data-testid={`photo-thumb-${stop.id}-${idx}`}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">Nessuna foto ancora. Aggiungi foto quando crei una nuova tappa!</p>
-                )}
-              </div>
-
-              <div data-testid={`reviews-section-${stop.id}`} className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.15))', border: '1px solid rgba(245,158,11,0.3)' }}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-amber-400" />
-                    <p className="text-sm font-semibold text-amber-400">Recensioni Community</p>
-                    {avgRating && (
-                      <div className="flex items-center gap-1">
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map(i => (
-                            <Star key={i} className={`w-3 h-3 ${i <= Math.round(Number(avgRating)) ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
-                          ))}
-                        </div>
-                        <span className="text-xs text-foreground font-medium">{avgRating}</span>
-                        <span className="text-xs text-muted-foreground">({reviews.length})</span>
-                      </div>
-                    )}
-                    {reviews.length === 0 && (
-                      <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">0 recensioni</span>
-                    )}
-                  </div>
-                  {!showReviewForm && !isOwner && user && (
-                    <Button
-                      onClick={(e) => { e.stopPropagation(); setShowReviewForm(true); }}
-                      variant="outline"
-                      size="sm"
-                      className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
-                      data-testid={`button-leave-review-${stop.id}`}
-                    >
-                      <MessageCircle className="w-3 h-3 mr-1" />
-                      Lascia recensione
-                    </Button>
-                  )}
-                </div>
-
-                {reviews.length > 0 && (
-                  <div className="space-y-1.5 mb-2">
-                    {reviews.slice(0, 3).map((review: any, idx: number) => (
-                      <div key={idx} className="p-2 bg-accent/30 rounded-lg">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map(i => (
-                              <Star key={i} className={`w-3 h-3 ${i <= (review.rating || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
-                            ))}
-                          </div>
-                          {review.user && (
-                            <span className="text-xs font-medium text-foreground/70">{review.user.name || review.user.username}</span>
-                          )}
-                        </div>
-                        {review.comment && (
-                          <p className="text-xs text-muted-foreground">{review.comment}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {showReviewForm && (
-                  <div className="p-3 bg-accent/30 rounded-lg space-y-2" data-testid={`review-form-${stop.id}`}>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setReviewRating(star); }}
-                          className="p-0.5 hover:scale-110 transition-transform"
-                          data-testid={`review-star-${stop.id}-${star}`}
-                        >
-                          <Star className={`w-5 h-5 ${star <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
-                        </button>
-                      ))}
-                    </div>
-                    <Textarea
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      placeholder="Commento (opzionale)..."
-                      className="bg-accent border-border text-sm"
-                      rows={2}
-                      onClick={(e) => e.stopPropagation()}
-                      data-testid={`review-comment-${stop.id}`}
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => { e.stopPropagation(); setShowReviewForm(false); setReviewRating(0); setReviewComment(""); }}
-                        className="flex-1"
-                        data-testid={`button-cancel-review-${stop.id}`}
-                      >
-                        Annulla
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleSubmitReview(); }}
-                        disabled={submittingReview || reviewRating === 0}
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-600"
-                        data-testid={`button-submit-review-${stop.id}`}
-                      >
-                        {submittingReview ? <Loader2 className="w-3 h-3 animate-spin" /> : "Pubblica"}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {tripUserId && (
-                <div data-testid={`meetup-section-${stop.id}`} className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.15))', border: '1px solid rgba(168,85,247,0.3)' }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-4 h-4 text-purple-400" />
-                    <p className="text-sm font-semibold text-purple-400">Incontri tra Nomadi</p>
-                  </div>
-                  {isOwner ? (
-                    <p className="text-xs text-muted-foreground">Gli altri nomadi potranno chiederti di incontrarsi in questa tappa. Riceverai una notifica!</p>
-                  ) : !showMeetupForm ? (
-                    <Button
-                      onClick={(e) => { e.stopPropagation(); setShowMeetupForm(true); }}
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
-                      data-testid={`button-meetup-${stop.id}`}
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      Incontriamoci!
-                    </Button>
-                  ) : (
-                    <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-2" data-testid={`meetup-form-${stop.id}`}>
-                      <p className="text-xs font-medium text-purple-400">Richiesta di incontro</p>
-                      <Textarea
-                        value={meetupMessage}
-                        onChange={(e) => setMeetupMessage(e.target.value)}
-                        placeholder="Ciao! Mi piacerebbe incontrarci a..."
-                        className="bg-accent border-border text-sm"
-                        rows={2}
-                        onClick={(e) => e.stopPropagation()}
-                        data-testid={`meetup-message-${stop.id}`}
-                      />
-                      <Input
-                        type="date"
-                        value={meetupDate}
-                        onChange={(e) => setMeetupDate(e.target.value)}
-                        className="bg-accent border-border text-sm"
-                        onClick={(e) => e.stopPropagation()}
-                        data-testid={`meetup-date-${stop.id}`}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => { e.stopPropagation(); setShowMeetupForm(false); setMeetupMessage(""); setMeetupDate(""); }}
-                          className="flex-1"
-                          data-testid={`button-cancel-meetup-${stop.id}`}
-                        >
-                          Annulla
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={(e) => { e.stopPropagation(); handleSubmitMeetup(); }}
-                          disabled={submittingMeetup || !meetupMessage.trim()}
-                          className="flex-1 bg-purple-500 hover:bg-purple-600"
-                          data-testid={`button-submit-meetup-${stop.id}`}
-                        >
-                          {submittingMeetup ? <Loader2 className="w-3 h-3 animate-spin" /> : "Invia"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
               

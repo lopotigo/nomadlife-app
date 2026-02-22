@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
-import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play, Eye, EyeOff } from "lucide-react";
+import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play, Eye, EyeOff, Camera, Users, MessageCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { TripReplay } from "@/components/trip-replay";
 import { EcoTripButton } from "@/components/eco-trip-card";
+import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 import type { Trip, TripStop, User } from "@shared/schema";
 
 type TripWithDetails = Trip & { stops: TripStop[]; user?: User };
@@ -16,6 +20,153 @@ function StarsDisplay({ rating, size = 16 }: { rating: number; size?: number }) 
       {[1, 2, 3, 4, 5].map(i => (
         <Star key={i} style={{ width: size, height: size }} className={i <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"} />
       ))}
+    </div>
+  );
+}
+
+function StopSocialSections({ stop, tripUserId }: { stop: TripStop; tripUserId?: string }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showMeetupForm, setShowMeetupForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [meetupMessage, setMeetupMessage] = useState("");
+  const [meetupDate, setMeetupDate] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [submittingMeetup, setSubmittingMeetup] = useState(false);
+
+  const isOwner = user?.id === tripUserId;
+
+  useEffect(() => {
+    fetch(`/api/stops/${stop.id}/photos`, { credentials: "include" }).then(r => r.ok ? r.json() : []).then(setPhotos).catch(() => {});
+    fetch(`/api/stops/${stop.id}/reviews`, { credentials: "include" }).then(r => r.ok ? r.json() : []).then(setReviews).catch(() => {});
+  }, [stop.id]);
+
+  const allPhotos = [...(photos.map((p: any) => typeof p === 'string' ? p : p.photoUrl || p.url).filter(Boolean)), ...(stop.imageUrl ? [stop.imageUrl] : [])];
+  const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + (r.rating || 0), 0) / reviews.length).toFixed(1) : null;
+
+  const handleSubmitReview = async () => {
+    if (!reviewRating) return;
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/stops/${stop.id}/reviews`, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ rating: reviewRating, comment: reviewComment }) });
+      if (res.ok) {
+        const newReview = await res.json();
+        setReviews(prev => [...prev, newReview]);
+        setShowReviewForm(false); setReviewRating(0); setReviewComment("");
+        toast({ title: "Recensione pubblicata!" });
+      }
+    } catch {} finally { setSubmittingReview(false); }
+  };
+
+  const handleSubmitMeetup = async () => {
+    if (!meetupMessage.trim() || !tripUserId) return;
+    setSubmittingMeetup(true);
+    try {
+      const res = await fetch(`/api/stops/${stop.id}/meetups`, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ message: meetupMessage, proposedDate: meetupDate || undefined, hostUserId: tripUserId }) });
+      if (res.ok) {
+        setShowMeetupForm(false); setMeetupMessage(""); setMeetupDate("");
+        toast({ title: "Richiesta di incontro inviata!" });
+      }
+    } catch {} finally { setSubmittingMeetup(false); }
+  };
+
+  const sp = (e: React.MouseEvent) => e.stopPropagation();
+
+  return (
+    <div onClick={sp} className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div data-testid={`photo-gallery-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(6,182,212,0.18))', border: '1.5px solid rgba(59,130,246,0.4)' }}>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Camera className="w-4 h-4 text-blue-400" />
+            <p className="text-xs font-bold text-blue-400">Foto</p>
+            <span className="text-[10px] text-blue-300/70 ml-auto">{allPhotos.length}</span>
+          </div>
+          {allPhotos.length > 0 ? (
+            <div className="flex gap-1 overflow-x-auto">
+              {allPhotos.slice(0, 4).map((photo, idx) => (
+                <img key={idx} src={photo} alt="" className="w-12 h-12 object-cover rounded flex-shrink-0 border border-blue-500/30" data-testid={`photo-thumb-${stop.id}-${idx}`} />
+              ))}
+              {allPhotos.length > 4 && <span className="text-xs text-blue-300 self-center ml-1">+{allPhotos.length - 4}</span>}
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground leading-tight">Nessuna foto ancora</p>
+          )}
+        </div>
+
+        <div data-testid={`reviews-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(249,115,22,0.18))', border: '1.5px solid rgba(245,158,11,0.4)' }}>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Star className="w-4 h-4 text-amber-400" />
+            <p className="text-xs font-bold text-amber-400">Recensioni</p>
+            {avgRating ? (
+              <span className="text-[10px] text-amber-300 ml-auto">{avgRating} ({reviews.length})</span>
+            ) : (
+              <span className="text-[10px] text-amber-300/70 ml-auto">0</span>
+            )}
+          </div>
+          {reviews.length > 0 ? (
+            <div className="space-y-1">
+              {reviews.slice(0, 2).map((review: any, idx: number) => (
+                <div key={idx} className="flex items-center gap-1">
+                  <div className="flex">{[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= (review.rating||0) ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />)}</div>
+                  {review.user && <span className="text-[10px] text-foreground/60 truncate">{review.user.name?.split(' ')[0]}</span>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground leading-tight">Nessuna ancora</p>
+          )}
+          {!isOwner && user && !showReviewForm && (
+            <button onClick={(e) => { sp(e); setShowReviewForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-leave-review-${stop.id}`}>⭐ Recensisci</button>
+          )}
+        </div>
+
+        {tripUserId && (
+          <div data-testid={`meetup-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(236,72,153,0.18))', border: '1.5px solid rgba(168,85,247,0.4)' }}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <Users className="w-4 h-4 text-purple-400" />
+              <p className="text-xs font-bold text-purple-400">Incontri</p>
+            </div>
+            {isOwner ? (
+              <p className="text-[11px] text-muted-foreground leading-tight">I nomadi potranno chiederti un incontro qui</p>
+            ) : !showMeetupForm ? (
+              <button onClick={(e) => { sp(e); setShowMeetupForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-meetup-${stop.id}`}>🤝 Incontriamoci!</button>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      {showReviewForm && (
+        <div className="p-3 rounded-lg space-y-2" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }} data-testid={`review-form-${stop.id}`}>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map(star => (
+              <button key={star} type="button" onClick={(e) => { sp(e); setReviewRating(star); }} className="p-0.5 hover:scale-110 transition-transform" data-testid={`review-star-${stop.id}-${star}`}>
+                <Star className={`w-5 h-5 ${star <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-500'}`} />
+              </button>
+            ))}
+          </div>
+          <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="Commento (opzionale)..." className="bg-accent border-border text-sm" rows={2} onClick={sp} data-testid={`review-comment-${stop.id}`} />
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={(e) => { sp(e); setShowReviewForm(false); setReviewRating(0); setReviewComment(""); }} className="flex-1" data-testid={`button-cancel-review-${stop.id}`}>Annulla</Button>
+            <Button size="sm" onClick={(e) => { sp(e); handleSubmitReview(); }} disabled={submittingReview || reviewRating === 0} className="flex-1 bg-emerald-500 hover:bg-emerald-600" data-testid={`button-submit-review-${stop.id}`}>{submittingReview ? <Loader2 className="w-3 h-3 animate-spin" /> : "Pubblica"}</Button>
+          </div>
+        </div>
+      )}
+
+      {showMeetupForm && (
+        <div className="p-3 rounded-lg space-y-2" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }} data-testid={`meetup-form-${stop.id}`}>
+          <p className="text-xs font-medium text-purple-400">Richiesta di incontro</p>
+          <Textarea value={meetupMessage} onChange={(e) => setMeetupMessage(e.target.value)} placeholder="Ciao! Mi piacerebbe incontrarci a..." className="bg-accent border-border text-sm" rows={2} onClick={sp} data-testid={`meetup-message-${stop.id}`} />
+          <Input type="date" value={meetupDate} onChange={(e) => setMeetupDate(e.target.value)} className="bg-accent border-border text-sm" onClick={sp} data-testid={`meetup-date-${stop.id}`} />
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={(e) => { sp(e); setShowMeetupForm(false); setMeetupMessage(""); setMeetupDate(""); }} className="flex-1" data-testid={`button-cancel-meetup-${stop.id}`}>Annulla</Button>
+            <Button size="sm" onClick={(e) => { sp(e); handleSubmitMeetup(); }} disabled={submittingMeetup || !meetupMessage.trim()} className="flex-1 bg-purple-500 hover:bg-purple-600" data-testid={`button-submit-meetup-${stop.id}`}>{submittingMeetup ? <Loader2 className="w-3 h-3 animate-spin" /> : "Invia"}</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -298,7 +449,7 @@ export default function TripDetail() {
                         </div>
 
                         {stop.accommodationName && (
-                          <div className="flex items-center gap-3 bg-blue-50 text-blue-700 rounded-xl px-3 py-2.5">
+                          <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 rounded-xl px-3 py-2.5">
                             <Bed className="w-5 h-5 shrink-0" />
                             <div>
                               <p className="font-semibold text-sm">{stop.accommodationName}</p>
@@ -331,6 +482,8 @@ export default function TripDetail() {
                             ) : null}
                           </div>
                         )}
+
+                        <StopSocialSections stop={stop} tripUserId={trip?.user?.id} />
                       </div>
                     </div>
                   )}

@@ -1643,66 +1643,70 @@ export default function UnifiedMap() {
                           )}
                           
                           {!stop.imageUrl && (
-                            <div className="p-3 pb-1">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div style={{ background: trip.color }} className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                            <div className="relative" style={{ background: `linear-gradient(135deg, ${trip.color}22, ${trip.color}44)` }}>
+                              <div className="p-4 py-5">
+                                <div className="flex items-center gap-3">
+                                  <div style={{ background: trip.color }} className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
                                     {stop.orderIndex + 1}
                                   </div>
-                                  <div>
-                                    <p className="font-bold text-sm">{stop.city}</p>
+                                  <div className="flex-1">
+                                    <p className="font-bold text-base">{stop.city}</p>
                                     <p className="text-xs text-gray-500">{stop.country}</p>
                                   </div>
+                                  {stop.rating && <StarRating rating={stop.rating} size={14} />}
                                 </div>
-                                {stop.rating && <StarRating rating={stop.rating} size={12} />}
                               </div>
                             </div>
                           )}
                           
-                          <div className="p-3 space-y-2">
+                          <div className="p-3 space-y-2.5">
                             <a 
                               href={`/user/${trip.user?.id || trip.userId}`}
-                              className="flex items-center gap-2 hover:bg-gray-50 rounded-lg p-1 -m-1 transition-colors"
+                              className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-1.5 -m-1 transition-colors"
                             >
                               <img 
                                 src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
-                                className="w-7 h-7 rounded-full object-cover ring-2 ring-primary/20"
+                                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
                                 alt={trip.user?.name || "User"}
                               />
-                              <div>
+                              <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-xs text-primary">{trip.user?.name || "Utente"}</p>
-                                <p className="text-[10px] text-gray-400">{trip.title}</p>
+                                <p className="text-[10px] text-gray-400 truncate">{trip.title}</p>
                               </div>
+                              {trip.isOwn && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Tu</span>}
                             </a>
 
+                            <div className="flex flex-wrap gap-1.5">
+                              <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(stop.arrivalDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                                {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}`}
+                              </div>
+                              {stop.transportMode && (
+                                <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                  <span className="capitalize">{stop.transportMode === "car" ? "🚗" : stop.transportMode === "train" ? "🚂" : stop.transportMode === "plane" ? "✈️" : stop.transportMode === "bus" ? "🚌" : stop.transportMode === "bike" ? "🚲" : stop.transportMode === "walk" ? "🚶" : "🚗"}</span>
+                                  {stop.distanceKm && <span>{stop.distanceKm} km</span>}
+                                  {stop.co2Kg ? <span className="text-emerald-600">{stop.co2Kg}kg CO₂</span> : null}
+                                </div>
+                              )}
+                            </div>
+
                             {stop.accommodationName && (
-                              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 rounded-lg px-2.5 py-2">
+                              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 rounded-lg px-2.5 py-2">
                                 <Bed className="w-4 h-4 shrink-0" />
                                 <div>
                                   <p className="font-semibold text-xs">{stop.accommodationName}</p>
-                                  {stop.accommodationType && <p className="text-blue-500 text-[10px] capitalize">{stop.accommodationType}</p>}
+                                  {stop.accommodationType && <p className="text-blue-500 dark:text-blue-400 text-[10px] capitalize">{stop.accommodationType}</p>}
                                 </div>
                               </div>
                             )}
 
-                            <div className="flex items-center gap-3 text-[11px] text-gray-500">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
-                                {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
-                              </span>
-                            </div>
-
                             {stop.notes && (
-                              <p className="text-xs text-gray-600 italic bg-gray-50 p-2 rounded-lg">"{stop.notes}"</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 p-2 rounded-lg leading-relaxed">"{stop.notes}"</p>
                             )}
 
-                            {stop.transportMode && (
-                              <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                                <span className="capitalize">{stop.transportMode}</span>
-                                {stop.distanceKm && <span>· {stop.distanceKm} km</span>}
-                                {stop.co2Kg ? <span className="text-emerald-600">· {stop.co2Kg} kg CO₂</span> : null}
-                              </div>
+                            {!stop.notes && !stop.accommodationName && (
+                              <p className="text-[11px] text-gray-400 italic text-center py-1">Tappa {stop.orderIndex + 1} del viaggio "{trip.title}"</p>
                             )}
 
                             <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
