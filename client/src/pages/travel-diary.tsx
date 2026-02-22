@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { searchFlights, searchHotels } from "@/lib/travelpayouts";
@@ -24,7 +24,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "re
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed, Sparkles, Camera } from "lucide-react";
+import { Navigation, Route, Play, Train, Footprints, Bike, Leaf, CheckCircle2, Lock, BarChart3, Film, ExternalLink, Share2, Bed, Sparkles, Camera, Pencil } from "lucide-react";
 import { PersonalStats } from "@/components/personal-stats";
 import { MomentsBar } from "@/components/moments";
 import { useI18n } from "@/lib/i18n";
@@ -1991,6 +1991,273 @@ function TripCO2Summary({ stops }: { stops: TripStop[] }) {
   );
 }
 
+function DiaryStopMapPopup({ stop, index, tripUserId, onStopUpdated }: {
+  stop: TripStop & { expenses?: TripExpense[] };
+  index: number;
+  tripUserId?: string;
+  onStopUpdated?: () => void;
+}) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isOwner = user?.id === tripUserId;
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesText, setNotesText] = useState("");
+  const [savedNotes, setSavedNotes] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [stopRating, setStopRating] = useState(0);
+  const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0);
+  const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null);
+
+  const realNotes = stop.notes && stop.notes !== "Aggiunta dalla mappa" ? stop.notes : "";
+
+  useEffect(() => {
+    if (containerRef.current) {
+      L.DomEvent.disableClickPropagation(containerRef.current);
+      L.DomEvent.disableScrollPropagation(containerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    const notes = stop.notes && stop.notes !== "Aggiunta dalla mappa" ? stop.notes : "";
+    setNotesText(notes);
+    setSavedNotes(notes);
+    setStopRating(stop.rating || 0);
+    setEditingNotes(false);
+    setSelectedPhotoIdx(0);
+    setPhotos([]);
+    fetch(`/api/stops/${stop.id}/photos`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setPhotos(data))
+      .catch(() => {});
+  }, [stop.id, stop.notes, stop.rating]);
+
+  const { uploadFile: uploadStopPhoto, isUploading: isUploadingPhoto, progress: photoUploadProgress } = useUpload({
+    onSuccess: async (response) => {
+      try {
+        const res = await fetch(`/api/stops/${stop.id}/photos`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ url: response.objectPath }),
+        });
+        if (res.ok) {
+          const newPhoto = await res.json();
+          setPhotos(prev => [...prev, newPhoto]);
+          toast({ title: "Foto aggiunta!" });
+        }
+      } catch {
+        toast({ title: "Errore", variant: "destructive" });
+      }
+    },
+  });
+
+  const handleDeletePhoto = async (photoId: string) => {
+    setDeletingPhoto(photoId);
+    try {
+      const res = await fetch(`/api/stop-photos/${photoId}`, { method: "DELETE", credentials: "include" });
+      if (res.ok) {
+        setPhotos(prev => prev.filter(p => p.id !== photoId));
+        toast({ title: "Foto eliminata" });
+      }
+    } catch {}
+    setDeletingPhoto(null);
+  };
+
+  const handleSaveNotes = async () => {
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/trips/stops/${stop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ notes: notesText || undefined, rating: stopRating || undefined }),
+      });
+      if (res.ok) {
+        setEditingNotes(false);
+        setSavedNotes(notesText);
+        toast({ title: "Salvato!" });
+        onStopUpdated?.();
+      }
+    } catch {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+    setSavingNotes(false);
+  };
+
+  const allPhotos = [
+    ...(stop.imageUrl ? [{ id: "main", url: stop.imageUrl }] : []),
+    ...photos.map((p: any) => ({ id: p.id, url: typeof p === 'string' ? p : p.url })),
+  ];
+
+  const hasPhotos = allPhotos.length > 0;
+  const currentPhoto = hasPhotos ? allPhotos[selectedPhotoIdx % allPhotos.length] : null;
+
+  return (
+    <div ref={containerRef} className="w-[300px]" data-testid={`popup-diary-stop-${stop.id}`}>
+      <div className="relative" style={!hasPhotos ? { background: `linear-gradient(135deg, #f9731630, #f9731660)` } : undefined}>
+        {hasPhotos && currentPhoto ? (
+          <div className="relative group">
+            <img src={currentPhoto.url} className="w-full h-40 object-cover" alt={stop.city} />
+            {allPhotos.length > 1 && (
+              <>
+                <button onClick={() => setSelectedPhotoIdx(i => (i - 1 + allPhotos.length) % allPhotos.length)} className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                </button>
+                <button onClick={() => setSelectedPhotoIdx(i => (i + 1) % allPhotos.length)} className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-1">
+                  {allPhotos.map((_, i) => (
+                    <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === selectedPhotoIdx % allPhotos.length ? 'bg-white' : 'bg-white/40'}`} />
+                  ))}
+                </div>
+              </>
+            )}
+            {isOwner && currentPhoto.id !== "main" && (
+              <button
+                onClick={() => handleDeletePhoto(currentPhoto.id)}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                data-testid={`diary-map-delete-photo-${currentPhoto.id}`}
+              >
+                {deletingPhoto === currentPhoto.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              </button>
+            )}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8">
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-white font-bold text-base leading-tight">{stop.city}</p>
+                  <p className="text-white/70 text-xs">{stop.country}</p>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {[1,2,3,4,5].map(s => (
+                    <button key={s} onClick={isOwner ? () => { setStopRating(s); if (!editingNotes) setEditingNotes(true); } : undefined} className={isOwner ? "cursor-pointer" : "cursor-default"} data-testid={`diary-map-rating-${stop.id}-${s}`}>
+                      <Star className={`w-4 h-4 drop-shadow-md ${s <= stopRating ? 'fill-amber-400 text-amber-400' : 'text-white/50'}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 pb-2">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                {index + 1}
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-base leading-tight">{stop.city}</p>
+                <p className="text-sm text-gray-500">{stop.country}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-0.5 mb-1">
+              {[1,2,3,4,5].map(s => (
+                <button key={s} onClick={isOwner ? () => { setStopRating(s); if (!editingNotes) setEditingNotes(true); } : undefined} className={isOwner ? "cursor-pointer" : "cursor-default"} data-testid={`diary-map-rating-${stop.id}-${s}`}>
+                  <Star className={`w-5 h-5 ${s <= stopRating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                </button>
+              ))}
+              {stopRating > 0 && <span className="text-xs text-gray-500 ml-1">{stopRating}/5</span>}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="p-3 space-y-2">
+        {isOwner && (
+          <label className="flex items-center justify-center w-full h-9 border-2 border-dashed border-blue-400/40 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-500/10 transition-all">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) await uploadStopPhoto(file);
+                e.target.value = "";
+              }}
+              className="hidden"
+              disabled={isUploadingPhoto}
+              data-testid={`diary-map-upload-photo-${stop.id}`}
+            />
+            {isUploadingPhoto ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                <span className="text-xs font-medium text-blue-500">{photoUploadProgress}%</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-blue-500" />
+                <span className="text-xs font-semibold text-blue-500">{hasPhotos ? 'Aggiungi altre foto' : 'Carica una foto'}</span>
+              </div>
+            )}
+          </label>
+        )}
+
+        {isOwner ? (
+          editingNotes ? (
+            <div className="space-y-1.5 bg-emerald-50 dark:bg-emerald-950/20 p-2.5 rounded-xl">
+              <div className="flex items-center gap-1.5">
+                <Pencil className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Le tue note</span>
+              </div>
+              <Textarea
+                value={notesText}
+                onChange={(e) => setNotesText(e.target.value)}
+                placeholder="Come è stato questo posto? Consigli..."
+                className="bg-white dark:bg-gray-900 border-emerald-200 dark:border-emerald-800 text-xs min-h-[60px] rounded-lg"
+                rows={2}
+                data-testid={`diary-map-notes-${stop.id}`}
+              />
+              <div className="flex gap-1.5">
+                <Button onClick={handleSaveNotes} disabled={savingNotes} size="sm" className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs h-7" data-testid={`diary-map-save-${stop.id}`}>
+                  {savingNotes ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Check className="w-3 h-3 mr-1" /> Salva</>}
+                </Button>
+                <Button onClick={() => { setEditingNotes(false); setNotesText(savedNotes); setStopRating(stop.rating || 0); }} variant="outline" size="sm" className="text-xs h-7" data-testid={`diary-map-cancel-${stop.id}`}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div onClick={() => setEditingNotes(true)} className="cursor-pointer group">
+              {savedNotes ? (
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-2 flex items-start gap-2 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition-colors">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 italic flex-1">"{savedNotes}"</p>
+                  <Pencil className="w-3 h-3 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2 text-center hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                  <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
+                    <Pencil className="w-3 h-3" /> Aggiungi note e impressioni
+                  </p>
+                </div>
+              )}
+            </div>
+          )
+        ) : savedNotes ? (
+          <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg p-2">
+            <p className="text-xs text-gray-600 dark:text-gray-400 italic">"{savedNotes}"</p>
+          </div>
+        ) : null}
+
+        {stop.arrivalDate && (
+          <div className="flex items-center gap-2 text-[11px] text-gray-500">
+            <Calendar className="w-3 h-3" />
+            {new Date(stop.arrivalDate).toLocaleDateString("it-IT")}
+            {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT")}`}
+          </div>
+        )}
+
+        {stop.transportMode && (
+          <div className="flex items-center gap-2 text-[11px] text-gray-500">
+            <span className="capitalize">{stop.transportMode}</span>
+            {stop.distanceKm && <span>· {stop.distanceKm} km</span>}
+            {stop.co2Kg ? <span className="text-emerald-600">· {stop.co2Kg} kg CO₂</span> : null}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function StopCard({ 
   stop, 
   index, 
@@ -2699,7 +2966,7 @@ function ExploreTripsMap({
                     </span>
                   </div>
 
-                  {stop.notes && (
+                  {stop.notes && stop.notes !== "Aggiunta dalla mappa" && (
                     <p className="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">"{stop.notes}"</p>
                   )}
 
@@ -3271,29 +3538,8 @@ function TripPlannerMap({
             position={[stop.latitude!, stop.longitude!]}
             icon={createStopMarkerIcon(index, "#f97316", userAvatar, stop.imageUrl)}
           >
-            <Popup>
-              <div className="min-w-[180px]">
-                <h3 className="font-bold">{stop.city}, {stop.country}</h3>
-                <p className="text-xs text-muted-foreground">Tappa {index + 1}</p>
-                <div className="flex gap-1.5 mt-2">
-                  <button
-                    onClick={() => searchFlights(index > 0 ? stopsWithCoords[index - 1].city : undefined, stop.city, stop.arrivalDate)}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs py-1.5 px-2 rounded-lg transition-colors"
-                    data-testid={`button-flights-planner-${stop.id}`}
-                  >
-                    <Plane className="w-3.5 h-3.5" />
-                    Voli
-                  </button>
-                  <button
-                    onClick={() => searchHotels(stop.city, stop.arrivalDate, stop.departureDate)}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1.5 px-2 rounded-lg transition-colors"
-                    data-testid={`button-hotel-planner-${stop.id}`}
-                  >
-                    <Hotel className="w-3.5 h-3.5" />
-                    Hotel
-                  </button>
-                </div>
-              </div>
+            <Popup className="custom-popup" maxWidth={340} minWidth={300} autoPanPadding={[20, 20]} autoPan={true}>
+              <DiaryStopMapPopup stop={stop} index={index} tripUserId={trip.userId} />
             </Popup>
           </Marker>
         ))}
