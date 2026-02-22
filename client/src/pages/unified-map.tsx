@@ -263,6 +263,278 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
 
 // CurvedRouteLine imported from shared component
 
+function StopMapPopup({ stop, trip, searchFlightsFn, searchHotelsFn, openDirections, onShare }: {
+  stop: any;
+  trip: any;
+  searchFlightsFn: (from: string | undefined, to: string, date: string) => void;
+  searchHotelsFn: (city: string, checkIn: string, checkOut?: string) => void;
+  openDirections: (lat: number, lng: number, label: string) => void;
+  onShare: () => void;
+}) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const isOwner = user?.id === trip.userId;
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesText, setNotesText] = useState(stop.notes || "");
+  const [savedNotes, setSavedNotes] = useState(stop.notes || "");
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [stopRating, setStopRating] = useState(stop.rating || 0);
+
+  useEffect(() => {
+    setNotesText(stop.notes || "");
+    setSavedNotes(stop.notes || "");
+    setStopRating(stop.rating || 0);
+    setEditingNotes(false);
+    setPhotos([]);
+    fetch(`/api/stops/${stop.id}/photos`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setPhotos(data))
+      .catch(() => {});
+  }, [stop.id]);
+
+  const { uploadFile: uploadStopPhoto, isUploading: isUploadingPhoto, progress: photoUploadProgress } = useUpload({
+    onSuccess: async (response) => {
+      try {
+        const res = await fetch(`/api/stops/${stop.id}/photos`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ url: response.objectPath }),
+        });
+        if (res.ok) {
+          const newPhoto = await res.json();
+          setPhotos(prev => [...prev, newPhoto]);
+          toast({ title: "Foto aggiunta!" });
+        }
+      } catch {
+        toast({ title: "Errore", variant: "destructive" });
+      }
+    },
+  });
+
+  const handleSaveNotes = async () => {
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/trips/stops/${stop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ notes: notesText, rating: stopRating || undefined }),
+      });
+      if (res.ok) {
+        setEditingNotes(false);
+        setSavedNotes(notesText);
+        toast({ title: "Tappa aggiornata!" });
+      }
+    } catch {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+    setSavingNotes(false);
+  };
+
+  const allPhotoUrls = [
+    ...(stop.imageUrl ? [stop.imageUrl] : []),
+    ...photos.map((p: any) => typeof p === 'string' ? p : p.url),
+  ];
+
+  const validStops = (trip.stops || []).filter((s: any) => s.latitude && s.longitude).sort((a: any, b: any) => a.orderIndex - b.orderIndex);
+  const stopIdx = validStops.findIndex((s: any) => s.id === stop.id);
+
+  return (
+    <div className="w-[300px]" data-testid={`popup-stop-${stop.id}`}>
+      {stop.imageUrl ? (
+        <div className="relative">
+          <img src={stop.imageUrl} className="w-full h-32 object-cover" alt={stop.city} />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white font-bold text-sm">{stop.city}</p>
+                <p className="text-white/70 text-xs">{stop.country}</p>
+              </div>
+              {stopRating > 0 && <StarRating rating={stopRating} size={14} />}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="relative" style={{ background: `linear-gradient(135deg, ${trip.color}22, ${trip.color}44)` }}>
+          <div className="p-4 py-5">
+            <div className="flex items-center gap-3">
+              <div style={{ background: trip.color }} className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                {stop.orderIndex + 1}
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-base">{stop.city}</p>
+                <p className="text-xs text-gray-500">{stop.country}</p>
+              </div>
+              {stopRating > 0 && <StarRating rating={stopRating} size={14} />}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="p-3 space-y-2">
+        <a
+          href={`/user/${trip.user?.id || trip.userId}`}
+          className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-1.5 -m-1 transition-colors"
+        >
+          <img
+            src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
+            alt={trip.user?.name || "User"}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-xs text-primary">{trip.user?.name || "Utente"}</p>
+            <p className="text-[10px] text-gray-400 truncate">{trip.title}</p>
+          </div>
+          {trip.isOwn && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Tu</span>}
+        </a>
+
+        <div className="flex flex-wrap gap-1.5">
+          <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+            <Calendar className="w-3 h-3" />
+            {new Date(stop.arrivalDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+            {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}`}
+          </div>
+          {stop.transportMode && (
+            <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
+              <span>{stop.transportMode === "car" ? "🚗" : stop.transportMode === "train" ? "🚂" : stop.transportMode === "plane" ? "✈️" : stop.transportMode === "bus" ? "🚌" : stop.transportMode === "bike" ? "🚲" : stop.transportMode === "walk" ? "🚶" : "🚗"}</span>
+              {stop.distanceKm && <span>{stop.distanceKm} km</span>}
+              {stop.co2Kg ? <span className="text-emerald-600">{stop.co2Kg}kg CO₂</span> : null}
+            </div>
+          )}
+        </div>
+
+        {stop.accommodationName && (
+          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 rounded-lg px-2.5 py-2">
+            <Bed className="w-4 h-4 shrink-0" />
+            <div>
+              <p className="font-semibold text-xs">{stop.accommodationName}</p>
+              {stop.accommodationType && <p className="text-blue-500 dark:text-blue-400 text-[10px] capitalize">{stop.accommodationType}</p>}
+            </div>
+          </div>
+        )}
+
+        {allPhotoUrls.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {allPhotoUrls.slice(0, 5).map((url, i) => (
+              <img key={i} src={url} alt="" className="w-14 h-14 object-cover rounded-lg flex-shrink-0 border border-border/50" />
+            ))}
+            {allPhotoUrls.length > 5 && <span className="text-xs text-muted-foreground self-center ml-1">+{allPhotoUrls.length - 5}</span>}
+          </div>
+        )}
+
+        {isOwner && (
+          <div className="space-y-2 border-t border-border/50 pt-2">
+            <label className="flex items-center justify-center w-full h-9 border-2 border-dashed border-blue-500/30 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-500/10 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) await uploadStopPhoto(file);
+                  e.target.value = "";
+                }}
+                className="hidden"
+                disabled={isUploadingPhoto}
+                data-testid={`map-input-upload-photo-${stop.id}`}
+              />
+              {isUploadingPhoto ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" />
+                  <span className="text-[11px] text-blue-400">{photoUploadProgress}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-[11px] font-medium text-blue-400">Aggiungi foto</span>
+                </div>
+              )}
+            </label>
+
+            <div className="flex items-center gap-1">
+              <span className="text-[11px] text-muted-foreground mr-1">Rating:</span>
+              {[1,2,3,4,5].map(s => (
+                <button key={s} onClick={() => { setStopRating(s); if (!editingNotes) setEditingNotes(true); }} className="p-0" data-testid={`map-rating-star-${stop.id}-${s}`}>
+                  <Star className={`w-4 h-4 ${s <= stopRating ? 'fill-amber-400 text-amber-400' : 'text-gray-400'}`} />
+                </button>
+              ))}
+            </div>
+
+            {editingNotes ? (
+              <div className="space-y-1.5">
+                <Textarea value={notesText} onChange={(e) => setNotesText(e.target.value)} placeholder="Le tue note..." className="bg-accent/50 border-border text-xs min-h-[60px]" rows={2} data-testid={`map-textarea-notes-${stop.id}`} />
+                <div className="flex gap-1.5">
+                  <Button size="sm" variant="outline" onClick={() => { setEditingNotes(false); setNotesText(savedNotes); }} className="flex-1 h-7 text-[11px]" data-testid={`map-button-cancel-notes-${stop.id}`}>Annulla</Button>
+                  <Button size="sm" onClick={handleSaveNotes} disabled={savingNotes} className="flex-1 h-7 text-[11px] bg-emerald-500 hover:bg-emerald-600" data-testid={`map-button-save-notes-${stop.id}`}>{savingNotes ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salva"}</Button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                {savedNotes ? (
+                  <p className="text-[11px] text-muted-foreground italic">"{savedNotes}"</p>
+                ) : null}
+                <button onClick={() => setEditingNotes(true)} className="text-[11px] font-medium text-emerald-400 hover:text-emerald-300" data-testid={`map-button-edit-notes-${stop.id}`}>
+                  {savedNotes ? "Modifica note" : "Scrivi le tue note"}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!isOwner && stop.notes && (
+          <p className="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 p-2 rounded-lg leading-relaxed">"{stop.notes}"</p>
+        )}
+
+        {!isOwner && !stop.notes && !stop.accommodationName && (
+          <p className="text-[11px] text-gray-400 italic text-center py-1">Tappa {stop.orderIndex + 1} del viaggio "{trip.title}"</p>
+        )}
+
+        <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
+
+        <div className="flex gap-1.5 pt-1 flex-wrap">
+          <a
+            href={`/trip/${trip.id}`}
+            className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-[11px] font-semibold transition-colors min-w-[60px]"
+            data-testid={`link-trip-diary-stop-${stop.id}`}
+          >
+            <ExternalLink className="w-3 h-3" />
+            Diario
+          </a>
+          <button
+            onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
+            className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+            data-testid={`button-directions-stop-${stop.id}`}
+          >
+            <Navigation className="w-3 h-3" />
+          </button>
+          <button
+            onClick={() => searchFlightsFn(stopIdx > 0 ? validStops[stopIdx - 1].city : undefined, stop.city, stop.arrivalDate)}
+            className="flex items-center justify-center gap-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+            data-testid={`button-flights-stop-${stop.id}`}
+          >
+            <Plane className="w-3 h-3" />
+          </button>
+          <button
+            onClick={() => searchHotelsFn(stop.city, stop.arrivalDate, stop.departureDate)}
+            className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
+            data-testid={`button-hotel-stop-${stop.id}`}
+          >
+            <Hotel className="w-3 h-3" />
+          </button>
+          <button
+            onClick={onShare}
+            className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+            data-testid={`button-share-trip-${trip.id}`}
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -1625,135 +1897,15 @@ export default function UnifiedMap() {
                       position={[stop.latitude!, stop.longitude!]}
                       icon={createStopMarkerIcon(stop.orderIndex, trip.color, trip.user?.avatar, stop.imageUrl)}
                     >
-                      <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
-                        <div className="w-[280px]" data-testid={`popup-stop-${stop.id}`}>
-                          {stop.imageUrl && (
-                            <div className="relative">
-                              <img src={stop.imageUrl} className="w-full h-32 object-cover" alt={stop.city} />
-                              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="text-white font-bold text-sm">{stop.city}</p>
-                                    <p className="text-white/70 text-xs">{stop.country}</p>
-                                  </div>
-                                  {stop.rating && <StarRating rating={stop.rating} size={14} />}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {!stop.imageUrl && (
-                            <div className="relative" style={{ background: `linear-gradient(135deg, ${trip.color}22, ${trip.color}44)` }}>
-                              <div className="p-4 py-5">
-                                <div className="flex items-center gap-3">
-                                  <div style={{ background: trip.color }} className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                                    {stop.orderIndex + 1}
-                                  </div>
-                                  <div className="flex-1">
-                                    <p className="font-bold text-base">{stop.city}</p>
-                                    <p className="text-xs text-gray-500">{stop.country}</p>
-                                  </div>
-                                  {stop.rating && <StarRating rating={stop.rating} size={14} />}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          
-                          <div className="p-3 space-y-2.5">
-                            <a 
-                              href={`/user/${trip.user?.id || trip.userId}`}
-                              className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-1.5 -m-1 transition-colors"
-                            >
-                              <img 
-                                src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
-                                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
-                                alt={trip.user?.name || "User"}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-xs text-primary">{trip.user?.name || "Utente"}</p>
-                                <p className="text-[10px] text-gray-400 truncate">{trip.title}</p>
-                              </div>
-                              {trip.isOwn && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Tu</span>}
-                            </a>
-
-                            <div className="flex flex-wrap gap-1.5">
-                              <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(stop.arrivalDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
-                                {stop.departureDate && ` → ${new Date(stop.departureDate).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}`}
-                              </div>
-                              {stop.transportMode && (
-                                <div className="flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-md">
-                                  <span className="capitalize">{stop.transportMode === "car" ? "🚗" : stop.transportMode === "train" ? "🚂" : stop.transportMode === "plane" ? "✈️" : stop.transportMode === "bus" ? "🚌" : stop.transportMode === "bike" ? "🚲" : stop.transportMode === "walk" ? "🚶" : "🚗"}</span>
-                                  {stop.distanceKm && <span>{stop.distanceKm} km</span>}
-                                  {stop.co2Kg ? <span className="text-emerald-600">{stop.co2Kg}kg CO₂</span> : null}
-                                </div>
-                              )}
-                            </div>
-
-                            {stop.accommodationName && (
-                              <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 rounded-lg px-2.5 py-2">
-                                <Bed className="w-4 h-4 shrink-0" />
-                                <div>
-                                  <p className="font-semibold text-xs">{stop.accommodationName}</p>
-                                  {stop.accommodationType && <p className="text-blue-500 dark:text-blue-400 text-[10px] capitalize">{stop.accommodationType}</p>}
-                                </div>
-                              </div>
-                            )}
-
-                            {stop.notes && (
-                              <p className="text-xs text-gray-600 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800 p-2 rounded-lg leading-relaxed">"{stop.notes}"</p>
-                            )}
-
-                            {!stop.notes && !stop.accommodationName && (
-                              <p className="text-[11px] text-gray-400 italic text-center py-1">Tappa {stop.orderIndex + 1} del viaggio "{trip.title}"</p>
-                            )}
-
-                            <WeatherWidget latitude={stop.latitude!} longitude={stop.longitude!} />
-
-                            <div className="flex gap-1.5 pt-1 flex-wrap">
-                              <a 
-                                href={`/trip/${trip.id}`}
-                                className="flex-1 flex items-center justify-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-1.5 text-[11px] font-semibold transition-colors min-w-[60px]"
-                                data-testid={`link-trip-diary-stop-${stop.id}`}
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                Diario
-                              </a>
-                              <button
-                                onClick={() => openDirections(stop.latitude!, stop.longitude!, `${stop.city}, ${stop.country}`)}
-                                className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
-                                data-testid={`button-directions-stop-${stop.id}`}
-                                title="Indicazioni"
-                              >
-                                <Navigation className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => searchFlights(idx > 0 ? validStops[idx - 1].city : undefined, stop.city, stop.arrivalDate)}
-                                className="flex items-center justify-center gap-1 bg-orange-500 hover:bg-orange-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
-                                data-testid={`button-flights-stop-${stop.id}`}
-                                title="Cerca voli"
-                              >
-                                <Plane className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => searchHotels(stop.city, stop.arrivalDate, stop.departureDate)}
-                                className="flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-1.5 px-2 text-[11px] font-semibold transition-colors"
-                                data-testid={`button-hotel-stop-${stop.id}`}
-                                title="Cerca hotel"
-                              >
-                                <Hotel className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => handleShare("trip", trip.id, trip.title, () => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title }))}
-                                className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                                data-testid={`button-share-trip-${trip.id}`}
-                              >
-                                <Share2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                      <Popup className="custom-popup" maxWidth={340} minWidth={300} autoPanPadding={[20, 20]} autoPan={true}>
+                        <StopMapPopup
+                          stop={stop}
+                          trip={trip}
+                          searchFlightsFn={searchFlights}
+                          searchHotelsFn={searchHotels}
+                          openDirections={openDirections}
+                          onShare={() => handleShare("trip", trip.id, trip.title, () => setShareModal({ open: true, type: "trip", id: trip.id, title: trip.title }))}
+                        />
                       </Popup>
                     </Marker>
                   ))}
