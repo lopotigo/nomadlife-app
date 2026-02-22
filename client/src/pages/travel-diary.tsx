@@ -1469,6 +1469,7 @@ export default function TravelDiary() {
             onClearAllStops={handleClearAllStops}
             onClose={() => setShowPlannerMap(false)}
             userAvatar={user?.avatar}
+            onStopUpdated={() => fetchTripDetails(selectedTrip.id)}
           />
         )}
       </div>
@@ -2252,6 +2253,10 @@ function DiaryStopMapPopup({ stop, index, tripUserId, onStopUpdated }: {
             {stop.distanceKm && <span>· {stop.distanceKm} km</span>}
             {stop.co2Kg ? <span className="text-emerald-600">· {stop.co2Kg} kg CO₂</span> : null}
           </div>
+        )}
+
+        {stop.latitude && stop.longitude && (
+          <WeatherWidget latitude={stop.latitude} longitude={stop.longitude} compact />
         )}
       </div>
     </div>
@@ -3155,13 +3160,15 @@ function TripPlannerMap({
   onAddStopFromMap,
   onClearAllStops,
   onClose,
-  userAvatar
+  userAvatar,
+  onStopUpdated
 }: { 
   trip: TripWithDetails;
   onAddStopFromMap: (lat: number, lng: number, city: string, country: string) => void;
   onClearAllStops: () => void;
   onClose: () => void;
   userAvatar?: string | null;
+  onStopUpdated?: () => void;
 }) {
   const [, setLocation] = useLocation();
   const { theme } = useTheme();
@@ -3539,7 +3546,7 @@ function TripPlannerMap({
             icon={createStopMarkerIcon(index, "#f97316", userAvatar, stop.imageUrl)}
           >
             <Popup className="custom-popup" maxWidth={340} minWidth={300} autoPanPadding={[20, 20]} autoPan={true}>
-              <DiaryStopMapPopup stop={stop} index={index} tripUserId={trip.userId} />
+              <DiaryStopMapPopup stop={stop} index={index} tripUserId={trip.userId} onStopUpdated={onStopUpdated} />
             </Popup>
           </Marker>
         ))}

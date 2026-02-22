@@ -369,9 +369,9 @@ function PostCard({ post, onLike, currentUser }: { post: PostWithUser; onLike: (
           </button>
         </div>
         
-        <p className="text-sm leading-relaxed" data-testid={`text-content-${post.id}`}>
+        <p className="text-sm leading-relaxed whitespace-pre-line" data-testid={`text-content-${post.id}`}>
           <span className="font-bold mr-2">{post.user.username}</span>
-          {post.content}
+          {post.content?.split(/\*\*(.*?)\*\*/g).map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)}
         </p>
 
         {post.tripId && (

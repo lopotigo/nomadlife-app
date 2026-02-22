@@ -1535,10 +1535,10 @@ Sitemap: https://nomad-life.app/sitemap.xml
         await storage.addStopPhoto({ stopId: stop.id, url: photos[i], orderIndex: i });
       }
       
-      // Auto-create a post in the feed for public trips
       if (trip.isPublic) {
         const emoji = stop.transportMode === "plane" ? "✈️" : stop.transportMode === "train" ? "🚂" : stop.transportMode === "car" ? "🚗" : "📍";
-        const content = `${emoji} Nuova tappa: **${stop.city}, ${stop.country}**\n🗺️ Viaggio: "${trip.title}"${stop.notes ? `\n💬 ${stop.notes}` : ""}${stop.rating ? `\n⭐ ${stop.rating}/5` : ""}`;
+        const cleanNotes = stop.notes && stop.notes !== "Aggiunta dalla mappa" ? stop.notes : "";
+        const content = `${emoji} Nuova tappa: ${stop.city}, ${stop.country}\n🗺️ Viaggio: "${trip.title}"${cleanNotes ? `\n💬 ${cleanNotes}` : ""}${stop.rating ? `\n⭐ ${stop.rating}/5` : ""}`;
         
         await storage.createPost({
           userId: (req.user as User).id,

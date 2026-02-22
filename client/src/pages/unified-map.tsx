@@ -537,6 +537,10 @@ function StopMapPopup({ stop, trip, openDirections, onShare }: {
           </div>
         )}
 
+        {stop.latitude && stop.longitude && (
+          <WeatherWidget latitude={stop.latitude} longitude={stop.longitude} />
+        )}
+
         <div className="flex gap-2 pt-1">
           <a
             href={`/trip/${trip.id}`}
