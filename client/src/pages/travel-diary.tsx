@@ -1851,6 +1851,7 @@ function TripDetails({
                 onAddExpense={() => onAddExpense(stop.id)}
                 prevCity={index > 0 ? trip.stops[index - 1].city : undefined}
                 tripUserId={trip.userId}
+                onStopUpdated={onRefresh}
               />
             </div>
           ))}
@@ -1996,7 +1997,8 @@ function StopCard({
   currency,
   onAddExpense,
   prevCity,
-  tripUserId
+  tripUserId,
+  onStopUpdated
 }: { 
   stop: TripStop & { expenses: TripExpense[] }; 
   index: number;
@@ -2004,11 +2006,12 @@ function StopCard({
   onAddExpense: () => void;
   prevCity?: string;
   tripUserId?: string;
+  onStopUpdated?: () => void;
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<any[]>([]);
   const [photosLoaded, setPhotosLoaded] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoaded, setReviewsLoaded] = useState(false);
@@ -2020,6 +2023,36 @@ function StopCard({
   const [meetupMessage, setMeetupMessage] = useState("");
   const [meetupDate, setMeetupDate] = useState("");
   const [submittingMeetup, setSubmittingMeetup] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesText, setNotesText] = useState(stop.notes || "");
+  const [savedNotes, setSavedNotes] = useState(stop.notes || "");
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [stopRating, setStopRating] = useState(stop.rating || 0);
+  const [savedRating, setSavedRating] = useState(stop.rating || 0);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
+
+  const { uploadFile: uploadStopPhoto, isUploading: isUploadingPhoto, progress: photoUploadProgress } = useUpload({
+    onSuccess: async (response) => {
+      try {
+        const res = await fetch(`/api/stops/${stop.id}/photos`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ url: response.objectPath }),
+        });
+        if (res.ok) {
+          const newPhoto = await res.json();
+          setPhotos(prev => [...prev, newPhoto]);
+          toast({ title: "Foto aggiunta!" });
+        }
+      } catch {
+        toast({ title: "Errore salvataggio foto", variant: "destructive" });
+      }
+    },
+    onError: (error) => {
+      toast({ title: "Errore upload", description: error.message, variant: "destructive" });
+    },
+  });
   const currencySymbol = currency === "EUR" ? "€" : currency === "USD" ? "$" : currency;
   const totalStopExpenses = stop.expenses.reduce((sum, e) => sum + e.cost, 0);
 
@@ -2058,6 +2091,42 @@ function StopCard({
       fetchPhotos();
       fetchReviews();
     }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    setDeletingPhotoId(photoId);
+    try {
+      const res = await fetch(`/api/stop-photos/${photoId}`, { method: "DELETE", credentials: "include" });
+      if (res.ok) {
+        setPhotos(prev => prev.filter((p: any) => p.id !== photoId));
+        toast({ title: "Foto rimossa" });
+      }
+    } catch {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+    setDeletingPhotoId(null);
+  };
+
+  const handleSaveNotes = async () => {
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/trips/stops/${stop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ notes: notesText, rating: stopRating || undefined }),
+      });
+      if (res.ok) {
+        setEditingNotes(false);
+        setSavedNotes(notesText);
+        setSavedRating(stopRating);
+        toast({ title: "Tappa aggiornata!" });
+        onStopUpdated?.();
+      }
+    } catch {
+      toast({ title: "Errore", variant: "destructive" });
+    }
+    setSavingNotes(false);
   };
 
   const handleSubmitReview = async () => {
@@ -2116,7 +2185,7 @@ function StopCard({
     setSubmittingMeetup(false);
   };
 
-  const allPhotos = [
+  const allPhotoUrls = [
     ...(stop.imageUrl ? [stop.imageUrl] : []),
     ...photos.map((p: any) => typeof p === 'string' ? p : p.url),
   ];
@@ -2184,69 +2253,149 @@ function StopCard({
             className="border-t border-border/50"
           >
             <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
-              {stop.notes && (
+              {stop.notes && !isOwner && (
                 <p className="text-sm text-muted-foreground italic">"{stop.notes}"</p>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" data-testid={`social-sections-${stop.id}`}>
-                <div data-testid={`photo-gallery-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(6,182,212,0.18))', border: '1.5px solid rgba(59,130,246,0.4)' }}>
-                  <div className="flex items-center gap-1.5 mb-1">
+              <div data-testid={`social-sections-${stop.id}`} className="space-y-3">
+                <div data-testid={`photo-gallery-${stop.id}`} className="p-3 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(6,182,212,0.12))', border: '1.5px solid rgba(59,130,246,0.3)' }}>
+                  <div className="flex items-center gap-1.5 mb-2">
                     <Camera className="w-4 h-4 text-blue-400" />
-                    <p className="text-xs font-bold text-blue-400">Foto</p>
-                    <span className="text-[10px] text-blue-300/70 ml-auto">{allPhotos.length}</span>
+                    <p className="text-sm font-bold text-blue-400">Foto della tappa</p>
+                    <span className="text-xs text-blue-300/70 ml-auto">{allPhotoUrls.length} foto</span>
                   </div>
-                  {allPhotos.length > 0 ? (
-                    <div className="flex gap-1 overflow-x-auto">
-                      {allPhotos.slice(0, 4).map((photo, idx) => (
-                        <img key={idx} src={photo} alt="" className="w-12 h-12 object-cover rounded flex-shrink-0 border border-blue-500/30" data-testid={`photo-thumb-${stop.id}-${idx}`} />
-                      ))}
-                      {allPhotos.length > 4 && <span className="text-xs text-blue-300 self-center ml-1">+{allPhotos.length - 4}</span>}
+                  {allPhotoUrls.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {allPhotoUrls.map((photoUrl, idx) => {
+                        const photoObj = idx === 0 && stop.imageUrl ? null : photos[stop.imageUrl ? idx - 1 : idx];
+                        return (
+                          <div key={idx} className="relative group">
+                            <img src={photoUrl} alt="" className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border border-blue-500/30" data-testid={`photo-thumb-${stop.id}-${idx}`} />
+                            {isOwner && photoObj?.id && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleDeletePhoto(photoObj.id); }}
+                                disabled={deletingPhotoId === photoObj.id}
+                                className="absolute -top-1.5 -right-1.5 p-0.5 bg-red-500 hover:bg-red-600 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                data-testid={`button-delete-photo-${stop.id}-${idx}`}
+                              >
+                                {deletingPhotoId === photoObj.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  ) : (
-                    <p className="text-[11px] text-muted-foreground leading-tight">Aggiungi foto dalla creazione tappa</p>
+                  )}
+                  {isOwner && (
+                    <label className="flex items-center justify-center w-full h-10 border-2 border-dashed border-blue-500/30 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-500/10 transition-colors" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) await uploadStopPhoto(file);
+                          e.target.value = "";
+                        }}
+                        className="hidden"
+                        disabled={isUploadingPhoto}
+                        data-testid={`input-upload-photo-${stop.id}`}
+                      />
+                      {isUploadingPhoto ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+                          <span className="text-xs text-blue-400">{photoUploadProgress}%</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-4 h-4 text-blue-400" />
+                          <span className="text-xs font-medium text-blue-400">Aggiungi foto</span>
+                        </div>
+                      )}
+                    </label>
+                  )}
+                  {!isOwner && allPhotoUrls.length === 0 && (
+                    <p className="text-[11px] text-muted-foreground">Nessuna foto ancora</p>
                   )}
                 </div>
 
-                <div data-testid={`reviews-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(249,115,22,0.18))', border: '1.5px solid rgba(245,158,11,0.4)' }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Star className="w-4 h-4 text-amber-400" />
-                    <p className="text-xs font-bold text-amber-400">Recensioni</p>
-                    {avgRating ? (
-                      <span className="text-[10px] text-amber-300 ml-auto">{avgRating} ({reviews.length})</span>
+                {isOwner && (
+                  <div className="p-3 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,182,212,0.12))', border: '1.5px solid rgba(16,185,129,0.3)' }}>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Edit className="w-4 h-4 text-emerald-400" />
+                      <p className="text-sm font-bold text-emerald-400">Le tue note</p>
+                      <div className="flex ml-auto gap-0.5">
+                        {[1,2,3,4,5].map(s => (
+                          <button key={s} onClick={(e) => { e.stopPropagation(); setStopRating(s); if (!editingNotes) setEditingNotes(true); }} className="p-0" data-testid={`stop-rating-star-${stop.id}-${s}`}>
+                            <Star className={`w-4 h-4 ${s <= stopRating ? 'fill-emerald-400 text-emerald-400' : 'text-gray-500'}`} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {editingNotes ? (
+                      <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                        <Textarea value={notesText} onChange={(e) => setNotesText(e.target.value)} placeholder="Le tue impressioni su questa tappa..." className="bg-accent/50 border-border text-sm" rows={3} data-testid={`textarea-notes-${stop.id}`} />
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setEditingNotes(false); setNotesText(savedNotes); }} className="flex-1" data-testid={`button-cancel-notes-${stop.id}`}>Annulla</Button>
+                          <Button size="sm" onClick={(e) => { e.stopPropagation(); handleSaveNotes(); }} disabled={savingNotes} className="flex-1 bg-emerald-500 hover:bg-emerald-600" data-testid={`button-save-notes-${stop.id}`}>{savingNotes ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salva"}</Button>
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-[10px] text-amber-300/70 ml-auto">0</span>
+                      <div>
+                        {savedNotes ? (
+                          <p className="text-sm text-muted-foreground italic mb-1">"{savedNotes}"</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground mb-1">Nessuna nota ancora</p>
+                        )}
+                        <button onClick={(e) => { e.stopPropagation(); setEditingNotes(true); }} className="text-xs font-medium text-emerald-400 hover:text-emerald-300" data-testid={`button-edit-notes-${stop.id}`}>
+                          {savedNotes ? "Modifica note" : "Scrivi le tue note"}
+                        </button>
+                      </div>
                     )}
                   </div>
-                  {reviews.length > 0 ? (
-                    <div className="space-y-1">
-                      {reviews.slice(0, 2).map((review: any, idx: number) => (
-                        <div key={idx} className="flex items-center gap-1">
-                          <div className="flex">{[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= (review.rating||0) ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />)}</div>
-                          {review.user && <span className="text-[10px] text-foreground/60 truncate">{review.user.name?.split(' ')[0]}</span>}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-muted-foreground leading-tight">Nessuna ancora</p>
-                  )}
-                  {!isOwner && user && !showReviewForm && (
-                    <button onClick={(e) => { e.stopPropagation(); setShowReviewForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-leave-review-${stop.id}`}>⭐ Recensisci</button>
-                  )}
-                </div>
-
-                {tripUserId && (
-                <div data-testid={`meetup-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.18), rgba(236,72,153,0.18))', border: '1.5px solid rgba(168,85,247,0.4)' }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Users className="w-4 h-4 text-purple-400" />
-                    <p className="text-xs font-bold text-purple-400">Incontri</p>
-                  </div>
-                  {isOwner ? (
-                    <p className="text-[11px] text-muted-foreground leading-tight">I nomadi potranno chiederti un incontro qui</p>
-                  ) : !showMeetupForm ? (
-                    <button onClick={(e) => { e.stopPropagation(); setShowMeetupForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-meetup-${stop.id}`}>🤝 Incontriamoci!</button>
-                  ) : null}
-                </div>
                 )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div data-testid={`reviews-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(249,115,22,0.12))', border: '1.5px solid rgba(245,158,11,0.3)' }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Star className="w-4 h-4 text-amber-400" />
+                      <p className="text-xs font-bold text-amber-400">Recensioni</p>
+                      {avgRating ? (
+                        <span className="text-[10px] text-amber-300 ml-auto">{avgRating} ({reviews.length})</span>
+                      ) : (
+                        <span className="text-[10px] text-amber-300/70 ml-auto">0</span>
+                      )}
+                    </div>
+                    {reviews.length > 0 ? (
+                      <div className="space-y-1">
+                        {reviews.slice(0, 2).map((review: any, idx: number) => (
+                          <div key={idx} className="flex items-center gap-1">
+                            <div className="flex">{[1,2,3,4,5].map(i => <Star key={i} className={`w-2.5 h-2.5 ${i <= (review.rating||0) ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />)}</div>
+                            {review.user && <span className="text-[10px] text-foreground/60 truncate">{review.user.name?.split(' ')[0]}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground leading-tight">{isOwner ? "Gli altri nomadi potranno recensire le tue tappe" : "Nessuna ancora"}</p>
+                    )}
+                    {!isOwner && user && !showReviewForm && (
+                      <button onClick={(e) => { e.stopPropagation(); setShowReviewForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-leave-review-${stop.id}`}>Recensisci</button>
+                    )}
+                  </div>
+
+                  {tripUserId && (
+                  <div data-testid={`meetup-section-${stop.id}`} className="p-2.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.12), rgba(236,72,153,0.12))', border: '1.5px solid rgba(168,85,247,0.3)' }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Users className="w-4 h-4 text-purple-400" />
+                      <p className="text-xs font-bold text-purple-400">Incontri</p>
+                    </div>
+                    {isOwner ? (
+                      <p className="text-[11px] text-muted-foreground leading-tight">I nomadi potranno chiederti un incontro qui</p>
+                    ) : !showMeetupForm ? (
+                      <button onClick={(e) => { e.stopPropagation(); setShowMeetupForm(true); }} className="mt-1 w-full text-center text-[11px] font-bold text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 rounded-md py-1.5 transition-colors" data-testid={`button-meetup-${stop.id}`}>Incontriamoci!</button>
+                    ) : null}
+                  </div>
+                  )}
+                </div>
               </div>
 
               {showReviewForm && (
