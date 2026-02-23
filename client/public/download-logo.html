@@ -1,8 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head><title>Scarica Logo NomadLife</title></head>
-<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;flex-direction:column;gap:20px;">
-<img src="/icons/icon-512x512.png" width="200" height="200" alt="NomadLife Logo">
-<a href="/icons/icon-512x512.png" download="NomadLife-Logo.png" style="padding:16px 32px;background:#14b8a6;color:white;border-radius:12px;text-decoration:none;font-size:18px;font-weight:bold;">Scarica Logo</a>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;flex-direction:column;gap:30px;background:#f5f5f5;">
+<h1 style="font-size:24px;color:#333;">Logo NomadLife</h1>
+<img id="logo" src="/icons/icon-512x512.png" width="300" height="300" alt="NomadLife Logo" style="border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+<button onclick="downloadLogo()" style="padding:18px 40px;background:#14b8a6;color:white;border:none;border-radius:12px;font-size:20px;font-weight:bold;cursor:pointer;">
+  Scarica Logo sul Computer
+</button>
+<p style="color:#888;font-size:14px;">Clicca il bottone verde per salvare il file PNG</p>
+<script>
+function downloadLogo() {
+  var img = document.getElementById('logo');
+  var canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  var ctx = canvas.getContext('2d');
+  var newImg = new Image();
+  newImg.crossOrigin = 'anonymous';
+  newImg.onload = function() {
+    ctx.drawImage(newImg, 0, 0, 512, 512);
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'NomadLife-Logo.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  newImg.src = img.src;
+}
+</script>
 </body>
 </html>
