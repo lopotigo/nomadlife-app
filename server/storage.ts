@@ -252,7 +252,7 @@ export interface IStorage {
   getCityGuideCities(): Promise<string[]>;
 
   // Skills Matchmaking
-  getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[]): Promise<(User & { distance: number })[]>;
+  getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[], currentUser?: User): Promise<(User & { distance: number; matchScore: number })[]>;
 
   // Crowdsourced Locations (Spots)
   getLocations(): Promise<(schema.Location & { user: User })[]>;
@@ -1917,14 +1917,22 @@ export class DrizzleStorage implements IStorage {
   }
 
   // ========== SKILLS MATCHMAKING ==========
-  async getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[]): Promise<(User & { distance: number })[]> {
-    const distanceExpr = sql<number>`(6371 * acos(cos(radians(${lat})) * cos(radians(${schema.users.latitude})) * cos(radians(${schema.users.longitude}) - radians(${lng})) + sin(radians(${lat})) * sin(radians(${schema.users.latitude}))))`;
+  async getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[], currentUser?: User): Promise<(User & { distance: number; matchScore: number })[]> {
+    const distanceExpr = sql<number>`(6371 * acos(LEAST(1.0, cos(radians(${lat})) * cos(radians(${schema.users.latitude})) * cos(radians(${schema.users.longitude}) - radians(${lng})) + sin(radians(${lat})) * sin(radians(${schema.users.latitude})))))`;
     
     const conditions = [
       sql`${schema.users.latitude} IS NOT NULL`,
       sql`${schema.users.longitude} IS NOT NULL`,
       sql`${schema.users.privacyMode} != 'hidden'`,
+      sql`${distanceExpr} <= ${radiusKm}`,
     ];
+
+    if (skills && skills.length > 0) {
+      const skillConditions = skills.map(s => 
+        sql`EXISTS (SELECT 1 FROM unnest(${schema.users.skills}) AS skill WHERE LOWER(skill) LIKE ${'%' + s.toLowerCase() + '%'})`
+      );
+      conditions.push(sql`(${sql.join(skillConditions, sql` OR `)})`);
+    }
 
     const result = await this.db
       .select({
@@ -1933,16 +1941,41 @@ export class DrizzleStorage implements IStorage {
       })
       .from(schema.users)
       .where(and(...conditions))
-      .orderBy(distanceExpr);
+      .orderBy(distanceExpr)
+      .limit(100);
 
-    return result
-      .filter(r => r.distance <= radiusKm)
-      .filter(r => {
-        if (!skills || skills.length === 0) return true;
-        const userSkills = (r.user as any).skills || [];
-        return skills.some(s => userSkills.some((us: string) => us.toLowerCase().includes(s.toLowerCase())));
-      })
-      .map(r => ({ ...r.user, distance: Math.round(r.distance * 100) / 100 }));
+    return result.map(r => {
+      let matchScore = 0;
+      const nomadSkills = (r.user as any).skills || [];
+      const nomadLookingFor = ((r.user as any).lookingFor || "").toLowerCase();
+      
+      if (currentUser) {
+        const mySkills = (currentUser as any).skills || [];
+        const myLookingFor = ((currentUser as any).lookingFor || "").toLowerCase();
+        
+        const theyHaveWhatINeed = myLookingFor && nomadSkills.some((s: string) => 
+          myLookingFor.includes(s.toLowerCase()) || s.toLowerCase().includes(myLookingFor)
+        );
+        const iHaveWhatTheyNeed = nomadLookingFor && mySkills.some((s: string) => 
+          nomadLookingFor.includes(s.toLowerCase()) || s.toLowerCase().includes(nomadLookingFor)
+        );
+        
+        if (theyHaveWhatINeed && iHaveWhatTheyNeed) matchScore = 100;
+        else if (theyHaveWhatINeed || iHaveWhatTheyNeed) matchScore = 60;
+        
+        if (skills && skills.length > 0) {
+          const matchedSkills = nomadSkills.filter((s: string) => 
+            skills.some(f => s.toLowerCase().includes(f.toLowerCase()))
+          );
+          matchScore += matchedSkills.length * 10;
+        }
+      }
+      
+      return { ...r.user, distance: Math.round(r.distance * 100) / 100, matchScore };
+    }).sort((a, b) => {
+      if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+      return a.distance - b.distance;
+    });
   }
 
   // Crowdsourced Locations (Spots)

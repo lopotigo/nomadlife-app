@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import {
-  Users, Handshake, Navigation, Loader2, MessageSquare, User as UserIcon, MapPin, X, Plus
+  Users, Handshake, Navigation, Loader2, MessageSquare, User as UserIcon, MapPin, X, Plus, Star, Zap, Heart
 } from "lucide-react";
 
 interface NomadResult {
@@ -18,6 +18,7 @@ interface NomadResult {
   skills: string[] | null;
   lookingFor: string | null;
   distance: number;
+  matchScore: number;
 }
 
 const skillColors = [
@@ -29,11 +30,39 @@ const skillColors = [
   "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
 ];
 
+function MatchBadge({ score }: { score: number }) {
+  if (score >= 100) {
+    return (
+      <span className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full font-bold animate-pulse" data-testid="badge-match-perfect">
+        <Zap className="w-3 h-3" />
+        Match Perfetto
+      </span>
+    );
+  }
+  if (score >= 60) {
+    return (
+      <span className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs rounded-full font-bold" data-testid="badge-match-good">
+        <Star className="w-3 h-3" />
+        Buon Match
+      </span>
+    );
+  }
+  if (score > 0) {
+    return (
+      <span className="flex items-center gap-1 px-2 py-1 bg-primary/15 text-primary text-xs rounded-full font-medium" data-testid="badge-match-partial">
+        <Heart className="w-3 h-3" />
+        Compatibile
+      </span>
+    );
+  }
+  return null;
+}
+
 export default function Matchmaking() {
   const { user } = useAuth();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [gpsStatus, setGpsStatus] = useState<"loading" | "ok" | "error">("loading");
-  const [radius, setRadius] = useState(5);
+  const [radius, setRadius] = useState(10);
   const [skillsFilter, setSkillsFilter] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
 
@@ -81,6 +110,8 @@ export default function Matchmaking() {
   const getInitials = (name: string) =>
     name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
+  const radiusLabel = radius < 10 ? `${radius} km` : `${radius} km`;
+
   return (
     <Layout>
       <div className="p-4 md:p-6 space-y-6">
@@ -89,7 +120,7 @@ export default function Matchmaking() {
             <Handshake className="w-7 h-7 text-primary" />
             Matchmaking Professionale
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">Trova collaboratori vicino a te</p>
+          <p className="text-muted-foreground text-sm mt-1">Trova collaboratori vicino a te — matching reciproco basato su competenze</p>
         </motion.div>
 
         {gpsStatus === "loading" && (
@@ -115,17 +146,23 @@ export default function Matchmaking() {
             <div>
               <label className="text-sm font-medium flex items-center justify-between">
                 <span>Raggio di ricerca</span>
-                <span className="text-primary font-bold">{radius} km</span>
+                <span className="text-primary font-bold">{radiusLabel}</span>
               </label>
               <input
                 data-testid="input-radius"
                 type="range"
                 min={1}
-                max={10}
+                max={50}
                 value={radius}
                 onChange={e => setRadius(Number(e.target.value))}
                 className="w-full mt-2 accent-primary"
               />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>1 km</span>
+                <span>10 km</span>
+                <span>25 km</span>
+                <span>50 km</span>
+              </div>
             </div>
 
             <div>
@@ -164,6 +201,12 @@ export default function Matchmaking() {
                 </div>
               )}
             </div>
+
+            {!isLoading && nomads.length > 0 && (
+              <div className="text-xs text-muted-foreground">
+                {nomads.length} nomad{nomads.length !== 1 ? "i" : "e"} trovati nel raggio di {radiusLabel}
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -185,7 +228,11 @@ export default function Matchmaking() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-shadow"
+                className={`bg-card border rounded-2xl p-5 hover:shadow-md transition-shadow ${
+                  nomad.matchScore >= 100 ? "border-green-400 dark:border-green-600 ring-1 ring-green-400/30" :
+                  nomad.matchScore >= 60 ? "border-amber-400 dark:border-amber-600 ring-1 ring-amber-400/20" :
+                  "border-border"
+                }`}
                 data-testid={`card-nomad-${nomad.id}`}
               >
                 <div className="flex items-start gap-3">
@@ -217,14 +264,17 @@ export default function Matchmaking() {
                   </span>
                 </div>
 
-                {nomad.profession && (
-                  <span
-                    className="inline-block mt-3 px-2.5 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium"
-                    data-testid={`badge-profession-${nomad.id}`}
-                  >
-                    {nomad.profession}
-                  </span>
-                )}
+                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  {nomad.profession && (
+                    <span
+                      className="inline-block px-2.5 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium"
+                      data-testid={`badge-profession-${nomad.id}`}
+                    >
+                      {nomad.profession}
+                    </span>
+                  )}
+                  <MatchBadge score={nomad.matchScore} />
+                </div>
 
                 {nomad.skills && nomad.skills.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-3">

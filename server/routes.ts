@@ -2746,13 +2746,14 @@ Sitemap: https://nomad-life.app/sitemap.xml
       const { lat, lng, radius, skills } = req.query;
       if (!lat || !lng) return res.status(400).send({ error: "lat and lng required" });
       const skillsArr = skills ? (skills as string).split(",").map(s => s.trim()) : undefined;
+      const user = req.user as User;
       const nomads = await storage.getNearbyNomadsWithSkills(
         parseFloat(lat as string),
         parseFloat(lng as string),
         parseFloat(radius as string) || 5,
-        skillsArr
+        skillsArr,
+        user
       );
-      const user = req.user as User;
       const filtered = nomads
         .filter(n => n.id !== user.id)
         .map(({ password, ...n }) => n);
