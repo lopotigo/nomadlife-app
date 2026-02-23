@@ -2890,9 +2890,10 @@ Sitemap: https://nomad-life.app/sitemap.xml
   });
 
   app.get("/api/download-logo", (_req, res) => {
-    const path = require("path");
-    const filePath = path.join(__dirname, "..", "client", "public", "icons", "icon-512x512.png");
-    res.download(filePath, "NomadLife-Logo.png");
+    const filePath = process.cwd() + "/client/public/icons/icon-512x512.png";
+    res.setHeader("Content-Disposition", "attachment; filename=NomadLife-Logo.png");
+    res.setHeader("Content-Type", "image/png");
+    res.sendFile(filePath);
   });
 
   return httpServer;
