@@ -379,6 +379,16 @@ export default function Auth() {
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Accedi
                   </Button>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="text-sm text-green-600 hover:text-green-700 hover:underline"
+                      onClick={() => setLocation("/forgot-password")}
+                      data-testid="link-forgot-password"
+                    >
+                      Password dimenticata?
+                    </button>
+                  </div>
                 </form>
               </CardContent>
             </Card>

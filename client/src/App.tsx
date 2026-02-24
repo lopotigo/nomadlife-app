@@ -34,6 +34,8 @@ import Matchmaking from "@/pages/matchmaking";
 import Blog from "@/pages/blog";
 import BlogArticle from "@/pages/blog-article";
 import BlogEditor from "@/pages/blog-editor";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -55,6 +57,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={Auth} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
       <Route path="/feed">{() => <ProtectedRoute component={MapFeed} />}</Route>
       <Route path="/booking">{() => <ProtectedRoute component={Booking} />}</Route>

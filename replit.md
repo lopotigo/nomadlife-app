@@ -76,3 +76,6 @@ Session-based authentication manages user login, signup, and secure access to pr
 - **Push Notifications**: `web-push` library
 - **Mapping**: Leaflet
 - **Affiliate Integrations**: Travelpayouts (Aviasales for flights, Hotellook for hotels, Kiwi.com for low-cost flights, Rentalcars for car rental, GetTransfer for transfers, Insubuy for travel insurance). Marker ID: env VITE_TRAVELPAYOUTS_MARKER. Frontend utility: `client/src/lib/travelpayouts.ts`. DB: 50 real places across 14 nomad cities (Bangkok, Bali, Lisbon, Chiang Mai, Berlin, Medellín, Mexico City, Buenos Aires, Porto, Tbilisi, Da Nang, Cape Town, Tulum, Playa del Carmen).
+- **Email Service**: SendGrid (`@sendgrid/mail`) for transactional emails (password reset). Sender: `noreply@nomad-life.app`. Domain: `nomad-life.app`.
+- **Password Recovery**: Full password reset flow via email. Routes: `POST /api/auth/forgot-password`, `GET /api/auth/verify-reset-token`, `POST /api/auth/reset-password`. Schema: `password_reset_tokens` table. Pages: `/forgot-password`, `/reset-password?token=X`. Token expires in 1 hour.
+- **reCAPTCHA**: Google reCAPTCHA v2 on login/signup forms. Currently using test keys, needs production keys for `nomad-life.app`.

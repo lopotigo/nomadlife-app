@@ -287,6 +287,11 @@ export interface IStorage {
   updateBlogPost(id: string, updates: Partial<schema.BlogPost>): Promise<schema.BlogPost | undefined>;
   deleteBlogPost(id: string): Promise<boolean>;
   getBlogCategories(): Promise<string[]>;
+
+  // Password Reset
+  createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<schema.PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<schema.PasswordResetToken | undefined>;
+  markTokenUsed(token: string): Promise<void>;
 }
 
 export class DrizzleStorage implements IStorage {
@@ -2200,6 +2205,27 @@ export class DrizzleStorage implements IStorage {
         user: t.users!,
         stops: stopsByTrip.get(t.trips.id) || [],
       }));
+  }
+
+  async createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<schema.PasswordResetToken> {
+    const [result] = await this.db.insert(schema.passwordResetTokens).values({
+      userId,
+      token,
+      expiresAt,
+    }).returning();
+    return result;
+  }
+
+  async getPasswordResetToken(token: string): Promise<schema.PasswordResetToken | undefined> {
+    const [result] = await this.db.select().from(schema.passwordResetTokens)
+      .where(eq(schema.passwordResetTokens.token, token));
+    return result;
+  }
+
+  async markTokenUsed(token: string): Promise<void> {
+    await this.db.update(schema.passwordResetTokens)
+      .set({ used: true })
+      .where(eq(schema.passwordResetTokens.token, token));
   }
 }
 

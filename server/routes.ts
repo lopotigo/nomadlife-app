@@ -179,6 +179,89 @@ Sitemap: https://nomad-life.app/sitemap.xml
     res.send(userWithoutPassword);
   });
 
+  // ========== PASSWORD RESET ==========
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).send({ error: "Email richiesta" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.send({ success: true, message: "Se l'email esiste, riceverai un link di recupero." });
+      }
+
+      const crypto = await import("crypto");
+      const token = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+      await storage.createPasswordResetToken(user.id, tokenHash, expiresAt);
+
+      const { sendPasswordResetEmail } = await import("./email");
+      const sent = await sendPasswordResetEmail(user.email, token, user.username);
+
+      if (!sent) {
+        return res.status(500).send({ error: "Errore nell'invio dell'email. Riprova più tardi." });
+      }
+
+      res.send({ success: true, message: "Se l'email esiste, riceverai un link di recupero." });
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      res.status(500).send({ error: "Errore interno. Riprova più tardi." });
+    }
+  });
+
+  app.get("/api/auth/verify-reset-token", async (req, res) => {
+    try {
+      const token = req.query.token as string;
+      if (!token) {
+        return res.status(400).send({ error: "Token mancante" });
+      }
+
+      const crypto = await import("crypto");
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+      const resetToken = await storage.getPasswordResetToken(tokenHash);
+      if (!resetToken || resetToken.used || new Date() > resetToken.expiresAt) {
+        return res.status(400).send({ error: "Token non valido o scaduto" });
+      }
+
+      res.send({ valid: true });
+    } catch (error: any) {
+      res.status(500).send({ error: "Errore interno" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) {
+        return res.status(400).send({ error: "Token e nuova password richiesti" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).send({ error: "La password deve avere almeno 8 caratteri" });
+      }
+
+      const crypto = await import("crypto");
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+      const resetToken = await storage.getPasswordResetToken(tokenHash);
+      if (!resetToken || resetToken.used || new Date() > resetToken.expiresAt) {
+        return res.status(400).send({ error: "Token non valido o scaduto" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(resetToken.userId, { password: hashedPassword });
+      await storage.markTokenUsed(tokenHash);
+
+      res.send({ success: true, message: "Password aggiornata con successo!" });
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      res.status(500).send({ error: "Errore interno. Riprova più tardi." });
+    }
+  });
+
   // ========== USER ROUTES ==========
   app.get("/api/users/search", async (req, res) => {
     try {
