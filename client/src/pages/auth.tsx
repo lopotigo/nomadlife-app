@@ -15,47 +15,19 @@ declare global {
   }
 }
 
-const RECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXrdS8bJ";
+const RECAPTCHA_V3_SITE_KEY = "6LdMNXYsAAAAABrnjRNQqrnq-JC4mObOiwcR8Lw1";
 
-function ReCaptchaWidget({ onVerify, id }: { onVerify: (token: string | null) => void; id: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<number | null>(null);
-  const renderedRef = useRef(false);
-
-  useEffect(() => {
-    const renderCaptcha = () => {
-      if (renderedRef.current || !containerRef.current || !window.grecaptcha?.render) return;
-      try {
-        containerRef.current.innerHTML = "";
-        widgetIdRef.current = window.grecaptcha.render(containerRef.current, {
-          sitekey: RECAPTCHA_SITE_KEY,
-          callback: (token: string) => onVerify(token),
-          "expired-callback": () => onVerify(null),
-          theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
-          size: "normal",
-        });
-        renderedRef.current = true;
-      } catch (e) {}
+async function getRecaptchaToken(action: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const tryExecute = () => {
+      if (window.grecaptcha?.execute) {
+        window.grecaptcha.execute(RECAPTCHA_V3_SITE_KEY, { action }).then(resolve).catch(reject);
+      } else {
+        setTimeout(tryExecute, 200);
+      }
     };
-
-    if (window.grecaptcha?.render) {
-      renderCaptcha();
-    } else {
-      const interval = setInterval(() => {
-        if (window.grecaptcha?.render) {
-          clearInterval(interval);
-          renderCaptcha();
-        }
-      }, 200);
-      return () => clearInterval(interval);
-    }
-  }, [onVerify]);
-
-  return (
-    <div className="flex justify-center my-3">
-      <div ref={containerRef} id={id} data-testid={`recaptcha-${id}`} />
-    </div>
-  );
+    tryExecute();
+  });
 }
 
 interface CityResult {
@@ -247,22 +219,21 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-  const [loginCaptchaToken, setLoginCaptchaToken] = useState<string | null>(null);
-  const [signupCaptchaToken, setSignupCaptchaToken] = useState<string | null>(null);
-
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!loginCaptchaToken) {
-      toast({ title: "Verifica richiesta", description: "Completa il CAPTCHA per continuare.", variant: "destructive" });
-      return;
-    }
     const formData = new FormData(e.currentTarget);
     const username = formData.get("username") as string;
     const password = formData.get("password") as string;
 
     try {
       setLoading(true);
-      await login(username, password);
+      let recaptchaToken: string | undefined;
+      try {
+        recaptchaToken = await getRecaptchaToken("login");
+      } catch {
+        console.warn("reCAPTCHA token acquisition failed");
+      }
+      await login(username, password, recaptchaToken);
       toast({ title: "Bentornato!", description: "Accesso effettuato con successo." });
       setLocation("/");
     } catch (error: any) {
@@ -274,10 +245,6 @@ export default function Auth() {
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!signupCaptchaToken) {
-      toast({ title: "Verifica richiesta", description: "Completa il CAPTCHA per continuare.", variant: "destructive" });
-      return;
-    }
     const formData = new FormData(e.currentTarget);
 
     const checks = validatePassword(signupPassword);
@@ -310,7 +277,13 @@ export default function Auth() {
 
     try {
       setLoading(true);
-      await signup(data);
+      let recaptchaToken: string | undefined;
+      try {
+        recaptchaToken = await getRecaptchaToken("signup");
+      } catch {
+        console.warn("reCAPTCHA token acquisition failed");
+      }
+      await signup({ ...data, recaptchaToken });
       toast({ title: "Account creato!", description: "Benvenuto su NomadLife." });
       setLocation("/");
     } catch (error: any) {
@@ -368,14 +341,7 @@ export default function Auth() {
                       disabled={loading}
                     />
                   </div>
-                  <ReCaptchaWidget onVerify={setLoginCaptchaToken} id="recaptcha-login" />
-                  {loginCaptchaToken && (
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-500 justify-center">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      Verifica completata
-                    </div>
-                  )}
-                  <Button type="submit" className="w-full" disabled={loading || !loginCaptchaToken} data-testid="button-login">
+                  <Button type="submit" className="w-full" disabled={loading} data-testid="button-login">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Accedi
                   </Button>
@@ -470,14 +436,7 @@ export default function Auth() {
                     <PasswordStrength password={signupPassword} />
                   </div>
 
-                  <ReCaptchaWidget onVerify={setSignupCaptchaToken} id="recaptcha-signup" />
-                  {signupCaptchaToken && (
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-500 justify-center">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      Verifica completata
-                    </div>
-                  )}
-                  <Button type="submit" className="w-full" disabled={loading || !signupCaptchaToken} data-testid="button-signup">
+                  <Button type="submit" className="w-full" disabled={loading} data-testid="button-signup">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Crea Account
                   </Button>

@@ -97,6 +97,23 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 
+async function verifyRecaptcha(token: string): Promise<{ success: boolean; score: number }> {
+  if (!process.env.RECAPTCHA_SECRET_KEY) {
+    return { success: true, score: 1.0 };
+  }
+  try {
+    const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
+    });
+    const data = await res.json();
+    return { success: data.success, score: data.score || 0 };
+  } catch {
+    return { success: false, score: 0 };
+  }
+}
+
 export function requireAuth(req: any, res: any, next: any) {
   if (req.isAuthenticated()) {
     return next();
@@ -130,7 +147,18 @@ Sitemap: https://nomad-life.app/sitemap.xml
   // ========== AUTH ROUTES ==========
   app.post("/api/auth/signup", async (req, res, next) => {
     try {
-      const data = insertUserSchema.parse(req.body);
+      const { recaptchaToken, ...bodyData } = req.body;
+      if (process.env.RECAPTCHA_SECRET_KEY) {
+        if (!recaptchaToken) {
+          return res.status(400).send({ error: "Verifica di sicurezza richiesta." });
+        }
+        const captchaResult = await verifyRecaptcha(recaptchaToken);
+        if (!captchaResult.success || captchaResult.score < 0.3) {
+          return res.status(400).send({ error: "Verifica di sicurezza fallita. Riprova." });
+        }
+      }
+
+      const data = insertUserSchema.parse(bodyData);
       
       const pw = data.password;
       if (pw.length < 8 || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pw)) {
@@ -163,9 +191,26 @@ Sitemap: https://nomad-life.app/sitemap.xml
     }
   });
 
-  app.post("/api/auth/login", passport.authenticate("local"), (req, res) => {
-    const { password, ...userWithoutPassword } = req.user as User;
-    res.send(userWithoutPassword);
+  app.post("/api/auth/login", async (req, res, next) => {
+    const { recaptchaToken } = req.body;
+    if (process.env.RECAPTCHA_SECRET_KEY) {
+      if (!recaptchaToken) {
+        return res.status(400).send({ error: "Verifica di sicurezza richiesta." });
+      }
+      const captchaResult = await verifyRecaptcha(recaptchaToken);
+      if (!captchaResult.success || captchaResult.score < 0.3) {
+        return res.status(400).send({ error: "Verifica di sicurezza fallita. Riprova." });
+      }
+    }
+    passport.authenticate("local", (err: any, user: User | false) => {
+      if (err) return next(err);
+      if (!user) return res.status(401).send({ error: "Credenziali non valide" });
+      req.login(user, (loginErr) => {
+        if (loginErr) return next(loginErr);
+        const { password, ...userWithoutPassword } = user;
+        res.send(userWithoutPassword);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/auth/logout", (req, res) => {
