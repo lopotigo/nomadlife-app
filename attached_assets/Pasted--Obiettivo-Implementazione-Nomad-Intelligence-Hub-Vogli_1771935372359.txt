@@ -1,0 +1,24 @@
+🎯 Obiettivo: Implementazione "Nomad Intelligence Hub"
+Vogliamo che il chatbot su Replit esegua queste due macro-funzioni utilizzando dati live (non solo la memoria di GPT):
+1. Funzione "Digital Nomad Scout" (Wi-Fi & Posti)
+Cosa deve fare: Quando l'utente chiede un posto per lavorare (es. a Vladivostok), l'AI non deve indovinare. Deve interrogare un servizio di ricerca.
+Strumento da usare: Integrare Tavily API o Serper.dev (sono API ottimizzate per LLM).
+Istruzione per Replit: "Configura un 'Tool' di ricerca web. Se l'utente cerca Wi-Fi o caffè, l'AI deve cercare su Google/Reddit/Blog i commenti più recenti sulla velocità della rete e la presenza di prese elettriche in quella specifica zona."
+2. Funzione "Budget Trip Planner" (Il calcolatore dei $1000)
+Cosa deve fare: Se l'utente dice "Ho 1000$, dove vado?", l'AI deve incrociare i costi della vita con i prezzi dei voli.
+Sorgenti Dati:
+Teleport API (Gratuita) per i punteggi di qualità della vita e costi medi.
+Travelpayouts API (Tua attuale) per il prezzo reale dei voli e hotel.
+Istruzione per Replit: "Crea una funzione di calcolo. L'AI deve: 1. Recuperare il costo della vita giornaliero della destinazione (via Teleport). 2. Sottrarre il costo del volo (via Travelpayouts). 3. Verificare se il budget residuo copre i giorni di permanenza. Se sì, genera l'itinerario con i tuoi link affiliati."
+🛠️ Cosa serve a te ora (I "Token" magici)
+Per far funzionare tutto questo, dovrai recuperare queste due chiavi (spesso hanno piani gratuiti generosi per iniziare):
+Chiave API di Tavily (per la ricerca web dei locali/Wi-Fi).
+Chiave API di Teleport (per i dati sui costi delle città).
+💡 Prossimo passo suggerito
+Dì a Replit:
+"Voglio aggiungere una funzione di Web Search al NomadBot usando l'API di Tavily. Quando un utente chiede informazioni specifiche su locali o connessioni internet in una città, l'AI deve fare una ricerca online prima di rispondere."
+Vuoi che ti scriva io il pezzo di codice Python da copiare su Replit per attivare la ricerca web?
+Le risposte dell'AI potrebbero contenere errori. Scopri di più
+
+
+
