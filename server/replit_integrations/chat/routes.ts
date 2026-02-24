@@ -2,6 +2,9 @@ import type { Express, Request, Response, NextFunction } from "express";
 import OpenAI from "openai";
 import { chatStorage } from "./storage";
 import { storage } from "../../storage";
+import { db } from "../../db";
+import { cities } from "@shared/schema";
+import { ilike } from "drizzle-orm";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -68,6 +71,51 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
           checkOut: { type: "string", description: "Check-out date (YYYY-MM-DD) for hotels" },
         },
         required: ["city", "type"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_city_costs",
+      description: "Get cost of living data for a specific city from the NomadLife database. Returns daily costs for accommodation, food, coworking, transport, plus internet speed, weather, and nomad community size. Use this when users ask about costs, budget, or living expenses in a city.",
+      parameters: {
+        type: "object",
+        properties: {
+          city: { type: "string", description: "City name (e.g. Bangkok, Bali, Lisbon, Chiang Mai)" },
+        },
+        required: ["city"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "budget_trip_planner",
+      description: "Calculate if a budget is enough for a trip to a destination. Cross-references city cost of living with estimated flight costs. Use when user says things like 'Ho 1000€, dove posso andare?', 'Can I travel to X with Y budget?', or asks about trip affordability.",
+      parameters: {
+        type: "object",
+        properties: {
+          budget: { type: "number", description: "Total budget in EUR" },
+          destination: { type: "string", description: "Target destination city. If empty, will suggest best cities for budget." },
+          days: { type: "number", description: "Number of days for the trip. Default 14 if not specified." },
+          origin: { type: "string", description: "Origin city for flight estimate. Default 'Roma' if not specified." },
+        },
+        required: ["budget"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "web_search",
+      description: "Search the web for real-time information about a location, Wi-Fi quality, cafes, coworking spaces, digital nomad tips, visa info, or any other travel-related query. Use this when the user asks about specific local info that may not be in the database, like 'best cafes with Wi-Fi in Vladivostok' or 'internet speed in rural Thailand'. Powered by Tavily.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "The search query. Be specific, e.g. 'best coworking spaces with fast wifi in Tbilisi 2025'" },
+        },
+        required: ["query"],
       },
     },
   },
@@ -202,6 +250,165 @@ async function executeToolCall(
         });
       }
 
+      case "get_city_costs": {
+        const { city } = args;
+        if (!city || typeof city !== "string") {
+          return JSON.stringify({ error: "Specifica una città" });
+        }
+        const cityResults = await db.select().from(cities).where(ilike(cities.name, `%${city.trim()}%`));
+        if (cityResults.length === 0) {
+          return JSON.stringify({ found: false, message: `Nessun dato per "${city}". Prova con un'altra città o usa web_search per informazioni online.` });
+        }
+        const c = cityResults[0];
+        const dailyMin = (c.costAccommodationMin || 0) + (c.costFoodMin || 0) + (c.costCoworkingMin || 0) + (c.costTransportMin || 0);
+        const dailyMax = (c.costAccommodationMax || 0) + (c.costFoodMax || 0) + (c.costCoworkingMax || 0) + (c.costTransportMax || 0);
+        return JSON.stringify({
+          found: true,
+          city: c.name,
+          country: c.country,
+          emoji: c.emoji,
+          dailyCosts: {
+            accommodation: { min: c.costAccommodationMin, max: c.costAccommodationMax, unit: "EUR/notte" },
+            food: { min: c.costFoodMin, max: c.costFoodMax, unit: "EUR/giorno" },
+            coworking: { min: c.costCoworkingMin, max: c.costCoworkingMax, unit: "EUR/giorno" },
+            transport: { min: c.costTransportMin, max: c.costTransportMax, unit: "EUR/giorno" },
+            totalDaily: { min: dailyMin, max: dailyMax, unit: "EUR/giorno" },
+          },
+          community: { nomadsCount: c.nomadsCount, rating: c.rating },
+          internet: { speed: c.internetSpeed, unit: "Mbps" },
+          weather: c.weather,
+        });
+      }
+
+      case "budget_trip_planner": {
+        const { budget, destination, days = 14, origin = "Roma" } = args;
+        if (!budget || typeof budget !== "number" || budget <= 0) {
+          return JSON.stringify({ error: "Specifica un budget valido in EUR" });
+        }
+
+        const FLIGHT_ESTIMATES: Record<string, Record<string, number>> = {
+          "Roma": { "Bangkok": 450, "Bali": 550, "Chiang Mai": 500, "Lisbona": 80, "Berlino": 60, "Medellin": 600, "Buenos Aires": 700, "Città del Messico": 550, "Ho Chi Minh": 500, "Cape Town": 500, "Tokyo": 650, "Singapore": 550, "Dubai": 250, "Barcellona": 50, "Amsterdam": 70, "Londra": 60, "Parigi": 50, "New York": 350, "Sydney": 800, "Mosca": 200 },
+          "Milano": { "Bangkok": 420, "Bali": 520, "Chiang Mai": 480, "Lisbona": 70, "Berlino": 50, "Medellin": 580, "Buenos Aires": 680, "Città del Messico": 530, "Ho Chi Minh": 480, "Cape Town": 480, "Tokyo": 620, "Singapore": 530, "Dubai": 230, "Barcellona": 40, "Amsterdam": 60, "Londra": 50, "Parigi": 40, "New York": 330, "Sydney": 780, "Mosca": 180 },
+          "default": { "Bangkok": 500, "Bali": 600, "Chiang Mai": 550, "Lisbona": 150, "Berlino": 120, "Medellin": 650, "Buenos Aires": 750, "Città del Messico": 600, "Ho Chi Minh": 550, "Cape Town": 550, "Tokyo": 700, "Singapore": 600, "Dubai": 300, "Barcellona": 100, "Amsterdam": 130, "Londra": 120, "Parigi": 100, "New York": 400, "Sydney": 850, "Mosca": 250 },
+        };
+
+        const getFlightCost = (orig: string, dest: string): number => {
+          const originMap = FLIGHT_ESTIMATES[orig] || FLIGHT_ESTIMATES["default"];
+          return originMap[dest] || 400;
+        };
+
+        if (destination) {
+          const cityResults = await db.select().from(cities).where(ilike(cities.name, `%${destination.trim()}%`));
+          if (cityResults.length === 0) {
+            return JSON.stringify({ feasible: false, message: `Nessun dato per "${destination}". Prova con un'altra città.` });
+          }
+          const c = cityResults[0];
+          const flightCost = getFlightCost(origin, c.name) * 2;
+          const dailyMin = (c.costAccommodationMin || 0) + (c.costFoodMin || 0) + (c.costCoworkingMin || 0) + (c.costTransportMin || 0);
+          const dailyMax = (c.costAccommodationMax || 0) + (c.costFoodMax || 0) + (c.costCoworkingMax || 0) + (c.costTransportMax || 0);
+          const totalMin = flightCost + (dailyMin * days);
+          const totalMax = flightCost + (dailyMax * days);
+          const feasible = budget >= totalMin;
+          const maxDaysBudget = Math.floor((budget - flightCost) / dailyMin);
+
+          return JSON.stringify({
+            destination: c.name,
+            country: c.country,
+            emoji: c.emoji,
+            budget,
+            days,
+            origin,
+            flightCostRoundTrip: flightCost,
+            dailyCost: { min: dailyMin, max: dailyMax },
+            totalCost: { min: totalMin, max: totalMax },
+            feasible,
+            maxDaysWithBudget: maxDaysBudget > 0 ? maxDaysBudget : 0,
+            budgetRemaining: feasible ? budget - totalMin : 0,
+            tip: feasible
+              ? `Con €${budget} puoi stare ${maxDaysBudget} giorni a ${c.name}! Budget giornaliero: €${dailyMin}-${dailyMax}.`
+              : `Budget insufficiente per ${days} giorni. Ti servirebbero almeno €${totalMin}. Con €${budget} puoi stare max ${maxDaysBudget > 0 ? maxDaysBudget : 0} giorni.`,
+            affiliateHint: "Usa search_affiliate per mostrare link di prenotazione voli e hotel con i prezzi reali.",
+          });
+        }
+
+        const allCities = await db.select().from(cities);
+        const suggestions = allCities
+          .map((c) => {
+            const flightCost = getFlightCost(origin, c.name) * 2;
+            const dailyMin = (c.costAccommodationMin || 0) + (c.costFoodMin || 0) + (c.costCoworkingMin || 0) + (c.costTransportMin || 0);
+            const totalMin = flightCost + (dailyMin * days);
+            const maxDays = Math.floor((budget - flightCost) / dailyMin);
+            return {
+              city: c.name,
+              country: c.country,
+              emoji: c.emoji,
+              flightCostRoundTrip: flightCost,
+              dailyCostMin: dailyMin,
+              totalMinCost: totalMin,
+              maxDaysWithBudget: maxDays > 0 ? maxDays : 0,
+              feasible: budget >= totalMin,
+              nomadsCount: c.nomadsCount,
+              internetSpeed: c.internetSpeed,
+              rating: c.rating,
+              weather: c.weather,
+            };
+          })
+          .filter((s) => s.feasible && s.maxDaysWithBudget >= 7)
+          .sort((a, b) => b.maxDaysWithBudget - a.maxDaysWithBudget);
+
+        return JSON.stringify({
+          budget,
+          days,
+          origin,
+          suggestedDestinations: suggestions.slice(0, 8),
+          totalOptions: suggestions.length,
+          tip: suggestions.length > 0
+            ? `Con €${budget} hai ${suggestions.length} destinazioni possibili per ${days} giorni! Le migliori per rapporto qualità/prezzo sono le prime della lista.`
+            : `Con €${budget} per ${days} giorni non ci sono destinazioni fattibili. Prova ad aumentare il budget o ridurre i giorni.`,
+        });
+      }
+
+      case "web_search": {
+        const { query } = args;
+        if (!query || typeof query !== "string") {
+          return JSON.stringify({ error: "Specifica una query di ricerca" });
+        }
+        if (!process.env.TAVILY_API_KEY) {
+          return JSON.stringify({ error: "Ricerca web non disponibile. Chiave API Tavily non configurata." });
+        }
+        try {
+          const tavilyResponse = await fetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              api_key: process.env.TAVILY_API_KEY,
+              query: `digital nomad ${query}`,
+              search_depth: "advanced",
+              max_results: 5,
+              include_answer: true,
+            }),
+          });
+          if (!tavilyResponse.ok) {
+            const errText = await tavilyResponse.text();
+            console.error("Tavily API error:", errText);
+            return JSON.stringify({ error: "Errore nella ricerca web. Riprova." });
+          }
+          const tavilyData = await tavilyResponse.json();
+          return JSON.stringify({
+            answer: tavilyData.answer || null,
+            results: (tavilyData.results || []).slice(0, 5).map((r: any) => ({
+              title: r.title,
+              url: r.url,
+              content: r.content?.substring(0, 300),
+            })),
+            query: query,
+          });
+        } catch (err: any) {
+          console.error("Tavily search error:", err);
+          return JSON.stringify({ error: "Errore nella ricerca web: " + err.message });
+        }
+      }
+
       case "search_affiliate": {
         const { city, type, checkIn, checkOut } = args;
         const cityEncoded = encodeURIComponent(city);
@@ -263,30 +470,51 @@ async function executeToolCall(
 
 const BASE_SYSTEM_PROMPT = `You are NomadBot, the AI travel assistant for NomadLife - a database-connected agent for digital nomads.
 
-YOU HAVE ACCESS TO THE REAL DATABASE. You MUST use your tools to answer questions about places, hotels, hostels, coworking spaces. NEVER invent or guess data.
+YOU HAVE ACCESS TO THE REAL DATABASE AND WEB SEARCH. You MUST use your tools to answer questions. NEVER invent or guess data.
+
+YOUR TOOLS:
+1. search_places → Search hotels, hostels, coworking in the database
+2. get_place_reviews → Get reviews for a specific place
+3. create_booking → Book a place (confirm with user first!)
+4. search_affiliate → Generate Travelpayouts affiliate links (flights, hotels, cars, transfers, insurance, VPN)
+5. get_city_costs → Get cost of living data for a city (accommodation, food, coworking, transport per day)
+6. budget_trip_planner → Calculate if a budget covers a trip. Suggests best cities for a given budget. Cross-references flight costs + daily living costs.
+7. web_search → Search the web via Tavily for real-time info: Wi-Fi quality, cafes, visa info, local tips, etc.
 
 YOUR WORKFLOW:
-1. When the user asks about accommodations or places in a city → call search_places with the city name
-2. Present the REAL results from the database with names, prices, ratings
-3. If the user asks for reviews or more details → call get_place_reviews
-4. If the user says "prenota", "book", "reserva" or confirms a booking → call create_booking
-5. If NO results are found in the database → call search_affiliate with type "all" to provide a complete set of booking links
-6. After booking, show a confirmation summary: "✅ Prenotazione effettuata per [Nome Hotel], check-in [data], stato: confermata"
-7. For flights → use search_affiliate with type "flights" (Aviasales + Kiwi.com)
-8. For car rentals → use search_affiliate with type "cars" (Rentalcars)
-9. For airport/city transfers → use search_affiliate with type "transfers" (GetTransfer)
-10. For travel insurance → use search_affiliate with type "insurance" (Insubuy)
+1. For accommodations/places → search_places first, then search_affiliate if no results
+2. For cost of living / "quanto costa vivere a..." → get_city_costs
+3. For budget questions ("Ho 1000€, dove vado?") → budget_trip_planner
+4. For specific local info (Wi-Fi, cafes, internet quality) → web_search
+5. For bookings → confirm details with user, then create_booking
+6. After search_places with no results → search_affiliate with type "all"
+7. For flights → search_affiliate type "flights"
+8. For car rentals → search_affiliate type "cars"
+9. For transfers → search_affiliate type "transfers"
+10. For insurance → search_affiliate type "insurance"
+
+BUDGET TRIP PLANNER:
+- When user says "Ho X€" or asks "where can I go with X budget" → call budget_trip_planner
+- If they specify a destination, check if budget is enough
+- If no destination, suggest best cities sorted by value
+- ALWAYS follow up with search_affiliate links for the recommended destinations
+- Show clear breakdown: flight cost + daily costs × days = total
+
+WEB SEARCH (Tavily):
+- Use for ANY question about specific locations not in our database
+- Great for: "miglior WiFi a [città]", "visto per [paese]", "caffè con prese elettriche a [città]"
+- Always search when user asks about a city NOT in our 26-city database
+- Present results with source links
 
 IMPORTANT RULES:
-- ALWAYS search the database first before responding about places/accommodations
+- ALWAYS use tools before responding. Never guess data.
 - Show real prices, ratings, and amenities from the database
 - For bookings, ALWAYS confirm place name, date, and guest name before creating
-- When showing affiliate links, format them as clickable markdown links: [Label](url)
+- Format affiliate links as clickable markdown: [Label](url)
 - Answer in the same language the user writes in (Italian, English, Spanish, etc.)
-- Be friendly, concise, and practical. Use emojis sparingly.
-- When presenting places, format them clearly with name, type, price, rating
-- When the user asks about a city, proactively offer ALL useful services (hotels, flights, cars, transfers, insurance) using search_affiliate with type "all"
-- Available affiliate services: Hotellook (hotels), Aviasales (flights), Kiwi.com (low-cost flights), Rentalcars (car rental), GetTransfer (transfers), Insubuy (travel insurance)`;
+- Be friendly, concise, and practical
+- When presenting places, format clearly with name, type, price, rating
+- Proactively offer related services when discussing a city`;
 
 async function buildContextualPrompt(userId: string): Promise<string> {
   try {
@@ -438,6 +666,9 @@ export function registerChatRoutes(app: Express): void {
               get_place_reviews: "Carico recensioni...",
               create_booking: "Creo prenotazione...",
               search_affiliate: "Cerco link esterni...",
+              get_city_costs: "Analizzo costi della città...",
+              budget_trip_planner: "Calcolo budget viaggio...",
+              web_search: "Ricerca web in corso...",
             };
             const statusMsg = toolStatusMap[fnName] || "Elaboro...";
             res.write(`data: ${JSON.stringify({ content: statusMsg + "\n" })}\n\n`);

@@ -671,12 +671,18 @@ export default function SearchPage() {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.6 }}
-                  className="bg-gradient-to-r from-muted to-background dark:from-accent dark:to-muted rounded-xl p-4 text-foreground mt-4"
+                  className="bg-gradient-to-r from-muted to-background dark:from-accent dark:to-muted rounded-xl p-4 text-foreground mt-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold">TOTALE GIORNALIERO</span>
-                    <span className="text-xl font-black">
+                    <span className="font-bold text-sm">TOTALE GIORNALIERO</span>
+                    <span className="text-lg font-black">
                       €{getTotalCost(selectedCity).min}-{getTotalCost(selectedCity).max}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1 opacity-70">
+                    <span className="text-xs font-medium">STIMA MENSILE</span>
+                    <span className="text-sm font-bold">
+                      €{getTotalCost(selectedCity).min * 30}-{getTotalCost(selectedCity).max * 30}
                     </span>
                   </div>
                 </motion.div>
