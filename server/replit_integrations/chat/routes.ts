@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { chatStorage } from "./storage";
 import { storage } from "../../storage";
 import { db } from "../../db";
-import { cities } from "@shared/schema";
-import { ilike } from "drizzle-orm";
+import { cities, knowledgeCache, learnedLocations } from "@shared/schema";
+import { ilike, eq, sql, desc } from "drizzle-orm";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -373,6 +373,46 @@ async function executeToolCall(
         if (!query || typeof query !== "string") {
           return JSON.stringify({ error: "Specifica una query di ricerca" });
         }
+
+        const normalizedQuery = query.toLowerCase().trim().replace(/\s+/g, " ");
+
+        try {
+          let cached = await db.select().from(knowledgeCache)
+            .where(eq(knowledgeCache.queryNormalized, normalizedQuery))
+            .limit(1);
+
+          if (cached.length === 0) {
+            const mainKeywords = normalizedQuery.split(" ")
+              .filter((w: string) => w.length > 3)
+              .slice(0, 3);
+            if (mainKeywords.length > 0) {
+              const fuzzyPattern = `%${mainKeywords.join("%")}%`;
+              cached = await db.select().from(knowledgeCache)
+                .where(ilike(knowledgeCache.queryNormalized, fuzzyPattern))
+                .limit(1);
+            }
+          }
+
+          if (cached.length > 0) {
+            await db.update(knowledgeCache)
+              .set({
+                hitCount: sql`${knowledgeCache.hitCount} + 1`,
+                lastAccessedAt: new Date(),
+              })
+              .where(eq(knowledgeCache.id, cached[0].id));
+
+            console.log(`[Knowledge Cache HIT] "${query}" (hits: ${cached[0].hitCount + 1})`);
+            return JSON.stringify({
+              answer: cached[0].answer || null,
+              results: cached[0].results ? JSON.parse(cached[0].results) : [],
+              query: query,
+              fromCache: true,
+            });
+          }
+        } catch (cacheErr) {
+          console.error("Cache lookup error (continuing to Tavily):", cacheErr);
+        }
+
         if (!process.env.TAVILY_API_KEY) {
           return JSON.stringify({ error: "Ricerca web non disponibile. Chiave API Tavily non configurata." });
         }
@@ -394,14 +434,58 @@ async function executeToolCall(
             return JSON.stringify({ error: "Errore nella ricerca web. Riprova." });
           }
           const tavilyData = await tavilyResponse.json();
+          const resultsFormatted = (tavilyData.results || []).slice(0, 5).map((r: any) => ({
+            title: r.title,
+            url: r.url,
+            content: r.content?.substring(0, 300),
+          }));
+
+          const locationMatch = query.match(/(?:a |in |di |to |about )([A-Z][a-zA-Zàèéìòùç\s'-]+)/i);
+          const locationName = locationMatch ? locationMatch[1].trim() : null;
+
+          try {
+            await db.insert(knowledgeCache).values({
+              query: query,
+              queryNormalized: normalizedQuery,
+              answer: tavilyData.answer || null,
+              results: JSON.stringify(resultsFormatted),
+              source: "tavily",
+              category: "location",
+              locationName: locationName,
+            });
+            console.log(`[Knowledge Cache SAVED] "${query}" (location: ${locationName || "unknown"})`);
+
+            if (locationName) {
+              const existingLocation = await db.select().from(learnedLocations)
+                .where(eq(learnedLocations.name, locationName))
+                .limit(1);
+
+              if (existingLocation.length > 0) {
+                await db.update(learnedLocations)
+                  .set({
+                    mentionCount: sql`${learnedLocations.mentionCount} + 1`,
+                    lastMentionedAt: new Date(),
+                  })
+                  .where(eq(learnedLocations.id, existingLocation[0].id));
+              } else {
+                await db.insert(learnedLocations).values({
+                  name: locationName,
+                  description: tavilyData.answer?.substring(0, 500) || null,
+                  nomadInfo: resultsFormatted.map((r: any) => r.content).join(" | ").substring(0, 1000) || null,
+                  sourceType: "tavily",
+                });
+                console.log(`[Learned Location NEW] "${locationName}" added to database`);
+              }
+            }
+          } catch (saveErr) {
+            console.error("Cache save error (non-blocking):", saveErr);
+          }
+
           return JSON.stringify({
             answer: tavilyData.answer || null,
-            results: (tavilyData.results || []).slice(0, 5).map((r: any) => ({
-              title: r.title,
-              url: r.url,
-              content: r.content?.substring(0, 300),
-            })),
+            results: resultsFormatted,
             query: query,
+            fromCache: false,
           });
         } catch (err: any) {
           console.error("Tavily search error:", err);

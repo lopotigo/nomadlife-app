@@ -404,6 +404,34 @@ Sitemap: https://nomad-life.app/sitemap.xml
         userId: (req.user as User).id,
       });
       const post = await storage.createPost(data);
+
+      if (data.location && data.location.trim()) {
+        try {
+          const { learnedLocations } = await import("@shared/schema");
+          const { eq, sql } = await import("drizzle-orm");
+          const locationName = data.location.trim();
+          const existing = await db.select().from(learnedLocations)
+            .where(eq(learnedLocations.name, locationName))
+            .limit(1);
+          if (existing.length > 0) {
+            await db.update(learnedLocations)
+              .set({
+                mentionCount: sql`${learnedLocations.mentionCount} + 1`,
+                lastMentionedAt: new Date(),
+              })
+              .where(eq(learnedLocations.id, existing[0].id));
+          } else {
+            await db.insert(learnedLocations).values({
+              name: locationName,
+              sourceType: "user_post",
+              sourceUserId: (req.user as User).id,
+            });
+          }
+        } catch (learnErr) {
+          console.error("Location learning error (non-blocking):", learnErr);
+        }
+      }
+
       res.status(201).send(post);
     } catch (error: any) {
       res.status(400).send({ error: error.message });

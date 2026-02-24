@@ -883,3 +883,52 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 });
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+export const knowledgeCache = pgTable("knowledge_cache", {
+  id: serial("id").primaryKey(),
+  query: text("query").notNull(),
+  queryNormalized: text("query_normalized").notNull(),
+  answer: text("answer"),
+  results: text("results"),
+  source: text("source").notNull().default("tavily"),
+  category: text("category").default("general"),
+  locationName: text("location_name"),
+  hitCount: integer("hit_count").default(1).notNull(),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertKnowledgeCacheSchema = createInsertSchema(knowledgeCache).omit({
+  id: true,
+  hitCount: true,
+  lastAccessedAt: true,
+  createdAt: true,
+});
+export type InsertKnowledgeCache = z.infer<typeof insertKnowledgeCacheSchema>;
+export type KnowledgeCache = typeof knowledgeCache.$inferSelect;
+
+export const learnedLocations = pgTable("learned_locations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  country: text("country"),
+  region: text("region"),
+  description: text("description"),
+  nomadInfo: text("nomad_info"),
+  wifiQuality: text("wifi_quality"),
+  costLevel: text("cost_level"),
+  coworkingSpaces: text("coworking_spaces"),
+  sourceType: text("source_type").notNull().default("tavily"),
+  sourceUserId: varchar("source_user_id"),
+  mentionCount: integer("mention_count").default(1).notNull(),
+  lastMentionedAt: timestamp("last_mentioned_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLearnedLocationSchema = createInsertSchema(learnedLocations).omit({
+  id: true,
+  mentionCount: true,
+  lastMentionedAt: true,
+  createdAt: true,
+});
+export type InsertLearnedLocation = z.infer<typeof insertLearnedLocationSchema>;
+export type LearnedLocation = typeof learnedLocations.$inferSelect;
