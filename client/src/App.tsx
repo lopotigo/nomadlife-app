@@ -38,6 +38,12 @@ import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import { Loader2 } from "lucide-react";
 
+function AuthenticatedChatbot() {
+  const { user, loading } = useAuth();
+  if (loading || !user) return null;
+  return <AiChatbot />;
+}
+
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
   if (loading) {
@@ -97,7 +103,7 @@ function App() {
                 <Toaster />
                 <WelcomeTutorial />
                 <Router />
-                <AiChatbot />
+                <AuthenticatedChatbot />
               </TooltipProvider>
             </OnboardingProvider>
           </AuthProvider>
