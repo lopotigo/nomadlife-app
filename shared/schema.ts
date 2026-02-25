@@ -935,3 +935,27 @@ export const insertLearnedLocationSchema = createInsertSchema(learnedLocations).
 });
 export type InsertLearnedLocation = z.infer<typeof insertLearnedLocationSchema>;
 export type LearnedLocation = typeof learnedLocations.$inferSelect;
+
+export const userAiPreferences = pgTable("user_ai_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  travelStyle: text("travel_style"),
+  budgetLevel: text("budget_level"),
+  accommodationType: text("accommodation_type"),
+  interests: text("interests").array(),
+  dietaryNeeds: text("dietary_needs"),
+  preferredClimate: text("preferred_climate"),
+  workStyle: text("work_style"),
+  languagesSpoken: text("languages_spoken").array(),
+  notes: text("notes"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserAiPreferencesSchema = createInsertSchema(userAiPreferences).omit({
+  id: true,
+  updatedAt: true,
+  createdAt: true,
+});
+export type InsertUserAiPreferences = z.infer<typeof insertUserAiPreferencesSchema>;
+export type UserAiPreferences = typeof userAiPreferences.$inferSelect;

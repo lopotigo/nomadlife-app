@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { chatStorage } from "./storage";
 import { storage } from "../../storage";
 import { db } from "../../db";
-import { cities, knowledgeCache, learnedLocations } from "@shared/schema";
+import { cities, knowledgeCache, learnedLocations, userAiPreferences, trips } from "@shared/schema";
 import { ilike, eq, sql, desc } from "drizzle-orm";
 
 const openai = new OpenAI({
@@ -116,6 +116,45 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
           query: { type: "string", description: "The search query. Be specific, e.g. 'best coworking spaces with fast wifi in Tbilisi 2025'" },
         },
         required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_itinerary",
+      description: "Generate a complete day-by-day travel itinerary for a destination. Use when user asks for a detailed travel plan, schedule, or itinerary. Includes coworking suggestions, activities, food, transport, and affiliate links.",
+      parameters: {
+        type: "object",
+        properties: {
+          destination: { type: "string", description: "Destination city or country" },
+          days: { type: "number", description: "Number of days for the trip" },
+          budget: { type: "number", description: "Total budget in EUR" },
+          interests: { type: "string", description: "User interests: surfing, food, nightlife, culture, nature, coworking, etc." },
+          travelStyle: { type: "string", description: "Travel style: budget, mid-range, luxury" },
+        },
+        required: ["destination", "days"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "save_user_preferences",
+      description: "Save or update user travel preferences learned from the conversation. Call this when the user reveals preferences like budget level, travel style, accommodation type, dietary needs, climate preference, work habits. Examples: 'preferisco ostelli', 'sono vegano', 'lavoro di notte', 'viaggio low-cost'.",
+      parameters: {
+        type: "object",
+        properties: {
+          travelStyle: { type: "string", description: "backpacker, budget, mid-range, luxury, slow-travel" },
+          budgetLevel: { type: "string", description: "very-low, low, medium, high, luxury" },
+          accommodationType: { type: "string", description: "hostel, hotel, airbnb, coliving, couchsurfing" },
+          interests: { type: "array", items: { type: "string" }, description: "List of interests: surfing, yoga, coding, photography, food, nightlife, nature, culture, etc." },
+          dietaryNeeds: { type: "string", description: "vegetarian, vegan, gluten-free, halal, none" },
+          preferredClimate: { type: "string", description: "tropical, temperate, cold, dry, any" },
+          workStyle: { type: "string", description: "morning-person, night-owl, flexible, 9-to-5" },
+          notes: { type: "string", description: "Any other preference or note about the user" },
+        },
+        required: [],
       },
     },
   },
@@ -546,6 +585,93 @@ async function executeToolCall(
         return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, vpn, esim, all" });
       }
 
+      case "generate_itinerary": {
+        const { destination, days, budget, interests, travelStyle } = args;
+        const m = TRAVELPAYOUTS_MARKER;
+        const cityEnc = encodeURIComponent(destination || "");
+
+        let cityData = null;
+        try {
+          const [found] = await db.select().from(cities).where(ilike(cities.name, destination)).limit(1);
+          cityData = found || null;
+        } catch {}
+
+        let webInfo = "";
+        if (!cityData) {
+          try {
+            const tavilyKey = process.env.TAVILY_API_KEY;
+            if (tavilyKey) {
+              const searchRes = await fetch("https://api.tavily.com/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ api_key: tavilyKey, query: `${destination} digital nomad guide coworking costs activities ${new Date().getFullYear()}`, max_results: 3, search_depth: "basic" }),
+              });
+              const searchData = await searchRes.json();
+              webInfo = (searchData.results || []).map((r: any) => r.content).join("\n").slice(0, 2000);
+            }
+          } catch {}
+        }
+
+        const affiliateLinks = {
+          flights: `https://www.aviasales.com/search?destination_name=${cityEnc}&adults=1&marker=${m}`,
+          hotels: `https://search.hotellook.com/?destination=${cityEnc}&adults=1&marker=${m}`,
+          esim: `https://www.airalo.com/?marker=${m}`,
+          cars: `https://www.getrentacar.com/en/search?location=${cityEnc}&marker=${m}`,
+        };
+
+        const itineraryData = {
+          type: "itinerary_request",
+          destination,
+          days: days || 7,
+          budget: budget || null,
+          interests: interests || "general sightseeing, coworking",
+          travelStyle: travelStyle || "mid-range",
+          cityData: cityData ? { dailyCost: cityData.estimatedDailyCost, currency: cityData.currency, internet: cityData.internetSpeed } : null,
+          webInfo: webInfo || null,
+          affiliateLinks,
+        };
+
+        return JSON.stringify(itineraryData);
+      }
+
+      case "save_user_preferences": {
+        const { travelStyle, budgetLevel, accommodationType, interests, dietaryNeeds, preferredClimate, workStyle, notes } = args;
+
+        try {
+          const existing = await db.select().from(userAiPreferences).where(eq(userAiPreferences.userId, userId)).limit(1);
+
+          if (existing.length > 0) {
+            const updates: any = { updatedAt: new Date() };
+            if (travelStyle) updates.travelStyle = travelStyle;
+            if (budgetLevel) updates.budgetLevel = budgetLevel;
+            if (accommodationType) updates.accommodationType = accommodationType;
+            if (interests?.length) updates.interests = interests;
+            if (dietaryNeeds) updates.dietaryNeeds = dietaryNeeds;
+            if (preferredClimate) updates.preferredClimate = preferredClimate;
+            if (workStyle) updates.workStyle = workStyle;
+            if (notes) updates.notes = notes;
+
+            await db.update(userAiPreferences).set(updates).where(eq(userAiPreferences.userId, userId));
+          } else {
+            await db.insert(userAiPreferences).values({
+              userId,
+              travelStyle: travelStyle || null,
+              budgetLevel: budgetLevel || null,
+              accommodationType: accommodationType || null,
+              interests: interests || null,
+              dietaryNeeds: dietaryNeeds || null,
+              preferredClimate: preferredClimate || null,
+              workStyle: workStyle || null,
+              notes: notes || null,
+            });
+          }
+
+          return JSON.stringify({ type: "preferences_saved", message: "Preferenze salvate con successo" });
+        } catch (error: any) {
+          return JSON.stringify({ error: "Errore nel salvare le preferenze: " + error.message });
+        }
+      }
+
       default:
         return JSON.stringify({ error: "Funzione non riconosciuta" });
     }
@@ -605,6 +731,27 @@ WEB SEARCH (Tavily):
 - Present results with source links when used
 - You can add affiliate links AFTER providing web search results as a complement
 
+ITINERARY GENERATION:
+- When the user asks "crea un itinerario", "pianifica viaggio", "programma per X giorni" → use generate_itinerary
+- Create a detailed DAY-BY-DAY plan with: morning activity, afternoon work/explore, evening activity
+- Include coworking spots, cafes with Wi-Fi, food recommendations, transport tips
+- Add affiliate links at the end: flights, hotels, eSIM, car rental
+- Consider user preferences if available (budget, style, dietary needs)
+
+USER MEMORY (PREFERENCES):
+- When the user reveals preferences during chat, SILENTLY call save_user_preferences
+- Examples: "preferisco ostelli" → save accommodationType=hostel
+- "sono vegano" → save dietaryNeeds=vegan
+- "viaggio low-cost" → save budgetLevel=low, travelStyle=backpacker
+- "lavoro di notte" → save workStyle=night-owl
+- Do NOT announce you're saving preferences. Just save them silently and continue the conversation naturally.
+- Use saved preferences to personalize all future recommendations.
+
+PHOTO ANALYSIS:
+- When the user sends an image, analyze it: identify the location, landmarks, atmosphere
+- Suggest the city/country, offer travel tips for that destination
+- If you recognize a coworking space, hotel, or restaurant, provide relevant info
+
 IMPORTANT RULES:
 - For data-related questions, use tools. For chat/greetings/advice, respond directly.
 - Show real prices, ratings, and amenities from the database
@@ -625,6 +772,35 @@ async function buildContextualPrompt(userId: string): Promise<string> {
       if (user.profession) context += `, profession: ${user.profession}`;
       if (user.skills?.length) context += `, skills: ${user.skills.join(', ')}`;
     }
+
+    try {
+      const [prefs] = await db.select().from(userAiPreferences).where(eq(userAiPreferences.userId, userId)).limit(1);
+      if (prefs) {
+        context += `\n\nUSER PREFERENCES (remembered from past conversations):`;
+        if (prefs.travelStyle) context += `\n- Travel style: ${prefs.travelStyle}`;
+        if (prefs.budgetLevel) context += `\n- Budget level: ${prefs.budgetLevel}`;
+        if (prefs.accommodationType) context += `\n- Preferred accommodation: ${prefs.accommodationType}`;
+        if (prefs.interests?.length) context += `\n- Interests: ${prefs.interests.join(', ')}`;
+        if (prefs.dietaryNeeds) context += `\n- Dietary needs: ${prefs.dietaryNeeds}`;
+        if (prefs.preferredClimate) context += `\n- Preferred climate: ${prefs.preferredClimate}`;
+        if (prefs.workStyle) context += `\n- Work style: ${prefs.workStyle}`;
+        if (prefs.notes) context += `\n- Notes: ${prefs.notes}`;
+        context += `\nUse these preferences to personalize all recommendations without asking again.`;
+      }
+    } catch {}
+
+    try {
+      const upcomingTrips = await db.select().from(trips)
+        .where(eq(trips.userId, userId))
+        .orderBy(desc(trips.startDate))
+        .limit(3);
+      if (upcomingTrips.length > 0) {
+        context += `\n\nUSER'S TRIPS:`;
+        for (const trip of upcomingTrips) {
+          context += `\n- "${trip.title}" (${trip.status}): ${trip.startLocation} → ${trip.endLocation}, ${trip.startDate ? new Date(trip.startDate).toLocaleDateString() : 'TBD'}`;
+        }
+      }
+    } catch {}
 
     return context;
   } catch {
@@ -768,6 +944,8 @@ export function registerChatRoutes(app: Express): void {
               get_city_costs: "Analizzo costi della città...",
               budget_trip_planner: "Calcolo budget viaggio...",
               web_search: "Ricerca web in corso...",
+              generate_itinerary: "Creo il tuo itinerario...",
+              save_user_preferences: "Aggiorno le tue preferenze...",
             };
             const statusMsg = toolStatusMap[fnName] || "Elaboro...";
             res.write(`data: ${JSON.stringify({ content: statusMsg + "\n" })}\n\n`);
@@ -890,6 +1068,141 @@ export function registerChatRoutes(app: Express): void {
     } catch (error) {
       console.error("Error generating recommendations:", error);
       res.status(500).json({ error: "Failed to generate recommendations" });
+    }
+  });
+
+  app.post("/api/ai/analyze-photo", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { imageUrl, conversationId } = req.body;
+      if (!imageUrl) {
+        return res.status(400).json({ error: "Image URL is required" });
+      }
+
+      const userId = getUserId(req);
+
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      let prefs: any = null;
+      try {
+        const [p] = await db.select().from(userAiPreferences).where(eq(userAiPreferences.userId, userId)).limit(1);
+        prefs = p;
+      } catch {}
+
+      let prefsContext = "";
+      if (prefs) {
+        prefsContext = `\nUser preferences: ${prefs.travelStyle ? `travel style: ${prefs.travelStyle}` : ""} ${prefs.budgetLevel ? `budget: ${prefs.budgetLevel}` : ""} ${prefs.interests?.length ? `interests: ${prefs.interests.join(", ")}` : ""}`;
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are NomadBot, an AI travel assistant. The user sent a photo. Analyze it and:
+1. Identify the location, landmarks, or type of place (coworking, cafe, beach, city, etc.)
+2. If you can recognize the city/country, say it
+3. Provide useful travel tips for that destination
+4. Suggest relevant services (coworking nearby, accommodation, eSIM, etc.)
+5. Be enthusiastic and helpful
+Answer in the same language the user typically uses (Italian if unsure).${prefsContext}`
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: { url: imageUrl, detail: "low" }
+              },
+              { type: "text", text: "Analizza questa foto e dimmi cosa vedi. Se riconosci il luogo, dammi consigli di viaggio utili." }
+            ]
+          }
+        ],
+        max_tokens: 2048,
+      });
+
+      const content = response.choices[0]?.message?.content || "Non riesco ad analizzare questa immagine.";
+
+      if (conversationId) {
+        await chatStorage.createMessage(parseInt(conversationId), "assistant", content);
+      }
+
+      const chunkSize = 20;
+      for (let i = 0; i < content.length; i += chunkSize) {
+        const chunk = content.slice(i, i + chunkSize);
+        res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+      }
+
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    } catch (error) {
+      console.error("Error analyzing photo:", error);
+      if (res.headersSent) {
+        res.write(`data: ${JSON.stringify({ error: "Failed to analyze photo" })}\n\n`);
+        res.end();
+      } else {
+        res.status(500).json({ error: "Failed to analyze photo" });
+      }
+    }
+  });
+
+  app.get("/api/ai/preferences", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const [prefs] = await db.select().from(userAiPreferences).where(eq(userAiPreferences.userId, userId)).limit(1);
+      res.json(prefs || null);
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+      res.status(500).json({ error: "Failed to fetch preferences" });
+    }
+  });
+
+  app.post("/api/ai/smart-notifications", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const now = new Date();
+
+      const userTrips = await db.select().from(trips)
+        .where(eq(trips.userId, userId))
+        .orderBy(trips.startDate);
+
+      const notifications: Array<{ type: string; message: string; priority: string }> = [];
+
+      for (const trip of userTrips) {
+        if (!trip.startDate) continue;
+        const startDate = new Date(trip.startDate);
+        const daysUntil = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (daysUntil > 0 && daysUntil <= 7 && trip.status === "planned") {
+          notifications.push({
+            type: "trip_reminder",
+            message: `Il tuo viaggio "${trip.title}" verso ${trip.endLocation} parte tra ${daysUntil} giorn${daysUntil === 1 ? 'o' : 'i'}! Hai bisogno di una eSIM o un'assicurazione?`,
+            priority: "high",
+          });
+        }
+
+        if (daysUntil > 7 && daysUntil <= 14 && trip.status === "planned") {
+          notifications.push({
+            type: "trip_prep",
+            message: `Mancano ${daysUntil} giorni al viaggio "${trip.title}". Controlla voli e alloggi per ${trip.endLocation}!`,
+            priority: "medium",
+          });
+        }
+
+        if (daysUntil > 14 && daysUntil <= 30 && trip.status === "planned") {
+          notifications.push({
+            type: "trip_planning",
+            message: `Hai un viaggio a ${trip.endLocation} tra ${daysUntil} giorni. Vuoi che ti crei un itinerario dettagliato?`,
+            priority: "low",
+          });
+        }
+      }
+
+      res.json({ notifications });
+    } catch (error) {
+      console.error("Error generating smart notifications:", error);
+      res.status(500).json({ error: "Failed to generate notifications" });
     }
   });
 }

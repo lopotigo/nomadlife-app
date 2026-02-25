@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, X, Send, Plus, Trash2, Loader2, Sparkles, ChevronLeft } from "lucide-react";
+import { Bot, X, Send, Plus, Trash2, Loader2, Sparkles, ChevronLeft, Mic, MicOff, ImageIcon, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -20,15 +20,21 @@ interface AiMessage {
   createdAt: string;
 }
 
+interface SmartNotification {
+  type: string;
+  message: string;
+  priority: string;
+}
+
 const QUICK_PROMPTS = [
+  { icon: "🗺️", label: "Itinerario", prompt: "Crea un itinerario di 7 giorni a Bali con coworking e attività" },
   { icon: "🏨", label: "Hotel a Bangkok", prompt: "Cercami hotel a Bangkok con prezzi e recensioni" },
   { icon: "💻", label: "Coworking Bali", prompt: "Quali coworking ci sono a Bali? Mostrami prezzi e Wi-Fi" },
-  { icon: "🏠", label: "Ostelli Lisbona", prompt: "Cercami ostelli a Lisbon con prezzi e valutazioni" },
   { icon: "✈️", label: "Voli economici", prompt: "Trovami link per voli economici per Bangkok" },
   { icon: "📋", label: "Prenota", prompt: "Voglio prenotare un hotel a Milano, cosa hai disponibile?" },
   { icon: "🌍", label: "Nomad cities", prompt: "Quali sono le migliori città per nomadi digitali nel tuo database?" },
-  { icon: "🤝", label: "Collaboratori", prompt: "Trova nomadi vicino a me con skill complementari" },
-  { icon: "🌱", label: "Viaggio eco", prompt: "Aiutami a pianificare un viaggio eco-friendly" },
+  { icon: "📱", label: "eSIM", prompt: "Ho bisogno di una eSIM per il mio prossimo viaggio in Asia" },
+  { icon: "💰", label: "Budget trip", prompt: "Ho 1000€, dove posso andare per 2 settimane?" },
 ];
 
 export function AiChatbot() {
@@ -40,8 +46,13 @@ export function AiChatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [view, setView] = useState<"list" | "chat">("chat");
+  const [isListening, setIsListening] = useState(false);
+  const [smartNotifications, setSmartNotifications] = useState<SmartNotification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
   const { user } = useAuth();
 
   const scrollToBottom = useCallback(() => {
@@ -55,6 +66,7 @@ export function AiChatbot() {
   useEffect(() => {
     if (isOpen) {
       fetchConversations();
+      fetchSmartNotifications();
     }
   }, [isOpen]);
 
@@ -68,6 +80,16 @@ export function AiChatbot() {
     } catch (err) {
       console.error("Failed to fetch conversations:", err);
     }
+  };
+
+  const fetchSmartNotifications = async () => {
+    try {
+      const res = await fetch("/api/ai/smart-notifications", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setSmartNotifications(data.notifications || []);
+      }
+    } catch {}
   };
 
   const createNewConversation = async () => {
@@ -218,6 +240,144 @@ export function AiChatbot() {
     }
   };
 
+  const toggleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Il tuo browser non supporta il riconoscimento vocale");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "it-IT";
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0].transcript)
+        .join("");
+      setInput(transcript);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Seleziona un file immagine");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("L'immagine deve essere inferiore a 5MB");
+      return;
+    }
+
+    let conv = activeConversation;
+    if (!conv) {
+      conv = await createNewConversation();
+      if (!conv) return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+
+      const userMsg: AiMessage = {
+        id: Date.now(),
+        conversationId: conv!.id,
+        role: "user",
+        content: "📷 [Foto inviata per analisi]",
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, userMsg]);
+      setIsLoading(true);
+      setStreamingContent("");
+
+      try {
+        const res = await fetch("/api/ai/analyze-photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageUrl: base64, conversationId: conv!.id }),
+        });
+
+        if (!res.ok) throw new Error("Failed to analyze photo");
+
+        const streamReader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = "";
+
+        if (streamReader) {
+          while (true) {
+            const { done, value } = await streamReader.read();
+            if (done) break;
+
+            const text = decoder.decode(value, { stream: true });
+            const lines = text.split("\n");
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  if (data.done) {
+                    const assistantMsg: AiMessage = {
+                      id: Date.now() + 1,
+                      conversationId: conv!.id,
+                      role: "assistant",
+                      content: fullContent,
+                      createdAt: new Date().toISOString(),
+                    };
+                    setMessages((prev) => [...prev, assistantMsg]);
+                    setStreamingContent("");
+                  } else if (data.content) {
+                    fullContent += data.content;
+                    setStreamingContent(fullContent);
+                  }
+                } catch {}
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Photo analysis error:", err);
+        const errorMsg: AiMessage = {
+          id: Date.now() + 1,
+          conversationId: conv!.id,
+          role: "assistant",
+          content: "Non sono riuscito ad analizzare la foto. Riprova.",
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      } finally {
+        setIsLoading(false);
+        setStreamingContent("");
+      }
+    };
+    reader.readAsDataURL(file);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const formatInline = (text: string, keyPrefix: string) => {
     const parts = text.split(/(\*\*[^*]+\*\*|\[([^\]]+)\]\(([^)]+)\))/g);
     const elements: React.ReactNode[] = [];
@@ -268,7 +428,7 @@ export function AiChatbot() {
         return <p key={i} className="font-semibold">{line.slice(2, -2)}</p>;
       }
       if (line.startsWith("- ") || line.startsWith("• ")) {
-        return <p key={i} className="ml-3">• {formatInline(line.slice(2), `li-${i}`)}</p>;
+        return <p key={i} className="ml-3">{formatInline(line.slice(2), `li-${i}`)}</p>;
       }
       if (line.match(/^\d+\.\s/)) {
         return <p key={i} className="ml-3">{formatInline(line, `ol-${i}`)}</p>;
@@ -309,6 +469,19 @@ export function AiChatbot() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {smartNotifications.length > 0 && (
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="p-1.5 hover:bg-white/20 rounded-lg transition-colors relative"
+                    title="Smart Notifications"
+                    data-testid="chatbot-notifications-btn"
+                  >
+                    <Bell className="w-4 h-4" />
+                    <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-amber-400 text-[9px] font-bold text-black rounded-full flex items-center justify-center">
+                      {smartNotifications.length}
+                    </span>
+                  </button>
+                )}
                 <button
                   onClick={() => setView(view === "list" ? "chat" : "list")}
                   className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
@@ -318,7 +491,7 @@ export function AiChatbot() {
                   <Sparkles className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => { setActiveConversation(null); setMessages([]); setView("chat"); }}
+                  onClick={() => { setActiveConversation(null); setMessages([]); setView("chat"); setShowNotifications(false); }}
                   className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                   title="New chat"
                   data-testid="chatbot-new-btn"
@@ -334,6 +507,27 @@ export function AiChatbot() {
                 </button>
               </div>
             </div>
+
+            {showNotifications && smartNotifications.length > 0 && (
+              <div className="p-3 border-b border-border bg-amber-50 dark:bg-amber-950/20 space-y-2 max-h-40 overflow-y-auto">
+                <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                  <Bell className="w-3 h-3" /> Notifiche Smart
+                </p>
+                {smartNotifications.map((n, i) => (
+                  <div
+                    key={i}
+                    onClick={() => { sendMessage(n.message); setShowNotifications(false); }}
+                    className={`text-xs p-2 rounded-lg cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors ${
+                      n.priority === "high" ? "bg-amber-100/80 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700" :
+                      n.priority === "medium" ? "bg-amber-50 dark:bg-amber-950/30" : "bg-white/50 dark:bg-white/5"
+                    }`}
+                    data-testid={`smart-notification-${i}`}
+                  >
+                    {n.type === "trip_reminder" ? "🔔" : n.type === "trip_prep" ? "📋" : "💡"} {n.message}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {view === "list" ? (
               <div className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -378,6 +572,7 @@ export function AiChatbot() {
                         </div>
                         <h4 className="font-semibold text-sm mb-1">Hey{user?.name ? `, ${user.name.split(" ")[0]}` : ""}!</h4>
                         <p className="text-xs text-muted-foreground">Ask me anything about travel, nomad life, destinations...</p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-1">Puoi anche inviare foto o usare il microfono</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {QUICK_PROMPTS.map((qp, i) => (
@@ -438,13 +633,43 @@ export function AiChatbot() {
                 </div>
 
                 <div className="p-3 border-t border-border">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                    data-testid="chatbot-photo-input"
+                  />
                   <div className="flex items-end gap-2 bg-muted/50 rounded-xl px-3 py-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-1.5 hover:bg-muted rounded-lg transition-colors shrink-0 text-muted-foreground hover:text-foreground"
+                      title="Invia foto"
+                      disabled={isLoading}
+                      data-testid="chatbot-photo-btn"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={toggleVoiceInput}
+                      className={`p-1.5 rounded-lg transition-colors shrink-0 ${
+                        isListening
+                          ? "bg-red-500/20 text-red-500 animate-pulse"
+                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                      title={isListening ? "Stop" : "Parla"}
+                      disabled={isLoading}
+                      data-testid="chatbot-voice-btn"
+                    >
+                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
                     <textarea
                       ref={inputRef}
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder="Ask NomadBot..."
+                      placeholder={isListening ? "Sto ascoltando..." : "Ask NomadBot..."}
                       className="flex-1 bg-transparent border-none outline-none resize-none text-sm placeholder:text-muted-foreground max-h-20 min-h-[36px]"
                       rows={1}
                       disabled={isLoading}
@@ -489,6 +714,11 @@ export function AiChatbot() {
             </motion.div>
           )}
         </AnimatePresence>
+        {!isOpen && smartNotifications.length > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 text-[10px] font-bold text-black rounded-full flex items-center justify-center animate-bounce">
+            {smartNotifications.length}
+          </span>
+        )}
       </motion.button>
     </>
   );
