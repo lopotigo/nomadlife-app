@@ -99,6 +99,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  const { ensureTablesExist } = await import("./db");
+  await ensureTablesExist();
+
   await registerRoutes(httpServer, app);
 
   const { autoSeed } = await import("./seed");
