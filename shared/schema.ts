@@ -457,6 +457,8 @@ export const cities = pgTable("cities", {
   feedbackCount: integer("feedback_count").default(0),
   lastUpdated: timestamp("last_updated").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  tavilyInsights: text("tavily_insights"),
+  lastTavilyUpdate: timestamp("last_tavily_update"),
 });
 
 export const insertCitySchema = createInsertSchema(cities).omit({
@@ -464,6 +466,7 @@ export const insertCitySchema = createInsertSchema(cities).omit({
   feedbackCount: true,
   lastUpdated: true,
   createdAt: true,
+  lastTavilyUpdate: true,
 });
 export type InsertCity = z.infer<typeof insertCitySchema>;
 export type City = typeof cities.$inferSelect;

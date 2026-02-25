@@ -2442,6 +2442,24 @@ Sitemap: https://nomad-life.app/sitemap.xml
     }
   });
 
+  app.get("/api/cities/:id/enriched", async (req, res) => {
+    try {
+      const city = await storage.getCity(req.params.id);
+      if (!city) {
+        return res.status(404).send({ error: "City not found" });
+      }
+      const { getCityEnrichedData } = await import("./weekly-update");
+      const enriched = await getCityEnrichedData(city.name);
+      res.send({
+        tavilyInsights: city.tavilyInsights ? JSON.parse(city.tavilyInsights) : null,
+        lastTavilyUpdate: city.lastTavilyUpdate,
+        ...enriched,
+      });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // Submit feedback for a city (updates cost averages)
   app.post("/api/cities/:id/feedback", requireAuth, async (req, res) => {
     try {

@@ -3,7 +3,7 @@ import Layout from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles, UserPlus, UserCheck, Eye, Compass, Wifi, Briefcase, FileText, UtensilsCrossed, Heart, Star, Navigation, Loader2 } from "lucide-react";
+import { Search, User as UserIcon, Plane, MapPin, Home, Coffee, Utensils, Bus, Users, X, Sparkles, UserPlus, UserCheck, Eye, Compass, Wifi, Briefcase, FileText, UtensilsCrossed, Heart, Star, Navigation, Loader2, TrendingUp, MessageCircle, Globe } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -44,6 +44,17 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("cities");
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
+
+  const { data: enrichedData } = useQuery({
+    queryKey: ["/api/cities", selectedCity?.id, "enriched"],
+    queryFn: async () => {
+      if (!selectedCity?.id) return null;
+      const res = await apiRequest("GET", `/api/cities/${selectedCity.id}/enriched`);
+      return res.json();
+    },
+    enabled: !!selectedCity?.id,
+    staleTime: 5 * 60 * 1000,
+  });
   const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
 
   const [checkins, setCheckins] = useState<Record<string, { status: string; city: string }>>({});
@@ -686,6 +697,49 @@ export default function SearchPage() {
                     </span>
                   </div>
                 </motion.div>
+
+                {enrichedData && (enrichedData.postCount > 0 || enrichedData.communityMentions > 0 || enrichedData.tavilyInsights) && (
+                  <motion.div
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    className="mt-3 space-y-2"
+                  >
+                    <h3 className="font-bold text-foreground text-sm uppercase tracking-wide flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" /> Community
+                    </h3>
+
+                    <div className="flex gap-2">
+                      {enrichedData.postCount > 0 && (
+                        <div className="flex-1 bg-white dark:bg-muted rounded-xl p-2 text-center shadow-sm" data-testid="enriched-posts">
+                          <MessageCircle className="w-4 h-4 mx-auto text-primary mb-1" />
+                          <div className="text-sm font-bold text-foreground">{enrichedData.postCount}</div>
+                          <div className="text-[10px] text-muted-foreground">post recenti</div>
+                        </div>
+                      )}
+                      {enrichedData.communityMentions > 0 && (
+                        <div className="flex-1 bg-white dark:bg-muted rounded-xl p-2 text-center shadow-sm" data-testid="enriched-mentions">
+                          <TrendingUp className="w-4 h-4 mx-auto text-green-500 mb-1" />
+                          <div className="text-sm font-bold text-foreground">{enrichedData.communityMentions}</div>
+                          <div className="text-[10px] text-muted-foreground">menzioni</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {enrichedData.tavilyInsights?.answer && (
+                      <div className="bg-white dark:bg-muted rounded-xl p-3 shadow-sm" data-testid="enriched-insights">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Globe className="w-3 h-3 text-blue-500" />
+                          <span className="text-[10px] font-semibold text-blue-500 uppercase">Aggiornamento automatico</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                          {enrichedData.tavilyInsights.answer.substring(0, 200)}
+                          {enrichedData.tavilyInsights.answer.length > 200 ? "..." : ""}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </motion.div>
