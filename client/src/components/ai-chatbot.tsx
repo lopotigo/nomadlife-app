@@ -49,6 +49,8 @@ export function AiChatbot() {
   const [isListening, setIsListening] = useState(false);
   const [smartNotifications, setSmartNotifications] = useState<SmartNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationName, setLocationName] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,8 +69,31 @@ export function AiChatbot() {
     if (isOpen) {
       fetchConversations();
       fetchSmartNotifications();
+      acquireLocation();
     }
   }, [isOpen]);
+
+  const acquireLocation = () => {
+    if (userLocation) return;
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(loc);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lng}&format=json&zoom=10`);
+          if (res.ok) {
+            const data = await res.json();
+            const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state || "";
+            const country = data.address?.country || "";
+            if (city || country) setLocationName(`${city}${city && country ? ", " : ""}${country}`);
+          }
+        } catch {}
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+    );
+  };
 
   const fetchConversations = async () => {
     try {
@@ -167,7 +192,10 @@ export function AiChatbot() {
       const res = await fetch(`/api/ai/conversations/${conv.id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: content.trim() }),
+        body: JSON.stringify({
+          content: content.trim(),
+          ...(userLocation && { latitude: userLocation.lat, longitude: userLocation.lng, locationName }),
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to send message");
@@ -465,7 +493,14 @@ export function AiChatbot() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">NomadBot</h3>
-                  <p className="text-[10px] text-white/70">AI Travel Assistant</p>
+                  <p className="text-[10px] text-white/70">
+                    {locationName ? (
+                      <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                        {locationName}
+                      </span>
+                    ) : "AI Travel Assistant"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-1">

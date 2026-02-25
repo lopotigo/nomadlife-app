@@ -879,7 +879,7 @@ export function registerChatRoutes(app: Express): void {
     try {
       const conversationId = parseInt(req.params.id);
       const userId = getUserId(req);
-      const { content } = req.body;
+      const { content, latitude, longitude, locationName } = req.body;
 
       if (!content || typeof content !== "string" || !content.trim()) {
         return res.status(400).json({ error: "Message content is required" });
@@ -892,7 +892,17 @@ export function registerChatRoutes(app: Express): void {
 
       await chatStorage.createMessage(conversationId, "user", content.trim());
 
-      const contextualPrompt = await buildContextualPrompt(userId);
+      let contextualPrompt = await buildContextualPrompt(userId);
+
+      if (latitude && longitude) {
+        contextualPrompt += `\n\nUSER CURRENT GPS LOCATION: ${locationName || "Unknown"} (lat: ${latitude}, lng: ${longitude})`;
+        contextualPrompt += `\nYou know exactly where the user is right now. Use this to:`;
+        contextualPrompt += `\n- Suggest nearby places, coworking, cafes, restaurants`;
+        contextualPrompt += `\n- Give contextual advice about their current city/area`;
+        contextualPrompt += `\n- Reference their location naturally (e.g. "Visto che sei a Bangkok...")`;
+        contextualPrompt += `\n- When they ask "cosa c'è vicino a me", search for places near their GPS coordinates`;
+      }
+
       const messages = await chatStorage.getMessagesByConversation(conversationId);
       const chatMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
         { role: "system", content: contextualPrompt },
