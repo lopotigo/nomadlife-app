@@ -61,12 +61,12 @@ const TOOLS: OpenAI.Chat.Completions.ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "search_affiliate",
-      description: "Generate Travelpayouts affiliate links for flights, hotels, car rentals, transfers, and travel insurance. Use when no local DB results, or when user asks for booking/travel services.",
+      description: "Generate affiliate links for flights (Aviasales), hotels (Hotellook), car rentals (GetRentacar), transfers (GetTransfer), eSIM (Airalo), insurance (Insubuy), VPN (NordVPN), or flights/trains/bus (Kiwi.com). Use when user asks for booking/travel services.",
       parameters: {
         type: "object",
         properties: {
           city: { type: "string", description: "Destination city" },
-          type: { type: "string", enum: ["hotels", "flights", "cars", "transfers", "insurance", "vpn", "all"], description: "Type of service: hotels, flights, cars, transfers, insurance, vpn, or all for a complete list" },
+          type: { type: "string", enum: ["hotels", "flights", "cars", "transfers", "insurance", "vpn", "esim", "all"], description: "Type of service: hotels, flights, cars, transfers, insurance, vpn, esim, or all" },
           checkIn: { type: "string", description: "Check-in date (YYYY-MM-DD) for hotels" },
           checkOut: { type: "string", description: "Check-out date (YYYY-MM-DD) for hotels" },
         },
@@ -500,19 +500,21 @@ async function executeToolCall(
 
         const hotelUrl = `https://search.hotellook.com/?destination=${cityEncoded}&adults=1&marker=${m}${checkIn ? `&checkIn=${checkIn}` : ""}${checkOut ? `&checkOut=${checkOut}` : ""}`;
         const flightUrl = `https://www.aviasales.com/search?destination_name=${cityEncoded}&adults=1&marker=${m}`;
-        const kiwi = `https://www.kiwi.com/en/search/results?to=${cityEncoded}`;
-        const cars = `https://www.rentalcars.com/search-results?location=${cityEncoded}`;
-        const transfer = `https://www.gettransfer.com/en?from=${cityEncoded}`;
+        const kiwi = `https://www.kiwi.com/en/search/results?to=${cityEncoded}&marker=${m}`;
+        const cars = `https://www.getrentacar.com/en/search?location=${cityEncoded}&marker=${m}`;
+        const transfer = `https://www.gettransfer.com/en?from=${cityEncoded}&marker=${m}`;
         const insurance = `https://www.insubuy.com/travel-medical-insurance/`;
-        const vpn = `https://nordvpn.com/`;
+        const vpn = `https://nordvpn.com/?marker=${m}`;
+        const esim = `https://www.airalo.com/?marker=${m}`;
 
         if (type === "all") {
           const links = [
             { provider: "Hotellook", label: `Hotel a ${city}`, url: hotelUrl },
             { provider: "Aviasales", label: `Voli per ${city}`, url: flightUrl },
-            { provider: "Kiwi.com", label: `Voli low-cost per ${city}`, url: kiwi },
-            { provider: "Rentalcars", label: `Noleggio auto a ${city}`, url: cars },
-            { provider: "GetTransfer", label: `Transfer da ${city}`, url: transfer },
+            { provider: "Kiwi.com", label: `Voli/treni/bus per ${city}`, url: kiwi },
+            { provider: "GetRentacar", label: `Noleggio auto a ${city}`, url: cars },
+            { provider: "GetTransfer", label: `Transfer a ${city}`, url: transfer },
+            { provider: "Airalo", label: `eSIM per ${city}`, url: esim },
             { provider: "Insubuy", label: `Assicurazione viaggio`, url: insurance },
             { provider: "NordVPN", label: `VPN per WiFi sicuro`, url: vpn },
           ];
@@ -526,10 +528,10 @@ async function executeToolCall(
           return JSON.stringify({ type: "affiliate_link", provider: "Aviasales", url: flightUrl, city, message: `Cerca voli per ${city} su Aviasales` });
         }
         if (type === "cars") {
-          return JSON.stringify({ type: "affiliate_link", provider: "Rentalcars", url: cars, city, message: `Noleggio auto a ${city}` });
+          return JSON.stringify({ type: "affiliate_link", provider: "GetRentacar", url: cars, city, message: `Noleggio auto a ${city} su GetRentacar` });
         }
         if (type === "transfers") {
-          return JSON.stringify({ type: "affiliate_link", provider: "GetTransfer", url: transfer, city, message: `Transfer da ${city}` });
+          return JSON.stringify({ type: "affiliate_link", provider: "GetTransfer", url: transfer, city, message: `Transfer a ${city}` });
         }
         if (type === "insurance") {
           return JSON.stringify({ type: "affiliate_link", provider: "Insubuy", url: insurance, city: "", message: "Assicurazione viaggio internazionale" });
@@ -537,8 +539,11 @@ async function executeToolCall(
         if (type === "vpn") {
           return JSON.stringify({ type: "affiliate_link", provider: "NordVPN", url: vpn, city: "", message: "NordVPN - Proteggi la tua connessione WiFi in viaggio" });
         }
+        if (type === "esim") {
+          return JSON.stringify({ type: "affiliate_link", provider: "Airalo", url: esim, city: city || "", message: "Airalo - eSIM internazionale per viaggiare senza roaming" });
+        }
 
-        return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, vpn, all" });
+        return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, vpn, esim, all" });
       }
 
       default:
@@ -577,9 +582,11 @@ YOUR WORKFLOW:
 5. For budget questions ("Ho 1000€, dove vado?") → budget_trip_planner
 6. For bookings → confirm details with user, then create_booking
 7. For flights → search_affiliate type "flights"
-8. For car rentals → search_affiliate type "cars"
-9. For transfers → search_affiliate type "transfers"
-10. For insurance → search_affiliate type "insurance"
+8. For car rentals → search_affiliate type "cars" (GetRentacar)
+9. For transfers → search_affiliate type "transfers" (GetTransfer)
+10. For insurance → search_affiliate type "insurance" (Insubuy)
+11. For eSIM / SIM card / roaming → search_affiliate type "esim" (Airalo)
+12. For VPN → search_affiliate type "vpn" (NordVPN)
 
 CRITICAL: When the user asks about a place/city NOT in our 26-city database, you MUST use web_search to find real information. Do NOT just show an affiliate link with no useful content. The user expects real info (coworking, Wi-Fi, lifestyle, costs), not just a booking link.
 

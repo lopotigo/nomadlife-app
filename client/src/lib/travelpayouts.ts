@@ -36,21 +36,21 @@ export function searchKiwiFlights(fromCity?: string, toCity?: string, date?: str
   if (date) params.push(`departure=${date}`);
   if (params.length > 0) targetUrl += "?" + params.join("&");
 
-  window.open(targetUrl, "_blank");
+  window.open(addMarker(targetUrl), "_blank");
 }
 
 export function searchRentalCars(city: string, pickupDate?: string) {
-  let targetUrl = `https://www.rentalcars.com/search-results?location=${encodeURIComponent(city)}`;
-  if (pickupDate) targetUrl += `&puDay=${pickupDate}`;
+  let targetUrl = `https://www.getrentacar.com/en/search?location=${encodeURIComponent(city)}`;
+  if (pickupDate) targetUrl += `&pickup_date=${pickupDate}`;
 
-  window.open(targetUrl, "_blank");
+  window.open(addMarker(targetUrl), "_blank");
 }
 
 export function searchTransfers(fromCity: string, toCity?: string) {
   let targetUrl = `https://www.gettransfer.com/en?from=${encodeURIComponent(fromCity)}`;
   if (toCity) targetUrl += `&to=${encodeURIComponent(toCity)}`;
 
-  window.open(targetUrl, "_blank");
+  window.open(addMarker(targetUrl), "_blank");
 }
 
 export function searchInsurance() {
@@ -58,7 +58,14 @@ export function searchInsurance() {
 }
 
 export function openNordVPN() {
-  window.open("https://nordvpn.com/", "_blank");
+  window.open(addMarker("https://nordvpn.com/"), "_blank");
+}
+
+export function searchAiraloESIM(destination?: string) {
+  let targetUrl = "https://www.airalo.com/";
+  if (destination) targetUrl += `${encodeURIComponent(destination.toLowerCase())}`;
+
+  window.open(addMarker(targetUrl), "_blank");
 }
 
 export function getAffiliateLinks(city: string, checkin?: string, checkout?: string) {
@@ -89,16 +96,16 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "Kiwi.com",
     category: "flights",
-    url: kiwiUrl,
+    url: addMarker(kiwiUrl),
     label: `Voli low-cost per ${city}`,
     icon: "plane",
   });
 
-  let carUrl = `https://www.rentalcars.com/search-results?location=${cityEnc}`;
+  let carUrl = `https://www.getrentacar.com/en/search?location=${cityEnc}`;
   links.push({
-    provider: "Rentalcars",
+    provider: "GetRentacar",
     category: "cars",
-    url: carUrl,
+    url: addMarker(carUrl),
     label: `Noleggio auto a ${city}`,
     icon: "car",
   });
@@ -107,9 +114,17 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "GetTransfer",
     category: "transfer",
-    url: transferUrl,
+    url: addMarker(transferUrl),
     label: `Transfer da ${city}`,
     icon: "bus",
+  });
+
+  links.push({
+    provider: "Airalo",
+    category: "esim",
+    url: addMarker("https://www.airalo.com/"),
+    label: "eSIM internazionale",
+    icon: "smartphone",
   });
 
   links.push({
@@ -123,7 +138,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "NordVPN",
     category: "vpn",
-    url: "https://nordvpn.com/",
+    url: addMarker("https://nordvpn.com/"),
     label: "VPN per WiFi sicuro",
     icon: "lock",
   });
