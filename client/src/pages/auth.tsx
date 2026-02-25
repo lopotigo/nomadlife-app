@@ -19,10 +19,17 @@ const RECAPTCHA_V3_SITE_KEY = "6LdMNXYsAAAAABrnjRNQqrnq-JC4mObOiwcR8Lw1";
 
 async function getRecaptchaToken(action: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const maxAttempts = 15;
     const tryExecute = () => {
       if (window.grecaptcha?.execute) {
         window.grecaptcha.execute(RECAPTCHA_V3_SITE_KEY, { action }).then(resolve).catch(reject);
       } else {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          reject(new Error("reCAPTCHA timeout"));
+          return;
+        }
         setTimeout(tryExecute, 200);
       }
     };
