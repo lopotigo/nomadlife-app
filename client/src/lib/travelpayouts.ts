@@ -1,9 +1,9 @@
 const TP_MARKER = import.meta.env.VITE_TRAVELPAYOUTS_MARKER || "";
 
-function buildTpRedirect(targetUrl: string, subId?: string): string {
-  if (!TP_MARKER) return targetUrl;
-  const marker = subId ? `${TP_MARKER}.${subId}` : TP_MARKER;
-  return `https://tp.media/r?marker=${marker}&trs=nomadlife&p=4370&u=${encodeURIComponent(targetUrl)}`;
+function addMarker(url: string): string {
+  if (!TP_MARKER) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}marker=${TP_MARKER}`;
 }
 
 export function searchFlights(fromCity?: string, toCity?: string, date?: string) {
@@ -16,8 +16,7 @@ export function searchFlights(fromCity?: string, toCity?: string, date?: string)
   params.push("trip_class=0");
   if (params.length > 0) targetUrl += "?" + params.join("&");
 
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "flights") : targetUrl;
-  window.open(url, "_blank");
+  window.open(addMarker(targetUrl), "_blank");
 }
 
 export function searchHotels(city: string, checkin?: string, checkout?: string) {
@@ -26,8 +25,7 @@ export function searchHotels(city: string, checkin?: string, checkout?: string) 
   if (checkout) targetUrl += `&checkOut=${checkout}`;
   targetUrl += "&adults=1";
 
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "hotels") : targetUrl;
-  window.open(url, "_blank");
+  window.open(addMarker(targetUrl), "_blank");
 }
 
 export function searchKiwiFlights(fromCity?: string, toCity?: string, date?: string) {
@@ -38,36 +36,29 @@ export function searchKiwiFlights(fromCity?: string, toCity?: string, date?: str
   if (date) params.push(`departure=${date}`);
   if (params.length > 0) targetUrl += "?" + params.join("&");
 
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "kiwi") : targetUrl;
-  window.open(url, "_blank");
+  window.open(targetUrl, "_blank");
 }
 
 export function searchRentalCars(city: string, pickupDate?: string) {
   let targetUrl = `https://www.rentalcars.com/search-results?location=${encodeURIComponent(city)}`;
   if (pickupDate) targetUrl += `&puDay=${pickupDate}`;
 
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "rentalcars") : targetUrl;
-  window.open(url, "_blank");
+  window.open(targetUrl, "_blank");
 }
 
 export function searchTransfers(fromCity: string, toCity?: string) {
   let targetUrl = `https://www.gettransfer.com/en?from=${encodeURIComponent(fromCity)}`;
   if (toCity) targetUrl += `&to=${encodeURIComponent(toCity)}`;
 
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "transfer") : targetUrl;
-  window.open(url, "_blank");
+  window.open(targetUrl, "_blank");
 }
 
 export function searchInsurance() {
-  const targetUrl = "https://www.insubuy.com/travel-medical-insurance/";
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "insurance") : targetUrl;
-  window.open(url, "_blank");
+  window.open("https://www.insubuy.com/travel-medical-insurance/", "_blank");
 }
 
 export function openNordVPN() {
-  const targetUrl = "https://nordvpn.com/";
-  const url = TP_MARKER ? buildTpRedirect(targetUrl, "nordvpn") : targetUrl;
-  window.open(url, "_blank");
+  window.open("https://nordvpn.com/", "_blank");
 }
 
 export function getAffiliateLinks(city: string, checkin?: string, checkout?: string) {
@@ -80,7 +71,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "Hotellook",
     category: "hotels",
-    url: TP_MARKER ? buildTpRedirect(hotelUrl, "hotels") : hotelUrl,
+    url: addMarker(hotelUrl),
     label: `Hotel a ${city}`,
     icon: "hotel",
   });
@@ -89,7 +80,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "Aviasales",
     category: "flights",
-    url: TP_MARKER ? buildTpRedirect(flightUrl, "flights") : flightUrl,
+    url: addMarker(flightUrl),
     label: `Voli per ${city}`,
     icon: "plane",
   });
@@ -98,7 +89,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "Kiwi.com",
     category: "flights",
-    url: TP_MARKER ? buildTpRedirect(kiwiUrl, "kiwi") : kiwiUrl,
+    url: kiwiUrl,
     label: `Voli low-cost per ${city}`,
     icon: "plane",
   });
@@ -107,7 +98,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "Rentalcars",
     category: "cars",
-    url: TP_MARKER ? buildTpRedirect(carUrl, "rentalcars") : carUrl,
+    url: carUrl,
     label: `Noleggio auto a ${city}`,
     icon: "car",
   });
@@ -116,7 +107,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "GetTransfer",
     category: "transfer",
-    url: TP_MARKER ? buildTpRedirect(transferUrl, "transfer") : transferUrl,
+    url: transferUrl,
     label: `Transfer da ${city}`,
     icon: "bus",
   });
@@ -124,7 +115,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "Insubuy",
     category: "insurance",
-    url: TP_MARKER ? buildTpRedirect("https://www.insubuy.com/travel-medical-insurance/", "insurance") : "https://www.insubuy.com/travel-medical-insurance/",
+    url: "https://www.insubuy.com/travel-medical-insurance/",
     label: "Assicurazione viaggio",
     icon: "shield",
   });
@@ -132,7 +123,7 @@ export function getAffiliateLinks(city: string, checkin?: string, checkout?: str
   links.push({
     provider: "NordVPN",
     category: "vpn",
-    url: TP_MARKER ? buildTpRedirect("https://nordvpn.com/", "nordvpn") : "https://nordvpn.com/",
+    url: "https://nordvpn.com/",
     label: "VPN per WiFi sicuro",
     icon: "lock",
   });

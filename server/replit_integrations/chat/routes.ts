@@ -495,49 +495,47 @@ async function executeToolCall(
 
       case "search_affiliate": {
         const { city, type, checkIn, checkOut } = args;
-        const cityEncoded = encodeURIComponent(city);
+        const cityEncoded = encodeURIComponent(city || "");
         const m = TRAVELPAYOUTS_MARKER;
 
-        const buildLink = (targetUrl: string, subId: string) =>
-          `https://tp.media/r?marker=${m}.${subId}&trs=nomadlife&p=4370&u=${encodeURIComponent(targetUrl)}`;
+        const hotelUrl = `https://search.hotellook.com/?destination=${cityEncoded}&adults=1&marker=${m}${checkIn ? `&checkIn=${checkIn}` : ""}${checkOut ? `&checkOut=${checkOut}` : ""}`;
+        const flightUrl = `https://www.aviasales.com/search?destination_name=${cityEncoded}&adults=1&marker=${m}`;
+        const kiwi = `https://www.kiwi.com/en/search/results?to=${cityEncoded}`;
+        const cars = `https://www.rentalcars.com/search-results?location=${cityEncoded}`;
+        const transfer = `https://www.gettransfer.com/en?from=${cityEncoded}`;
+        const insurance = `https://www.insubuy.com/travel-medical-insurance/`;
+        const vpn = `https://nordvpn.com/`;
 
         if (type === "all") {
           const links = [
-            { provider: "Hotellook", label: `🏨 Hotel a ${city}`, url: buildLink(`https://search.hotellook.com/?destination=${cityEncoded}&adults=1${checkIn ? `&checkIn=${checkIn}` : ""}${checkOut ? `&checkOut=${checkOut}` : ""}`, "hotels") },
-            { provider: "Aviasales", label: `✈️ Voli per ${city}`, url: buildLink(`https://www.aviasales.com/search?destination_name=${cityEncoded}&adults=1`, "flights") },
-            { provider: "Kiwi.com", label: `🛫 Voli low-cost per ${city}`, url: buildLink(`https://www.kiwi.com/en/search/results?to=${cityEncoded}`, "kiwi") },
-            { provider: "Rentalcars", label: `🚗 Noleggio auto a ${city}`, url: buildLink(`https://www.rentalcars.com/search-results?location=${cityEncoded}`, "rentalcars") },
-            { provider: "GetTransfer", label: `🚐 Transfer da ${city}`, url: buildLink(`https://www.gettransfer.com/en?from=${cityEncoded}`, "transfer") },
-            { provider: "Insubuy", label: `🛡️ Assicurazione viaggio`, url: buildLink("https://www.insubuy.com/travel-medical-insurance/", "insurance") },
-            { provider: "NordVPN", label: `🔒 VPN per WiFi sicuro`, url: buildLink("https://nordvpn.com/", "nordvpn") },
+            { provider: "Hotellook", label: `Hotel a ${city}`, url: hotelUrl },
+            { provider: "Aviasales", label: `Voli per ${city}`, url: flightUrl },
+            { provider: "Kiwi.com", label: `Voli low-cost per ${city}`, url: kiwi },
+            { provider: "Rentalcars", label: `Noleggio auto a ${city}`, url: cars },
+            { provider: "GetTransfer", label: `Transfer da ${city}`, url: transfer },
+            { provider: "Insubuy", label: `Assicurazione viaggio`, url: insurance },
+            { provider: "NordVPN", label: `VPN per WiFi sicuro`, url: vpn },
           ];
           return JSON.stringify({ type: "affiliate_links", city, links });
         }
 
         if (type === "hotels") {
-          const url = buildLink(`https://search.hotellook.com/?destination=${cityEncoded}&adults=1${checkIn ? `&checkIn=${checkIn}` : ""}${checkOut ? `&checkOut=${checkOut}` : ""}`, "hotels");
-          return JSON.stringify({ type: "affiliate_link", provider: "Hotellook", url, city, message: `Cerca hotel a ${city} su Hotellook` });
+          return JSON.stringify({ type: "affiliate_link", provider: "Hotellook", url: hotelUrl, city, message: `Cerca hotel a ${city} su Hotellook` });
         }
         if (type === "flights") {
-          const url = buildLink(`https://www.aviasales.com/search?destination_name=${cityEncoded}&adults=1`, "flights");
-          return JSON.stringify({ type: "affiliate_link", provider: "Aviasales", url, city, message: `Cerca voli per ${city} su Aviasales` });
+          return JSON.stringify({ type: "affiliate_link", provider: "Aviasales", url: flightUrl, city, message: `Cerca voli per ${city} su Aviasales` });
         }
         if (type === "cars") {
-          const url = buildLink(`https://www.rentalcars.com/search-results?location=${cityEncoded}`, "rentalcars");
-          return JSON.stringify({ type: "affiliate_link", provider: "Rentalcars", url, city, message: `Noleggio auto a ${city}` });
+          return JSON.stringify({ type: "affiliate_link", provider: "Rentalcars", url: cars, city, message: `Noleggio auto a ${city}` });
         }
         if (type === "transfers") {
-          const url = buildLink(`https://www.gettransfer.com/en?from=${cityEncoded}`, "transfer");
-          return JSON.stringify({ type: "affiliate_link", provider: "GetTransfer", url, city, message: `Transfer da ${city}` });
+          return JSON.stringify({ type: "affiliate_link", provider: "GetTransfer", url: transfer, city, message: `Transfer da ${city}` });
         }
         if (type === "insurance") {
-          const url = buildLink("https://www.insubuy.com/travel-medical-insurance/", "insurance");
-          return JSON.stringify({ type: "affiliate_link", provider: "Insubuy", url, city: "", message: "Assicurazione viaggio internazionale" });
+          return JSON.stringify({ type: "affiliate_link", provider: "Insubuy", url: insurance, city: "", message: "Assicurazione viaggio internazionale" });
         }
-
         if (type === "vpn") {
-          const url = buildLink("https://nordvpn.com/", "nordvpn");
-          return JSON.stringify({ type: "affiliate_link", provider: "NordVPN", url, city: "", message: "NordVPN - Proteggi la tua connessione WiFi in viaggio" });
+          return JSON.stringify({ type: "affiliate_link", provider: "NordVPN", url: vpn, city: "", message: "NordVPN - Proteggi la tua connessione WiFi in viaggio" });
         }
 
         return JSON.stringify({ error: "Tipo non supportato. Usa: hotels, flights, cars, transfers, insurance, vpn, all" });
