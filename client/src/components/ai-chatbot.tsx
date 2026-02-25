@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, X, Send, Plus, Trash2, Loader2, Sparkles, ChevronLeft, Mic, MicOff, ImageIcon, Bell } from "lucide-react";
+import { Bot, X, Send, Plus, Trash2, Loader2, Sparkles, ChevronLeft, Mic, MicOff, ImageIcon, Bell, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
@@ -54,6 +54,7 @@ export function AiChatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const { user } = useAuth();
 
@@ -404,6 +405,7 @@ export function AiChatbot() {
     reader.readAsDataURL(file);
 
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   };
 
   const formatInline = (text: string, keyPrefix: string) => {
@@ -676,11 +678,29 @@ export function AiChatbot() {
                     onChange={handlePhotoUpload}
                     data-testid="chatbot-photo-input"
                   />
+                  <input
+                    type="file"
+                    ref={cameraInputRef}
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                    data-testid="chatbot-camera-input"
+                  />
                   <div className="flex items-end gap-2 bg-muted/50 rounded-xl px-3 py-2">
+                    <button
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="p-1.5 hover:bg-muted rounded-lg transition-colors shrink-0 text-muted-foreground hover:text-foreground"
+                      title="Scatta foto"
+                      disabled={isLoading}
+                      data-testid="chatbot-camera-btn"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="p-1.5 hover:bg-muted rounded-lg transition-colors shrink-0 text-muted-foreground hover:text-foreground"
-                      title="Invia foto"
+                      title="Scegli dalla galleria"
                       disabled={isLoading}
                       data-testid="chatbot-photo-btn"
                     >
