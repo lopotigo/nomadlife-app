@@ -2873,7 +2873,51 @@ Sitemap: https://nomad-life.app/sitemap.xml
   app.get("/api/city-guides", async (req, res) => {
     try {
       const { city, category } = req.query;
-      const guides = await storage.getCityGuides(city as string, category as string);
+      let guides = await storage.getCityGuides(city as string, category as string);
+      
+      if (guides.length === 0 && city && typeof city === "string" && city.length >= 2) {
+        try {
+          const OpenAI = (await import("openai")).default;
+          const ai = new OpenAI({ apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY });
+          
+          const prompt = `Generate a digital nomad city guide for "${city}". Return a JSON array with exactly 6 guide entries covering these categories: wifi, coworking, visa, food, lifestyle, transport.
+Each entry must have: city (proper name), country, latitude (number), longitude (number), category, title (in Italian), content (detailed paragraph in Italian, 100+ words with practical tips), icon (emoji), rating (1-5), tags (array of 3-4 relevant tags in Italian).
+Return ONLY the JSON array, no markdown.`;
+          
+          const response = await ai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            max_tokens: 3000,
+          });
+          
+          const content = response.choices[0]?.message?.content?.trim() || "[]";
+          const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          const generated: any[] = JSON.parse(cleaned);
+          
+          for (const g of generated) {
+            try {
+              await storage.createCityGuide({
+                city: g.city,
+                country: g.country,
+                latitude: g.latitude,
+                longitude: g.longitude,
+                category: g.category,
+                title: g.title,
+                content: g.content,
+                icon: g.icon,
+                rating: g.rating,
+                tags: g.tags,
+              });
+            } catch {}
+          }
+          
+          guides = await storage.getCityGuides(city, category as string);
+        } catch (aiErr) {
+          console.log("AI guide generation failed:", aiErr);
+        }
+      }
+      
       res.send(guides);
     } catch (error: any) {
       res.status(500).send({ error: error.message });

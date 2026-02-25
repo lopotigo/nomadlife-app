@@ -250,6 +250,7 @@ export interface IStorage {
   getCityGuideById(id: string): Promise<schema.CityGuide | undefined>;
   getNearbyCityGuides(lat: number, lng: number, radiusKm: number): Promise<schema.CityGuide[]>;
   getCityGuideCities(): Promise<string[]>;
+  createCityGuide(data: schema.InsertCityGuide): Promise<schema.CityGuide>;
 
   // Skills Matchmaking
   getNearbyNomadsWithSkills(lat: number, lng: number, radiusKm: number, skills?: string[], currentUser?: User): Promise<(User & { distance: number; matchScore: number })[]>;
@@ -1919,6 +1920,11 @@ export class DrizzleStorage implements IStorage {
       .from(schema.cityGuides)
       .orderBy(schema.cityGuides.city);
     return result.map(r => r.city);
+  }
+
+  async createCityGuide(data: schema.InsertCityGuide): Promise<schema.CityGuide> {
+    const result = await this.db.insert(schema.cityGuides).values(data).returning();
+    return result[0];
   }
 
   // ========== SKILLS MATCHMAKING ==========
