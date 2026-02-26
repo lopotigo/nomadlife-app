@@ -2887,12 +2887,15 @@ Sitemap: https://nomad-life.app/sitemap.xml
 Each entry must have: city (proper name), country, latitude (number), longitude (number), category, title (in Italian), content (detailed paragraph in Italian, 100+ words with practical tips), icon (emoji), rating (1-5), tags (array of 3-4 relevant tags in Italian).
 Return ONLY the JSON array, no markdown.`;
           
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 30000);
           const response = await ai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
             max_tokens: 3000,
-          });
+          }, { signal: controller.signal });
+          clearTimeout(timeout);
           
           const content = response.choices[0]?.message?.content?.trim() || "[]";
           const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();

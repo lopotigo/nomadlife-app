@@ -7,6 +7,13 @@ import passport from "passport";
 import connectPgSimple from "connect-pg-simple";
 import pg from "pg";
 
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err.message);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+});
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -113,9 +120,8 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
+    console.error("Express error:", message);
     res.status(status).json({ message });
-    throw err;
   });
 
   // importantly only setup vite in development and after
