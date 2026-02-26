@@ -145,7 +145,7 @@ export function startWeeklyUpdateJob() {
     } catch (err) {
       console.error("[Weekly Update] Initial run error:", err);
     }
-  }, 30000);
+  }, 120000);
 
   setInterval(async () => {
     try {
