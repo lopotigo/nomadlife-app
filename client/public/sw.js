@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomadlife-v5';
+const CACHE_NAME = 'nomadlife-v6';
 const STATIC_ASSETS = [
   '/manifest.json',
   '/favicon.png'
