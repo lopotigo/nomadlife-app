@@ -2878,7 +2878,10 @@ Sitemap: https://nomad-life.app/sitemap.xml
       if (guides.length === 0 && city && typeof city === "string" && city.length >= 2) {
         try {
           const OpenAI = (await import("openai")).default;
-          const ai = new OpenAI({ apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY });
+          const ai = new OpenAI({
+            apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+            baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+          });
           
           const prompt = `Generate a digital nomad city guide for "${city}". Return a JSON array with exactly 6 guide entries covering these categories: wifi, coworking, visa, food, lifestyle, transport.
 Each entry must have: city (proper name), country, latitude (number), longitude (number), category, title (in Italian), content (detailed paragraph in Italian, 100+ words with practical tips), icon (emoji), rating (1-5), tags (array of 3-4 relevant tags in Italian).
