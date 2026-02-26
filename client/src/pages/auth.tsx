@@ -17,7 +17,27 @@ declare global {
 
 const RECAPTCHA_V3_SITE_KEY = "6LdMNXYsAAAAABrnjRNQqrnq-JC4mObOiwcR8Lw1";
 
+function loadRecaptchaScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.grecaptcha) { resolve(); return; }
+    const existing = document.querySelector(`script[src*="recaptcha"]`);
+    if (existing) { resolve(); return; }
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_V3_SITE_KEY}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load reCAPTCHA"));
+    document.head.appendChild(script);
+  });
+}
+
 async function getRecaptchaToken(action: string): Promise<string> {
+  try {
+    await loadRecaptchaScript();
+  } catch {
+    return "";
+  }
   return new Promise((resolve, reject) => {
     let attempts = 0;
     const maxAttempts = 15;
@@ -27,7 +47,7 @@ async function getRecaptchaToken(action: string): Promise<string> {
       } else {
         attempts++;
         if (attempts >= maxAttempts) {
-          reject(new Error("reCAPTCHA timeout"));
+          resolve("");
           return;
         }
         setTimeout(tryExecute, 200);
