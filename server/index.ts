@@ -123,14 +123,6 @@ app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
-    const originalExit = process.exit;
-    process.exit = ((code?: number) => {
-      if (code === 0) {
-        return originalExit(code);
-      }
-      console.error(`Prevented process.exit(${code}) - keeping server alive`);
-      return undefined as never;
-    }) as any;
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }

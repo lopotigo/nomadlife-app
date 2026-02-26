@@ -88,10 +88,6 @@
             .catch((err) => console.log('SW registration failed:', err));
         });
       }
-      new MutationObserver(function(mutations) {
-        var overlay = document.querySelector('vite-error-overlay');
-        if (overlay) { overlay.remove(); window.location.reload(); }
-      }).observe(document.body || document.documentElement, { childList: true, subtree: true });
     </script>
   </body>
 </html>
