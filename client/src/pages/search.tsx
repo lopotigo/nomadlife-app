@@ -66,6 +66,7 @@ export default function SearchPage() {
   const [selectedGuideCategory, setSelectedGuideCategory] = useState("");
   const [guideNearbyMode, setGuideNearbyMode] = useState(false);
   const [guideCoords, setGuideCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [guideSearchInput, setGuideSearchInput] = useState("");
 
   useEffect(() => {
     if (!guideNearbyMode || !navigator.geolocation) return;
@@ -215,7 +216,13 @@ export default function SearchPage() {
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(tab) => {
+          setActiveTab(tab);
+          if (tab === "guides" && query.trim() && !selectedGuideCity) {
+            setSelectedGuideCity(query.trim());
+            setGuideSearchInput(query.trim());
+          }
+        }}>
           <TabsList className="w-full mb-4">
             <TabsTrigger value="cities" className="flex-1">
               <MapPin className="w-4 h-4 mr-2" />
@@ -282,11 +289,40 @@ export default function SearchPage() {
 
           <TabsContent value="guides">
             <div className="space-y-4">
-              <div className="flex items-center justify-end">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    value={guideSearchInput}
+                    onChange={(e) => setGuideSearchInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && guideSearchInput.trim()) {
+                        setSelectedGuideCity(guideSearchInput.trim());
+                        setGuideNearbyMode(false);
+                      }
+                    }}
+                    placeholder="Cerca una città per la guida AI..."
+                    className="pr-10"
+                    data-testid="input-guide-city-search"
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                    onClick={() => {
+                      if (guideSearchInput.trim()) {
+                        setSelectedGuideCity(guideSearchInput.trim());
+                        setGuideNearbyMode(false);
+                      }
+                    }}
+                    data-testid="button-guide-search"
+                  >
+                    <Search className="w-4 h-4" />
+                  </Button>
+                </div>
                 <button
                   data-testid="button-guide-nearby"
                   onClick={() => setGuideNearbyMode(!guideNearbyMode)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     guideNearbyMode
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -297,12 +333,12 @@ export default function SearchPage() {
                 </button>
               </div>
 
-              {!guideNearbyMode && (
+              {!guideNearbyMode && guideCitiesList.length > 0 && (
               <div className="overflow-x-auto pb-2 -mx-4 px-4">
                 <div className="flex gap-2 min-w-max">
                   <button
                     data-testid="button-guide-city-all"
-                    onClick={() => setSelectedGuideCity("")}
+                    onClick={() => { setSelectedGuideCity(""); setGuideSearchInput(""); }}
                     className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                       !selectedGuideCity
                         ? "bg-primary text-primary-foreground"
@@ -315,7 +351,7 @@ export default function SearchPage() {
                     <button
                       key={city}
                       data-testid={`button-guide-city-${city.toLowerCase().replace(/\s/g, "-")}`}
-                      onClick={() => setSelectedGuideCity(city)}
+                      onClick={() => { setSelectedGuideCity(city); setGuideSearchInput(city); }}
                       className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                         selectedGuideCity === city
                           ? "bg-primary text-primary-foreground"
@@ -355,6 +391,13 @@ export default function SearchPage() {
               {guidesLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-muted-foreground ml-3 text-sm">Generazione guida AI in corso...</p>
+                </div>
+              ) : !selectedGuideCity && !guideNearbyMode ? (
+                <div className="text-center py-12" data-testid="text-guides-empty">
+                  <Compass className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+                  <p className="text-muted-foreground font-medium">Cerca una città</p>
+                  <p className="text-muted-foreground/70 text-sm mt-1">Scrivi il nome di una città per generare la guida AI</p>
                 </div>
               ) : filteredGuides.length === 0 ? (
                 <div className="text-center py-12" data-testid="text-guides-empty">
