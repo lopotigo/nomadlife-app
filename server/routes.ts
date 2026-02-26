@@ -409,6 +409,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
         try {
           const { learnedLocations } = await import("@shared/schema");
           const { eq, sql } = await import("drizzle-orm");
+          const { db } = await import("./db");
           const locationName = data.location.trim();
           const existing = await db.select().from(learnedLocations)
             .where(eq(learnedLocations.name, locationName))

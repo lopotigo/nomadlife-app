@@ -13,6 +13,11 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled Rejection:", reason);
 });
+process.on("SIGTERM", () => console.error("Received SIGTERM"));
+process.on("SIGINT", () => console.error("Received SIGINT"));
+process.on("SIGHUP", () => console.error("Received SIGHUP"));
+process.on("beforeExit", (code) => console.error("beforeExit with code:", code));
+process.on("exit", (code) => console.error("Process exit with code:", code));
 
 const app = express();
 const httpServer = createServer(app);
@@ -82,23 +87,11 @@ export function log(message: string, source = "express") {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
 
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      log(logLine);
+      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
     }
   });
 
@@ -130,6 +123,14 @@ app.use((req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
+    const originalExit = process.exit;
+    process.exit = ((code?: number) => {
+      if (code === 0) {
+        return originalExit(code);
+      }
+      console.error(`Prevented process.exit(${code}) - keeping server alive`);
+      return undefined as never;
+    }) as any;
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
