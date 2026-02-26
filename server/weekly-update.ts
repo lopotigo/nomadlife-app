@@ -137,6 +137,10 @@ export async function getCityEnrichedData(cityName: string) {
 }
 
 export function startWeeklyUpdateJob() {
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[Weekly Update] Skipped in development mode to save memory.");
+    return;
+  }
   console.log("[Weekly Update] Scheduler started. Updates every 7 days.");
 
   setTimeout(async () => {
