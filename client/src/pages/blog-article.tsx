@@ -106,20 +106,25 @@ export default function BlogArticle() {
         return <h3 key={i} className="text-lg font-semibold mt-6 mb-2 text-foreground">{paragraph.slice(4)}</h3>;
       }
       if (paragraph.startsWith('- ') || paragraph.startsWith('* ')) {
+        const liFormatted = paragraph.slice(2)
+          .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-medium">$1</a>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>');
         return (
-          <li key={i} className="ml-4 mb-1 text-muted-foreground leading-relaxed list-disc">
-            {paragraph.slice(2)}
-          </li>
+          <li key={i} className="ml-4 mb-1 text-muted-foreground leading-relaxed list-disc" dangerouslySetInnerHTML={{ __html: liFormatted }} />
         );
       }
       if (paragraph.match(/^\d+\. /)) {
+        const olFormatted = paragraph.replace(/^\d+\. /, '')
+          .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-medium">$1</a>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>');
         return (
-          <li key={i} className="ml-4 mb-1 text-muted-foreground leading-relaxed list-decimal">
-            {paragraph.replace(/^\d+\. /, '')}
-          </li>
+          <li key={i} className="ml-4 mb-1 text-muted-foreground leading-relaxed list-decimal" dangerouslySetInnerHTML={{ __html: olFormatted }} />
         );
       }
       const formatted = paragraph
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-medium">$1</a>')
         .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>');
       return (
