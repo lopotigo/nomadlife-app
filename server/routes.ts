@@ -2878,23 +2878,61 @@ Sitemap: https://nomad-life.app/sitemap.xml
       
       if (guides.length === 0 && city && typeof city === "string" && city.length >= 2) {
         try {
+          let webContext = "";
+          if (process.env.TAVILY_API_KEY) {
+            try {
+              const searches = [
+                `${city} Italia coworking wifi nomadi digitali lavorare`,
+                `${city} Italia ristoranti cibo tipico costo vita trasporti`,
+              ];
+              const results: string[] = [];
+              for (const q of searches) {
+                const tavilyRes = await fetch("https://api.tavily.com/search", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    api_key: process.env.TAVILY_API_KEY,
+                    query: q,
+                    search_depth: "basic",
+                    max_results: 3,
+                    include_answer: true,
+                  }),
+                });
+                if (tavilyRes.ok) {
+                  const data = await tavilyRes.json();
+                  if (data.answer) results.push(data.answer);
+                  for (const r of (data.results || []).slice(0, 3)) {
+                    if (r.content) results.push(r.content.substring(0, 400));
+                  }
+                }
+              }
+              if (results.length > 0) {
+                webContext = `\n\nDATI REALI DA RICERCA WEB (usa SOLO queste informazioni verificate, non inventare nomi di locali o servizi che non compaiono qui):\n${results.join("\n---\n")}`;
+              }
+            } catch (webErr) {
+              console.log("Tavily search for city guide failed:", webErr);
+            }
+          }
+
           const OpenAI = (await import("openai")).default;
           const ai = new OpenAI({
             apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
             baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
           });
           
-          const prompt = `Generate a digital nomad city guide for "${city}". Return a JSON array with exactly 6 guide entries covering these categories: wifi, coworking, visa, food, lifestyle, transport.
-Each entry must have: city (proper name), country, latitude (number), longitude (number), category, title (in Italian), content (detailed paragraph in Italian, 100+ words with practical tips), icon (emoji), rating (1-5), tags (array of 3-4 relevant tags in Italian).
+          const prompt = `Genera una guida per nomadi digitali per "${city}" in Italia. IMPORTANTE: Usa SOLO informazioni verificate. Se non hai dati certi su un aspetto specifico (es. nomi di coworking, velocità wifi), scrivi consigli generali utili senza inventare nomi di locali, servizi o dati specifici che non conosci con certezza.${webContext}
+
+Return a JSON array with exactly 6 guide entries covering these categories: wifi, coworking, visa, food, lifestyle, transport.
+Each entry must have: city (proper name), country, latitude (number, must be accurate for the actual city), longitude (number, must be accurate for the actual city), category, title (in Italian), content (detailed paragraph in Italian, 100+ words with practical tips based on REAL data), icon (emoji), rating (1-5, be honest - smaller cities may have lower ratings for some categories), tags (array of 3-4 relevant tags in Italian).
 Return ONLY the JSON array, no markdown.`;
           
           const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 30000);
+          const timeout = setTimeout(() => controller.abort(), 45000);
           const response = await ai.chat.completions.create({
             model: "gpt-4o-mini",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-            max_tokens: 3000,
+            messages: [{ role: "system", content: "Sei un esperto di viaggi e nomadismo digitale in Italia. Rispondi SOLO con dati verificati. Non inventare mai nomi di locali, coworking, ristoranti o servizi. Se non conosci informazioni specifiche, fornisci consigli generali utili. Preferisci informazioni provenienti dai dati di ricerca web forniti." }, { role: "user", content: prompt }],
+            temperature: 0.3,
+            max_tokens: 4000,
           }, { signal: controller.signal });
           clearTimeout(timeout);
           
