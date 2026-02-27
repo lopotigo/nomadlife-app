@@ -244,6 +244,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [signupPassword, setSignupPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -288,6 +289,15 @@ export default function Auth() {
       toast({
         title: "Città e Paese richiesti",
         description: "Seleziona una città dal menu a tendina.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!privacyAccepted) {
+      toast({
+        title: "Privacy Policy",
+        description: "Devi accettare l'informativa sulla privacy per registrarti.",
         variant: "destructive",
       });
       return;
@@ -463,7 +473,32 @@ export default function Auth() {
                     <PasswordStrength password={signupPassword} />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={loading} data-testid="button-signup">
+                  <div className="flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      id="privacy-accept"
+                      checked={privacyAccepted}
+                      onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                      data-testid="checkbox-privacy"
+                      disabled={loading}
+                    />
+                    <label htmlFor="privacy-accept" className="text-sm text-muted-foreground cursor-pointer leading-snug">
+                      Ho letto e accetto l'{" "}
+                      <a
+                        href="/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                        data-testid="link-privacy-policy"
+                      >
+                        Informativa sulla Privacy
+                      </a>{" "}
+                      e il trattamento dei miei dati personali ai sensi del GDPR (Reg. UE 2016/679).
+                    </label>
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={loading || !privacyAccepted} data-testid="button-signup">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Crea Account
                   </Button>
