@@ -37,6 +37,7 @@ import BlogEditor from "@/pages/blog-editor";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import PrivacyPolicy from "@/pages/privacy-policy";
+import Terms from "@/pages/terms";
 import { Loader2 } from "lucide-react";
 
 function AuthenticatedChatbot() {
@@ -67,6 +68,8 @@ function Router() {
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/terms" component={Terms} />
       <Route path="/">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
       <Route path="/feed">{() => <ProtectedRoute component={MapFeed} />}</Route>
       <Route path="/booking">{() => <ProtectedRoute component={Booking} />}</Route>

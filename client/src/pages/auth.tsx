@@ -296,8 +296,8 @@ export default function Auth() {
 
     if (!privacyAccepted) {
       toast({
-        title: "Privacy Policy",
-        description: "Devi accettare l'informativa sulla privacy per registrarti.",
+        title: "Termini e Privacy",
+        description: "Devi accettare i Termini di Servizio e l'Informativa sulla Privacy per registrarti.",
         variant: "destructive",
       });
       return;
@@ -392,6 +392,12 @@ export default function Auth() {
                       Password dimenticata?
                     </button>
                   </div>
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    Accedendo accetti i nostri{" "}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" data-testid="link-terms-login">Termini di Servizio</a>
+                    {" "}e l'{" "}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" data-testid="link-privacy-login">Informativa sulla Privacy</a>.
+                  </p>
                 </form>
               </CardContent>
             </Card>
@@ -484,17 +490,26 @@ export default function Auth() {
                       disabled={loading}
                     />
                     <label htmlFor="privacy-accept" className="text-sm text-muted-foreground cursor-pointer leading-snug">
-                      Ho letto e accetto l'{" "}
+                      Accetto i{" "}
                       <a
-                        href="/privacy-policy"
+                        href="/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                        data-testid="link-terms-signup"
+                      >
+                        Termini di Servizio
+                      </a>{" "}
+                      e l'{" "}
+                      <a
+                        href="/privacy"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline font-medium"
                         data-testid="link-privacy-policy"
                       >
                         Informativa sulla Privacy
-                      </a>{" "}
-                      e il trattamento dei miei dati personali ai sensi del GDPR (Reg. UE 2016/679).
+                      </a>
                     </label>
                   </div>
 
