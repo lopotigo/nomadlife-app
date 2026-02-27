@@ -102,15 +102,39 @@ function getYouTubeEmbedUrl(url: string): string | null {
 function YouTubeEmbed({ url, className = "" }: { url: string; className?: string }) {
   const embedUrl = getYouTubeEmbedUrl(url);
   if (!embedUrl) return null;
+  const videoId = embedUrl.split("/embed/")[1];
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  const [iframeError, setIframeError] = useState(false);
+
+  if (iframeError) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className={`block relative w-full ${className}`}>
+        <div className="relative w-full rounded-xl overflow-hidden" style={{ minHeight: "160px" }}>
+          <img src={thumbnailUrl} className="w-full h-full object-cover" alt="YouTube video" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="9,6 9,18 18,12" /></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+    );
+  }
+
   return (
-    <div className={`relative w-full aspect-video ${className}`}>
-      <iframe
-        src={embedUrl}
-        className="absolute inset-0 w-full h-full rounded-xl"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        title="YouTube video"
-      />
+    <div className={`relative w-full ${className}`} style={{ minHeight: "160px" }}>
+      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+        <iframe
+          src={embedUrl}
+          className="absolute top-0 left-0 w-full h-full rounded-xl"
+          style={{ border: "none" }}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="YouTube video"
+          loading="lazy"
+          onError={() => setIframeError(true)}
+        />
+      </div>
     </div>
   );
 }
