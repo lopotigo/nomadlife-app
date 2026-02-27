@@ -1099,6 +1099,10 @@ export default function UnifiedMap() {
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite" | "event"; id: string; title: string } | null>(null);
   const [posterEvent, setPosterEvent] = useState<any | null>(null);
   const [highlightedTripId, setHighlightedTripId] = useState<string | null>(null);
+  const [countryFilter, setCountryFilter] = useState<{ country: string; lat: number; lng: number } | null>(null);
+  const [countryNomads, setCountryNomads] = useState<any[]>([]);
+  const [loadingNomads, setLoadingNomads] = useState(false);
+  const [showNomadDrawer, setShowNomadDrawer] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [pulsingPosts, setPulsingPosts] = useState<Set<string>>(new Set());
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
@@ -1124,6 +1128,32 @@ export default function UnifiedMap() {
     dateTo: "",
     maxDistance: 0,
   });
+
+  const handleShowNomadsByCountry = useCallback(async (country: string, lat: number, lng: number) => {
+    setCountryFilter({ country, lat, lng });
+    setLoadingNomads(true);
+    setShowNomadDrawer(true);
+    try {
+      const res = await fetch(`/api/users/by-country/${encodeURIComponent(country)}`, { credentials: "include" });
+      if (res.ok) {
+        const users = await res.json();
+        setCountryNomads(users);
+      } else {
+        toast({ title: "Errore", description: "Impossibile caricare i nomadi", variant: "destructive" });
+      }
+    } catch (err) {
+      console.error("Failed to fetch nomads:", err);
+      toast({ title: "Errore", description: "Impossibile caricare i nomadi", variant: "destructive" });
+    } finally {
+      setLoadingNomads(false);
+    }
+  }, [toast]);
+
+  const clearCountryFilter = useCallback(() => {
+    setCountryFilter(null);
+    setCountryNomads([]);
+    setShowNomadDrawer(false);
+  }, []);
 
   const handleLike = useCallback(async (postId: string) => {
     if (likedPosts.has(postId)) return;
@@ -1850,6 +1880,16 @@ export default function UnifiedMap() {
                           Vedi dettagli
                         </Link>
                       </div>
+                      {guide.country && (
+                        <button
+                          onClick={() => handleShowNomadsByCountry(guide.country!, guide.latitude, guide.longitude)}
+                          className="w-full mt-2 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-semibold hover:bg-primary/20 transition-colors"
+                          data-testid={`button-nomads-${guide.id}`}
+                        >
+                          <Users className="w-3.5 h-3.5" />
+                          Vedi i Nomadi in {guide.country}
+                        </button>
+                      )}
                       <PopupAutoClose />
                     </div>
                   </Popup>
@@ -1961,8 +2001,142 @@ export default function UnifiedMap() {
                 </Fragment>
               );
             })}
+            {countryFilter && countryNomads.length > 0 && (
+              <MarkerClusterGroup
+                chunkedLoading
+                maxClusterRadius={50}
+                spiderfyOnMaxZoom={true}
+                showCoverageOnHover={false}
+                zoomToBoundsOnClick={true}
+                disableClusteringAtZoom={16}
+                iconCreateFunction={(cluster: any) => {
+                  const count = cluster.getChildCount();
+                  const size = count < 10 ? 36 : count < 50 ? 44 : 52;
+                  const color = count < 10 ? "#10b981" : count < 50 ? "#f59e0b" : "#ef4444";
+                  return L.divIcon({
+                    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${count < 10 ? 13 : 14}px;box-shadow:0 3px 12px rgba(0,0,0,0.3);border:3px solid white;">${count}</div>`,
+                    className: "",
+                    iconSize: L.point(size, size),
+                    iconAnchor: L.point(size / 2, size / 2),
+                  });
+                }}
+              >
+                {countryNomads.filter((n: any) => n.latitude && n.longitude).map((nomad) => {
+                  const lat = nomad.latitude;
+                  const lng = nomad.longitude;
+                  return (
+                    <Marker
+                      key={`nomad-${nomad.id}`}
+                      position={[lat, lng]}
+                      icon={L.divIcon({
+                        html: `<div style="width:40px;height:40px;border-radius:50%;border:3px solid #10b981;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.3);background:white;">
+                          <img src="${nomad.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${nomad.username}`}" style="width:100%;height:100%;object-fit:cover;" />
+                        </div>`,
+                        className: "",
+                        iconSize: L.point(40, 40),
+                        iconAnchor: L.point(20, 20),
+                      })}
+                    >
+                      <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
+                        <div className="px-1 py-0.5">
+                          <p className="text-xs font-semibold">{nomad.name || nomad.username}</p>
+                          <p className="text-[10px] text-gray-500">{nomad.location || "Nomade"}</p>
+                        </div>
+                      </Tooltip>
+                      <Popup className="custom-popup" maxWidth={260} minWidth={220} autoPanPadding={[20, 20]} autoPan={true}>
+                        <div className="popup-animate-in p-3 w-[220px]">
+                          <div className="flex items-center gap-3 mb-2">
+                            <img src={nomad.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${nomad.username}`} className="w-10 h-10 rounded-xl object-cover" />
+                            <div>
+                              <p className="font-bold text-sm">{nomad.name || nomad.username}</p>
+                              <p className="text-[10px] text-gray-500">@{nomad.username}</p>
+                            </div>
+                          </div>
+                          {nomad.profession && <p className="text-xs text-gray-600 mb-1">{nomad.profession}</p>}
+                          {nomad.location && <p className="text-[10px] text-gray-400 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{nomad.location}</p>}
+                          <Link href={`/user/${nomad.id}`} className="block mt-2 text-xs font-semibold text-primary hover:underline text-center">
+                            Vedi profilo
+                          </Link>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+              </MarkerClusterGroup>
+            )}
+            {countryFilter && <ZoomToCountry lat={countryFilter.lat} lng={countryFilter.lng} />}
           </MapContainer>
           
+          {countryFilter && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-primary text-primary-foreground rounded-full px-4 py-2 shadow-lg flex items-center gap-2 text-sm font-semibold" data-testid="banner-country-filter">
+              <Users className="w-4 h-4" />
+              {loadingNomads ? "Caricamento..." : `${countryNomads.length} nomadi in ${countryFilter.country}`}
+              <button onClick={clearCountryFilter} className="ml-1 p-0.5 rounded-full hover:bg-white/20 transition-colors" data-testid="button-clear-country-filter">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          <AnimatePresence>
+            {showNomadDrawer && countryFilter && (
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="absolute bottom-0 left-0 right-0 z-[1000] bg-card rounded-t-2xl shadow-2xl border-t border-border/50 max-h-[45vh] flex flex-col"
+                data-testid="drawer-nomads"
+              >
+                <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/30">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <span className="font-semibold text-sm">Nomadi in {countryFilter.country}</span>
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                      {countryNomads.length}
+                    </span>
+                  </div>
+                  <button onClick={() => setShowNomadDrawer(false)} className="p-1 rounded-full hover:bg-muted transition-colors" data-testid="button-close-drawer">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="overflow-y-auto flex-1 p-3 space-y-2">
+                  {loadingNomads ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : countryNomads.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      Nessun nomade trovato in {countryFilter.country}
+                    </div>
+                  ) : (
+                    countryNomads.map((nomad) => (
+                      <Link key={nomad.id} href={`/user/${nomad.id}`} className="block" data-testid={`nomad-card-${nomad.id}`}>
+                        <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/60 transition-colors">
+                          <img
+                            src={nomad.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${nomad.username}`}
+                            className="w-10 h-10 rounded-xl object-cover border border-border/50"
+                            alt={nomad.username}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm truncate">{nomad.name || nomad.username}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {nomad.profession || nomad.location || `@${nomad.username}`}
+                            </p>
+                          </div>
+                          {nomad.location && (
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 shrink-0">
+                              <MapPin className="w-2.5 h-2.5" />{nomad.location.split(",")[0]}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="absolute top-4 left-4 z-[900] bg-card/90 backdrop-blur-md rounded-2xl px-4 py-2 shadow-lg border border-border/50">
             <h1 className="text-lg font-display font-bold flex items-center gap-2">
               <Compass className="w-5 h-5 text-primary" />

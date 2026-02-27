@@ -55,6 +55,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   searchUsers(query: string): Promise<User[]>;
+  getUsersByCountry(country: string): Promise<User[]>;
 
   // Posts
   getPosts(limit?: number): Promise<(Post & { user: User })[]>;
@@ -348,6 +349,39 @@ export class DrizzleStorage implements IStorage {
         )
       )
       .limit(20);
+  }
+
+  async getUsersByCountry(country: string): Promise<User[]> {
+    const searchTerm = `%${country.toLowerCase()}%`;
+    const usersFromLocation = await this.db
+      .select()
+      .from(schema.users)
+      .where(sql`LOWER(${schema.users.location}) LIKE ${searchTerm}`)
+      .limit(50);
+
+    const checkinUsers = await this.db
+      .select({ userId: schema.nomadCheckins.userId })
+      .from(schema.nomadCheckins)
+      .where(
+        and(
+          sql`LOWER(${schema.nomadCheckins.country}) LIKE ${searchTerm}`,
+          eq(schema.nomadCheckins.isActive, true)
+        )
+      );
+
+    const checkinUserIds = checkinUsers
+      .map(c => c.userId)
+      .filter(id => !usersFromLocation.some(u => u.id === id));
+
+    if (checkinUserIds.length > 0) {
+      const extraUsers = await this.db
+        .select()
+        .from(schema.users)
+        .where(sql`${schema.users.id} IN ${checkinUserIds}`);
+      return [...usersFromLocation, ...extraUsers].slice(0, 50);
+    }
+
+    return usersFromLocation;
   }
 
   // Posts

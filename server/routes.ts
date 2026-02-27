@@ -332,6 +332,16 @@ Sitemap: https://nomad-life.app/sitemap.xml
     }
   });
 
+  app.get("/api/users/by-country/:country", requireAuth, async (req, res) => {
+    try {
+      const users = await storage.getUsersByCountry(req.params.country);
+      const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+      res.send(usersWithoutPasswords);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.get("/api/users/:id", async (req, res) => {
     try {
       const user = await storage.getUser(req.params.id);
@@ -3057,6 +3067,16 @@ Return ONLY the JSON array, no markdown.`;
       const user = req.user as User;
       const posts = await storage.getBlogPostsByUserId(user.id);
       res.send(posts);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/blog/user/:userId", async (req, res) => {
+    try {
+      const posts = await storage.getBlogPostsByUserId(req.params.userId);
+      const published = posts.filter(p => p.published);
+      res.send(published);
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }
