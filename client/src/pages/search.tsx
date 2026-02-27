@@ -67,6 +67,7 @@ export default function SearchPage() {
   const [guideNearbyMode, setGuideNearbyMode] = useState(false);
   const [guideCoords, setGuideCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [guideSearchInput, setGuideSearchInput] = useState("");
+  const [expandedGuideId, setExpandedGuideId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!guideNearbyMode || !navigator.geolocation) return;
@@ -416,8 +417,9 @@ export default function SearchPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-shadow"
+                        className="bg-card border border-border rounded-2xl p-5 hover:shadow-md transition-shadow cursor-pointer"
                         data-testid={`card-guide-${guide.id}`}
+                        onClick={() => setExpandedGuideId(expandedGuideId === guide.id ? null : guide.id)}
                       >
                         <div className="flex items-start gap-3">
                           <div className={`p-2 rounded-xl ${colorClass}`}>
@@ -431,11 +433,30 @@ export default function SearchPage() {
                               {guide.city}, {guide.country}
                             </p>
                           </div>
+                          <div className={`text-muted-foreground transition-transform ${expandedGuideId === guide.id ? "rotate-180" : ""}`}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                          </div>
                         </div>
 
-                        <p className="text-sm text-muted-foreground mt-3 line-clamp-3" data-testid={`text-guide-content-${guide.id}`}>
-                          {guide.content}
-                        </p>
+                        <AnimatePresence>
+                          {expandedGuideId === guide.id ? (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <p className="text-sm text-muted-foreground mt-3 whitespace-pre-line" data-testid={`text-guide-content-${guide.id}`}>
+                                {guide.content}
+                              </p>
+                            </motion.div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground mt-3 line-clamp-2" data-testid={`text-guide-preview-${guide.id}`}>
+                              {guide.content}
+                            </p>
+                          )}
+                        </AnimatePresence>
 
                         {guide.rating != null && guide.rating > 0 && (
                           <div className="flex items-center gap-1 mt-3" data-testid={`rating-guide-${guide.id}`}>
@@ -463,6 +484,10 @@ export default function SearchPage() {
                               </span>
                             ))}
                           </div>
+                        )}
+
+                        {expandedGuideId !== guide.id && (
+                          <p className="text-xs text-primary mt-2 font-medium">Tocca per leggere tutto</p>
                         )}
                       </motion.div>
                     );
