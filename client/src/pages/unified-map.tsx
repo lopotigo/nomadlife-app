@@ -104,36 +104,38 @@ function YouTubeEmbed({ url, className = "" }: { url: string; className?: string
   if (!embedUrl) return null;
   const videoId = embedUrl.split("/embed/")[1];
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-  const [iframeError, setIframeError] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
-  if (iframeError) {
+  if (playing) {
     return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className={`block relative w-full ${className}`}>
-        <div className="relative w-full rounded-xl overflow-hidden" style={{ minHeight: "160px" }}>
-          <img src={thumbnailUrl} className="w-full h-full object-cover" alt="YouTube video" />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-            <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="9,6 9,18 18,12" /></svg>
-            </div>
-          </div>
+      <div className={`relative w-full ${className}`}>
+        <div className="relative w-full rounded-xl overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            src={`${embedUrl}?autoplay=1`}
+            className="absolute top-0 left-0 w-full h-full"
+            style={{ border: "none" }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title="YouTube video"
+          />
         </div>
-      </a>
+      </div>
     );
   }
 
   return (
-    <div className={`relative w-full ${className}`} style={{ minHeight: "160px" }}>
-      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-        <iframe
-          src={embedUrl}
-          className="absolute top-0 left-0 w-full h-full rounded-xl"
-          style={{ border: "none" }}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="YouTube video"
-          loading="lazy"
-          onError={() => setIframeError(true)}
-        />
+    <div className={`relative w-full cursor-pointer ${className}`} onClick={() => setPlaying(true)} data-testid="youtube-thumbnail">
+      <div className="relative w-full rounded-xl overflow-hidden">
+        <img src={thumbnailUrl} className="w-full aspect-video object-cover" alt="YouTube video" loading="lazy" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
+          <div className="w-16 h-11 bg-red-600 rounded-xl flex items-center justify-center shadow-lg hover:bg-red-700 transition-colors">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="9.5,6 9.5,18 19,12" /></svg>
+          </div>
+        </div>
+        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/70 text-white px-2 py-1 rounded-md">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
+          <span className="text-[10px] font-semibold">YouTube</span>
+        </div>
       </div>
     </div>
   );
