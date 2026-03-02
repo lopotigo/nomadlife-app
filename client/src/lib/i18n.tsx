@@ -148,6 +148,34 @@ const translations: Record<Language, Translations> = {
     "chat.start_the_conversation": "Inizia la conversazione! Condividi le tue avventure nomadi.",
     "chat.group_welcome": "Benvenuto nel gruppo! Presentati alla community.",
     "map.filter_groups": "Gruppi Chat",
+    "auth.subtitle": "La community globale dei nomadi digitali",
+    "auth.login": "Accedi",
+    "auth.signup": "Registrati",
+    "auth.welcome_back": "Bentornato",
+    "auth.enter_credentials": "Inserisci le tue credenziali per accedere",
+    "auth.forgot_password": "Password dimenticata?",
+    "auth.login_terms": "Accedendo accetti i nostri",
+    "auth.terms_of_service": "Termini di Servizio",
+    "auth.and_the": "e l'",
+    "auth.privacy_policy": "Informativa sulla Privacy",
+    "auth.create_account": "Crea il tuo account",
+    "auth.join_community": "Unisciti alla community globale dei nomadi",
+    "auth.full_name": "Nome e Cognome",
+    "auth.city": "Città",
+    "auth.city_placeholder": "Milano, Roma, Bali...",
+    "auth.country": "Paese",
+    "auth.country_placeholder": "Selezionato automaticamente",
+    "auth.create_account_btn": "Crea Account",
+    "auth.accept_terms": "Accetto i",
+    "auth.welcome_toast": "Bentornato!",
+    "auth.login_success": "Accesso effettuato con successo.",
+    "auth.account_created": "Account creato!",
+    "auth.account_created_desc": "Benvenuto nella community NomadLife.",
+    "auth.error": "Errore",
+    "auth.pw_min_length": "Almeno 8 caratteri",
+    "auth.pw_uppercase": "Una lettera maiuscola",
+    "auth.pw_number": "Un numero",
+    "auth.pw_special": "Un carattere speciale (!@#$...)",
   },
   
   en: {
@@ -291,6 +319,34 @@ const translations: Record<Language, Translations> = {
     "chat.start_the_conversation": "Start the conversation! Share your nomad adventures.",
     "chat.group_welcome": "Welcome to the group! Introduce yourself to the community.",
     "map.filter_groups": "Chat Groups",
+    "auth.subtitle": "The global community for digital nomads",
+    "auth.login": "Log In",
+    "auth.signup": "Sign Up",
+    "auth.welcome_back": "Welcome Back",
+    "auth.enter_credentials": "Enter your credentials to log in",
+    "auth.forgot_password": "Forgot password?",
+    "auth.login_terms": "By logging in you accept our",
+    "auth.terms_of_service": "Terms of Service",
+    "auth.and_the": "and the",
+    "auth.privacy_policy": "Privacy Policy",
+    "auth.create_account": "Create your account",
+    "auth.join_community": "Join the global community of digital nomads",
+    "auth.full_name": "Full Name",
+    "auth.city": "City",
+    "auth.city_placeholder": "London, Bali, Lisbon...",
+    "auth.country": "Country",
+    "auth.country_placeholder": "Automatically selected",
+    "auth.create_account_btn": "Create Account",
+    "auth.accept_terms": "I accept the",
+    "auth.welcome_toast": "Welcome back!",
+    "auth.login_success": "Logged in successfully.",
+    "auth.account_created": "Account created!",
+    "auth.account_created_desc": "Welcome to the NomadLife community.",
+    "auth.error": "Error",
+    "auth.pw_min_length": "At least 8 characters",
+    "auth.pw_uppercase": "One uppercase letter",
+    "auth.pw_number": "One number",
+    "auth.pw_special": "One special character (!@#$...)",
   },
   
   es: {
@@ -434,6 +490,34 @@ const translations: Record<Language, Translations> = {
     "chat.start_the_conversation": "¡Empieza la conversación! Comparte tus aventuras nómadas.",
     "chat.group_welcome": "¡Bienvenido al grupo! Preséntate a la comunidad.",
     "map.filter_groups": "Grupos de Chat",
+    "auth.subtitle": "La comunidad global de nómadas digitales",
+    "auth.login": "Iniciar Sesión",
+    "auth.signup": "Registrarse",
+    "auth.welcome_back": "Bienvenido de nuevo",
+    "auth.enter_credentials": "Ingresa tus credenciales para acceder",
+    "auth.forgot_password": "¿Olvidaste tu contraseña?",
+    "auth.login_terms": "Al iniciar sesión aceptas nuestros",
+    "auth.terms_of_service": "Términos de Servicio",
+    "auth.and_the": "y la",
+    "auth.privacy_policy": "Política de Privacidad",
+    "auth.create_account": "Crea tu cuenta",
+    "auth.join_community": "Únete a la comunidad global de nómadas",
+    "auth.full_name": "Nombre Completo",
+    "auth.city": "Ciudad",
+    "auth.city_placeholder": "Madrid, Bali, Lisboa...",
+    "auth.country": "País",
+    "auth.country_placeholder": "Seleccionado automáticamente",
+    "auth.create_account_btn": "Crear Cuenta",
+    "auth.accept_terms": "Acepto los",
+    "auth.welcome_toast": "¡Bienvenido de nuevo!",
+    "auth.login_success": "Sesión iniciada correctamente.",
+    "auth.account_created": "¡Cuenta creada!",
+    "auth.account_created_desc": "Bienvenido a la comunidad NomadLife.",
+    "auth.error": "Error",
+    "auth.pw_min_length": "Al menos 8 caracteres",
+    "auth.pw_uppercase": "Una letra mayúscula",
+    "auth.pw_number": "Un número",
+    "auth.pw_special": "Un carácter especial (!@#$...)",
   }
 };
 
@@ -452,8 +536,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       if (saved && (saved === "it" || saved === "en" || saved === "es")) {
         return saved as Language;
       }
+      const browserLang = navigator.language?.toLowerCase() || "";
+      if (browserLang.startsWith("it")) return "it";
+      if (browserLang.startsWith("es")) return "es";
     }
-    return "it";
+    return "en";
   });
 
   const setLanguage = (lang: Language) => {

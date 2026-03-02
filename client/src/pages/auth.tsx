@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plane, Loader2, Check, X, MapPin, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/lib/i18n";
 
 declare global {
   interface Window {
@@ -82,7 +83,7 @@ function validatePassword(password: string) {
   };
 }
 
-function PasswordStrength({ password }: { password: string }) {
+function PasswordStrength({ password, t }: { password: string; t: (key: string) => string }) {
   const checks = validatePassword(password);
   const allValid = checks.minLength && checks.hasUppercase && checks.hasNumber && checks.hasSpecial;
 
@@ -91,10 +92,10 @@ function PasswordStrength({ password }: { password: string }) {
   return (
     <div className="space-y-1 mt-2" data-testid="password-strength">
       {[
-        { key: "minLength", label: "Almeno 8 caratteri", valid: checks.minLength },
-        { key: "hasUppercase", label: "Una lettera maiuscola", valid: checks.hasUppercase },
-        { key: "hasNumber", label: "Un numero", valid: checks.hasNumber },
-        { key: "hasSpecial", label: "Un carattere speciale (!@#$...)", valid: checks.hasSpecial },
+        { key: "minLength", label: t("auth.pw_min_length"), valid: checks.minLength },
+        { key: "hasUppercase", label: t("auth.pw_uppercase"), valid: checks.hasUppercase },
+        { key: "hasNumber", label: t("auth.pw_number"), valid: checks.hasNumber },
+        { key: "hasSpecial", label: t("auth.pw_special"), valid: checks.hasSpecial },
       ].map(({ key, label, valid }) => (
         <div key={key} className={`flex items-center gap-1.5 text-xs ${valid ? "text-emerald-500" : "text-red-400"}`}>
           {valid ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
@@ -111,12 +112,14 @@ function CityAutocomplete({
   onCityChange,
   onCountryChange,
   disabled,
+  t,
 }: {
   city: string;
   country: string;
   onCityChange: (v: string) => void;
   onCountryChange: (v: string) => void;
   disabled: boolean;
+  t: (key: string) => string;
 }) {
   const [suggestions, setSuggestions] = useState<CityResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -177,7 +180,7 @@ function CityAutocomplete({
   return (
     <div className="space-y-3">
       <div className="space-y-2">
-        <Label htmlFor="signup-city">Città</Label>
+        <Label htmlFor="signup-city">{t("auth.city")}</Label>
         <div ref={containerRef} className="relative">
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -187,7 +190,7 @@ function CityAutocomplete({
               onChange={(e) => handleInputChange(e.target.value)}
               onFocus={() => { if (suggestions.length > 0) setShowDropdown(true); }}
               data-testid="input-signup-city"
-              placeholder="Milano, Roma, Bali..."
+              placeholder={t("auth.city_placeholder")}
               required
               disabled={disabled}
               className="pl-9"
@@ -221,13 +224,13 @@ function CityAutocomplete({
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="signup-country">Paese</Label>
+        <Label htmlFor="signup-country">{t("auth.country")}</Label>
         <Input
           id="signup-country"
           value={country}
           onChange={(e) => onCountryChange(e.target.value)}
           data-testid="input-signup-country"
-          placeholder="Selezionato automaticamente"
+          placeholder={t("auth.country_placeholder")}
           required
           disabled={disabled}
           className="bg-muted/50"
@@ -241,6 +244,7 @@ export default function Auth() {
   const { login, signup } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [signupPassword, setSignupPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -262,7 +266,7 @@ export default function Auth() {
         console.warn("reCAPTCHA token acquisition failed");
       }
       await login(username, password, recaptchaToken);
-      toast({ title: "Bentornato!", description: "Accesso effettuato con successo." });
+      toast({ title: t("auth.welcome_toast"), description: t("auth.login_success") });
       setLocation("/");
     } catch (error: any) {
       toast({ title: "Accesso fallito", description: error.message, variant: "destructive" });
@@ -278,8 +282,8 @@ export default function Auth() {
     const checks = validatePassword(signupPassword);
     if (!checks.minLength || !checks.hasUppercase || !checks.hasNumber || !checks.hasSpecial) {
       toast({
-        title: "Password non valida",
-        description: "La password deve avere almeno 8 caratteri, una maiuscola, un numero e un carattere speciale.",
+        title: t("auth.error"),
+        description: t("auth.pw_min_length"),
         variant: "destructive",
       });
       return;
@@ -287,8 +291,8 @@ export default function Auth() {
 
     if (!city.trim() || !country.trim()) {
       toast({
-        title: "Città e Paese richiesti",
-        description: "Seleziona una città dal menu a tendina.",
+        title: t("auth.error"),
+        description: t("auth.city"),
         variant: "destructive",
       });
       return;
@@ -296,8 +300,8 @@ export default function Auth() {
 
     if (!privacyAccepted) {
       toast({
-        title: "Termini e Privacy",
-        description: "Devi accettare i Termini di Servizio e l'Informativa sulla Privacy per registrarti.",
+        title: t("auth.error"),
+        description: t("auth.terms_of_service"),
         variant: "destructive",
       });
       return;
@@ -321,7 +325,7 @@ export default function Auth() {
         console.warn("reCAPTCHA token acquisition failed");
       }
       await signup({ ...data, recaptchaToken });
-      toast({ title: "Account creato!", description: "Benvenuto su NomadLife." });
+      toast({ title: t("auth.account_created"), description: t("auth.account_created_desc") });
       setLocation("/");
     } catch (error: any) {
       toast({ title: "Registrazione fallita", description: error.message, variant: "destructive" });
@@ -338,20 +342,20 @@ export default function Auth() {
             <Plane className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-display font-bold mb-2">NomadLife</h1>
-          <p className="text-muted-foreground">La community globale dei nomadi digitali</p>
+          <p className="text-muted-foreground">{t("auth.subtitle")}</p>
         </div>
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Accedi</TabsTrigger>
-            <TabsTrigger value="signup">Registrati</TabsTrigger>
+            <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
+            <TabsTrigger value="signup">{t("auth.signup")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login">
             <Card>
               <CardHeader>
-                <CardTitle>Bentornato</CardTitle>
-                <CardDescription>Inserisci le tue credenziali per accedere</CardDescription>
+                <CardTitle>{t("auth.welcome_back")}</CardTitle>
+                <CardDescription>{t("auth.enter_credentials")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
@@ -380,7 +384,7 @@ export default function Auth() {
                   </div>
                   <Button type="submit" className="w-full" disabled={loading} data-testid="button-login">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Accedi
+                    {t("auth.login")}
                   </Button>
                   <div className="text-center">
                     <button
@@ -389,14 +393,14 @@ export default function Auth() {
                       onClick={() => setLocation("/forgot-password")}
                       data-testid="link-forgot-password"
                     >
-                      Password dimenticata?
+                      {t("auth.forgot_password")}
                     </button>
                   </div>
                   <p className="text-xs text-center text-muted-foreground mt-2">
-                    Accedendo accetti i nostri{" "}
-                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" data-testid="link-terms-login">Termini di Servizio</a>
-                    {" "}e l'{" "}
-                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" data-testid="link-privacy-login">Informativa sulla Privacy</a>.
+                    {t("auth.login_terms")}{" "}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" data-testid="link-terms-login">{t("auth.terms_of_service")}</a>
+                    {" "}{t("auth.and_the")}{" "}
+                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" data-testid="link-privacy-login">{t("auth.privacy_policy")}</a>.
                   </p>
                 </form>
               </CardContent>
@@ -406,13 +410,13 @@ export default function Auth() {
           <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>Crea il tuo account</CardTitle>
-                <CardDescription>Unisciti alla community globale dei nomadi</CardDescription>
+                <CardTitle>{t("auth.create_account")}</CardTitle>
+                <CardDescription>{t("auth.join_community")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nome e Cognome</Label>
+                    <Label htmlFor="signup-name">{t("auth.full_name")}</Label>
                     <Input
                       id="signup-name"
                       name="name"
@@ -452,6 +456,7 @@ export default function Auth() {
                     onCityChange={setCity}
                     onCountryChange={setCountry}
                     disabled={loading}
+                    t={t}
                   />
 
                   <div className="space-y-2">
@@ -476,7 +481,7 @@ export default function Auth() {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    <PasswordStrength password={signupPassword} />
+                    <PasswordStrength password={signupPassword} t={t} />
                   </div>
 
                   <div className="flex items-start gap-2">
@@ -490,7 +495,7 @@ export default function Auth() {
                       disabled={loading}
                     />
                     <label htmlFor="privacy-accept" className="text-sm text-muted-foreground cursor-pointer leading-snug">
-                      Accetto i{" "}
+                      {t("auth.accept_terms")}{" "}
                       <a
                         href="/terms"
                         target="_blank"
@@ -498,9 +503,9 @@ export default function Auth() {
                         className="text-primary hover:underline font-medium"
                         data-testid="link-terms-signup"
                       >
-                        Termini di Servizio
+                        {t("auth.terms_of_service")}
                       </a>{" "}
-                      e l'{" "}
+                      {t("auth.and_the")}{" "}
                       <a
                         href="/privacy"
                         target="_blank"
@@ -508,14 +513,14 @@ export default function Auth() {
                         className="text-primary hover:underline font-medium"
                         data-testid="link-privacy-policy"
                       >
-                        Informativa sulla Privacy
+                        {t("auth.privacy_policy")}
                       </a>
                     </label>
                   </div>
 
                   <Button type="submit" className="w-full" disabled={loading || !privacyAccepted} data-testid="button-signup">
                     {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Crea Account
+                    {t("auth.create_account_btn")}
                   </Button>
                 </form>
               </CardContent>
