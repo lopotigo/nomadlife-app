@@ -5,6 +5,7 @@ import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { useGpsTracking } from "@/hooks/use-gps-tracking";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
   const [location] = useLocation();
   const { t } = useI18n();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  useGpsTracking();
   
   const { data: adminCheck } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/admin/check"],

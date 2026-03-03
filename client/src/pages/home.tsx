@@ -11,6 +11,7 @@ import { CreatePostForm } from "@/components/CreatePostForm";
 import { QRCodeSVG } from "qrcode.react";
 import { MomentsBar } from "@/components/moments";
 import { SmartProductsWidget } from "@/components/smart-products-widget";
+import { TravelAlertsBanner } from "@/components/travel-alerts-banner";
 
 function isYouTubeUrl(url: string): boolean {
   return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
@@ -137,6 +138,7 @@ export default function Home() {
       </header>
 
       <div className="p-4 space-y-6">
+        <TravelAlertsBanner />
         <MomentsBar />
         
         {liveTrips.length > 0 && <LiveTripsSection trips={liveTrips} />}

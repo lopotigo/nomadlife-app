@@ -105,6 +105,19 @@ app.use((req, res, next) => {
   const { startWeeklyUpdateJob } = await import("./weekly-update");
   startWeeklyUpdateJob();
 
+  const { checkTravelAlerts } = await import("./travel-alerts");
+  if (process.env.NODE_ENV !== "development") {
+    setTimeout(() => {
+      checkTravelAlerts().catch(err => console.error("[Travel Alerts] Initial check error:", err));
+    }, 60000);
+    setInterval(() => {
+      checkTravelAlerts().catch(err => console.error("[Travel Alerts] Periodic check error:", err));
+    }, 24 * 60 * 60 * 1000);
+    console.log("[Travel Alerts] Scheduled: runs daily in production.");
+  } else {
+    console.log("[Travel Alerts] Skipped in development mode.");
+  }
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

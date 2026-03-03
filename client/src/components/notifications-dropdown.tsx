@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Bell, Check, Heart, MessageCircle, UserPlus, Plane, MapPin, Navigation } from "lucide-react";
+import { Bell, Check, Heart, MessageCircle, UserPlus, Plane, MapPin, Navigation, AlertTriangle, Shield, Radar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import type { Notification } from "@shared/schema";
@@ -19,6 +19,10 @@ function getNotificationRoute(notification: Notification): string | null {
     case "like":
     case "comment":
       return notification.relatedUserId ? `/user/${notification.relatedUserId}` : null;
+    case "nearby_nomad":
+      return notification.relatedUserId ? `/user/${notification.relatedUserId}` : "/matchmaking";
+    case "travel_alert":
+      return "/search";
     default:
       return notification.relatedTripId
         ? `/trip/${notification.relatedTripId}`
@@ -38,6 +42,8 @@ function getNotificationIcon(type: string) {
     case "trip_started": return <Plane className="w-4 h-4 text-purple-500" />;
     case "new_stop": return <MapPin className="w-4 h-4 text-orange-500" />;
     case "message": return <MessageCircle className="w-4 h-4 text-cyan-500" />;
+    case "nearby_nomad": return <Radar className="w-4 h-4 text-emerald-500" />;
+    case "travel_alert": return <AlertTriangle className="w-4 h-4 text-amber-500" />;
     default: return <Bell className="w-4 h-4" />;
   }
 }
@@ -47,14 +53,16 @@ function getActionLabel(notification: Notification): string | null {
   if (!route) return null;
   switch (notification.type) {
     case "new_follower":
-    case "follow": return "Vedi profilo";
+    case "follow": return "View profile";
     case "new_trip":
-    case "trip_started": return "Vedi viaggio";
-    case "new_stop": return "Vedi viaggio";
-    case "message": return "Vai ai messaggi";
+    case "trip_started": return "View trip";
+    case "new_stop": return "View trip";
+    case "message": return "Go to messages";
     case "like":
-    case "comment": return "Vedi profilo";
-    default: return "Apri";
+    case "comment": return "View profile";
+    case "nearby_nomad": return "View profile";
+    case "travel_alert": return "View details";
+    default: return "Open";
   }
 }
 
@@ -244,11 +252,19 @@ export function NotificationsDropdown() {
                       key={notification.id}
                       className={`p-3 flex items-start gap-3 transition-colors ${
                         route ? "cursor-pointer hover:bg-muted/60 active:bg-muted" : ""
-                      } ${!notification.isRead ? "bg-primary/5" : ""}`}
+                      } ${!notification.isRead ? "bg-primary/5" : ""} ${
+                        notification.type === "travel_alert" ? "border-l-3 border-l-amber-500" : ""
+                      } ${
+                        notification.type === "nearby_nomad" ? "border-l-3 border-l-emerald-500" : ""
+                      }`}
                       onClick={() => handleNotificationClick(notification)}
                       data-testid={`notification-${notification.id}`}
                     >
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        notification.type === "travel_alert" ? "bg-amber-100 dark:bg-amber-900/30" :
+                        notification.type === "nearby_nomad" ? "bg-emerald-100 dark:bg-emerald-900/30" :
+                        "bg-muted"
+                      }`}>
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">

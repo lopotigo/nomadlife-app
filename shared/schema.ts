@@ -959,3 +959,36 @@ export const insertUserAiPreferencesSchema = createInsertSchema(userAiPreference
 });
 export type InsertUserAiPreferences = z.infer<typeof insertUserAiPreferencesSchema>;
 export type UserAiPreferences = typeof userAiPreferences.$inferSelect;
+
+export const travelAlerts = pgTable("travel_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  country: text("country").notNull(),
+  city: text("city"),
+  type: text("type").notNull(),
+  severity: text("severity").notNull().default("info"),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  source: text("source"),
+  sourceUrl: text("source_url"),
+  isActive: boolean("is_active").default(true).notNull(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertTravelAlertSchema = createInsertSchema(travelAlerts).omit({
+  id: true,
+  isActive: true,
+  createdAt: true,
+});
+export type InsertTravelAlert = z.infer<typeof insertTravelAlertSchema>;
+export type TravelAlert = typeof travelAlerts.$inferSelect;
+
+export const proximityLogs = pgTable("proximity_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  nearbyUserId: varchar("nearby_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  distanceKm: doublePrecision("distance_km").notNull(),
+  notifiedAt: timestamp("notified_at").defaultNow().notNull(),
+});
+
+export type ProximityLog = typeof proximityLogs.$inferSelect;

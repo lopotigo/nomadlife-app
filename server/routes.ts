@@ -12,6 +12,7 @@ import { registerChatRoutes } from "./replit_integrations/chat";
 import { registerImageRoutes } from "./replit_integrations/image";
 import { registerAiSocialHubRoutes } from "./ai-social-hub";
 import { createRepository, pushFile, getGitHubUser } from "./github";
+import { checkProximityAndNotify, getActiveAlerts, checkTravelAlerts } from "./travel-alerts";
 
 // Configure VAPID keys for push notifications
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -362,12 +363,28 @@ Sitemap: https://nomad-life.app/sitemap.xml
       }
       
       const updates = req.body;
-      delete updates.password; // Don't allow password changes through this endpoint
+      delete updates.password;
       
+      const oldUser = req.user as User;
+      const hasNewGps = typeof updates.latitude === "number" && typeof updates.longitude === "number";
+      const gpsChanged = hasNewGps && (
+        oldUser.latitude !== updates.latitude || oldUser.longitude !== updates.longitude
+      );
+
       const user = await storage.updateUser(req.params.id, updates);
       if (!user) {
         return res.status(404).send({ error: "User not found" });
       }
+
+      if (gpsChanged && updates.latitude && updates.longitude) {
+        checkProximityAndNotify(
+          req.params.id,
+          updates.latitude,
+          updates.longitude,
+          sendPushToUser
+        ).catch(err => console.error("[Proximity] Background check error:", err));
+      }
+
       const { password, ...userWithoutPassword } = user;
       res.send(userWithoutPassword);
     } catch (error: any) {
@@ -3168,6 +3185,66 @@ Return ONLY the JSON array, no markdown.`;
       if (!updated) return res.status(404).send({ error: "User not found" });
       const { password, ...safe } = updated;
       res.send(safe);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  // ========== TRAVEL ALERTS ==========
+  app.get("/api/travel-alerts", async (req, res) => {
+    try {
+      const { country } = req.query;
+      const alerts = await getActiveAlerts(country as string || undefined);
+      res.send(alerts);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.get("/api/travel-alerts/my", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      const userLocation = user.location || "";
+      const parts = userLocation.split(",").map(s => s.trim());
+      const userCountry = parts.length >= 2 ? parts[parts.length - 1] : "";
+
+      const alerts = [];
+      if (userCountry) {
+        const countryAlerts = await getActiveAlerts(userCountry);
+        alerts.push(...countryAlerts);
+      }
+
+      const { db: dbInstance } = await import("./db");
+      const { trips: tripsTable } = await import("@shared/schema");
+      const { eq: eqOp } = await import("drizzle-orm");
+      const userTrips = await dbInstance.select().from(tripsTable)
+        .where(eqOp(tripsTable.userId, user.id))
+        .limit(10);
+      
+      for (const trip of userTrips) {
+        if (trip.destination) {
+          const tripParts = trip.destination.split(",").map(s => s.trim());
+          const tripCountry = tripParts[tripParts.length - 1];
+          if (tripCountry && tripCountry !== userCountry) {
+            const tripAlerts = await getActiveAlerts(tripCountry);
+            alerts.push(...tripAlerts);
+          }
+        }
+      }
+
+      const unique = Array.from(new Map(alerts.map(a => [a.id, a])).values());
+      res.send(unique);
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/travel-alerts/check", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.isAdmin) return res.status(403).send({ error: "Admin only" });
+      checkTravelAlerts().catch(err => console.error("[Travel Alerts] Manual check error:", err));
+      res.send({ message: "Travel alert check started" });
     } catch (error: any) {
       res.status(500).send({ error: error.message });
     }
