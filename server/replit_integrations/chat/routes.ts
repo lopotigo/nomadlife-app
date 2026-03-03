@@ -461,7 +461,7 @@ async function executeToolCall(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               api_key: process.env.TAVILY_API_KEY,
-              query: `digital nomad ${query}`,
+              query: query,
               search_depth: "advanced",
               max_results: 5,
               include_answer: true,
@@ -730,6 +730,7 @@ WEB SEARCH (Tavily):
 - DO NOT use for: greetings, generic chat, or cities already in our database (use get_city_costs/search_places instead)
 - Present results with source links when used
 - You can add affiliate links AFTER providing web search results as a complement
+- CRITICAL SAFETY: When the user asks about a country/region's "current situation", safety, conflicts, or travel advisories, use web_search with a query focused on current news and safety (e.g. "Iran current situation safety travel 2025"). ALWAYS report geopolitical events, wars, conflicts, natural disasters, or travel warnings found in search results. User safety is the top priority — never omit critical safety information even if it is negative about a destination. If web search reveals an active conflict, war, bombing, sanctions, or travel ban, you MUST prominently warn the user and advise against traveling there.
 
 ITINERARY GENERATION:
 - When the user asks "crea un itinerario", "pianifica viaggio", "programma per X giorni" → use generate_itinerary
@@ -760,7 +761,8 @@ IMPORTANT RULES:
 - Answer in the same language the user writes in (Italian, English, Spanish, etc.)
 - Be friendly, concise, and practical
 - When presenting places, format clearly with name, type, price, rating
-- Proactively offer related services when discussing a city`;
+- Proactively offer related services when discussing a city
+- SAFETY FIRST: When web search results mention active wars, bombings, military conflicts, natural disasters, or government travel warnings about a destination, you MUST report this information clearly and prominently. Never hide or minimize safety risks. Recommend alternative safe destinations when a place is dangerous.`;
 
 async function buildContextualPrompt(userId: string): Promise<string> {
   try {
