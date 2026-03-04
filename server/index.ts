@@ -15,6 +15,11 @@ process.on("unhandledRejection", (reason) => {
 });
 
 const app = express();
+
+app.get("/health", (_req, res) => {
+  res.status(200).send("ok");
+});
+
 const httpServer = createServer(app);
 
 declare module "http" {
