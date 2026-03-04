@@ -5,7 +5,8 @@ import { createServer } from "http";
 import session from "express-session";
 import passport from "passport";
 import connectPgSimple from "connect-pg-simple";
-import pg from "pg";
+import compression from "compression";
+import { pool } from "./db";
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err.message);
@@ -28,6 +29,31 @@ declare module "http" {
   }
 }
 
+app.use(compression());
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+app.use((req, res, next) => {
+  if (!req.path.startsWith("/api")) return next();
+  const ip = req.ip || req.socket.remoteAddress || "unknown";
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + 60000 });
+    return next();
+  }
+  entry.count++;
+  if (entry.count > 200) {
+    return res.status(429).json({ message: "Too many requests. Please slow down." });
+  }
+  next();
+});
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitMap) {
+    if (now > entry.resetTime) rateLimitMap.delete(ip);
+  }
+}, 60000);
+
 app.use(
   express.json({
     limit: "10mb",
@@ -39,11 +65,7 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration with PostgreSQL store
 const PgSession = connectPgSimple(session);
-const pgPool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
 
 app.set("trust proxy", 1);
 
@@ -52,7 +74,7 @@ const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
     store: new PgSession({
-      pool: pgPool,
+      pool: pool,
       tableName: "session",
       createTableIfMissing: true,
     }),

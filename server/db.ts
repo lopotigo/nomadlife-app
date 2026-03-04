@@ -5,11 +5,18 @@ import * as schema from "@shared/schema";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 3,
+  max: 10,
+  min: 2,
   idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+pool.on("error", (err) => {
+  console.error("Unexpected database pool error:", err.message);
 });
 
 export const db = drizzle(pool, { schema });
+export { pool };
 
 export async function ensureTablesExist() {
   try {
