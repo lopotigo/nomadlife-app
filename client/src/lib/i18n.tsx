@@ -536,9 +536,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       if (saved && (saved === "it" || saved === "en" || saved === "es")) {
         return saved as Language;
       }
-      const browserLang = navigator.language?.toLowerCase() || "";
-      if (browserLang.startsWith("it")) return "it";
-      if (browserLang.startsWith("es")) return "es";
     }
     return "en";
   });
