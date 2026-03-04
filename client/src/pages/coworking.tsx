@@ -250,12 +250,7 @@ export default function Coworking() {
     const placeType = selectedPlace.type?.toLowerCase();
     const city = selectedPlace.city || searchQuery || "";
 
-    if (placeType === "hotel" || placeType === "hostel") {
-      const marker = import.meta.env.VITE_TRAVELPAYOUTS_MARKER || "578583";
-      let url = `https://search.hotellook.com/?destination=${encodeURIComponent(city)}&adults=1&marker=${marker}`;
-      window.open(url, "_blank");
-      toast({ title: "Redirecting to Hotellook", description: `Search hotels in ${city}` });
-    } else if (selectedPlace.website) {
+    if (selectedPlace.website) {
       window.open(selectedPlace.website, "_blank");
     } else if (selectedPlace.latitude && selectedPlace.longitude) {
       window.open(`https://www.google.com/maps/search/${encodeURIComponent(selectedPlace.name)}/@${selectedPlace.latitude},${selectedPlace.longitude},17z`, "_blank");
@@ -555,7 +550,7 @@ export default function Coworking() {
                             )}
                             <div className="flex justify-between items-center mt-3">
                               <span className="text-teal-400 font-bold" data-testid={`text-place-price-${place.id}`}>
-                                {place.price !== "N/A" ? place.price : (place.type === "hotel" || place.type === "hostel") ? "Book on Hotellook →" : "See website"}
+                                {place.price !== "N/A" ? place.price : "See details →"}
                               </span>
                               {!isOsm && <span className="text-xs text-muted-foreground">{place.reviews} reviews</span>}
                               {isOsm && (place as OverpassResult).openingHours && (
@@ -728,7 +723,7 @@ export default function Coworking() {
                             {selectedPlace.source === "osm" ? "Source: OpenStreetMap" : "Price"}
                           </p>
                           <p className="text-2xl font-bold text-teal-400">
-                            {selectedPlace.price !== "N/A" ? selectedPlace.price : (selectedPlace.type === "hotel" || selectedPlace.type === "hostel") ? "Check prices →" : "See website"}
+                            {selectedPlace.price !== "N/A" ? selectedPlace.price : "See details"}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -753,10 +748,8 @@ export default function Coworking() {
                             </Button>
                           )}
                           <Button onClick={handleBook} className="bg-teal-500 hover:bg-teal-600 text-white px-8" data-testid="button-confirm-booking">
-                            {(selectedPlace.type === "hotel" || selectedPlace.type === "hostel") ? (
-                              <><Hotel className="w-4 h-4 mr-1" /> Book on Hotellook</>
-                            ) : selectedPlace.website ? (
-                              <><ExternalLink className="w-4 h-4 mr-1" /> Book on website</>
+                            {selectedPlace.website ? (
+                              <><ExternalLink className="w-4 h-4 mr-1" /> Visit website</>
                             ) : (
                               <><MapPin className="w-4 h-4 mr-1" /> Find on Maps</>
                             )}
