@@ -555,7 +555,7 @@ export default function Coworking() {
                             )}
                             <div className="flex justify-between items-center mt-3">
                               <span className="text-teal-400 font-bold" data-testid={`text-place-price-${place.id}`}>
-                                {place.price !== "N/A" ? place.price : "Info sul sito"}
+                                {place.price !== "N/A" ? place.price : (place.type === "hotel" || place.type === "hostel") ? "Book on Hotellook →" : "See website"}
                               </span>
                               {!isOsm && <span className="text-xs text-muted-foreground">{place.reviews} reviews</span>}
                               {isOsm && (place as OverpassResult).openingHours && (
@@ -728,7 +728,7 @@ export default function Coworking() {
                             {selectedPlace.source === "osm" ? "Source: OpenStreetMap" : "Price"}
                           </p>
                           <p className="text-2xl font-bold text-teal-400">
-                            {selectedPlace.price !== "N/A" ? selectedPlace.price : "See website"}
+                            {selectedPlace.price !== "N/A" ? selectedPlace.price : (selectedPlace.type === "hotel" || selectedPlace.type === "hostel") ? "Check prices →" : "See website"}
                           </p>
                         </div>
                         <div className="flex gap-2">
