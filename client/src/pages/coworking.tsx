@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { Calendar, Users, CheckCircle2, MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink, Plane, Car, Bus, Shield, Lock } from "lucide-react";
+import { MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink, Plane, Car, Bus, Shield, Lock } from "lucide-react";
 import { getAffiliateLinks } from "@/lib/travelpayouts";
 import { PlaceReviews } from "@/components/place-reviews";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,8 +86,6 @@ export default function Coworking() {
   const [events, setEvents] = useState<(Event & { host?: any })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
-  const [step, setStep] = useState(1);
-  const [guestName, setGuestName] = useState("");
 
   const [activeTab, setActiveTab] = useState<"places" | "events">("places");
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,8 +110,6 @@ export default function Coworking() {
       setLocation("/auth");
       return;
     }
-
-    setGuestName(user.name);
 
     if (!urlParamsApplied) {
       const params = new URLSearchParams(window.location.search);
@@ -249,38 +245,22 @@ export default function Coworking() {
     setSearchQuery(city);
   };
 
-  const handleBook = async () => {
-    if (!selectedPlace || !user) return;
-    if (selectedPlace.source === "osm") {
-      if (selectedPlace.website) {
-        window.open(selectedPlace.website, "_blank");
-      } else {
-        toast({ title: "Prenotazione esterna", description: "Cerca questo luogo su Google Maps per prenotare.", variant: "default" });
-      }
-      return;
-    }
+  const handleBook = () => {
+    if (!selectedPlace) return;
+    const placeType = selectedPlace.type?.toLowerCase();
+    const city = selectedPlace.city || searchQuery || "";
 
-    setStep(2);
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          placeId: selectedPlace.id,
-          checkInDate: new Date().toISOString(),
-          guestName,
-        }),
-      });
-
-      if (res.ok) {
-        setTimeout(() => setStep(3), 1500);
-      } else {
-        throw new Error("Booking failed");
-      }
-    } catch (error) {
-      toast({ title: "Prenotazione fallita", description: "Riprova più tardi", variant: "destructive" });
-      setStep(1);
+    if (placeType === "hotel" || placeType === "hostel") {
+      const marker = import.meta.env.VITE_TRAVELPAYOUTS_MARKER || "578583";
+      let url = `https://search.hotellook.com/?destination=${encodeURIComponent(city)}&adults=1&marker=${marker}`;
+      window.open(url, "_blank");
+      toast({ title: "Redirecting to Hotellook", description: `Search hotels in ${city}` });
+    } else if (selectedPlace.website) {
+      window.open(selectedPlace.website, "_blank");
+    } else if (selectedPlace.latitude && selectedPlace.longitude) {
+      window.open(`https://www.google.com/maps/search/${encodeURIComponent(selectedPlace.name)}/@${selectedPlace.latitude},${selectedPlace.longitude},17z`, "_blank");
+    } else {
+      window.open(`https://www.google.com/maps/search/${encodeURIComponent(selectedPlace.name + " " + city)}`, "_blank");
     }
   };
 
@@ -525,7 +505,7 @@ export default function Coworking() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           className="bg-muted rounded-2xl overflow-hidden border border-border hover:border-teal-500/50 transition-colors cursor-pointer group"
-                          onClick={() => { setSelectedPlace(place); setStep(1); }}
+                          onClick={() => setSelectedPlace(place)}
                           data-testid={`button-place-${place.id}`}
                         >
                           <div className="h-40 relative overflow-hidden">
@@ -686,8 +666,7 @@ export default function Coworking() {
                   <img src={selectedPlace.imageUrl} className="w-full h-48 object-cover flex-shrink-0" />
                 )}
                 <div className="p-6 overflow-y-auto flex-1">
-                  {step === 1 && (
-                    <div className="space-y-6">
+                  <div className="space-y-6">
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
@@ -740,41 +719,16 @@ export default function Coworking() {
                       )}
 
                       {selectedPlace.source !== "osm" && (
-                        <>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-muted rounded-xl">
-                              <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1 block">Check-in</label>
-                              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                                <Calendar className="w-4 h-4 text-teal-400" />
-                                {new Date().toLocaleDateString("it-IT", { month: "short", day: "numeric", year: "numeric" })}
-                              </div>
-                            </div>
-                            <div className="p-3 bg-muted rounded-xl">
-                              <label className="text-[10px] uppercase font-bold text-muted-foreground mb-1 block">Nome Ospite</label>
-                              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                                <Users className="w-4 h-4 text-teal-400" />
-                                <input
-                                  type="text"
-                                  value={guestName}
-                                  onChange={(e) => setGuestName(e.target.value)}
-                                  className="bg-transparent border-none outline-none w-full text-foreground"
-                                  data-testid="input-guest-name"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <PlaceReviews placeId={selectedPlace.id} currentUserId={user?.id} />
-                        </>
+                        <PlaceReviews placeId={selectedPlace.id} currentUserId={user?.id} />
                       )}
 
                       <div className="flex justify-between items-center pt-4 border-t border-border">
                         <div>
                           <p className="text-xs text-muted-foreground">
-                            {selectedPlace.source === "osm" ? "Fonte: OpenStreetMap" : "Totale"}
+                            {selectedPlace.source === "osm" ? "Source: OpenStreetMap" : "Price"}
                           </p>
                           <p className="text-2xl font-bold text-teal-400">
-                            {selectedPlace.price !== "N/A" ? selectedPlace.price : "Vedi sito"}
+                            {selectedPlace.price !== "N/A" ? selectedPlace.price : "See website"}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -786,7 +740,7 @@ export default function Coworking() {
                               data-testid="button-visit-website"
                             >
                               <ExternalLink className="w-4 h-4" />
-                              Sito web
+                              Website
                             </Button>
                           )}
                           {selectedPlace.latitude && selectedPlace.longitude && (
@@ -798,35 +752,18 @@ export default function Coworking() {
                               <MapPin className="w-4 h-4" />
                             </Button>
                           )}
-                          {selectedPlace.source !== "osm" && (
-                            <Button onClick={handleBook} className="bg-teal-500 hover:bg-teal-600 text-white px-8" data-testid="button-confirm-booking">
-                              Prenota
-                            </Button>
-                          )}
+                          <Button onClick={handleBook} className="bg-teal-500 hover:bg-teal-600 text-white px-8" data-testid="button-confirm-booking">
+                            {(selectedPlace.type === "hotel" || selectedPlace.type === "hostel") ? (
+                              <><Hotel className="w-4 h-4 mr-1" /> Book on Hotellook</>
+                            ) : selectedPlace.website ? (
+                              <><ExternalLink className="w-4 h-4 mr-1" /> Book on website</>
+                            ) : (
+                              <><MapPin className="w-4 h-4 mr-1" /> Find on Maps</>
+                            )}
+                          </Button>
                         </div>
                       </div>
                     </div>
-                  )}
-
-                  {step === 2 && (
-                    <div className="py-12 text-center">
-                      <Loader2 className="w-12 h-12 animate-spin text-teal-400 mx-auto" />
-                      <p className="mt-4 text-muted-foreground">Elaboro la prenotazione...</p>
-                    </div>
-                  )}
-
-                  {step === 3 && (
-                    <div className="py-12 text-center">
-                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                        <CheckCircle2 className="w-8 h-8 text-green-500" />
-                      </motion.div>
-                      <h3 className="text-xl font-bold text-foreground mt-4">Prenotazione Confermata!</h3>
-                      <p className="text-muted-foreground mt-2">La tua prenotazione presso {selectedPlace.name} è confermata.</p>
-                      <Button onClick={() => setSelectedPlace(null)} className="mt-6 bg-teal-500 hover:bg-teal-600" data-testid="button-close-modal">
-                        Fatto
-                      </Button>
-                    </div>
-                  )}
                 </div>
               </motion.div>
             </motion.div>
