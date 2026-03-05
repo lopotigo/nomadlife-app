@@ -85,7 +85,7 @@ app.use(
     cookie: {
       secure: isProduction,
       httpOnly: true,
-      sameSite: isProduction ? "none" as const : "lax" as const,
+      sameSite: "lax" as const,
       maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     },
   })
