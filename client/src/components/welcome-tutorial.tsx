@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, PenSquare, Plane, Users, ChevronRight, ChevronLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/lib/onboarding";
+import { useAuth } from "@/lib/auth";
 
 const slides = [
   {
@@ -36,11 +37,12 @@ const slides = [
 ];
 
 export function WelcomeTutorial() {
+  const { user } = useAuth();
   const { markAsSeen, state } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(!state.hasSeenWelcome);
 
-  if (!isVisible) return null;
+  if (!user || !isVisible) return null;
 
   const slide = slides[currentSlide];
   const isLast = currentSlide === slides.length - 1;
