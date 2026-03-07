@@ -166,6 +166,8 @@ export const chatGroups = pgTable("chat_groups", {
   latitude: text("latitude"),
   longitude: text("longitude"),
   isOpen: boolean("is_open").default(true).notNull(),
+  isCommunity: boolean("is_community").default(false).notNull(),
+  icon: text("icon"),
   createdById: varchar("created_by_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

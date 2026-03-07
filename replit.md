@@ -23,6 +23,7 @@ The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as
 - Personalized travel statistics dashboard.
 - Onboarding system with tutorials and contextual tips.
 - Dark/light mode and multi-language support (Italian, English, Spanish).
+- Community Chat Channels: predefined themed channels (Lavoro & Freelance, Città & Destinazioni, Visti & Burocrazia, Coworking & Alloggi, Tech & Strumenti, Off Topic) with join/leave functionality, alongside private messaging and user-created groups. Chat page uses tabbed sidebar (Messaggi/Community). All user names are clickable links to profiles.
 - AI Chatbot (NomadBot) with streaming responses, conversation history, quick prompts, trip/destination recommendations, voice input, photo analysis, AI itinerary generation, and user memory.
 - AI Social Intelligence features integrated into Marketplace (product recommendations), Profile (interest analysis), Search (nomad check-in badges), Travel Diary (destination suggestions), and Home Feed (suggested connections, personalized products).
 - AI Image Generation functionality.

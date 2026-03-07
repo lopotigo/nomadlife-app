@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation, useSearch, Link } from "wouter";
-import { Send, Search, Plus, Loader2, ArrowLeft, Users, MapPin, MessageCircle, X, ChevronUp, Globe, Compass } from "lucide-react";
+import { Send, Search, Plus, Loader2, ArrowLeft, Users, MapPin, MessageCircle, X, ChevronUp, Globe, Compass, Hash, Sparkles, UserPlus, Crown, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,15 @@ import type { ChatGroup, Message, User } from "@shared/schema";
 
 type MessageWithSender = Message & { sender: User };
 type Conversation = { user: User; lastMessage: Message; unreadCount: number };
+
+const COMMUNITY_GRADIENTS: Record<string, string> = {
+  "💼": "from-amber-500 to-orange-600",
+  "🌍": "from-emerald-500 to-teal-600",
+  "📋": "from-blue-500 to-indigo-600",
+  "🏢": "from-violet-500 to-purple-600",
+  "💻": "from-cyan-500 to-blue-600",
+  "🎲": "from-pink-500 to-rose-600",
+};
 
 const GROUP_COLORS = [
   "from-violet-500 to-purple-600",
@@ -113,6 +122,8 @@ function StackedAvatars({ members, max = 4 }: { members: Partial<User>[]; max?: 
   );
 }
 
+type SidebarTab = "messages" | "community";
+
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -124,6 +135,7 @@ export default function Chat() {
   const groupIdParam = urlParams.get("group");
 
   const [groups, setGroups] = useState<ChatGroup[]>([]);
+  const [communityChannels, setCommunityChannels] = useState<ChatGroup[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [followerIds, setFollowerIds] = useState<Set<string>>(new Set());
@@ -142,6 +154,8 @@ export default function Chat() {
   const [showMembersPanel, setShowMembersPanel] = useState(false);
   const [groupMembers, setGroupMembers] = useState<Partial<User>[]>([]);
   const [visibleMessages, setVisibleMessages] = useState(30);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("messages");
+  const [joinedChannelIds, setJoinedChannelIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchConversations = () => {
@@ -170,7 +184,11 @@ export default function Chat() {
   const fetchGroups = () => {
     fetch("/api/chat-groups", { credentials: "include" })
       .then(res => res.json())
-      .then(data => setGroups(Array.isArray(data) ? data : []))
+      .then(data => {
+        const all = Array.isArray(data) ? data : [];
+        setCommunityChannels(all.filter((g: ChatGroup) => g.isCommunity));
+        setGroups(all.filter((g: ChatGroup) => !g.isCommunity));
+      })
       .catch(console.error);
   };
 
@@ -184,6 +202,20 @@ export default function Chat() {
     } catch (error) {
       console.error("Failed to fetch group members:", error);
     }
+  };
+
+  const checkMembership = async (channelIds: string[]) => {
+    const joined = new Set<string>();
+    for (const id of channelIds) {
+      try {
+        const res = await fetch(`/api/chat-groups/${id}/is-member`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.isMember) joined.add(id);
+        }
+      } catch {}
+    }
+    setJoinedChannelIds(joined);
   };
 
   useEffect(() => {
@@ -200,19 +232,26 @@ export default function Chat() {
       fetch(`/api/users/${user.id}/followers`, { credentials: "include" }).then(res => res.json()).catch(() => []),
       fetch(`/api/users/${user.id}/following`, { credentials: "include" }).then(res => res.json()).catch(() => []),
     ])
-      .then(([groupsData, usersData, conversationsData, followersData, followingData]) => {
-        setGroups(Array.isArray(groupsData) ? groupsData : []);
+      .then(async ([groupsData, usersData, conversationsData, followersData, followingData]) => {
+        const all = Array.isArray(groupsData) ? groupsData : [];
+        const community = all.filter((g: ChatGroup) => g.isCommunity);
+        const userGroups = all.filter((g: ChatGroup) => !g.isCommunity);
+        setCommunityChannels(community);
+        setGroups(userGroups);
         const otherUsers = Array.isArray(usersData) ? usersData.filter((u: User) => u.id !== user.id) : [];
         setAllUsers(otherUsers);
         setConversations(Array.isArray(conversationsData) ? conversationsData : []);
         setFollowerIds(new Set(Array.isArray(followersData) ? followersData.map((f: any) => f.followerId) : []));
         setFollowingIds(new Set(Array.isArray(followingData) ? followingData.map((f: any) => f.followingId) : []));
+
+        await checkMembership(community.map((g: ChatGroup) => g.id));
         
         if (groupIdParam) {
-          const targetGroup = (Array.isArray(groupsData) ? groupsData : []).find((g: ChatGroup) => g.id === groupIdParam);
+          const targetGroup = all.find((g: ChatGroup) => g.id === groupIdParam);
           if (targetGroup) {
             setSelectedGroup(targetGroup);
             fetchGroupMembers(targetGroup.id);
+            if (targetGroup.isCommunity) setSidebarTab("community");
           }
         } else if (privateUserId) {
           const targetUser = otherUsers.find((u: User) => u.id === privateUserId);
@@ -339,6 +378,48 @@ export default function Chat() {
     }
   };
 
+  const handleJoinChannel = async (channel: ChatGroup) => {
+    try {
+      const res = await fetch(`/api/chat-groups/${channel.id}/join`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setJoinedChannelIds(prev => new Set([...prev, channel.id]));
+        setSelectedGroup(channel);
+        setSelectedPrivateUser(null);
+        fetchGroupMembers(channel.id);
+        fetchGroups();
+        toast({ title: `Sei entrato in ${channel.name}!` });
+      }
+    } catch (error) {
+      console.error("Failed to join channel:", error);
+    }
+  };
+
+  const handleLeaveChannel = async (channelId: string) => {
+    try {
+      const res = await fetch(`/api/chat-groups/${channelId}/leave`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setJoinedChannelIds(prev => {
+          const next = new Set(prev);
+          next.delete(channelId);
+          return next;
+        });
+        if (selectedGroup?.id === channelId) {
+          setSelectedGroup(null);
+        }
+        fetchGroups();
+        toast({ title: "Hai lasciato il canale" });
+      }
+    } catch (error) {
+      console.error("Failed to leave channel:", error);
+    }
+  };
+
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
   const hasActiveChat = selectedGroup || selectedPrivateUser;
   const currentMessages = selectedGroup ? groupMessages : privateMessages;
@@ -437,157 +518,328 @@ export default function Chat() {
     );
   }
 
+  const totalUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+
   return (
     <Layout>
       <div className="flex h-[calc(100vh-64px)] md:h-screen bg-background">
-        {/* Left Sidebar - Groups */}
-        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-20 bg-background border-r border-border`}>
-          <div className="p-3 border-b border-border">
-            <div className="w-12 h-12 mx-auto bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-1">{t("chat.groups")}</p>
-          </div>
+
+        {/* Left Sidebar */}
+        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-full lg:w-96 bg-background border-r border-border`}>
           
-          <div className="flex-1 overflow-y-auto py-3 space-y-2">
-            {groups.map((group, index) => (
-              <button
-                key={group.id}
-                onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); setShowMembersPanel(false); setVisibleMessages(30); }}
-                className={`w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-all relative group ${
-                  selectedGroup?.id === group.id 
-                    ? "ring-2 ring-violet-500 ring-offset-2 ring-offset-background" 
-                    : "hover:scale-110"
-                }`}
-                title={group.name}
-                data-testid={`group-icon-${group.id}`}
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg`}>
-                  {group.name[0]}
-                </div>
-                {group.members > 1 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-teal-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                    {group.members > 99 ? "99+" : group.members}
-                  </span>
-                )}
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-muted text-foreground text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                  {group.name} ({group.city})
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <div className="p-3 border-t border-border">
-            <button 
-              onClick={() => setShowCreateGroup(true)}
-              className="w-12 h-12 mx-auto bg-violet-500 hover:bg-violet-600 rounded-xl flex items-center justify-center text-white transition-colors"
-              data-testid="button-create-group"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-            <p className="text-[10px] text-muted-foreground text-center mt-1">{t("chat.new")}</p>
-          </div>
-        </aside>
-
-        {/* Middle Section - Contacts List */}
-        <aside className={`${hasActiveChat && isMobile ? 'hidden' : 'flex'} lg:flex flex-col w-full lg:w-80 bg-background border-r border-border`}>
+          {/* Tab Header */}
           <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <h1 className="text-xl font-bold text-foreground flex items-center gap-2" data-testid="text-chat-title">
                 <MessageCircle className="w-5 h-5 text-violet-400" />
                 {t("chat.title")}
               </h1>
-              <button
-                onClick={() => setShowNewContact(true)}
-                className="w-8 h-8 bg-violet-500 hover:bg-violet-600 rounded-lg flex items-center justify-center text-white transition-colors"
-                data-testid="button-new-contact"
-                title={t("chat.new_contact")}
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+              <div className="flex gap-2">
+                {sidebarTab === "messages" && (
+                  <button
+                    onClick={() => setShowNewContact(true)}
+                    className="w-8 h-8 bg-violet-500 hover:bg-violet-600 rounded-lg flex items-center justify-center text-white transition-colors"
+                    data-testid="button-new-contact"
+                    title={t("chat.new_contact")}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
-            
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={t("chat.search_contacts")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-muted border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
-                data-testid="input-search-contacts"
-              />
+
+            {/* Tabs */}
+            <div className="flex bg-muted rounded-xl p-1 gap-1">
+              <button
+                onClick={() => setSidebarTab("messages")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
+                  sidebarTab === "messages"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                data-testid="tab-messages"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Messaggi</span>
+                {totalUnread > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-1 bg-violet-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {totalUnread > 99 ? "99+" : totalUnread}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setSidebarTab("community")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
+                  sidebarTab === "community"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                data-testid="tab-community"
+              >
+                <Hash className="w-4 h-4" />
+                <span>Community</span>
+                <span className="min-w-[18px] h-[18px] px-1 bg-emerald-500/20 text-emerald-500 text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {communityChannels.length}
+                </span>
+              </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {sortedContacts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Send className="w-10 h-10 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground font-medium">{t("chat.no_contacts")}</p>
-              </div>
-            ) : (
-              sortedContacts.map(u => {
-                const conversation = conversations.find(c => c.user.id === u.id);
-                const unreadCount = conversation?.unreadCount || 0;
-                const lastMessage = conversation?.lastMessage;
-                const rel = getRelationship(u.id);
-                
-                return (
-                  <button
-                    key={u.id}
-                    onClick={() => selectPrivateChat(u)}
-                    className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
-                      selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-muted"
-                    }`}
-                    data-testid={`chat-private-${u.id}`}
-                  >
-                    <AvatarWithPresence user={u} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <p className="font-semibold text-sm truncate text-foreground">{u.name}</p>
-                          {rel === "mutual" && (
-                            <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full">{t("chat.badge_mutual")}</span>
-                          )}
-                          {rel === "following" && (
-                            <span className="shrink-0 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[9px] font-bold rounded-full">{t("chat.badge_following")}</span>
-                          )}
-                          {rel === "follower" && (
-                            <span className="shrink-0 px-1.5 py-0.5 bg-violet-500/20 text-violet-400 text-[9px] font-bold rounded-full">{t("chat.badge_follower")}</span>
-                          )}
-                        </div>
-                        {lastMessage && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        {u.location && (
-                          <span className="flex items-center gap-0.5 text-[10px] text-teal-500">
-                            <MapPin className="w-2.5 h-2.5" />
-                            {u.location.split(",")[0]}
-                          </span>
-                        )}
-                      </div>
-                      {lastMessage ? (
-                        <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                          {lastMessage.senderId === user?.id ? t("chat.you_prefix") : ""}{lastMessage.content}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
-                      )}
+          {/* Tab Content */}
+          <div className="flex-1 overflow-y-auto">
+            <AnimatePresence mode="wait">
+              {sidebarTab === "messages" ? (
+                <motion.div
+                  key="messages"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="h-full"
+                >
+                  {/* Search */}
+                  <div className="p-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder={t("chat.search_contacts")}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-muted border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
+                        data-testid="input-search-contacts"
+                      />
                     </div>
-                    {unreadCount > 0 && (
-                      <span className="w-5 h-5 bg-violet-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
+                  </div>
+
+                  {/* User Groups section */}
+                  {groups.length > 0 && (
+                    <div className="px-3 pb-2">
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-2 mb-2">I tuoi gruppi</p>
+                      <div className="space-y-1">
+                        {groups.map((group, index) => (
+                          <button
+                            key={group.id}
+                            onClick={() => { setSelectedGroup(group); setSelectedPrivateUser(null); setShowMembersPanel(false); setVisibleMessages(30); }}
+                            className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
+                              selectedGroup?.id === group.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-muted"
+                            }`}
+                            data-testid={`group-icon-${group.id}`}
+                          >
+                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${GROUP_COLORS[index % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold text-lg flex-shrink-0`}>
+                              {group.name[0]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm text-foreground truncate">{group.name}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <MapPin className="w-2.5 h-2.5 text-teal-500 flex-shrink-0" />
+                                <span className="text-[11px] text-muted-foreground truncate">{group.city}</span>
+                                <span className="text-[10px] text-muted-foreground">·</span>
+                                <span className="text-[10px] text-muted-foreground">{group.members} membri</span>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="border-b border-border mt-3 mb-1" />
+                    </div>
+                  )}
+
+                  {/* Create Group button */}
+                  <div className="px-3 pb-2">
+                    <button
+                      onClick={() => setShowCreateGroup(true)}
+                      className="w-full p-3 flex items-center gap-3 rounded-xl hover:bg-muted transition-colors text-left group"
+                      data-testid="button-create-group"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-2 border-dashed border-violet-500/40 flex items-center justify-center group-hover:border-violet-500 transition-colors">
+                        <Plus className="w-5 h-5 text-violet-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-foreground">{t("chat.create_group")}</p>
+                        <p className="text-[11px] text-muted-foreground">Crea un nuovo gruppo</p>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Private conversations header */}
+                  <div className="px-5 pt-1 pb-2">
+                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Chat private</p>
+                  </div>
+
+                  {/* Contact list */}
+                  <div className="px-3 space-y-0.5 pb-4">
+                    {sortedContacts.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <Send className="w-10 h-10 text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground font-medium">{t("chat.no_contacts")}</p>
+                      </div>
+                    ) : (
+                      sortedContacts.map(u => {
+                        const conversation = conversations.find(c => c.user.id === u.id);
+                        const unreadCount = conversation?.unreadCount || 0;
+                        const lastMessage = conversation?.lastMessage;
+                        const rel = getRelationship(u.id);
+                        
+                        return (
+                          <button
+                            key={u.id}
+                            onClick={() => selectPrivateChat(u)}
+                            className={`w-full p-3 flex items-center gap-3 rounded-xl transition-all text-left ${
+                              selectedPrivateUser?.id === u.id ? "bg-violet-500/20 border border-violet-500/50" : "hover:bg-muted"
+                            }`}
+                            data-testid={`chat-private-${u.id}`}
+                          >
+                            <AvatarWithPresence user={u} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <p className="font-semibold text-sm truncate text-foreground">{u.name}</p>
+                                  {rel === "mutual" && (
+                                    <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full">{t("chat.badge_mutual")}</span>
+                                  )}
+                                  {rel === "following" && (
+                                    <span className="shrink-0 px-1.5 py-0.5 bg-blue-500/20 text-blue-400 text-[9px] font-bold rounded-full">{t("chat.badge_following")}</span>
+                                  )}
+                                  {rel === "follower" && (
+                                    <span className="shrink-0 px-1.5 py-0.5 bg-violet-500/20 text-violet-400 text-[9px] font-bold rounded-full">{t("chat.badge_follower")}</span>
+                                  )}
+                                </div>
+                                {lastMessage && (
+                                  <span className="text-[10px] text-muted-foreground">
+                                    {new Date(lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                {u.location && (
+                                  <span className="flex items-center gap-0.5 text-[10px] text-teal-500">
+                                    <MapPin className="w-2.5 h-2.5" />
+                                    {u.location.split(",")[0]}
+                                  </span>
+                                )}
+                              </div>
+                              {lastMessage ? (
+                                <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                                  {lastMessage.senderId === user?.id ? t("chat.you_prefix") : ""}{lastMessage.content}
+                                </p>
+                              ) : (
+                                <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
+                              )}
+                            </div>
+                            {unreadCount > 0 && (
+                              <span className="w-5 h-5 bg-violet-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                                {unreadCount > 9 ? "9+" : unreadCount}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })
                     )}
-                  </button>
-                );
-              })
-            )}
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="community"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.15 }}
+                  className="p-3"
+                >
+                  {/* Community Hero */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-5 mb-4">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6" />
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-5 h-5 text-amber-300" />
+                        <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">NomadLife Community</span>
+                      </div>
+                      <h2 className="text-white font-bold text-lg leading-tight" data-testid="text-community-title">
+                        Canali per la community
+                      </h2>
+                      <p className="text-white/70 text-sm mt-1.5">
+                        Unisciti ai canali tematici e connettiti con nomadi da tutto il mondo
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Community Channels */}
+                  <div className="space-y-2">
+                    {communityChannels.map((channel) => {
+                      const isJoined = joinedChannelIds.has(channel.id);
+                      const gradient = COMMUNITY_GRADIENTS[channel.icon || "🎲"] || "from-gray-500 to-gray-600";
+                      const isSelected = selectedGroup?.id === channel.id;
+
+                      return (
+                        <motion.div
+                          key={channel.id}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          className={`relative overflow-hidden rounded-xl border transition-all cursor-pointer ${
+                            isSelected
+                              ? "border-violet-500 bg-violet-500/10 shadow-lg shadow-violet-500/10"
+                              : "border-border bg-card hover:border-border/80 hover:shadow-md"
+                          }`}
+                          onClick={() => {
+                            setSelectedGroup(channel);
+                            setSelectedPrivateUser(null);
+                            setShowMembersPanel(false);
+                            setVisibleMessages(30);
+                          }}
+                          data-testid={`community-channel-${channel.id}`}
+                        >
+                          <div className="p-4">
+                            <div className="flex items-start gap-3">
+                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-2xl flex-shrink-0 shadow-lg`}>
+                                {channel.icon || "#"}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-bold text-foreground text-sm truncate">{channel.name}</h3>
+                                  {isJoined ? (
+                                    <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/15 text-emerald-500 text-[10px] font-bold rounded-full flex-shrink-0">
+                                      <Shield className="w-2.5 h-2.5" />
+                                      Iscritto
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{channel.description}</p>
+                                <div className="flex items-center justify-between mt-2.5">
+                                  <div className="flex items-center gap-2">
+                                    <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                                    <span className="text-[11px] text-muted-foreground font-medium">{channel.members} membri</span>
+                                  </div>
+                                  {!isJoined ? (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleJoinChannel(channel); }}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500 hover:bg-violet-600 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                                      data-testid={`button-join-${channel.id}`}
+                                    >
+                                      <UserPlus className="w-3.5 h-3.5" />
+                                      Unisciti
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleLeaveChannel(channel.id); }}
+                                      className="flex items-center gap-1 px-2.5 py-1.5 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 text-[11px] font-medium rounded-lg transition-colors"
+                                      data-testid={`button-leave-${channel.id}`}
+                                    >
+                                      Lascia
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </aside>
 
@@ -611,9 +863,15 @@ export default function Chat() {
                 
                 {selectedPrivateUser ? (
                   <>
-                    <AvatarWithPresence user={selectedPrivateUser} />
+                    <Link href={`/user/${selectedPrivateUser.id}`}>
+                      <div className="cursor-pointer">
+                        <AvatarWithPresence user={selectedPrivateUser} />
+                      </div>
+                    </Link>
                     <div className="flex-1">
-                      <h2 className="font-bold text-foreground">{selectedPrivateUser.name}</h2>
+                      <Link href={`/user/${selectedPrivateUser.id}`}>
+                        <h2 className="font-bold text-foreground hover:text-violet-400 transition-colors cursor-pointer" data-testid="text-chat-user-name">{selectedPrivateUser.name}</h2>
+                      </Link>
                       <div className="flex items-center gap-2">
                         <p className="text-xs text-muted-foreground">@{selectedPrivateUser.username}</p>
                         {isOnlineSimulated(selectedPrivateUser.id) && (
@@ -624,21 +882,33 @@ export default function Chat() {
                   </>
                 ) : selectedGroup ? (
                   <>
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} flex items-center justify-center text-white font-bold`}>
-                      {selectedGroup.name[0]}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0 ${
+                      selectedGroup.isCommunity
+                        ? `bg-gradient-to-br ${COMMUNITY_GRADIENTS[selectedGroup.icon || "🎲"] || "from-gray-500 to-gray-600"} text-2xl`
+                        : `bg-gradient-to-br ${GROUP_COLORS[groups.indexOf(selectedGroup) % GROUP_COLORS.length]} text-lg`
+                    }`}>
+                      {selectedGroup.isCommunity ? selectedGroup.icon : selectedGroup.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h2 className="font-bold text-foreground truncate">{selectedGroup.name}</h2>
-                        <span className="text-[10px] px-2 py-0.5 bg-teal-500/20 text-teal-400 rounded-full font-medium flex items-center gap-1">
-                          <MapPin className="w-2.5 h-2.5" />
-                          {selectedGroup.city}
-                        </span>
+                        {selectedGroup.isCommunity && (
+                          <span className="text-[10px] px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded-full font-semibold flex items-center gap-1">
+                            <Crown className="w-2.5 h-2.5" />
+                            Community
+                          </span>
+                        )}
+                        {!selectedGroup.isCommunity && (
+                          <span className="text-[10px] px-2 py-0.5 bg-teal-500/20 text-teal-400 rounded-full font-medium flex items-center gap-1">
+                            <MapPin className="w-2.5 h-2.5" />
+                            {selectedGroup.city}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
                         <StackedAvatars members={groupMembers} max={5} />
                         <span className="text-[11px] text-muted-foreground">
-                          {selectedGroup.members} {t("chat.group_members_count")}
+                          {groupMembers.length} {t("chat.group_members_count")}
                         </span>
                         <Users className="w-3.5 h-3.5 text-muted-foreground" />
                       </div>
@@ -647,7 +917,7 @@ export default function Chat() {
                 ) : null}
               </header>
 
-              {/* Members Panel (slides from top) */}
+              {/* Members Panel */}
               <AnimatePresence>
                 {showMembersPanel && selectedGroup && (
                   <motion.div
@@ -681,9 +951,15 @@ export default function Chat() {
                               className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/60 hover:bg-muted transition-colors group/member"
                               data-testid={`member-${member.id}`}
                             >
-                              <AvatarWithPresence user={member as User} size="sm" />
+                              <Link href={`/user/${member.id}`}>
+                                <div className="cursor-pointer">
+                                  <AvatarWithPresence user={member as User} size="sm" />
+                                </div>
+                              </Link>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-foreground truncate">{member.name}</p>
+                                <Link href={`/user/${member.id}`}>
+                                  <p className="text-sm font-medium text-foreground truncate hover:text-violet-400 transition-colors cursor-pointer" data-testid={`text-member-name-${member.id}`}>{member.name}</p>
+                                </Link>
                                 <div className="flex items-center gap-1.5">
                                   {(member as any).location && (
                                     <span className="text-[10px] text-teal-400 flex items-center gap-0.5 truncate">
@@ -733,7 +1009,6 @@ export default function Chat() {
 
               {/* Messages Area */}
               <div className="flex-1 overflow-y-auto px-4 py-3">
-                {/* Load previous messages button */}
                 {groupedMessages.hasMore && (
                   <div className="flex justify-center mb-4">
                     <button
@@ -750,11 +1025,17 @@ export default function Chat() {
                 {currentMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-muted to-accent flex items-center justify-center mb-4">
-                      <Compass className="w-10 h-10 text-teal-400" />
+                      {selectedGroup?.isCommunity ? (
+                        <span className="text-4xl">{selectedGroup.icon}</span>
+                      ) : (
+                        <Compass className="w-10 h-10 text-teal-400" />
+                      )}
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{t("chat.no_messages_yet")}</h3>
                     <p className="text-muted-foreground text-sm mt-2 max-w-xs">
-                      {selectedGroup ? t("chat.group_welcome") : t("chat.start_the_conversation")}
+                      {selectedGroup?.isCommunity
+                        ? `Sii il primo a scrivere in ${selectedGroup.name}!`
+                        : selectedGroup ? t("chat.group_welcome") : t("chat.start_the_conversation")}
                     </p>
                   </div>
                 ) : (
@@ -781,16 +1062,15 @@ export default function Chat() {
                           className={`flex ${isOwn ? 'justify-end' : 'justify-start'} ${showAvatar ? 'mt-3' : 'mt-0.5'} ${isLast ? 'mb-1' : ''}`}
                           data-testid={`message-${msg.id}`}
                         >
-                          {/* Avatar column for other users */}
                           {!isOwn && (
                             <div className="w-9 mr-2 flex-shrink-0">
                               {showAvatar ? (
                                 <Link href={`/user/${msg.senderId}`}>
                                   <div className="cursor-pointer">
                                     {senderAvatar ? (
-                                      <img src={senderAvatar} alt={senderName || ""} className="w-8 h-8 rounded-full object-cover" />
+                                      <img src={senderAvatar} alt={senderName || ""} className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-violet-400 transition-all" />
                                     ) : (
-                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-violet-400 transition-all">
                                         {senderName?.[0] || "?"}
                                       </div>
                                     )}
@@ -801,12 +1081,13 @@ export default function Chat() {
                           )}
                           
                           <div className={`max-w-[70%]`}>
-                            {/* Sender name + location tag */}
                             {showName && (
                               <div className="flex items-center gap-2 mb-0.5 ml-1">
-                                <span className={`text-xs font-semibold ${getSenderColor(msg.senderId)}`}>
-                                  {senderName}
-                                </span>
+                                <Link href={`/user/${msg.senderId}`}>
+                                  <span className={`text-xs font-semibold ${getSenderColor(msg.senderId)} hover:underline cursor-pointer`} data-testid={`text-sender-name-${msg.id}`}>
+                                    {senderName}
+                                  </span>
+                                </Link>
                                 {senderLocation && (
                                   <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
                                     <MapPin className="w-2 h-2" />
@@ -834,7 +1115,31 @@ export default function Chat() {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Join prompt for community channels */}
+              {selectedGroup?.isCommunity && !joinedChannelIds.has(selectedGroup.id) && (
+                <div className="p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border-t border-violet-500/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{selectedGroup.icon}</span>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Unisciti a {selectedGroup.name}</p>
+                        <p className="text-xs text-muted-foreground">Per inviare messaggi, entra nel canale</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleJoinChannel(selectedGroup)}
+                      className="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2"
+                      data-testid="button-join-from-chat"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Unisciti
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Message Input */}
+              {(!selectedGroup?.isCommunity || joinedChannelIds.has(selectedGroup?.id || "")) && (
               <form
                 onSubmit={selectedPrivateUser ? handleSendPrivateMessage : handleSendGroupMessage}
                 className="p-3 bg-card/95 backdrop-blur-sm border-t border-border flex gap-2"
@@ -843,7 +1148,11 @@ export default function Chat() {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={t("chat.write_message")}
+                  placeholder={
+                    selectedGroup?.isCommunity
+                      ? `Scrivi in ${selectedGroup.name}...`
+                      : t("chat.write_message")
+                  }
                   className="flex-1 bg-muted border border-border rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-violet-500/50 outline-none"
                   data-testid="input-message"
                 />
@@ -856,14 +1165,25 @@ export default function Chat() {
                   <Send className="w-4.5 h-4.5" />
                 </button>
               </form>
+              )}
             </>
           ) : (
             <div className="hidden lg:flex flex-col items-center justify-center h-full text-center">
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-muted to-accent flex items-center justify-center mb-4">
-                <Compass className="w-12 h-12 text-teal-400" />
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mb-4">
+                <MessageCircle className="w-12 h-12 text-violet-400" />
               </div>
               <h2 className="text-xl font-bold text-foreground">{t("chat.select_conversation")}</h2>
-              <p className="text-muted-foreground mt-2">{t("chat.select_conversation_desc")}</p>
+              <p className="text-muted-foreground mt-2 max-w-sm">{t("chat.select_conversation_desc")}</p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setSidebarTab("community")}
+                  className="px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2"
+                  data-testid="button-explore-community"
+                >
+                  <Hash className="w-4 h-4" />
+                  Esplora i Canali
+                </button>
+              </div>
             </div>
           )}
         </main>
@@ -931,10 +1251,16 @@ export default function Chat() {
                         data-testid={`new-contact-${u.id}`}
                       >
                         <AvatarWithPresence user={u} size="sm" />
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <p className="font-semibold text-foreground text-sm">{u.name}</p>
                           <p className="text-xs text-muted-foreground">@{u.username}</p>
                         </div>
+                        {u.location && (
+                          <span className="text-[10px] text-teal-500 flex items-center gap-0.5 flex-shrink-0">
+                            <MapPin className="w-2.5 h-2.5" />
+                            {u.location.split(",")[0]}
+                          </span>
+                        )}
                       </button>
                     ))
                   }
