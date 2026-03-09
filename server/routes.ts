@@ -1456,7 +1456,6 @@ Sitemap: https://nomad-life.app/sitemap.xml
       
       if (!userId) {
         const trips = await storage.getTrips({ isPublic: true });
-        log(`GET /api/trips (unauth) returning ${trips.length} public trips`);
         res.send(trips);
       } else {
         // Authenticated: public trips + own trips
