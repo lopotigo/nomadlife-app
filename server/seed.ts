@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { db } from "./db";
 import { blogPosts, places, events, users, posts, chatGroups, messages, vendors, products } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import seedData from "./seed-data.json";
 
@@ -209,7 +210,6 @@ export async function autoSeed() {
   }
 
   await seedCommunityChannels();
-  await assignBlogAuthors();
   await seedIndiaArticle();
 }
 
