@@ -69,7 +69,7 @@ const PgSession = connectPgSimple(session);
 
 app.set("trust proxy", 1);
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV !== "development";
 
 app.use(
   session({
@@ -81,12 +81,12 @@ app.use(
     secret: process.env.SESSION_SECRET || "nomadlife-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
-    rolling: true, // Refresh session on each request
+    rolling: true,
     cookie: {
       secure: isProduction,
       httpOnly: true,
       sameSite: "lax" as const,
-      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      maxAge: 1000 * 60 * 60 * 24 * 30,
     },
   })
 );
