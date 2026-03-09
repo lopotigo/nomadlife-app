@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { db } from "./db";
-import { blogPosts, places, events, users, posts, chatGroups, messages, vendors, products } from "@shared/schema";
+import { blogPosts, places, events, users, posts, chatGroups, messages, vendors, products, trips, tripStops } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
 import seedData from "./seed-data.json";
 
@@ -13,7 +13,9 @@ export async function autoSeed() {
   if (Number(blogCount) > 0 && Number(placeCount) > 0) {
     console.log("Database already seeded, skipping...");
     await seedCommunityChannels();
+    await seedMissingBlogPosts();
     await seedIndiaArticle();
+    await seedGabrieleIndiaTrip();
     return;
   }
 
@@ -211,7 +213,9 @@ export async function autoSeed() {
   }
 
   await seedCommunityChannels();
+  await seedMissingBlogPosts();
   await seedIndiaArticle();
+  await seedGabrieleIndiaTrip();
 }
 
 async function seedCommunityChannels() {
@@ -370,5 +374,80 @@ Se stai pensando di andare in India come nomade digitale, fallo. È un'esperienz
     console.log("[Blog] Created India travel article by Gabriele Zavettieri");
   } catch (error) {
     console.error("[Blog] India article seed error:", error);
+  }
+}
+
+async function seedGabrieleIndiaTrip() {
+  try {
+    const userRows = await db.select().from(users).where(eq(users.username, "zave_17"));
+    if (userRows.length === 0) return;
+    const gabriele = userRows[0];
+
+    const existingTrips = await db.select({ count: sql<number>`count(*)` }).from(trips)
+      .where(sql`user_id = ${gabriele.id} AND title = 'India'`);
+    if (Number(existingTrips[0].count) > 0) return;
+
+    const [trip] = await db.insert(trips).values({
+      userId: gabriele.id,
+      title: "India",
+      description: "Viaggio da nomade digitale attraverso l'India: Delhi, Jaipur, Agra, Varanasi",
+      startLocation: "Milano",
+      endLocation: "New Delhi",
+      startDate: new Date("2026-01-25"),
+      isPublic: true,
+      isActive: true,
+      status: "completed",
+      imageUrl: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&h=400&fit=crop",
+    }).returning();
+
+    const stops = [
+      { tripId: trip.id, city: "Nuova Delhi", country: "India", latitude: 28.6141, longitude: 77.2091, orderIndex: 0, arrivalDate: new Date("2026-02-10"), notes: "Prima tappa - la capitale" },
+      { tripId: trip.id, city: "Jaipur", country: "India", latitude: 26.9057, longitude: 75.7471, orderIndex: 1, arrivalDate: new Date("2026-02-13"), notes: "La città rosa", transportMode: "train", distanceKm: 238, co2Kg: 10 },
+      { tripId: trip.id, city: "Agra", country: "India", latitude: 27.1797, longitude: 77.9883, orderIndex: 2, arrivalDate: new Date("2026-02-16"), notes: "Il Taj Mahal", transportMode: "train", distanceKm: 224, co2Kg: 9 },
+      { tripId: trip.id, city: "Varanasi", country: "India", latitude: 25.3904, longitude: 83.0054, orderIndex: 3, arrivalDate: new Date("2026-02-18"), notes: "L'India spirituale", transportMode: "plane", distanceKm: 538, co2Kg: 137 },
+      { tripId: trip.id, city: "Nuova Delhi", country: "India", latitude: 28.6145, longitude: 77.2389, orderIndex: 4, arrivalDate: new Date("2026-02-21"), notes: "Ritorno per il volo", transportMode: "plane", distanceKm: 674, co2Kg: 172 },
+    ];
+
+    for (const stop of stops) {
+      await db.insert(tripStops).values(stop as any);
+    }
+
+    if (gabriele.countriesVisited === 0) {
+      await db.update(users).set({ countriesVisited: 2, citiesVisited: 5 }).where(eq(users.id, gabriele.id));
+    }
+
+    console.log("[Seed] Created India trip for Gabriele with 5 stops");
+  } catch (error) {
+    console.error("[Seed] India trip seed error:", error);
+  }
+}
+
+async function seedMissingBlogPosts() {
+  try {
+    const existingSlugs = (await db.select({ slug: blogPosts.slug }).from(blogPosts)).map(r => r.slug);
+    
+    const missingBlogs = (seedData as any).blogs?.filter((b: any) => !existingSlugs.includes(b.slug)) || [];
+    
+    for (const b of missingBlogs) {
+      await db.insert(blogPosts).values({
+        slug: b.slug,
+        title: b.title,
+        excerpt: b.excerpt,
+        content: b.content,
+        category: b.category,
+        city: b.city || null,
+        country: b.country || null,
+        imageUrl: b.image_url || null,
+        tags: b.tags || null,
+        author: b.author || "NomadLife Team",
+        published: b.published,
+      });
+    }
+    
+    if (missingBlogs.length > 0) {
+      console.log(`[Seed] Created ${missingBlogs.length} missing blog posts`);
+    }
+  } catch (error) {
+    console.error("[Seed] Missing blog posts error:", error);
   }
 }
