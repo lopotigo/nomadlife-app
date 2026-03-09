@@ -209,6 +209,8 @@ export async function autoSeed() {
   }
 
   await seedCommunityChannels();
+  await assignBlogAuthors();
+  await seedIndiaArticle();
 }
 
 async function seedCommunityChannels() {
