@@ -207,4 +207,32 @@ export async function autoSeed() {
   } catch (error) {
     console.error("Auto-seed error:", error);
   }
+
+  await seedCommunityChannels();
+}
+
+async function seedCommunityChannels() {
+  try {
+    const existing = await db.select({ count: sql<number>`count(*)` }).from(chatGroups).where(sql`is_community = true`);
+    if (Number(existing[0].count) >= 6) return;
+
+    const channels = [
+      { name: "Lavoro & Freelance", city: "Global", description: "Offerte di lavoro, collaborazioni, consigli per freelancer e nomadi digitali", icon: "\u{1F4BC}", isCommunity: true, isOpen: true },
+      { name: "Città & Destinazioni", city: "Global", description: "Consigli su dove andare, esperienze e recensioni delle migliori città per nomadi", icon: "\u{1F30D}", isCommunity: true, isOpen: true },
+      { name: "Visti & Burocrazia", city: "Global", description: "Info su visti, permessi di soggiorno, tasse e questioni legali per nomadi", icon: "\u{1F4CB}", isCommunity: true, isOpen: true },
+      { name: "Coworking & Alloggi", city: "Global", description: "Recensioni e suggerimenti su spazi di coworking, coliving e alloggi", icon: "\u{1F3E2}", isCommunity: true, isOpen: true },
+      { name: "Tech & Strumenti", city: "Global", description: "Tool, app, VPN, setup e tutto ciò che serve per lavorare da remoto", icon: "\u{1F4BB}", isCommunity: true, isOpen: true },
+      { name: "Off Topic", city: "Global", description: "Discussioni libere, politica, attualità, hobby e tutto il resto", icon: "\u{1F3B2}", isCommunity: true, isOpen: true },
+    ];
+
+    for (const ch of channels) {
+      const exists = await db.select({ count: sql<number>`count(*)` }).from(chatGroups).where(sql`name = ${ch.name} AND is_community = true`);
+      if (Number(exists[0].count) === 0) {
+        await db.insert(chatGroups).values({ ...ch, members: 0 });
+        console.log(`[Community] Created channel: ${ch.name}`);
+      }
+    }
+  } catch (error) {
+    console.error("[Community] Seed error:", error);
+  }
 }

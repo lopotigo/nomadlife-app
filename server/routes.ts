@@ -1454,11 +1454,9 @@ Sitemap: https://nomad-life.app/sitemap.xml
     try {
       const userId = req.isAuthenticated() ? (req.user as User).id : null;
       
-      // Always enforce visibility: only public trips OR own trips
-      // Ignore client-provided isPublic/userId filters that would expose private data
       if (!userId) {
-        // Unauthenticated: only public trips
         const trips = await storage.getTrips({ isPublic: true });
+        log(`GET /api/trips (unauth) returning ${trips.length} public trips`);
         res.send(trips);
       } else {
         // Authenticated: public trips + own trips
