@@ -30,6 +30,7 @@ import { MomentsBar } from "@/components/moments";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { TripReplay } from "@/components/trip-replay";
 import { WeatherWidget } from "@/components/weather-widget";
 import { handleShare } from "@/components/share-qr-modal";
@@ -1476,10 +1477,17 @@ export default function TravelDiary() {
         )}
       </div>
 
+      <div className="px-4 pb-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: Navigation, title: "See trips on the map", description: "View your routes and stops on the interactive map", href: "/" },
+          { icon: Bed, title: "Book coworking & stays", description: "Find hotels, hostels, and workspaces worldwide", href: "/booking" },
+        ]} />
+      </div>
+
       <FloatingTip
         tipKey="hasSeenTravelDiaryTip"
-        title="Crea il tuo diario di viaggio"
-        description="Premi 'Nuovo Viaggio' per iniziare a pianificare. Aggiungi tappe, spese e traccia le tue statistiche CO2!"
+        title="Create your travel diary"
+        description="Press 'New Trip' to start planning. Add stops, expenses, and track your CO2 stats!"
         delay={2000}
       />
     </Layout>

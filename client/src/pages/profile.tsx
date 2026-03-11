@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
-import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag, Play, Shield, X, Plus, Briefcase } from "lucide-react";
+import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, LogOut, Share2, QrCode, Camera, Users, UserPlus, Sun, Moon, Bell, BellOff, Sparkles, Bookmark, Heart, Brain, RefreshCw, Tag, Play, Shield, X, Plus, Briefcase, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Post } from "@shared/schema";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -15,6 +15,7 @@ import { useI18n, languageNames, languageFlags, Language } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Languages } from "lucide-react";
 import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -722,10 +723,17 @@ export default function Profile() {
         </div>
       )}
 
+      <div className="px-4 pb-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: BookOpen, title: "Read our guides", description: "Travel tips, visa info, and city reviews", href: "/blog" },
+          { icon: Globe, title: "Plan a trip", description: "Create itineraries with stops and CO2 tracking", href: "/travel-diary" },
+        ]} />
+      </div>
+
       <FloatingTip
         tipKey="hasSeenProfileTip"
-        title="Personalizza il tuo profilo"
-        description="Clicca sulla foto per cambiarla, modifica la bio e le impostazioni. Attiva le notifiche push per non perderti nulla!"
+        title="Customize your profile"
+        description="Tap your photo to change it, edit your bio and settings. Enable push notifications so you never miss anything!"
         delay={2000}
       />
     </Layout>

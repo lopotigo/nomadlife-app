@@ -21,10 +21,10 @@ The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as
 - Social features including multi-format post creation, QR code sharing, comments, and PWA support.
 - Integrated booking for hotels, hostels, and coworking spaces, plus an events system with calendar view.
 - Personalized travel statistics dashboard.
-- Onboarding system with tutorials and contextual tips.
+- Onboarding system with 7-slide English welcome tutorial, contextual floating tips on 10+ pages, and feature discovery cross-link cards on key pages (map, travel diary, blog, profile, marketplace, booking, events).
 - Dark/light mode and multi-language support (Italian, English, Spanish).
 - Community Chat Channels: predefined themed channels (Lavoro & Freelance, Città & Destinazioni, Visti & Burocrazia, Coworking & Alloggi, Tech & Strumenti, Off Topic) with join/leave functionality, alongside private messaging and user-created groups. Chat page uses tabbed sidebar (Messaggi/Community). All user names are clickable links to profiles.
-- AI Chatbot (NomadBot) with streaming responses, conversation history, quick prompts, trip/destination recommendations, voice input, photo analysis, AI itinerary generation, and user memory.
+- AI Chatbot (NomadBot) with streaming responses, conversation history, context-aware page-specific quick prompts and greetings, trip/destination recommendations, voice input (English), photo analysis, AI itinerary generation, and user memory.
 - AI Social Intelligence features integrated into Marketplace (product recommendations), Profile (interest analysis), Search (nomad check-in badges), Travel Diary (destination suggestions), and Home Feed (suggested connections, personalized products).
 - AI Image Generation functionality.
 - "Moments" (Stories) for ephemeral content sharing.

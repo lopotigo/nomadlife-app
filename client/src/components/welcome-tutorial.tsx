@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, PenSquare, Plane, Users, ChevronRight, ChevronLeft, X } from "lucide-react";
+import { MapPin, PenSquare, Plane, Users, ChevronRight, ChevronLeft, X, Bot, BookOpen, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/lib/onboarding";
 import { useAuth } from "@/lib/auth";
@@ -9,30 +9,51 @@ const slides = [
   {
     icon: MapPin,
     color: "from-blue-500 to-cyan-400",
-    title: "Esplora la Mappa",
-    description: "Scopri post, eventi e viaggi di altri nomadi digitali in tutto il mondo. Clicca sui marker per vedere i dettagli!",
-    tip: "Usa i filtri per mostrare solo quello che ti interessa",
+    title: "Explore the Map",
+    description: "Discover posts, events, and trips from digital nomads around the world. Tap on markers to see details and find coworking spaces, cafes, and meetups near you!",
+    tip: "Use filters to show only what interests you",
   },
   {
     icon: PenSquare,
     color: "from-purple-500 to-pink-400",
-    title: "Condividi le tue Esperienze",
-    description: "Clicca sulla mappa per creare un post o un evento nella posizione che preferisci. Aggiungi foto, video e descrizioni!",
-    tip: "Premi il bottone + in basso per creare contenuti",
+    title: "Share Your Experiences",
+    description: "Tap anywhere on the map to create a post or event at that location. Add photos, videos, and descriptions to share with the community!",
+    tip: "Press the + button at the bottom to create content",
   },
   {
     icon: Plane,
     color: "from-green-500 to-emerald-400",
-    title: "Pianifica i tuoi Viaggi",
-    description: "Crea il tuo diario di viaggio con tappe, spese e statistiche CO2. Condividi i tuoi itinerari con la community!",
-    tip: "Vai su 'Diario' per gestire i tuoi viaggi",
+    title: "Plan Your Trips",
+    description: "Create your travel diary with stops, expenses, and CO2 stats. Share your itineraries with the community and track your environmental impact!",
+    tip: "Go to 'Trips' to manage your travels",
   },
   {
     icon: Users,
     color: "from-orange-500 to-amber-400",
-    title: "Connettiti con altri Nomadi",
-    description: "Trova nomadi nelle tue stesse città, partecipa agli eventi e chatta con la community. Non sei mai solo!",
-    tip: "Cerca altri utenti nella pagina Cerca",
+    title: "Connect with Nomads",
+    description: "Find nomads in your city, join events, and chat with the community. You're never alone — there's always someone nearby!",
+    tip: "Use Search to find other users and places",
+  },
+  {
+    icon: Bot,
+    color: "from-violet-500 to-purple-400",
+    title: "Ask NomadBot Anything",
+    description: "Your AI travel assistant lives in the purple bubble at the bottom right. Ask for itineraries, flight deals, visa info, cost comparisons — or send a photo to analyze!",
+    tip: "Try voice input or upload a photo for instant help",
+  },
+  {
+    icon: BookOpen,
+    color: "from-teal-500 to-cyan-400",
+    title: "Blog, Guides & Marketplace",
+    description: "Read travel guides, sustainability tips, and city reviews written by and for nomads. Browse the local marketplace to buy and sell gear, services, and more!",
+    tip: "Check the Blog for destination guides and nomad tips",
+  },
+  {
+    icon: MessageCircle,
+    color: "from-rose-500 to-pink-400",
+    title: "Community Channels",
+    description: "Join themed channels like 'Work & Freelance', 'Cities & Destinations', 'Visas & Bureaucracy' and more. Chat privately or create your own groups!",
+    tip: "Go to Chat and explore the Community tab",
   },
 ];
 
@@ -109,7 +130,7 @@ export function WelcomeTutorial() {
                 <h2 className="text-2xl font-bold mb-3">{slide.title}</h2>
                 <p className="text-white/90 mb-4">{slide.description}</p>
                 <div className="bg-white/20 rounded-xl px-4 py-2 text-sm">
-                  💡 {slide.tip}
+                  {slide.tip}
                 </div>
               </motion.div>
             </div>
@@ -139,7 +160,7 @@ export function WelcomeTutorial() {
                     data-testid="button-prev-slide"
                   >
                     <ChevronLeft className="w-4 h-4 mr-1" />
-                    Indietro
+                    Back
                   </Button>
                 )}
                 <Button
@@ -148,10 +169,10 @@ export function WelcomeTutorial() {
                   data-testid="button-next-slide"
                 >
                   {isLast ? (
-                    "Inizia!"
+                    "Let's Go!"
                   ) : (
                     <>
-                      Avanti
+                      Next
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </>
                   )}
@@ -164,7 +185,7 @@ export function WelcomeTutorial() {
                   className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   data-testid="button-skip-all"
                 >
-                  Salta il tutorial
+                  Skip tutorial
                 </button>
               )}
             </div>

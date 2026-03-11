@@ -3,6 +3,7 @@ import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation, useSearch, Link } from "wouter";
 import { Send, Search, Plus, Loader2, ArrowLeft, Users, MapPin, MessageCircle, X, ChevronUp, Globe, Compass, Hash, Sparkles, UserPlus, Crown, Shield } from "lucide-react";
+import { FloatingTip } from "@/components/contextual-tip";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -1281,6 +1282,12 @@ export default function Chat() {
           </div>
         )}
       </AnimatePresence>
+      <FloatingTip
+        tipKey="hasSeenChatTip"
+        title="Join community channels"
+        description="Switch to the Community tab to join themed channels like Work & Freelance, Cities & Destinations, and more. Chat with nomads worldwide!"
+        delay={2000}
+      />
     </Layout>
   );
 }

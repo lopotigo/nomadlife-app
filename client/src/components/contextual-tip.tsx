@@ -4,7 +4,7 @@ import { X, Lightbulb } from "lucide-react";
 import { useOnboarding } from "@/lib/onboarding";
 
 interface ContextualTipProps {
-  tipKey: "hasSeenMapTip" | "hasSeenFeedTip" | "hasSeenCreateTip" | "hasSeenProfileTip" | "hasSeenTravelDiaryTip";
+  tipKey: "hasSeenMapTip" | "hasSeenFeedTip" | "hasSeenCreateTip" | "hasSeenProfileTip" | "hasSeenTravelDiaryTip" | "hasSeenChatTip" | "hasSeenBlogTip" | "hasSeenMarketplaceTip" | "hasSeenBookingTip" | "hasSeenEventsTip";
   title: string;
   description: string;
   position?: "top" | "bottom" | "left" | "right";
@@ -85,7 +85,7 @@ export function ContextualTip({
               className="w-full mt-3 py-1.5 text-xs font-medium bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
               data-testid={`button-got-it-${tipKey}`}
             >
-              Ho capito!
+              Got it!
             </button>
           </div>
         </motion.div>
@@ -149,7 +149,7 @@ export function FloatingTip({
               onClick={handleDismiss}
               className="w-full mt-4 py-2 text-sm font-medium bg-white/20 hover:bg-white/30 rounded-xl transition-colors"
             >
-              Ho capito!
+              Got it!
             </button>
           </div>
         </motion.div>

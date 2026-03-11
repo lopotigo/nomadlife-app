@@ -3,6 +3,8 @@ import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Plus } from "lucide-react";
+import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -343,6 +345,19 @@ export default function EventsCalendar() {
           </div>
         </div>
       </div>
+      <div className="px-4 pb-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: MapPin, title: "See events on the map", description: "Find meetups and gatherings near you", href: "/" },
+          { icon: Calendar, title: "Book coworking & stays", description: "Find workspaces and accommodations", href: "/booking" },
+        ]} />
+      </div>
+
+      <FloatingTip
+        tipKey="hasSeenEventsTip"
+        title="Discover nomad meetups"
+        description="Browse events by date, join meetups, or create your own. Find nomads gathering near you!"
+        delay={2000}
+      />
     </Layout>
   );
 }

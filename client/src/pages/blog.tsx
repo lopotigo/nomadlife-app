@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Search, BookOpen, MapPin, Globe, Plane, Shield, Wallet, Wifi, Calendar, ChevronRight, ArrowLeft, PenLine } from "lucide-react";
+import { Search, BookOpen, MapPin, Globe, Plane, Shield, Wallet, Wifi, Calendar, ChevronRight, ArrowLeft, PenLine, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 
 type BlogPost = {
   id: string;
@@ -261,17 +263,30 @@ export default function Blog() {
         )}
       </main>
 
+      <div className="max-w-5xl mx-auto px-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: MapPin, title: "Explore destinations", description: "Discover places on the interactive map", href: "/" },
+          { icon: ShoppingBag, title: "Browse local deals", description: "Buy and sell gear with nearby nomads", href: "/marketplace" },
+        ]} />
+      </div>
+
       <footer className="border-t border-border py-8 mt-12">
         <div className="max-w-5xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>NomadLife - La community per nomadi digitali</p>
+          <p>NomadLife - The community for digital nomads</p>
           <div className="flex justify-center gap-4 mt-3">
-            <Link href="/" className="hover:text-primary transition-colors">Mappa</Link>
+            <Link href="/" className="hover:text-primary transition-colors">Map</Link>
             <Link href="/booking" className="hover:text-primary transition-colors">Booking</Link>
             <Link href="/marketplace" className="hover:text-primary transition-colors">Marketplace</Link>
-            <Link href="/auth" className="hover:text-primary transition-colors">Accedi</Link>
+            <Link href="/auth" className="hover:text-primary transition-colors">Sign In</Link>
           </div>
         </div>
       </footer>
+      <FloatingTip
+        tipKey="hasSeenBlogTip"
+        title="Explore nomad guides"
+        description="Read travel guides, sustainability tips, visa guides, and city reviews. Written by nomads, for nomads!"
+        delay={2000}
+      />
     </div>
   );
 }

@@ -7,6 +7,11 @@ interface OnboardingState {
   hasSeenCreateTip: boolean;
   hasSeenProfileTip: boolean;
   hasSeenTravelDiaryTip: boolean;
+  hasSeenChatTip: boolean;
+  hasSeenBlogTip: boolean;
+  hasSeenMarketplaceTip: boolean;
+  hasSeenBookingTip: boolean;
+  hasSeenEventsTip: boolean;
 }
 
 interface OnboardingContextType {
@@ -23,6 +28,11 @@ const defaultState: OnboardingState = {
   hasSeenCreateTip: false,
   hasSeenProfileTip: false,
   hasSeenTravelDiaryTip: false,
+  hasSeenChatTip: false,
+  hasSeenBlogTip: false,
+  hasSeenMarketplaceTip: false,
+  hasSeenBookingTip: false,
+  hasSeenEventsTip: false,
 };
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);

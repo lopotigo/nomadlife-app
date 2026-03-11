@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useLocation } from "wouter";
+import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { MapPin, Loader2, Search, Wifi, Coffee, Monitor, X, Star, Filter, Building2, Hotel, Home, CalendarDays, Ticket, MessageSquare, Navigation, Globe, ExternalLink, Plane, Car, Bus, Shield, Lock } from "lucide-react";
 import { getAffiliateLinks } from "@/lib/travelpayouts";
 import { PlaceReviews } from "@/components/place-reviews";
@@ -765,6 +767,19 @@ export default function Coworking() {
           )}
         </AnimatePresence>
       </div>
+      <div className="px-4 pb-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: MapPin, title: "Explore locations", description: "See coworking spaces and cafes on the map", href: "/" },
+          { icon: CalendarDays, title: "Find local meetups", description: "Join events and meet nomads nearby", href: "/events-calendar" },
+        ]} />
+      </div>
+
+      <FloatingTip
+        tipKey="hasSeenBookingTip"
+        title="Find your workspace"
+        description="Search for coworking spaces, hotels, and hostels worldwide. Filter by WiFi, price, and amenities to find your perfect spot!"
+        delay={2000}
+      />
     </Layout>
   );
 }

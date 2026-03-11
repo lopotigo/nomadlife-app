@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import Layout from "@/components/layout";
+import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { 
   ShoppingBag, ExternalLink, Star, BadgeCheck, 
   Wifi, Briefcase, Shield, Smartphone, Package,
@@ -825,6 +827,19 @@ export default function Marketplace() {
           </TabsContent>
         </Tabs>
       </div>
+      <div className="px-4 pb-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: MapPin, title: "Find nearby listings", description: "See what's for sale around you on the map", href: "/" },
+          { icon: Sparkles, title: "Read buying guides", description: "Tips on gear and essentials for nomads", href: "/blog" },
+        ]} />
+      </div>
+
+      <FloatingTip
+        tipKey="hasSeenMarketplaceTip"
+        title="Buy & sell locally"
+        description="Browse listings from nomads nearby or post your own gear, services, and more. GPS-based so you see what's around you!"
+        delay={2000}
+      />
     </Layout>
   );
 }

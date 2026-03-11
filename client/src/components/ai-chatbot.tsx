@@ -4,6 +4,7 @@ import { Bot, X, Send, Plus, Trash2, Loader2, Sparkles, ChevronLeft, Mic, MicOff
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { useLocation } from "wouter";
 
 interface AiConversation {
   id: number;
@@ -26,16 +27,101 @@ interface SmartNotification {
   priority: string;
 }
 
-const QUICK_PROMPTS = [
-  { icon: "🗺️", label: "Itinerario", prompt: "Crea un itinerario di 7 giorni a Bali con coworking e attività" },
-  { icon: "🏨", label: "Hotel a Bangkok", prompt: "Cercami hotel a Bangkok con prezzi e recensioni" },
-  { icon: "💻", label: "Coworking Bali", prompt: "Quali coworking ci sono a Bali? Mostrami prezzi e Wi-Fi" },
-  { icon: "✈️", label: "Voli economici", prompt: "Trovami link per voli economici per Bangkok" },
-  { icon: "📋", label: "Prenota", prompt: "Voglio prenotare un hotel a Milano, cosa hai disponibile?" },
-  { icon: "🌍", label: "Nomad cities", prompt: "Quali sono le migliori città per nomadi digitali nel tuo database?" },
-  { icon: "📱", label: "eSIM", prompt: "Ho bisogno di una eSIM per il mio prossimo viaggio in Asia" },
-  { icon: "💰", label: "Budget trip", prompt: "Ho 1000€, dove posso andare per 2 settimane?" },
+const DEFAULT_PROMPTS = [
+  { icon: "🗺️", label: "7-day itinerary", prompt: "Create a 7-day itinerary for Bali with coworking and activities" },
+  { icon: "🏨", label: "Hotels Bangkok", prompt: "Find me hotels in Bangkok with prices and reviews" },
+  { icon: "💻", label: "Coworking Bali", prompt: "What coworking spaces are in Bali? Show me prices and WiFi" },
+  { icon: "✈️", label: "Cheap flights", prompt: "Find me links for cheap flights to Bangkok" },
+  { icon: "📋", label: "Book a stay", prompt: "I want to book a hotel in Lisbon, what do you have?" },
+  { icon: "🌍", label: "Nomad cities", prompt: "What are the best cities for digital nomads in your database?" },
+  { icon: "📱", label: "eSIM", prompt: "I need an eSIM for my next trip to Asia" },
+  { icon: "💰", label: "Budget trip", prompt: "I have €1000, where can I go for 2 weeks?" },
 ];
+
+const PAGE_PROMPTS: Record<string, { greeting: string; prompts: typeof DEFAULT_PROMPTS }> = {
+  "/": {
+    greeting: "I can help you explore destinations, find coworking spaces, or plan a route!",
+    prompts: [
+      { icon: "📍", label: "Nearby spots", prompt: "What coworking spaces and cafes are near me?" },
+      { icon: "🗺️", label: "Plan a route", prompt: "Help me plan a travel route through Southeast Asia" },
+      { icon: "🏙️", label: "City compare", prompt: "Compare cost of living between Lisbon and Bali for a digital nomad" },
+      { icon: "☀️", label: "Best weather", prompt: "Which nomad cities have the best weather right now?" },
+    ],
+  },
+  "/travel-diary": {
+    greeting: "Need help planning a trip? I can suggest destinations and create itineraries!",
+    prompts: [
+      { icon: "🗺️", label: "Create itinerary", prompt: "Create a 2-week itinerary for Portugal with coworking spots" },
+      { icon: "💰", label: "Budget planner", prompt: "Help me plan a trip with a budget of €2000 per month" },
+      { icon: "🌱", label: "Eco route", prompt: "Suggest an eco-friendly travel route through Europe by train" },
+      { icon: "📊", label: "Cost breakdown", prompt: "Give me a detailed cost breakdown for living in Chiang Mai" },
+    ],
+  },
+  "/marketplace": {
+    greeting: "Looking for something specific? I can help you find deals and gear recommendations!",
+    prompts: [
+      { icon: "💻", label: "Best laptop", prompt: "What's the best laptop for a digital nomad in 2026?" },
+      { icon: "🎒", label: "Packing list", prompt: "Create a minimalist packing list for a 3-month trip" },
+      { icon: "📱", label: "Tech essentials", prompt: "What tech essentials should every digital nomad carry?" },
+      { icon: "🔒", label: "VPN advice", prompt: "Which VPN is best for digital nomads traveling in Asia?" },
+    ],
+  },
+  "/blog": {
+    greeting: "Want travel tips? Ask me about any destination or topic!",
+    prompts: [
+      { icon: "🌍", label: "Visa guide", prompt: "Which countries have the best digital nomad visas in 2026?" },
+      { icon: "🏙️", label: "City guide", prompt: "Give me a complete city guide for Medellin as a digital nomad" },
+      { icon: "🌱", label: "Green travel", prompt: "How can I reduce my carbon footprint as a digital nomad?" },
+      { icon: "📋", label: "Tax tips", prompt: "What should I know about taxes as a digital nomad?" },
+    ],
+  },
+  "/booking": {
+    greeting: "I can help you find coworking spaces and accommodations worldwide!",
+    prompts: [
+      { icon: "💻", label: "Coworking search", prompt: "Find the best coworking spaces in Lisbon with fast WiFi" },
+      { icon: "🏨", label: "Budget hotels", prompt: "Find me affordable hotels in Bangkok near coworking spaces" },
+      { icon: "🏠", label: "Coliving", prompt: "What are the best coliving spaces for nomads in Bali?" },
+      { icon: "📍", label: "Near me", prompt: "Search for coworking spaces near my current location" },
+    ],
+  },
+  "/events-calendar": {
+    greeting: "Looking for nomad meetups? I can help you find events nearby!",
+    prompts: [
+      { icon: "🤝", label: "Meetups", prompt: "What nomad meetups and events are happening near me?" },
+      { icon: "🎉", label: "Networking", prompt: "How can I meet other digital nomads in a new city?" },
+      { icon: "💼", label: "Conferences", prompt: "What are the best digital nomad conferences in 2026?" },
+      { icon: "🌍", label: "Community", prompt: "Tell me about the digital nomad community in Lisbon" },
+    ],
+  },
+  "/chat": {
+    greeting: "Need help with community channels? Ask me anything!",
+    prompts: [
+      { icon: "💬", label: "Channels", prompt: "What community channels are available and what are they about?" },
+      { icon: "🤝", label: "Find nomads", prompt: "How can I connect with other digital nomads near me?" },
+      { icon: "💼", label: "Freelance tips", prompt: "Give me tips for finding freelance work as a digital nomad" },
+      { icon: "🌍", label: "Language tips", prompt: "What are the best ways to learn the local language while traveling?" },
+    ],
+  },
+  "/profile": {
+    greeting: "I can help you customize your profile or find nomads near you!",
+    prompts: [
+      { icon: "✨", label: "Profile tips", prompt: "How can I make my nomad profile stand out?" },
+      { icon: "📊", label: "My stats", prompt: "Analyze my travel stats and suggest new destinations" },
+      { icon: "🤝", label: "Find nearby", prompt: "Find digital nomads near my current location" },
+      { icon: "🌍", label: "Next trip", prompt: "Based on my profile, where should I go next?" },
+    ],
+  },
+};
+
+function getPageContext(path: string) {
+  if (PAGE_PROMPTS[path]) return PAGE_PROMPTS[path];
+  if (path === "/coworking") return PAGE_PROMPTS["/booking"];
+  if (path.startsWith("/blog/")) return PAGE_PROMPTS["/blog"];
+  if (path.startsWith("/trip/")) return PAGE_PROMPTS["/travel-diary"];
+  if (path.startsWith("/user/")) return PAGE_PROMPTS["/profile"];
+  if (path.startsWith("/city-guide")) return PAGE_PROMPTS["/blog"];
+  return null;
+}
 
 export function AiChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +143,8 @@ export function AiChatbot() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const { user } = useAuth();
+  const [currentPath] = useLocation();
+  const pageContext = getPageContext(currentPath);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -272,7 +360,7 @@ export function AiChatbot() {
   const toggleVoiceInput = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Il tuo browser non supporta il riconoscimento vocale");
+      alert("Your browser does not support voice recognition");
       return;
     }
 
@@ -283,7 +371,7 @@ export function AiChatbot() {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = "it-IT";
+    recognition.lang = "en-US";
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
@@ -313,12 +401,12 @@ export function AiChatbot() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Seleziona un file immagine");
+      alert("Please select an image file");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("L'immagine deve essere inferiore a 5MB");
+      alert("Image must be smaller than 5MB");
       return;
     }
 
@@ -393,7 +481,7 @@ export function AiChatbot() {
           id: Date.now() + 1,
           conversationId: conv!.id,
           role: "assistant",
-          content: "Non sono riuscito ad analizzare la foto. Riprova.",
+          content: "I couldn't analyze the photo. Please try again.",
           createdAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, errorMsg]);
@@ -548,7 +636,7 @@ export function AiChatbot() {
             {showNotifications && smartNotifications.length > 0 && (
               <div className="p-3 border-b border-border bg-amber-50 dark:bg-amber-950/20 space-y-2 max-h-40 overflow-y-auto">
                 <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                  <Bell className="w-3 h-3" /> Notifiche Smart
+                  <Bell className="w-3 h-3" /> Smart Notifications
                 </p>
                 {smartNotifications.map((n, i) => (
                   <div
@@ -608,11 +696,13 @@ export function AiChatbot() {
                           <Bot className="w-8 h-8 text-violet-500" />
                         </div>
                         <h4 className="font-semibold text-sm mb-1">Hey{user?.name ? `, ${user.name.split(" ")[0]}` : ""}!</h4>
-                        <p className="text-xs text-muted-foreground">Ask me anything about travel, nomad life, destinations...</p>
-                        <p className="text-[10px] text-muted-foreground/60 mt-1">Puoi anche inviare foto o usare il microfono</p>
+                        <p className="text-xs text-muted-foreground">
+                          {pageContext ? pageContext.greeting : "Ask me anything about travel, nomad life, destinations..."}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-1">You can also send photos or use the microphone</p>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        {QUICK_PROMPTS.map((qp, i) => (
+                        {(pageContext ? pageContext.prompts : DEFAULT_PROMPTS).map((qp, i) => (
                           <button
                             key={i}
                             onClick={() => sendMessage(qp.prompt)}
@@ -691,7 +781,7 @@ export function AiChatbot() {
                     <button
                       onClick={() => cameraInputRef.current?.click()}
                       className="p-1.5 hover:bg-muted rounded-lg transition-colors shrink-0 text-muted-foreground hover:text-foreground"
-                      title="Scatta foto"
+                      title="Take photo"
                       disabled={isLoading}
                       data-testid="chatbot-camera-btn"
                     >
@@ -724,7 +814,7 @@ export function AiChatbot() {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder={isListening ? "Sto ascoltando..." : "Ask NomadBot..."}
+                      placeholder={isListening ? "Listening..." : "Ask NomadBot..."}
                       className="flex-1 bg-transparent border-none outline-none resize-none text-sm placeholder:text-muted-foreground max-h-20 min-h-[36px]"
                       rows={1}
                       disabled={isLoading}

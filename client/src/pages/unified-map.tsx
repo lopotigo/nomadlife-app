@@ -32,6 +32,7 @@ import { WeatherWidget } from "@/components/weather-widget";
 import { InFeedAd } from "@/components/ad-banner";
 import { MomentsBar } from "@/components/moments";
 import { FloatingTip } from "@/components/contextual-tip";
+import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -2600,17 +2601,24 @@ export default function UnifiedMap() {
         .leaflet-container { font-family: inherit; }
       `}</style>
 
+      <div className="px-4 pb-4">
+        <FeatureDiscoveryRow cards={[
+          { icon: Plane, title: "Plan your next trip", description: "Create itineraries with stops and CO2 tracking", href: "/travel-diary" },
+          { icon: BookOpen, title: "Read nomad guides", description: "Travel tips, visa guides, and city reviews", href: "/blog" },
+        ]} />
+      </div>
+
       <FloatingTip
         tipKey="hasSeenMapTip"
-        title="Clicca sulla mappa!"
-        description="Tocca un punto qualsiasi sulla mappa per creare un post o un evento in quella posizione."
+        title="Tap on the map!"
+        description="Tap anywhere on the map to create a post or event at that location. Explore markers to discover what's around you!"
         delay={3000}
       />
 
       <FloatingTip
         tipKey="hasSeenFeedTip"
-        title="Scorri per vedere il feed"
-        description="Sotto la mappa trovi tutti i post, eventi e viaggi della community. Clicca su un contenuto per vederlo in dettaglio!"
+        title="Scroll to see the feed"
+        description="Below the map you'll find posts, events, and trips from the community. Tap any content to see details!"
         delay={8000}
       />
     </Layout>
