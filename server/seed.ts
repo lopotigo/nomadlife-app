@@ -4,6 +4,7 @@ import { db } from "./db";
 import { blogPosts, places, events, users, posts, chatGroups, messages, vendors, products, trips, tripStops } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
 import seedData from "./seed-data.json";
+import { translateArticlesToEnglish } from "./seed-translate-articles";
 
 export async function autoSeed() {
   const [{ count: blogCount }] = await db.select({ count: sql<number>`count(*)` }).from(blogPosts);
@@ -18,6 +19,7 @@ export async function autoSeed() {
     await seedGabrieleIndiaTrip();
     await seedEcoArticles();
     await seedGeopoliticsArticles();
+    await translateArticlesToEnglish();
     return;
   }
 
@@ -220,6 +222,7 @@ export async function autoSeed() {
   await seedGabrieleIndiaTrip();
   await seedEcoArticles();
   await seedGeopoliticsArticles();
+  await translateArticlesToEnglish();
 }
 
 async function seedCommunityChannels() {
