@@ -914,8 +914,14 @@ export async function translateArticlesToEnglish() {
 
   for (const article of translations) {
     try {
-      const existing = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, article.oldSlug));
-      if (existing.length > 0) {
+      const englishExists = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, article.newSlug));
+      const italianExists = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, article.oldSlug));
+
+      if (englishExists.length > 0 && italianExists.length > 0) {
+        await db.delete(blogPosts).where(eq(blogPosts.slug, article.oldSlug));
+        console.log(`[Blog] Removed duplicate Italian: ${article.oldSlug} (English version exists)`);
+        translated++;
+      } else if (italianExists.length > 0) {
         const updateData: any = {
           slug: article.newSlug,
           title: article.title,
@@ -929,11 +935,21 @@ export async function translateArticlesToEnglish() {
         await db.update(blogPosts).set(updateData).where(eq(blogPosts.slug, article.oldSlug));
         console.log(`[Blog] Translated: ${article.oldSlug} → ${article.newSlug}`);
         translated++;
+      } else if (englishExists.length > 0) {
+        continue;
       } else {
-        const alreadyTranslated = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, article.newSlug));
-        if (alreadyTranslated.length > 0) {
-          continue;
-        }
+        const insertData: any = {
+          slug: article.newSlug,
+          title: article.title,
+          excerpt: article.excerpt,
+          content: article.content,
+          category: article.category,
+        };
+        if (article.city) insertData.city = article.city;
+        if (article.country) insertData.country = article.country;
+        await db.insert(blogPosts).values(insertData);
+        console.log(`[Blog] Inserted new English article: ${article.newSlug}`);
+        translated++;
       }
     } catch (err) {
       console.error(`[Blog] Failed to translate ${article.oldSlug}:`, err);
@@ -941,4 +957,328 @@ export async function translateArticlesToEnglish() {
   }
 
   console.log(`[Blog] Translation complete: ${translated} articles translated`);
+
+  await seedNewEnglishArticles();
+}
+
+const newArticles = [
+  {
+    slug: "the-cube-athens-coworking-complete-guide",
+    title: "The Cube Athens: The Complete Guide for Digital Nomads",
+    excerpt: "Athens' largest coworking space and startup cluster. 9 floors, 24/7 access, €5/hour, and one of Europe's most vibrant tech communities. Everything you need to know.",
+    category: "review",
+    city: "Athens",
+    country: "Greece",
+    content: `# The Cube Athens: The Complete Guide for Digital Nomads
+
+Athens has emerged as one of Europe's most exciting destinations for digital nomads. Affordable living costs, year-round sunshine, world-class food, and a rapidly growing tech scene have put it firmly on the remote work map. At the center of this ecosystem sits **The Cube Athens**, the city's largest coworking space and startup cluster.
+
+## Location
+
+The Cube is located at **73 Aiolou Street**, right in the heart of Athens' commercial district. The location is exceptional — you're within walking distance of some of the city's most iconic landmarks and neighborhoods:
+
+- **Monastiraki** — Athens' famous flea market and vibrant square
+- **Syntagma Square** — the political center and main metro hub
+- **Plaka** — the charming old town beneath the Acropolis
+- **Exarcheia** — Athens' alternative, artistic neighborhood
+
+The building itself is a striking cube-shaped structure spread across **9 floors** with **1,700 square meters** of workspace. Getting there is easy thanks to excellent public transport connections — Monastiraki metro station is just a few minutes' walk away.
+
+## Pricing
+
+One of The Cube's biggest advantages is its affordability, especially compared to coworking spaces in Western European capitals:
+
+- **Hourly Rate:** €5/hour
+- **Day Pass:** Available on request
+- **Monthly Membership:** Contact for current rates
+- **Private Office:** 22 private offices available for teams (contact for pricing)
+
+At €5 per hour, The Cube is consistently described as a bargain by international nomads. For up-to-date monthly rates or team pricing, contact them directly at **hello@thecube.gr**.
+
+## Amenities & Facilities
+
+The Cube delivers a comprehensive workspace across its 9 floors:
+
+- **High-Speed Wi-Fi** — described by members as incredibly fast, perfect for video calls and heavy uploads
+- **24/7 Access** — members enjoy round-the-clock access, ideal for those working across time zones
+- **22 Private Offices** — for teams and startups that need their own space
+- **Open-Plan Coworking** — hot desks in both quiet and active zones
+- **Meeting Rooms** — equipped with HD projectors for client presentations
+- **Phone Booths** — private spaces for calls without disturbing others
+- **Seminar & Workshop Rooms** — for presentations and larger meetings
+- **Event Space** — capable of hosting multiple events simultaneously
+- **Free Coffee & Cookies** — because nobody should work without coffee
+- **Kitchen Facilities** — store and prepare your own food
+- **Quiet Zones** — dedicated areas for focused, deep work
+- **Active Zones** — collaborative spaces for networking and brainstorming
+
+## The Community
+
+What truly sets The Cube apart is its extraordinary community. Founded in 2013 by **Stavros Messinis and Maria Calafatis** (who previously ran Athens' first coworking space, CoLab Athens), The Cube was built with one mission: create a melting-pot community where people connect, create, and collaborate.
+
+The space currently hosts **60-80+ entrepreneurs, startups, and digital nomads** from diverse backgrounds — developers, designers, NGO workers, gaming companies, IoT startups, and artists. The founders are personally involved in daily operations and actively foster connections between Greek and international members.
+
+### Events & Programs
+
+The Cube is arguably the most event-rich coworking space in Athens:
+
+- **Daily Meetups & Hackathons** — 2-3 events can run concurrently on different floors
+- **80% of Athens' tech meetups** are hosted at The Cube
+- **Athens Mini MakerFaire** — a creativity and invention festival
+- **Robotex** — robotics competition
+- **Ladypreneurs Athens** — dedicated to female entrepreneurs
+- **The Cube Runners** — a fitness group for members who want to stay active
+- **Workshops & Talks** — on topics from SEO to business strategy
+- **Art Exhibitions & Wellness Classes** — keeping the space vibrant and diverse
+
+The Cube is not just a desk — it is an **incubator and accelerator** with mentorship, business support, and connections to Athens' startup ecosystem and investment community.
+
+## Why Athens for Digital Nomads?
+
+Athens offers an unbeatable combination of lifestyle and affordability:
+
+- **Cost of Living:** A comfortable lifestyle is achievable on €1,200–1,600/month, including rent, food, and coworking
+- **Weather:** 300+ days of sunshine per year, mild winters, and beautiful summers
+- **Food:** World-class Greek cuisine at very affordable prices — fresh seafood, souvlaki, mezze, and incredible bakeries
+- **Culture:** The Acropolis, ancient ruins, world-class museums, and a thriving contemporary arts scene
+- **Nightlife:** Athens has some of Europe's best nightlife, from rooftop bars to underground clubs
+- **Safety:** Generally very safe, with a friendly and welcoming atmosphere
+- **Transport:** Modern metro system, affordable taxis, and Athens International Airport with connections across Europe
+- **Greece Digital Nomad Visa:** Greece offers a digital nomad visa for non-EU remote workers, valid for 12 months and renewable
+- **Islands:** Weekend trips to Aegean islands (Hydra, Aegina, Poros) are just a ferry ride away
+
+## Tips for Getting the Most Out of The Cube
+
+1. **Start with an hourly visit** at €5/hour to feel the vibe before committing to a membership
+2. **Attend the events** — they are the best way to meet people and tap into the Athens startup scene
+3. **Ask for a tour** — the founders personally show new visitors around and share their vision
+4. **Join The Cube Runners** — stay active while building your network
+5. **Explore the neighborhood** — Aiolou Street is full of hidden cafes, bookshops, and street art
+6. **Work mornings, explore afternoons** — the Acropolis, Plaka, and the National Garden are all walkable
+7. **Visit in spring or autumn** — the weather is perfect (25–28°C) and the city is not overwhelmed by summer tourists
+
+## What Members Say
+
+- "Super cosy, quiet and most importantly flexible!"
+- "Facilities are awesome, staff is super attentive and very friendly"
+- "Boutique space which feels like home"
+- "Natural positive and welcoming environment"
+- "The hosts are extremely well connected in Athens"
+
+## Final Verdict
+
+The Cube Athens is much more than a coworking space — it is a full ecosystem for entrepreneurs and digital nomads. The combination of ultra-affordable pricing (€5/hour), 24/7 access, fast Wi-Fi, 9 floors of diverse workspace, and one of the most vibrant event calendars of any coworking space in Europe makes it a standout choice.
+
+If you are considering Athens as your next base, The Cube should be your first stop. The founders' personal touch, the diverse community of 60–80+ members, and the constant stream of meetups and hackathons create an environment that is hard to replicate.
+
+Athens itself is a revelation for nomads — incredible food, ancient history, island getaways, and a cost of living that lets you live well without burning through your savings.
+
+---
+
+**Useful Links:**
+- [The Cube Athens Website](https://thecube.gr)
+- [Greece Digital Nomad Visa Info](https://workfromgreece.gr)
+- Email: hello@thecube.gr
+- Phone: +30 210 331 4704
+
+**Plan your trip to Athens:**
+- [Search flights to Athens](https://www.aviasales.com/search?destination_name=Athens&adults=1&marker=578583)
+- [Rent a car in Athens](https://www.getrentacar.com/en/search?location=Athens&marker=578583)
+- [Book a transfer from Athens airport](https://www.gettransfer.com/en?from=Athens%20Airport&marker=578583)
+- [Get an eSIM for Greece](https://www.airalo.com/greece?marker=578583)
+- [Travel insurance](https://www.insubuy.com/travel-medical-insurance/)`
+  },
+  {
+    slug: "zone-01-coding-school-digital-nomads",
+    title: "Zone 01: The Free Coding School That Creates Digital Nomads",
+    excerpt: "Zone 01 is a tuition-free, peer-to-peer coding school based on the 42 Network model. No teachers, no lectures — just real projects and a global community. Here's everything you need to know.",
+    category: "review",
+    city: "Global",
+    country: "Global",
+    content: `# Zone 01: The Free Coding School That Creates Digital Nomads
+
+What if you could learn software development for free, with no teachers, no lectures, and no prior experience required — and come out the other side ready to work remotely from anywhere in the world? That's the promise of **Zone 01**, a revolutionary coding school that's changing how people enter the tech industry.
+
+## What Is Zone 01?
+
+Zone 01 is part of the global network of peer-to-peer coding schools inspired by the **42 Network** model, originally founded in Paris by Xavier Niel. The concept is radical:
+
+- **Zero tuition fees** — completely free
+- **No teachers** — students learn from each other
+- **No lectures** — all learning happens through hands-on projects
+- **No degree required** — open to anyone aged 18+
+- **Gamified progression** — levels, XP, and achievements
+
+The school operates on the principle that the best way to learn programming is by doing it — solving real problems, reviewing each other's code, and building projects that matter.
+
+## How It Works
+
+### The Selection: The Piscine
+
+Before you're accepted, you must survive the **Piscine** (French for "swimming pool") — an intense 4-week selection process where candidates are thrown into the deep end:
+
+- **26 days of coding challenges**, starting from zero
+- Work from morning to night, often past midnight
+- No prior programming experience needed
+- Learn by doing — figure things out yourself or ask peers
+- About **30-40% of candidates** make it through
+
+The Piscine tests not just your coding ability, but your **resilience, creativity, and ability to collaborate** — the same skills you need as a digital nomad.
+
+### The Curriculum
+
+Once accepted, the main curriculum typically spans **12-18 months** and covers:
+
+#### Core Technologies
+- **Go** — the primary language, chosen for its simplicity and power
+- **JavaScript/TypeScript** — frontend and full-stack development
+- **Rust** — systems programming and performance
+- **SQL & Databases** — data management and queries
+- **Docker & DevOps** — containerization and deployment
+- **Linux & System Administration** — understanding the stack
+
+#### Project-Based Learning
+Every skill is learned through projects, not theory:
+- Build a social network from scratch
+- Create a real-time chat application
+- Develop a 3D game engine
+- Design and deploy web applications
+- Implement blockchain concepts
+- Build AI and machine learning projects
+
+#### Peer Review System
+- Every project is reviewed by **at least 3 peers**
+- You also review others' projects — teaching reinforces learning
+- No grades from teachers — the community validates your work
+- Gamified with XP, levels, and achievements
+
+## Zone 01 Campuses
+
+Zone 01 has expanded globally, with campuses in several locations that are also great for digital nomads:
+
+### Zone 01 Normandie (France)
+- Located in Rouen, a charming city in northern France
+- Beautiful campus in a renovated building
+- Access to Paris (1.5 hours by train)
+
+### Zone 01 Bahrain
+- In the heart of the Gulf, tax-free country
+- Modern campus with cutting-edge facilities
+- Gateway to the Middle East tech scene
+
+### Zone 01 Dakar (Senegal)
+- Growing tech hub in West Africa
+- Affordable cost of living
+- Vibrant startup ecosystem
+
+### Zone 01 Abu Dhabi (UAE)
+- Partnerships with major tech companies
+- Tax-free income
+- World-class infrastructure
+
+### Zone 01 Oujda (Morocco)
+- Beautiful campus in eastern Morocco
+- Very affordable cost of living
+- Gateway to North Africa and Europe
+
+### Other 42 Network Schools
+The broader 42 Network has 50+ campuses worldwide, including:
+- **42 Paris** — the original
+- **42 Tokyo** — in Japan
+- **42 Silicon Valley** — in the USA
+- **42 London** — in the UK
+- **42 Berlin** — in Germany
+- **42 Seoul** — in South Korea
+
+## Why Zone 01 Is Perfect for Future Digital Nomads
+
+### 1. You Learn Remote-Ready Skills
+The entire curriculum focuses on the technologies that remote companies actually hire for — Go, JavaScript, DevOps, full-stack development. These are exactly the skills that let you work from anywhere.
+
+### 2. Self-Discipline is Built In
+Without teachers pushing you, you develop the **self-motivation and time management** skills that are essential for remote work. If you can survive the Piscine and complete the curriculum, you can definitely manage yourself as a freelancer or remote employee.
+
+### 3. Community & Networking
+The peer-to-peer model creates deep connections with fellow students who become your professional network. Many Zone 01 alumni end up working together or referring each other for jobs — across borders.
+
+### 4. No Debt
+Unlike traditional coding bootcamps that charge $10,000–20,000+, Zone 01 is **completely free**. You start your nomad career without student debt weighing you down.
+
+### 5. Global Recognition
+The 42/Zone 01 network is recognized by major tech companies. Google, Amazon, Microsoft, and countless startups actively recruit from these schools.
+
+## Career Outcomes
+
+Zone 01 and 42 Network graduates are in high demand:
+
+- **Average starting salary**: $40,000–70,000 (varies by location)
+- **Employment rate**: 80-100% within 6 months of graduation
+- **Common roles**: Full-stack developer, backend engineer, DevOps engineer, system administrator
+- **Top employers**: Google, Amazon, Airbnb, Ubisoft, IBM, plus hundreds of startups
+- **Freelance path**: Many graduates go straight to freelancing, working remotely from day one
+
+## How to Apply
+
+1. **Visit the website** of your nearest Zone 01 or 42 campus
+2. **Complete the online registration** — basic personal information
+3. **Pass the online tests** — logic and memory games (no coding knowledge needed)
+4. **Attend the Piscine** — the 4-week selection process
+5. **Get accepted** — if you survive the Piscine, you're in!
+
+### Tips for the Piscine
+- **Sleep enough** — it's a marathon, not a sprint
+- **Help others** — collaboration is valued and assessed
+- **Don't give up** — the difficulty is intentional; persistence matters more than talent
+- **Ask questions** — there's no shame in not knowing; the shame is in not asking
+- **Have fun** — the Piscine is intense but also one of the most memorable experiences you'll have
+
+## Cost & Commitment
+
+- **Tuition**: Free (€0)
+- **Duration**: 12–18 months (flexible, self-paced)
+- **Schedule**: Self-directed, but most students work full-time hours
+- **Living costs**: You'll need to cover your own accommodation and food during the program
+- **Equipment**: Computers are provided at the campus
+
+## Our Verdict
+
+Zone 01 is one of the best-kept secrets in tech education. It's completely free, teaches you the exact skills needed for remote work, and builds the discipline and self-reliance that every digital nomad needs. The peer-to-peer model creates a global network of like-minded developers who support each other long after graduation.
+
+If you're considering a career change into tech, or you want to build the skills to work remotely from anywhere, Zone 01 and the 42 Network should be at the top of your list. The Piscine is tough, but if you make it through, you'll come out the other side as a developer ready to work from Bali, Berlin, or anywhere in between.
+
+---
+
+**Useful Links:**
+- [Zone 01 Official Website](https://www.zone01.com)
+- [42 Network — All Campuses](https://www.42network.org)
+- [42 Paris](https://42.fr)
+
+**Ready to start your nomad journey after Zone 01?**
+- [Search flights worldwide](https://www.aviasales.com/?marker=578583)
+- [Find coworking spaces](https://www.aviasales.com/?marker=578583)
+- [Get travel insurance](https://www.insubuy.com/travel-medical-insurance/)
+- [Get an eSIM](https://www.airalo.com/?marker=578583)`
+  },
+];
+
+async function seedNewEnglishArticles() {
+  for (const article of newArticles) {
+    try {
+      const existing = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, article.slug));
+      if (existing.length > 0) continue;
+
+      await db.insert(blogPosts).values({
+        slug: article.slug,
+        title: article.title,
+        excerpt: article.excerpt,
+        content: article.content,
+        category: article.category,
+        city: article.city || null,
+        country: article.country || null,
+      });
+      console.log(`[Blog] Created new article: ${article.slug}`);
+    } catch (err) {
+      console.error(`[Blog] Failed to create ${article.slug}:`, err);
+    }
+  }
 }
