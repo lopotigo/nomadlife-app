@@ -458,251 +458,251 @@ async function seedMissingBlogPosts() {
 
 async function seedEcoArticles() {
   try {
-    const slugs = [
-      "viaggiare-green-guida-sostenibilita-nomadi-digitali",
-      "citta-sostenibili-nomadi-digitali-2026"
-    ];
+    const oldSlugs = ["viaggiare-green-guida-sostenibilita-nomadi-digitali", "citta-sostenibili-nomadi-digitali-2026"];
+    for (const s of oldSlugs) { await db.delete(blogPosts).where(eq(blogPosts.slug, s)); }
+
+    const slugs = ["green-travel-sustainability-guide-digital-nomads", "most-sustainable-cities-digital-nomads-2026"];
     const existingSlugs = (await db.select({ slug: blogPosts.slug }).from(blogPosts)).map(r => r.slug);
-    
+
     if (!existingSlugs.includes(slugs[0])) {
       await db.insert(blogPosts).values({
         slug: slugs[0],
-        title: "Viaggiare Green: Guida alla Sostenibilità per Nomadi Digitali",
-        excerpt: "Come ridurre l'impatto ambientale della vita nomade. Trasporti eco-friendly, coworking sostenibili, compensazione CO2 e scelte consapevoli per un nomadismo digitale a basso impatto.",
-        content: `# Viaggiare Green: Guida alla Sostenibilità per Nomadi Digitali
+        title: "Green Travel: The Ultimate Sustainability Guide for Digital Nomads",
+        excerpt: "How to reduce your environmental impact as a digital nomad. Eco-friendly transport, sustainable coworking, CO2 offsetting, and conscious choices for a low-impact nomadic lifestyle.",
+        content: `# Green Travel: The Ultimate Sustainability Guide for Digital Nomads
 
-Il nomadismo digitale è libertà, ma ha un costo ambientale. Voli frequenti, consumo energetico dei dispositivi e lo stile di vita "sempre in movimento" generano un'impronta di carbonio significativa. Ecco come ridurla senza rinunciare alla libertà.
+Digital nomadism is freedom — but it comes with an environmental cost. Frequent flights, device energy consumption, and the "always moving" lifestyle create a significant carbon footprint. Here's how to reduce it without giving up the freedom.
 
-## L'impronta di carbonio del nomade digitale
+## The Carbon Footprint of a Digital Nomad
 
-Un nomade digitale medio produce tra **5 e 12 tonnellate di CO2 all'anno**, contro le 4-6 tonnellate di un cittadino medio europeo. La differenza? I voli. Un singolo volo Roma-Bangkok genera circa **2,5 tonnellate di CO2** — metà dell'intera quota annuale sostenibile per persona (circa 5 tonnellate secondo l'IPCC).
+An average digital nomad produces between **5 and 12 tonnes of CO2 per year**, compared to 4-6 tonnes for an average European citizen. The difference? Flights. A single London-Bangkok flight generates around **2.5 tonnes of CO2** — half the entire sustainable annual quota per person (about 5 tonnes according to the IPCC).
 
-## Trasporti: la scelta che conta di più
+## Transport: The Choice That Matters Most
 
-### Treno vs Aereo
-Il treno emette fino al **90% in meno di CO2** rispetto all'aereo per le stesse distanze. In Europa, la rete ferroviaria ad alta velocità rende possibile viaggiare tra hub nomadi senza volare:
-- **Milano → Lisbona** in treno: ~85 kg CO2 (vs ~350 kg in aereo)
-- **Berlino → Barcellona**: ~65 kg CO2 (vs ~280 kg in aereo)
-- **Interrail Global Pass**: da 185€ per viaggi illimitati in 33 paesi
+### Train vs Plane
+Trains emit up to **90% less CO2** than planes for the same distances. In Europe, the high-speed rail network makes it possible to travel between nomad hubs without flying:
+- **London to Lisbon** by train: ~85 kg CO2 (vs ~350 kg by plane)
+- **Berlin to Barcelona**: ~65 kg CO2 (vs ~280 kg by plane)
+- **Interrail Global Pass**: from €185 for unlimited travel across 33 countries
 
 ### Slow Travel
-La filosofia dello **slow travel** non è solo ecologica — è anche più produttiva. Restare 2-3 mesi in un posto invece di 2 settimane significa:
-- Meno voli, meno CO2
-- Affitti mensili più economici
-- Tempo per costruire routine lavorative stabili
-- Connessioni più profonde con la comunità locale
+The **slow travel** philosophy isn't just ecological — it's also more productive. Staying 2-3 months in one place instead of 2 weeks means:
+- Fewer flights, less CO2
+- Cheaper monthly rent
+- Time to build stable work routines
+- Deeper connections with the local community
 
-## Coworking e Coliving Sostenibili
+## Sustainable Coworking & Coliving
 
-Sempre più spazi di coworking e coliving adottano pratiche green:
+More and more coworking and coliving spaces are adopting green practices:
 
-### Certificazioni da cercare
-- **B Corp** — standard di sostenibilità aziendale
-- **LEED** — edifici a basso impatto energetico
-- **Energia rinnovabile al 100%** — sempre più comuni nei paesi del Nord Europa
+### Certifications to Look For
+- **B Corp** — corporate sustainability standard
+- **LEED** — low-impact energy buildings
+- **100% Renewable Energy** — increasingly common in Northern European countries
 
-### Esempi di spazi eco-friendly
-- **Green Coworking Bali** — energia solare, zero plastica, compostaggio
-- **The Sustainable Hub Lisbona** — edificio ristrutturato con materiali riciclati
-- **EcoHub Berlin** — certificazione LEED, trasporti condivisi per i membri
-- **Impact Hub** (rete globale) — focus su sostenibilità e impatto sociale
+### Examples of Eco-Friendly Spaces
+- **Green Coworking Bali** — solar power, zero plastic, composting
+- **The Sustainable Hub Lisbon** — renovated building with recycled materials
+- **EcoHub Berlin** — LEED certification, shared transport for members
+- **Impact Hub** (global network) — focus on sustainability and social impact
 
-## Compensazione CO2: come funziona
+## CO2 Offsetting: How It Works
 
-Quando volare è inevitabile, la **compensazione della CO2** è un'opzione:
+When flying is unavoidable, **CO2 offsetting** is an option:
 
-1. **Calcola le emissioni** — usa NomadLife o siti come atmosfair.de
-2. **Scegli un progetto certificato** — Gold Standard o VCS (Verified Carbon Standard)
-3. **Paga la compensazione** — costa circa 23€ per tonnellata di CO2
+1. **Calculate your emissions** — use NomadLife or sites like atmosfair.de
+2. **Choose a certified project** — Gold Standard or VCS (Verified Carbon Standard)
+3. **Pay for the offset** — costs about €23 per tonne of CO2
 
-### Attenzione al greenwashing
-Non tutti i programmi di compensazione sono uguali. Evita:
-- Progetti senza certificazione indipendente
-- Programmi che promettono "carbon neutral" senza trasparenza
-- App che chiedono importi fissi senza calcolare le emissioni reali
+### Beware of Greenwashing
+Not all offsetting programs are equal. Avoid:
+- Projects without independent certification
+- Programs that promise "carbon neutral" without transparency
+- Apps that charge fixed amounts without calculating actual emissions
 
-## Alimentazione sostenibile in viaggio
+## Sustainable Eating While Traveling
 
-- **Mangia locale e di stagione** — riduce le emissioni del trasporto alimentare
-- **Riduci la carne** — l'industria zootecnica causa il 14.5% delle emissioni globali
-- **Street food** — spesso più sostenibile dei ristoranti (meno packaging, filiera corta)
-- **Porta la borraccia** — in molti paesi asiatici l'acqua in bottiglia è un problema enorme
+- **Eat local and seasonal** — reduces food transport emissions
+- **Reduce meat** — the livestock industry causes 14.5% of global emissions
+- **Street food** — often more sustainable than restaurants (less packaging, shorter supply chain)
+- **Carry a water bottle** — in many Asian countries, bottled water is a massive problem
 
-## La regola del 3-3-3 per il nomade green
+## The 3-3-3 Rule for the Green Nomad
 
-Una formula semplice per bilanciare sostenibilità e libertà:
+A simple formula to balance sustainability and freedom:
 
-1. **3 mesi minimo** in ogni destinazione (slow travel)
-2. **3 voli massimo** all'anno per tratte intercontinentali
-3. **3 azioni green** quotidiane (borraccia, trasporto pubblico, cibo locale)
+1. **3 months minimum** in each destination (slow travel)
+2. **3 flights maximum** per year for intercontinental routes
+3. **3 green actions** daily (water bottle, public transport, local food)
 
-## Tecnologia e sostenibilità
+## Technology & Sustainability
 
-Anche la tecnologia può essere più green:
-- **Laptop ricondizionati** — risparmio economico e ambientale
-- **Cloud computing green** — preferisci provider con data center alimentati da rinnovabili (Google Cloud, AWS con regioni green)
-- **Dark mode** — su schermi OLED riduce il consumo energetico fino al 40%
-- **Connessione WiFi vs 4G/5G** — il WiFi consuma meno energia del mobile data
+Tech can be greener too:
+- **Refurbished laptops** — saves money and the environment
+- **Green cloud computing** — prefer providers with renewable-powered data centers (Google Cloud, AWS with green regions)
+- **Dark mode** — on OLED screens, reduces energy consumption by up to 40%
+- **WiFi vs 4G/5G** — WiFi uses less energy than mobile data
 
-## Conclusioni
+## Conclusion
 
-Essere nomadi digitali e sostenibili non è un ossimoro. Richiede consapevolezza e piccole scelte quotidiane che, sommate, fanno la differenza. Lo slow travel non è un limite — è un modo migliore di vivere e lavorare.
+Being a digital nomad and sustainable is not an oxymoron. It requires awareness and small daily choices that, combined, make a real difference. Slow travel isn't a limitation — it's a better way to live and work.
 
-Usa la funzione Eco Trip di NomadLife per calcolare e monitorare la tua impronta di carbonio ad ogni viaggio. Il pianeta è la nostra casa — ovunque ci troviamo.`,
+Use NomadLife's Eco Trip feature to calculate and track your carbon footprint on every trip. The planet is our home — wherever we are.`,
         category: "lifestyle",
         city: null,
         country: null,
         imageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=630&fit=crop",
-        tags: ["sostenibilità", "eco travel", "carbon footprint", "slow travel", "green coworking", "compensazione CO2", "nomade digitale", "viaggiare green"],
+        tags: ["sustainability", "eco travel", "carbon footprint", "slow travel", "green coworking", "CO2 offsetting", "digital nomad", "green travel"],
         author: "NomadLife Team",
         published: true,
       });
-      console.log("[Blog] Created eco-sustainability article 1");
+      console.log("[Blog] Created eco-sustainability article 1 (EN)");
     }
 
     if (!existingSlugs.includes(slugs[1])) {
       await db.insert(blogPosts).values({
         slug: slugs[1],
-        title: "Le Città più Sostenibili per Nomadi Digitali nel 2026",
-        excerpt: "Classifica delle 10 città più eco-friendly per lavorare da remoto. Energia rinnovabile, trasporti verdi, qualità dell'aria e coworking sostenibili: dove andare per un nomadismo a basso impatto.",
-        content: `# Le Città più Sostenibili per Nomadi Digitali nel 2026
+        title: "The Most Sustainable Cities for Digital Nomads in 2026",
+        excerpt: "Ranking the top 10 eco-friendly cities for remote work. Renewable energy, green transport, air quality, and sustainable coworking — where to go for a low-impact nomadic lifestyle.",
+        content: `# The Most Sustainable Cities for Digital Nomads in 2026
 
-Non tutte le destinazioni nomadi sono uguali dal punto di vista ambientale. Abbiamo analizzato le principali città per nomadi digitali valutando: energia rinnovabile, trasporto pubblico, qualità dell'aria, spazi verdi e infrastruttura per coworking sostenibile.
+Not all nomad destinations are equal from an environmental standpoint. We analyzed the top cities for digital nomads evaluating: renewable energy, public transport, air quality, green spaces, and sustainable coworking infrastructure.
 
-## La classifica
+## The Ranking
 
-### 1. 🇳🇴 Oslo, Norvegia
-**Punteggio eco: 9.5/10**
+### 1. Oslo, Norway
+**Eco Score: 9.5/10**
 
-Oslo è la capitale green d'Europa. Il 98% dell'energia norvegese è rinnovabile (idroelettrica). I trasporti pubblici sono elettrici, le auto a combustione sono quasi scomparse dal centro.
+Oslo is Europe's green capital. 98% of Norwegian energy is renewable (hydroelectric). Public transport is electric, and combustion cars have nearly vanished from the city center.
 
-- **Costo medio mensile**: 2.800-3.500€
-- **WiFi**: eccellente ovunque
-- **Coworking**: Mesh (100% energia verde), Spaces Stortorget
-- **Pro**: aria pulitissima, natura a portata di metro, estate con luce 20+ ore
-- **Contro**: costo della vita altissimo, inverno buio e freddo
+- **Average monthly cost**: $3,000-3,800
+- **WiFi**: excellent everywhere
+- **Coworking**: Mesh (100% green energy), Spaces Stortorget
+- **Pros**: pristine air, nature accessible by metro, 20+ hours of summer light
+- **Cons**: very high cost of living, dark and cold winters
 
-### 2. 🇳🇱 Amsterdam, Paesi Bassi
-**Punteggio eco: 9.2/10**
+### 2. Amsterdam, Netherlands
+**Eco Score: 9.2/10**
 
-La città delle biciclette non ha bisogno di presentazioni. Il 36% degli spostamenti avviene in bici, e il governo punta al 100% rinnovabile entro il 2030.
+The city of bicycles needs no introduction. 36% of all trips are by bike, and the government targets 100% renewable by 2030.
 
-- **Costo medio mensile**: 2.200-2.800€
-- **WiFi**: eccellente
+- **Average monthly cost**: $2,400-3,000
+- **WiFi**: excellent
 - **Coworking**: B.Amsterdam, WeWork Weteringschans, The Student Hotel
-- **Pro**: cultura ciclabile, inclusività, scena tech vibrante
-- **Contro**: pioggia frequente, alloggi costosi e difficili da trovare
+- **Pros**: cycling culture, inclusivity, vibrant tech scene
+- **Cons**: frequent rain, expensive and hard-to-find housing
 
-### 3. 🇸🇪 Stoccolma, Svezia
-**Punteggio eco: 9.0/10**
+### 3. Stockholm, Sweden
+**Eco Score: 9.0/10**
 
-La Svezia ricicla il 99% dei rifiuti e punta a diventare il primo paese fossil-free al mondo. Stoccolma ha metro, bus e treni efficienti e sostenibili.
+Sweden recycles 99% of its waste and aims to become the first fossil-free country in the world. Stockholm has efficient and sustainable metro, bus, and train systems.
 
-- **Costo medio mensile**: 2.500-3.200€
-- **WiFi**: eccellente
+- **Average monthly cost**: $2,700-3,500
+- **WiFi**: excellent
 - **Coworking**: Epicenter, SUP46, United Spaces
-- **Pro**: innovazione, qualità della vita, natura nelle isole dell'arcipelago
-- **Contro**: inverno lungo, costo elevato
+- **Pros**: innovation, quality of life, archipelago nature
+- **Cons**: long winter, high costs
 
-### 4. 🇵🇹 Lisbona, Portogallo
-**Punteggio eco: 8.5/10**
+### 4. Lisbon, Portugal
+**Eco Score: 8.5/10**
 
-Lisbona ha investito massicciamente nei trasporti pubblici elettrici e nell'energia solare. Il clima mite riduce la necessità di riscaldamento e aria condizionata.
+Lisbon has invested heavily in electric public transport and solar energy. The mild climate reduces the need for heating and air conditioning.
 
-- **Costo medio mensile**: 1.500-2.200€
-- **WiFi**: molto buono
+- **Average monthly cost**: $1,600-2,400
+- **WiFi**: very good
 - **Coworking**: Second Home, Outsite, Heden
-- **Pro**: costo accessibile per l'Europa, sole, comunità nomade enorme, cibo eccellente
-- **Contro**: gentrificazione, estate calda, rumore nel centro storico
+- **Pros**: affordable for Europe, sunshine, massive nomad community, excellent food
+- **Cons**: gentrification, hot summers, noisy city center
 
-### 5. 🇩🇰 Copenaghen, Danimarca
-**Punteggio eco: 8.8/10**
+### 5. Copenhagen, Denmark
+**Eco Score: 8.8/10**
 
-Copenaghen punta a diventare carbon neutral entro il 2025. Il 62% dei cittadini va al lavoro in bici. I parchi eolici offshore alimentano gran parte della città.
+Copenhagen aims to become carbon neutral by 2025. 62% of citizens commute by bike. Offshore wind farms power much of the city.
 
-- **Costo medio mensile**: 2.600-3.300€
-- **WiFi**: eccellente
+- **Average monthly cost**: $2,800-3,600
+- **WiFi**: excellent
 - **Coworking**: Soho, Rainmaking Loft, BLOX Hub
-- **Pro**: design, felicità, ciclabilità, hygge
-- **Contro**: molto costosa, inverno freddo e corto di luce
+- **Pros**: design, happiness, bike-friendliness, hygge
+- **Cons**: very expensive, cold and dark winters
 
-### 6. 🇨🇷 San José, Costa Rica
-**Punteggio eco: 8.3/10**
+### 6. San Jose, Costa Rica
+**Eco Score: 8.3/10**
 
-Il Costa Rica genera il **99% della sua energia da fonti rinnovabili** — un record mondiale. La biodiversità è straordinaria e il governo ha un piano per decarbonizzare completamente entro il 2050.
+Costa Rica generates **99% of its energy from renewable sources** — a world record. Biodiversity is extraordinary and the government plans to fully decarbonize by 2050.
 
-- **Costo medio mensile**: 1.200-1.800€
-- **WiFi**: buono nelle zone urbane, variabile nelle zone rurali
-- **Coworking**: Selina, Impact Hub San José, Cenfotec
-- **Pro**: natura incredibile, pura vida lifestyle, visto nomade digitale disponibile
-- **Contro**: WiFi instabile fuori città, stagione delle piogge intensa
+- **Average monthly cost**: $1,300-2,000
+- **WiFi**: good in urban areas, variable in rural zones
+- **Coworking**: Selina, Impact Hub San Jose, Cenfotec
+- **Pros**: incredible nature, pura vida lifestyle, digital nomad visa available
+- **Cons**: unstable WiFi outside cities, intense rainy season
 
-### 7. 🇸🇮 Lubiana, Slovenia
-**Punteggio eco: 8.2/10**
+### 7. Ljubljana, Slovenia
+**Eco Score: 8.2/10**
 
-Lubiana è stata Capitale Verde Europea nel 2016 e da allora ha continuato a migliorare. Centro storico pedonale, trasporti green, parchi ovunque.
+Ljubljana was European Green Capital in 2016 and has kept improving since. Pedestrian-only old town, green transport, parks everywhere.
 
-- **Costo medio mensile**: 1.200-1.600€
-- **WiFi**: molto buono
+- **Average monthly cost**: $1,300-1,700
+- **WiFi**: very good
 - **Coworking**: ABC Hub, Poligon, Technology Park Ljubljana
-- **Pro**: economica per l'Europa, sicura, natura alpina a 30 minuti
-- **Contro**: piccola, community nomade ridotta, inverno freddo
+- **Pros**: affordable for Europe, safe, Alpine nature 30 minutes away
+- **Cons**: small, limited nomad community, cold winters
 
-### 8. 🇯🇵 Tokyo, Giappone
-**Punteggio eco: 7.8/10**
+### 8. Tokyo, Japan
+**Eco Score: 7.8/10**
 
-Tokyo ha il sistema di trasporto pubblico più efficiente al mondo. Il Giappone sta investendo fortemente nell'idrogeno e nel solare. La cultura dello zero waste è radicata.
+Tokyo has the world's most efficient public transport system. Japan is investing heavily in hydrogen and solar. The zero-waste culture runs deep.
 
-- **Costo medio mensile**: 1.800-2.500€
-- **WiFi**: eccellente
+- **Average monthly cost**: $2,000-2,700
+- **WiFi**: excellent
 - **Coworking**: WeWork, Fabbit, AND Space
-- **Pro**: sicurezza assoluta, treni perfetti, cibo leggendario, cultura unica
-- **Contro**: barriera linguistica, appartamenti piccoli, burocrazia per il visto
+- **Pros**: absolute safety, perfect trains, legendary food, unique culture
+- **Cons**: language barrier, small apartments, visa bureaucracy
 
-### 9. 🇪🇸 Valencia, Spagna
-**Punteggio eco: 7.5/10**
+### 9. Valencia, Spain
+**Eco Score: 7.5/10**
 
-Valencia è stata Capitale Verde Europea nel 2024. Ha il più grande giardino urbano d'Europa (Turia), oltre 160 km di piste ciclabili e un clima che riduce il consumo energetico.
+Valencia was European Green Capital in 2024. It has Europe's largest urban garden (Turia), over 160 km of bike lanes, and a climate that reduces energy consumption.
 
-- **Costo medio mensile**: 1.400-1.900€
-- **WiFi**: molto buono
+- **Average monthly cost**: $1,500-2,100
+- **WiFi**: very good
 - **Coworking**: Wayco, The Shed, Impact Hub Valencia
-- **Pro**: rapporto qualità/prezzo ottimo, clima, paella, mare
-- **Contro**: meno internazionale di Barcellona, caldo estremo in estate
+- **Pros**: excellent value for money, climate, paella, beach
+- **Cons**: less international than Barcelona, extreme summer heat
 
-### 10. 🇹🇼 Taipei, Taiwan
-**Punteggio eco: 7.3/10**
+### 10. Taipei, Taiwan
+**Eco Score: 7.3/10**
 
-Taiwan sta investendo massicciamente nel solare e nell'eolico. Taipei ha un eccellente sistema di metro e bike sharing (YouBike), e la cultura del riciclo è molto sviluppata.
+Taiwan is investing massively in solar and wind. Taipei has an excellent metro and bike-sharing system (YouBike), and recycling culture is highly developed.
 
-- **Costo medio mensile**: 1.200-1.800€
-- **WiFi**: eccellente (uno dei migliori al mondo)
+- **Average monthly cost**: $1,300-2,000
+- **WiFi**: excellent (one of the best in the world)
 - **Coworking**: CLBC, Hive Taipei, AppWorks
-- **Pro**: internet velocissimo, cibo incredibile, sicurissima, costo contenuto
-- **Contro**: tifoni stagionali, umidità estrema in estate, barriera linguistica
+- **Pros**: blazing-fast internet, incredible food, ultra-safe, affordable
+- **Cons**: seasonal typhoons, extreme summer humidity, language barrier
 
-## Come scegliere la tua destinazione green
+## How to Choose Your Green Destination
 
-Oltre al punteggio eco, considera:
-- **Stagionalità**: evita di usare l'AC in estate o il riscaldamento in inverno scegliendo climi temperati
-- **Trasporti locali**: una città con buona metro/bici riduce l'impatto quotidiano
-- **Dieta locale**: paesi con forte tradizione vegetale (India, Giappone, Thailandia) facilitano una dieta sostenibile
-- **Slow travel**: il modo migliore per ridurre l'impronta è restare più a lungo
+Beyond the eco score, consider:
+- **Seasonality**: avoid needing AC in summer or heating in winter by choosing temperate climates
+- **Local transport**: a city with good metro/bike infrastructure reduces daily impact
+- **Local diet**: countries with strong plant-based traditions (India, Japan, Thailand) make sustainable eating easier
+- **Slow travel**: the best way to reduce your footprint is staying longer
 
-## Il futuro del nomadismo sostenibile
+## The Future of Sustainable Nomadism
 
-Entro il 2030, si stima che i nomadi digitali saranno oltre 60 milioni. Se ognuno riducesse la propria impronta di anche solo il 30%, l'impatto sarebbe enorme. La tecnologia aiuta: NomadLife calcola automaticamente la CO2 di ogni viaggio e suggerisce alternative più green.
+By 2030, digital nomads are estimated to number over 60 million. If each one reduced their footprint by just 30%, the impact would be enormous. Technology helps: NomadLife automatically calculates CO2 for every trip and suggests greener alternatives.
 
-Il nomadismo del futuro non è solo dove vai — è come ci arrivi e come vivi quando sei lì.`,
+The future of nomadism isn't just about where you go — it's about how you get there and how you live when you're there.`,
         category: "travel",
         city: null,
         country: null,
         imageUrl: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=1200&h=630&fit=crop",
-        tags: ["sostenibilità", "città green", "nomade digitale", "eco travel", "coworking sostenibile", "carbon neutral", "slow travel", "energia rinnovabile", "2026"],
+        tags: ["sustainability", "green cities", "digital nomad", "eco travel", "sustainable coworking", "carbon neutral", "slow travel", "renewable energy", "2026"],
         author: "NomadLife Team",
         published: true,
       });
-      console.log("[Blog] Created eco-sustainability article 2");
+      console.log("[Blog] Created eco-sustainability article 2 (EN)");
     }
   } catch (error) {
     console.error("[Blog] Eco articles seed error:", error);
@@ -711,287 +711,287 @@ Il nomadismo del futuro non è solo dove vai — è come ci arrivi e come vivi q
 
 async function seedGeopoliticsArticles() {
   try {
-    const slugs = [
-      "geopolitica-nomadismo-digitale-conflitti-rotte",
-      "visti-digitali-2026-mappa-geopolitica-opportunita"
-    ];
+    const oldSlugs = ["geopolitica-nomadismo-digitale-conflitti-rotte", "visti-digitali-2026-mappa-geopolitica-opportunita"];
+    for (const s of oldSlugs) { await db.delete(blogPosts).where(eq(blogPosts.slug, s)); }
+
+    const slugs = ["geopolitics-digital-nomadism-how-conflicts-reshape-routes", "digital-nomad-visas-2026-geopolitical-map-opportunities"];
     const existingSlugs = (await db.select({ slug: blogPosts.slug }).from(blogPosts)).map(r => r.slug);
 
     if (!existingSlugs.includes(slugs[0])) {
       await db.insert(blogPosts).values({
         slug: slugs[0],
-        title: "Geopolitica e Nomadismo Digitale: Come i Conflitti Cambiano le Rotte dei Nomadi",
-        excerpt: "Guerre, sanzioni, crisi diplomatiche: come gli eventi geopolitici del 2025-2026 stanno ridisegnando la mappa dei nomadi digitali. Quali paesi evitare, quali stanno emergendo e come proteggersi.",
-        content: `# Geopolitica e Nomadismo Digitale: Come i Conflitti Cambiano le Rotte dei Nomadi
+        title: "Geopolitics & Digital Nomadism: How Conflicts Are Reshaping Nomad Routes",
+        excerpt: "Wars, sanctions, diplomatic crises: how geopolitical events in 2025-2026 are redrawing the map for digital nomads. Which countries to avoid, which are emerging, and how to protect yourself.",
+        content: `# Geopolitics & Digital Nomadism: How Conflicts Are Reshaping Nomad Routes
 
-Il nomadismo digitale non esiste in una bolla. Gli eventi geopolitici — guerre, sanzioni, tensioni diplomatiche, crisi economiche — influenzano direttamente dove possiamo andare, quanto costa viverci e quanto è sicuro lavorare da remoto. Ecco un'analisi aggiornata al 2026.
+Digital nomadism doesn't exist in a bubble. Geopolitical events — wars, sanctions, diplomatic tensions, economic crises — directly affect where we can go, how much it costs to live there, and how safe it is to work remotely. Here's an updated analysis for 2026.
 
-## La mappa dei rischi nel 2026
+## The Risk Map in 2026
 
-### Europa dell'Est e il conflitto Russia-Ucraina
-Il conflitto iniziato nel 2022 ha ridisegnato le rotte dei nomadi in Europa dell'Est. L'Ucraina, che prima della guerra stava emergendo come hub tech (Kiev aveva un ecosistema startup vibrante), è ovviamente fuori questione.
+### Eastern Europe and the Russia-Ukraine Conflict
+The conflict that began in 2022 has redrawn nomad routes across Eastern Europe. Ukraine, which was emerging as a tech hub before the war (Kyiv had a vibrant startup ecosystem), is obviously off the table.
 
-**Impatti indiretti:**
-- **Georgia e Armenia**: hanno ricevuto un'ondata di nomadi russi in fuga dal regime. Tbilisi è diventata un hub nomade, ma l'afflusso ha fatto salire i prezzi
-- **Paesi Baltici** (Estonia, Lettonia, Lituania): hanno reso più difficile l'ingresso per cittadini russi, rafforzando la cybersecurity
-- **Polonia**: è diventata il nuovo gateway per l'Europa dell'Est, con Varsavia e Cracovia in forte crescita
+**Indirect impacts:**
+- **Georgia and Armenia**: received a wave of Russian nomads fleeing the regime. Tbilisi has become a nomad hub, but the influx has driven up prices
+- **Baltic States** (Estonia, Latvia, Lithuania): have made entry harder for Russian citizens while strengthening cybersecurity
+- **Poland**: has become the new gateway to Eastern Europe, with Warsaw and Krakow growing rapidly
 
-### Medio Oriente
-La situazione in Medio Oriente rimane complessa:
-- **Israele**: Tel Aviv era un hub tech di prim'ordine ma la situazione attuale ha ridotto drasticamente l'afflusso di nomadi
-- **Emirati Arabi**: Dubai resta stabile e continua ad attrarre nomadi con il suo visto da un anno, nonostante le tensioni regionali
-- **Giordania e Oman**: destinazioni emergenti per chi cerca il Medio Oriente senza i rischi delle zone di conflitto
+### Middle East
+The Middle East situation remains complex:
+- **Israel**: Tel Aviv was a top-tier tech hub, but the current situation has drastically reduced the influx of nomads
+- **UAE**: Dubai remains stable and continues attracting nomads with its one-year visa, despite regional tensions
+- **Jordan and Oman**: emerging destinations for those seeking the Middle East without conflict zone risks
 
-### Asia-Pacifico e le tensioni Cina-Taiwan
-Le tensioni nello Stretto di Taiwan preoccupano i nomadi in Asia:
-- **Taiwan**: nonostante i rischi geopolitici, resta una delle migliori destinazioni per internet e qualità della vita. Ma è consigliabile avere un piano B
-- **Giappone e Corea del Sud**: stabili ma monitorano la situazione con attenzione
-- **Sud-Est Asiatico**: Thailandia, Vietnam e Indonesia rimangono lontani dalle tensioni dirette
+### Asia-Pacific and China-Taiwan Tensions
+Tensions in the Taiwan Strait concern nomads across Asia:
+- **Taiwan**: despite geopolitical risks, it remains one of the best destinations for internet and quality of life. But having a Plan B is advisable
+- **Japan and South Korea**: stable but monitoring the situation closely
+- **Southeast Asia**: Thailand, Vietnam, and Indonesia remain distant from direct tensions
 
-### Africa: opportunità emergenti
-Diversi paesi africani stanno introducendo visti per nomadi digitali:
-- **Mauritius**: stabile, anglofono, visto nomade facile
-- **Capo Verde**: sicuro, clima eccellente, comunità crescente
-- **Namibia**: sorprendentemente connessa, paesaggi unici
-- **Ruanda**: in forte crescita economica e tech, ma autoritario
+### Africa: Emerging Opportunities
+Several African countries are introducing digital nomad visas:
+- **Mauritius**: stable, English-speaking, easy nomad visa
+- **Cape Verde**: safe, excellent climate, growing community
+- **Namibia**: surprisingly well-connected, unique landscapes
+- **Rwanda**: strong economic and tech growth, but authoritarian
 
-## Come le sanzioni influenzano i nomadi
+## How Sanctions Affect Nomads
 
-Le sanzioni internazionali non colpiscono solo gli stati — hanno effetti pratici sulla vita quotidiana dei nomadi:
+International sanctions don't just hit states — they have practical effects on nomads' daily lives:
 
-### Sistemi di pagamento
-- **Carte bancarie occidentali** non funzionano in Russia, Iran e Cuba
-- **Crypto** è diventato un metodo di pagamento alternativo in molti paesi sanzionati
-- **Wise e Revolut** hanno restrizioni per trasferimenti verso certi paesi
+### Payment Systems
+- **Western bank cards** don't work in Russia, Iran, and Cuba
+- **Crypto** has become an alternative payment method in many sanctioned countries
+- **Wise and Revolut** have restrictions on transfers to certain countries
 
-### Voli e trasporti
-- Lo **spazio aereo chiuso** sopra Russia e Ucraina ha reso i voli Europa-Asia più lunghi e costosi (fino a 2-3 ore in più)
-- Le rotte verso il Sud-Est Asiatico passano ora per il Medio Oriente o l'Artico
-- I costi dei voli sono aumentati del 15-25% sulle rotte intercontinentali
+### Flights and Transport
+- **Closed airspace** over Russia and Ukraine has made Europe-Asia flights longer and more expensive (up to 2-3 extra hours)
+- Routes to Southeast Asia now go through the Middle East or the Arctic
+- Flight costs have increased 15-25% on intercontinental routes
 
-### Internet e censura
-- **VPN essenziale** in Cina, Russia, Iran, Turchia (parzialmente)
-- Alcuni paesi bloccano piattaforme di lavoro (Slack, Notion, Google Workspace)
-- La **Net Neutrality** non è garantita ovunque
+### Internet and Censorship
+- **VPN essential** in China, Russia, Iran, Turkey (partially)
+- Some countries block work platforms (Slack, Notion, Google Workspace)
+- **Net Neutrality** is not guaranteed everywhere
 
-## I "rifugi" geopolitici dei nomadi
+## Geopolitical "Safe Havens" for Nomads
 
-Alcuni paesi si distinguono per stabilità e accoglienza:
+Some countries stand out for stability and welcoming attitudes:
 
-### Portogallo
-- Stabile democraticamente da decenni
-- Membro NATO e UE
-- Visto D7 e visto nomade digitale
-- Comunità nomade enorme a Lisbona, Porto e Madeira
+### Portugal
+- Democratically stable for decades
+- NATO and EU member
+- D7 visa and digital nomad visa
+- Massive nomad community in Lisbon, Porto, and Madeira
 
 ### Uruguay
-- La "Svizzera del Sud America"
-- Democrazia stabile, bassa corruzione
-- Non coinvolto in conflitti regionali
-- Costo della vita ragionevole
+- The "Switzerland of South America"
+- Stable democracy, low corruption
+- Not involved in regional conflicts
+- Reasonable cost of living
 
-### Nuova Zelanda
-- Isolamento geografico = distanza dai conflitti
-- Democrazia solida, alta qualità della vita
-- Working Holiday Visa per molte nazionalità
-- Costosa ma sicurissima
+### New Zealand
+- Geographic isolation = distance from conflicts
+- Solid democracy, high quality of life
+- Working Holiday Visa for many nationalities
+- Expensive but extremely safe
 
 ### Estonia
-- Pioniere della e-Residency e del digitale
-- Membro NATO e UE, stabile nonostante la vicinanza alla Russia
-- Tallinn come hub tech
+- Pioneer of e-Residency and digital governance
+- NATO and EU member, stable despite proximity to Russia
+- Tallinn as a tech hub
 
-## Come proteggersi: checklist geopolitica per nomadi
+## How to Protect Yourself: Geopolitical Checklist for Nomads
 
-1. **Assicurazione viaggio con copertura evacuazione** — non la classica da 20€, ma una seria che copra l'evacuazione medica e politica (World Nomads, SafetyWing con add-on)
-2. **Registra il tuo viaggio** all'ambasciata o consolato (per italiani: Dove Siamo nel Mondo su viaggiaresicuri.it)
-3. **Piano B sempre pronto** — avere un biglietto aereo flessibile o fondi per un'uscita rapida
-4. **Diversifica il denaro** — non tenere tutti i risparmi in un'unica banca o valuta
-5. **VPN e backup dei dati** — in caso di shutdown internet
-6. **Segui le Travel Alerts** di NomadLife per aggiornamenti in tempo reale su visti, sicurezza e disastri naturali
+1. **Travel insurance with evacuation coverage** — not the basic $20 plan, but a serious one covering medical and political evacuation (World Nomads, SafetyWing with add-ons)
+2. **Register your trip** at your embassy or consulate
+3. **Always have a Plan B** — keep a flexible flight ticket or funds for a quick exit
+4. **Diversify your money** — don't keep all savings in one bank or currency
+5. **VPN and data backup** — in case of internet shutdowns
+6. **Follow NomadLife's Travel Alerts** for real-time updates on visas, safety, and natural disasters
 
-## Il paradosso del nomade geopolitico
+## The Geopolitical Nomad Paradox
 
-C'è un paradosso nel nomadismo digitale nell'era geopolitica: la stessa libertà di movimento che ci definisce è la prima cosa che le crisi mettono a rischio. Un passaporto forte (italiano, tedesco, giapponese) offre accesso a 190+ paesi — ma quel numero si riduce rapidamente quando scoppia un conflitto o cambiano le relazioni diplomatiche.
+There's a paradox in digital nomadism in the geopolitical era: the very freedom of movement that defines us is the first thing crises put at risk. A strong passport (German, Japanese, Swedish) grants access to 190+ countries — but that number shrinks rapidly when a conflict erupts or diplomatic relations change.
 
-La lezione? Il nomade digitale del 2026 non può più ignorare la geopolitica. È una competenza essenziale quanto il WiFi.`,
+The lesson? The digital nomad of 2026 can no longer ignore geopolitics. It's as essential a skill as having reliable WiFi.`,
         category: "travel",
         city: null,
         country: null,
         imageUrl: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=1200&h=630&fit=crop",
-        tags: ["geopolitica", "nomade digitale", "sicurezza", "conflitti", "sanzioni", "visti", "travel alerts", "rifugi sicuri", "lavoro remoto"],
+        tags: ["geopolitics", "digital nomad", "safety", "conflicts", "sanctions", "visas", "travel alerts", "safe havens", "remote work"],
         author: "NomadLife Team",
         published: true,
       });
-      console.log("[Blog] Created geopolitics article 1");
+      console.log("[Blog] Created geopolitics article 1 (EN)");
     }
 
     if (!existingSlugs.includes(slugs[1])) {
       await db.insert(blogPosts).values({
         slug: slugs[1],
-        title: "Visti Digitali nel 2026: La Mappa Geopolitica delle Opportunità",
-        excerpt: "Oltre 60 paesi offrono visti per nomadi digitali nel 2026. Analisi completa: quali convengono davvero, requisiti di reddito, tassazione, durata e strategie per scegliere il migliore.",
-        content: `# Visti Digitali nel 2026: La Mappa Geopolitica delle Opportunità
+        title: "Digital Nomad Visas in 2026: The Geopolitical Map of Opportunities",
+        excerpt: "Over 60 countries now offer digital nomad visas in 2026. Complete analysis: which ones are actually worth it, income requirements, taxation, duration, and strategies to choose the best one.",
+        content: `# Digital Nomad Visas in 2026: The Geopolitical Map of Opportunities
 
-La corsa al "Digital Nomad Visa" è diventata una competizione geopolitica. Oltre 60 paesi offrono oggi un visto specifico per lavoratori remoti, e il numero cresce ogni mese. Ma dietro questa apertura c'è una strategia economica precisa: attrarre talenti, capitali e competenze.
+The race for the "Digital Nomad Visa" has become a geopolitical competition. Over 60 countries now offer a specific visa for remote workers, and the number grows every month. But behind this openness lies a precise economic strategy: attracting talent, capital, and expertise.
 
-## Perché i paesi competono per i nomadi digitali?
+## Why Are Countries Competing for Digital Nomads?
 
-I numeri parlano chiaro: nel 2026 i nomadi digitali sono circa **40 milioni** nel mondo, con un reddito medio superiore a 50.000$ annui. Per un paese come l'Estonia (1.3 milioni di abitanti), attrarre anche solo 10.000 nomadi significa un impatto economico significativo.
+The numbers speak for themselves: in 2026, there are roughly **40 million** digital nomads worldwide, with an average income exceeding $50,000 per year. For a country like Estonia (1.3 million inhabitants), attracting even 10,000 nomads means a significant economic impact.
 
-**Cosa cercano i governi:**
-- **Consumi locali** — affitti, cibo, trasporti, intrattenimento
-- **Nessun impatto sul mercato del lavoro locale** — i nomadi lavorano per aziende straniere
-- **Capitale umano qualificato** — talenti tech, creativi, imprenditori
-- **Soft power** — nomadi che parlano bene del paese sui social media
+**What governments are looking for:**
+- **Local spending** — rent, food, transport, entertainment
+- **No impact on the local job market** — nomads work for foreign companies
+- **Qualified human capital** — tech talent, creatives, entrepreneurs
+- **Soft power** — nomads speaking positively about the country on social media
 
-## La mappa dei visti nel 2026
+## The Visa Map in 2026
 
-### 🇪🇺 Europa
+### Europe
 
-**Portogallo — D8 Digital Nomad Visa**
-- Reddito minimo: 3.510€/mese (4x il salario minimo)
-- Durata: 1 anno, rinnovabile fino a 5 anni
-- Tassazione: regime NHR (Non-Habitual Resident), 20% flat per 10 anni
-- Residenza permanente possibile dopo 5 anni
-- **Verdetto**: il migliore in Europa per il path to residency
+**Portugal — D8 Digital Nomad Visa**
+- Minimum income: €3,510/month (4x minimum wage)
+- Duration: 1 year, renewable up to 5 years
+- Taxation: NHR regime (Non-Habitual Resident), 20% flat for 10 years
+- Permanent residency possible after 5 years
+- **Verdict**: the best in Europe for the path to residency
 
-**Spagna — Ley de Startups (Visa Nómada Digital)**
-- Reddito minimo: ~2.520€/mese (200% del salario minimo)
-- Durata: 1 anno, rinnovabile fino a 3
-- Tassazione: 24% flat sui primi 600.000€ per 4 anni (regime Beckham)
-- **Verdetto**: ottimo regime fiscale, ma burocrazia lenta
+**Spain — Ley de Startups (Digital Nomad Visa)**
+- Minimum income: ~€2,520/month (200% of minimum wage)
+- Duration: 1 year, renewable up to 3
+- Taxation: 24% flat on first €600,000 for 4 years (Beckham regime)
+- **Verdict**: excellent tax regime, but slow bureaucracy
 
-**Grecia — Digital Nomad Visa**
-- Reddito minimo: 3.500€/mese
-- Durata: 1 anno, rinnovabile
-- Tassazione: 50% riduzione sulle tasse per 7 anni se diventi residente fiscale
-- **Verdetto**: clima e costo della vita ottimi, burocrazia migliorata
+**Greece — Digital Nomad Visa**
+- Minimum income: €3,500/month
+- Duration: 1 year, renewable
+- Taxation: 50% tax reduction for 7 years if you become a tax resident
+- **Verdict**: great climate and cost of living, improved bureaucracy
 
 **Estonia — Digital Nomad Visa**
-- Reddito minimo: 4.500€/mese (il più alto in Europa)
-- Durata: 1 anno
-- Nessuna tassazione locale sul reddito estero
-- e-Residency separata (per aprire azienda EU)
-- **Verdetto**: perfetto per chi ha un business EU, ma il reddito minimo è alto
+- Minimum income: €4,500/month (highest in Europe)
+- Duration: 1 year
+- No local taxation on foreign income
+- Separate e-Residency (for opening an EU business)
+- **Verdict**: perfect for those with an EU business, but high income threshold
 
-**Croazia — Digital Nomad Visa**
-- Reddito minimo: ~2.540€/mese
-- Durata: 1 anno, non rinnovabile (devi uscire e rientrare)
-- Nessuna tassazione locale
-- **Verdetto**: buon rapporto qualità-prezzo, ma la non-rinnovabilità è un limite
+**Croatia — Digital Nomad Visa**
+- Minimum income: ~€2,540/month
+- Duration: 1 year, non-renewable (must leave and re-enter)
+- No local taxation
+- **Verdict**: good value, but the non-renewal aspect is a limitation
 
-### 🌎 Americhe
+### Americas
 
-**Messico — Residente Temporal**
-- Reddito minimo: ~2.700€/mese (o risparmi di ~45.000€)
-- Durata: 1-4 anni
-- Tassazione: complessa — rischio di diventare residente fiscale dopo 183 giorni
-- **Verdetto**: de facto la destinazione nomade più popolare, ma il visto non è specifico per nomadi
+**Mexico — Residente Temporal**
+- Minimum income: ~€2,700/month (or savings of ~€45,000)
+- Duration: 1-4 years
+- Taxation: complex — risk of becoming a tax resident after 183 days
+- **Verdict**: de facto the most popular nomad destination, but the visa isn't nomad-specific
 
 **Colombia — Digital Nomad Visa**
-- Reddito minimo: ~2.800€/mese (3x il salario minimo)
-- Durata: 2 anni, rinnovabile
-- Nessuna tassazione sul reddito estero per il primo anno
-- **Verdetto**: Medellín è tra le migliori città nomadi al mondo, buon visto
+- Minimum income: ~€2,800/month (3x minimum wage)
+- Duration: 2 years, renewable
+- No taxation on foreign income for the first year
+- **Verdict**: Medellin is among the world's best nomad cities, solid visa
 
-**Brasile — Digital Nomad Visa**
-- Reddito minimo: ~1.500€/mese
-- Durata: 1 anno, rinnovabile
-- Nessuna tassazione sul reddito estero per i primi 12 mesi
-- **Verdetto**: reddito minimo basso, ma burocrazia complessa
+**Brazil — Digital Nomad Visa**
+- Minimum income: ~€1,500/month
+- Duration: 1 year, renewable
+- No taxation on foreign income for the first 12 months
+- **Verdict**: low income threshold, but complex bureaucracy
 
 **Costa Rica — Digital Nomad Visa (Rentista Digital)**
-- Reddito minimo: ~3.000€/mese
-- Durata: 1 anno, rinnovabile
-- Tassazione: solo sul reddito prodotto in Costa Rica
-- **Verdetto**: natura incredibile, energia 99% rinnovabile, ma costo della vita in crescita
+- Minimum income: ~€3,000/month
+- Duration: 1 year, renewable
+- Taxation: only on income earned in Costa Rica
+- **Verdict**: incredible nature, 99% renewable energy, but rising cost of living
 
-### 🌏 Asia e Oceania
+### Asia & Oceania
 
-**Thailandia — Long-Term Resident (LTR) Visa**
-- Reddito minimo: ~70.000€/anno per la categoria "Work from Thailand"
-- Durata: 5 anni (!) con multipli ingressi
-- Tassazione: 17% flat (ridotto dal 35%)
-- **Verdetto**: il reddito minimo è alto, ma la durata di 5 anni è imbattibile
+**Thailand — Long-Term Resident (LTR) Visa**
+- Minimum income: ~€70,000/year for the "Work from Thailand" category
+- Duration: 5 years (!) with multiple entries
+- Taxation: 17% flat (reduced from 35%)
+- **Verdict**: high income threshold, but the 5-year duration is unbeatable
 
 **Indonesia — Digital Nomad Visa (B211A DN)**
-- Reddito minimo: ~1.800€/mese
-- Durata: 1 anno
-- Tassazione: nessuna sul reddito estero
-- **Verdetto**: Bali resta la mecca dei nomadi, il visto è finalmente adeguato
+- Minimum income: ~€1,800/month
+- Duration: 1 year
+- Taxation: none on foreign income
+- **Verdict**: Bali remains the nomad mecca, the visa finally matches the demand
 
-**Giappone — Digital Nomad Visa (2024)**
-- Reddito minimo: ~65.000€/anno
-- Durata: 6 mesi, non rinnovabile
-- Nessuna tassazione
-- **Verdetto**: finalmente il Giappone si è aperto, ma le condizioni sono restrittive
+**Japan — Digital Nomad Visa (2024)**
+- Minimum income: ~€65,000/year
+- Duration: 6 months, non-renewable
+- No taxation
+- **Verdict**: Japan has finally opened up, but conditions are restrictive
 
-**Malesia — DE Rantau**
-- Reddito minimo: ~22.000€/anno
-- Durata: 1 anno, rinnovabile
-- Nessuna tassazione sul reddito estero
-- **Verdetto**: KL è sottovalutata, internet veloce, cibo incredibile, costo basso
+**Malaysia — DE Rantau**
+- Minimum income: ~€22,000/year
+- Duration: 1 year, renewable
+- No taxation on foreign income
+- **Verdict**: KL is underrated — fast internet, incredible food, low cost
 
-### 🌍 Africa e Medio Oriente
+### Africa & Middle East
 
 **Mauritius — Premium Travel Visa**
-- Reddito minimo: nessun minimo formale (dimostrazione di reddito sufficiente)
-- Durata: 1 anno, rinnovabile
-- Nessuna tassazione sul reddito estero
-- **Verdetto**: paradiso tropicale anglofono, zero burocrazia
+- Minimum income: no formal minimum (proof of sufficient income)
+- Duration: 1 year, renewable
+- No taxation on foreign income
+- **Verdict**: tropical English-speaking paradise, zero bureaucracy
 
 **Dubai — Virtual Working Visa**
-- Reddito minimo: ~3.500€/mese
-- Durata: 1 anno
-- Zero tassazione (nessuna income tax negli UAE)
-- **Verdetto**: lusso e zero tasse, ma costo della vita alto
+- Minimum income: ~€3,500/month
+- Duration: 1 year
+- Zero taxation (no income tax in UAE)
+- **Verdict**: luxury and zero taxes, but high cost of living
 
-**Capo Verde — Remote Working Visa**
-- Reddito minimo: ~1.400€/mese
-- Durata: 6 mesi, rinnovabile fino a 1 anno
-- **Verdetto**: destinazione emergente, clima perfetto, comunità piccola ma crescente
+**Cape Verde — Remote Working Visa**
+- Minimum income: ~€1,400/month
+- Duration: 6 months, renewable up to 1 year
+- **Verdict**: emerging destination, perfect climate, small but growing community
 
-## Strategie per scegliere il visto giusto
+## Strategies for Choosing the Right Visa
 
-### Per chi cerca il costo più basso
-1. **Brasile** (1.500€/mese)
-2. **Capo Verde** (1.400€/mese)
-3. **Indonesia** (1.800€/mese)
+### Lowest Income Requirement
+1. **Brazil** (€1,500/month)
+2. **Cape Verde** (€1,400/month)
+3. **Indonesia** (€1,800/month)
 
-### Per chi cerca zero tasse
+### Zero Tax
 1. **Dubai** — zero income tax
-2. **Mauritius** — nessuna tassa su reddito estero
-3. **Croazia** — nessuna tassa locale
+2. **Mauritius** — no tax on foreign income
+3. **Croatia** — no local taxation
 
-### Per chi cerca un path to residency
-1. **Portogallo** — residenza permanente dopo 5 anni
-2. **Colombia** — path to residency chiaro
-3. **Spagna** — possibilità dopo 5 anni
+### Path to Residency
+1. **Portugal** — permanent residency after 5 years
+2. **Colombia** — clear path to residency
+3. **Spain** — possible after 5 years
 
-### Per la durata più lunga
-1. **Thailandia** — 5 anni
-2. **Messico** — fino a 4 anni
-3. **Colombia** — 2 anni rinnovabili
+### Longest Duration
+1. **Thailand** — 5 years
+2. **Mexico** — up to 4 years
+3. **Colombia** — 2 years renewable
 
-## Il futuro dei visti digitali
+## The Future of Digital Nomad Visas
 
-La tendenza è chiara: entro il 2028, praticamente ogni paese turistico avrà un visto per nomadi digitali. La competizione si sposterà su:
-- **Fiscalità competitiva** — tasse basse o zero per attrarre talenti
-- **Infrastruttura digitale** — fibra ottica, 5G, coworking
-- **Qualità della vita** — sanità, sicurezza, comunità
-- **Accordi bilaterali** — visti reciproci tra paesi "nomad-friendly"
+The trend is clear: by 2028, virtually every tourist-friendly country will have a digital nomad visa. Competition will shift to:
+- **Competitive taxation** — low or zero taxes to attract talent
+- **Digital infrastructure** — fiber optics, 5G, coworking
+- **Quality of life** — healthcare, safety, community
+- **Bilateral agreements** — reciprocal visas between "nomad-friendly" countries
 
-Il nomade del futuro non sceglierà solo dove andare — sceglierà a quale "ecosistema paese" appartenere. E i paesi che lo capiranno per primi vinceranno questa nuova competizione globale per il talento.`,
+The nomad of the future won't just choose where to go — they'll choose which country's "ecosystem" to belong to. And the countries that understand this first will win the new global competition for talent.`,
         category: "tips",
         city: null,
         country: null,
         imageUrl: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=630&fit=crop",
-        tags: ["visti digitali", "digital nomad visa", "geopolitica", "tassazione", "nomade digitale", "lavoro remoto", "residenza", "portogallo", "thailandia", "dubai", "2026"],
+        tags: ["digital nomad visa", "geopolitics", "taxation", "digital nomad", "remote work", "residency", "portugal", "thailand", "dubai", "2026"],
         author: "NomadLife Team",
         published: true,
       });
-      console.log("[Blog] Created geopolitics article 2");
+      console.log("[Blog] Created geopolitics article 2 (EN)");
     }
   } catch (error) {
     console.error("[Blog] Geopolitics articles seed error:", error);
