@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Place, Event } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function UserRatingBadge({ placeId }: { placeId: string }) {
   const { data: ratings } = useQuery({
@@ -79,6 +80,7 @@ interface OverpassResult {
 }
 
 export default function Coworking() {
+  usePageTitle("Booking");
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();

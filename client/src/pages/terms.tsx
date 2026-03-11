@@ -1,7 +1,9 @@
 import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function Terms() {
+  usePageTitle("Termini e Condizioni");
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 py-8">

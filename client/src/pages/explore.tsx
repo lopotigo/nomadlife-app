@@ -9,6 +9,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Search, MapPin, Map as MapIcon, Leaf, Users, Hotel, Briefcase, Calendar, X, CheckCircle2, Loader2, ArrowRight, Train, Plane, Car, Bike, Footprints } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 // Fix Leaflet default marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -348,6 +349,7 @@ function calculateRoute(from: string, to: string): RouteResult | null {
 }
 
 export default function Explore() {
+  usePageTitle("Esplora");
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
   const tileUrl = theme === "dark"

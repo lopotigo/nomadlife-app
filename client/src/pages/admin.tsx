@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
 import type { Product, Vendor, BlogPost } from "@shared/schema";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 interface AdminCheckResponse {
   isAdmin: boolean;
@@ -38,6 +39,7 @@ const categories = [
 ];
 
 export default function AdminPage() {
+  usePageTitle("Admin");
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"products" | "vendors" | "stats" | "blog">("products");

@@ -34,6 +34,7 @@ import { TripReplay } from "@/components/trip-replay";
 import { WeatherWidget } from "@/components/weather-widget";
 import { handleShare } from "@/components/share-qr-modal";
 import { InFeedAd } from "@/components/ad-banner";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -161,6 +162,7 @@ function formatDuration(hours: number): string {
 }
 
 export default function TravelDiary() {
+  usePageTitle("Travel Diary");
   const { user, loading: authLoading } = useAuth();
   const { t } = useI18n();
   const { theme } = useTheme();

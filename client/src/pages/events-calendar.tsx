@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useI18n, Language } from "@/lib/i18n";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 interface Event {
   id: string;
@@ -51,6 +52,7 @@ const DAYS: Record<Language, string[]> = {
 };
 
 export default function EventsCalendar() {
+  usePageTitle("Eventi");
   const { user, loading: authLoading } = useAuth();
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();

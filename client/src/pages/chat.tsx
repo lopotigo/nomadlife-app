@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import type { ChatGroup, Message, User } from "@shared/schema";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 type MessageWithSender = Message & { sender: User };
 type Conversation = { user: User; lastMessage: Message; unreadCount: number };
@@ -125,6 +126,7 @@ function StackedAvatars({ members, max = 4 }: { members: Partial<User>[]; max?: 
 type SidebarTab = "messages" | "community";
 
 export default function Chat() {
+  usePageTitle("Messaggi");
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useI18n();

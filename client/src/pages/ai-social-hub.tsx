@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/layout";
 import type { Product } from "@shared/schema";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 type UserInterest = {
   id: string;
@@ -80,6 +81,7 @@ const INTEREST_COLORS: Record<string, string> = {
 };
 
 export default function AiSocialHub() {
+  usePageTitle("AI Social Hub");
   const { user } = useAuth();
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState("profile");

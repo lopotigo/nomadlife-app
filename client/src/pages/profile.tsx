@@ -17,6 +17,7 @@ import { Languages } from "lucide-react";
 import { FloatingTip } from "@/components/contextual-tip";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function getYouTubeThumbnail(url: string): string | null {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
@@ -35,6 +36,7 @@ function getPostThumbnail(post: Post): string | null {
 }
 
 export default function Profile() {
+  usePageTitle("Profilo");
   const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();

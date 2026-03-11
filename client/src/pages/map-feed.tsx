@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useUpload } from "@/hooks/use-upload";
 import "leaflet/dist/leaflet.css";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 type PostWithUser = Post & { user: UserType };
 
@@ -57,6 +58,7 @@ function MapEvents({ onMapClick }: { onMapClick: (lat: number, lng: number) => v
 }
 
 export default function MapFeed() {
+  usePageTitle("Feed");
   const { user, loading: authLoading, logout } = useAuth();
   const { theme } = useTheme();
   const tileUrl = theme === "dark"

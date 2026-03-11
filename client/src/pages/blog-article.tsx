@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { ArrowLeft, MapPin, Calendar, User, ChevronRight, Plane, Hotel, Car, Shield, Lock, ExternalLink, BookOpen, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getAffiliateLinks } from "@/lib/travelpayouts";
@@ -51,6 +52,8 @@ export default function BlogArticle() {
     queryKey: [`/api/blog/${slug}`],
     enabled: !!slug,
   });
+
+  usePageTitle(post?.title || "Articolo");
 
   const { data: relatedPosts = [] } = useQuery<BlogPost[]>({
     queryKey: ["/api/blog", post?.category],

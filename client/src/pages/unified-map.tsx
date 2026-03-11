@@ -37,6 +37,7 @@ import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents }
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -1099,6 +1100,7 @@ function PostMapPopupExpanded({
 }
 
 export default function UnifiedMap() {
+  usePageTitle("Mappa");
   const { user, loading: authLoading } = useAuth();
   const [location, setLocation] = useLocation();
   const { t } = useI18n();

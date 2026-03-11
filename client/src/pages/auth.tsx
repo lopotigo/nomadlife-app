@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plane, Loader2, Check, X, MapPin, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 declare global {
   interface Window {
@@ -241,6 +242,7 @@ function CityAutocomplete({
 }
 
 export default function Auth() {
+  usePageTitle("Accedi");
   const { login, signup } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();

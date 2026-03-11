@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Check, Shuffle, Loader2, Sparkles, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const AVATAR_STYLES = [
   { id: "personas", name: "Persona", icon: "🧍", hasBody: true, hasSkin: false },
@@ -48,6 +49,7 @@ const SKIN_COLORS = [
 ];
 
 export default function AvatarBuilder() {
+  usePageTitle("Avatar Builder");
   const { user, refreshUser } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();

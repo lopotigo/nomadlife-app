@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { apiRequest } from "@/lib/queryClient";
 import type { BlogPost } from "@shared/schema";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const blogCategories = [
   { value: "guide", label: "Guide Città" },
@@ -29,6 +30,7 @@ const blogCategories = [
 ];
 
 export default function BlogEditor() {
+  usePageTitle("Blog Editor");
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);

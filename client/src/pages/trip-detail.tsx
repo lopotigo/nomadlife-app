@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { MapPin, ArrowLeft, Share2, Calendar, Plane, DollarSign, Globe, Star, Bed, Route, Leaf, ChevronDown, Play, Eye, EyeOff, Camera, Users, MessageCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -180,6 +181,7 @@ export default function TripDetail() {
   const [expandedStop, setExpandedStop] = useState<string | null>(null);
   const [isFollowed, setIsFollowed] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  usePageTitle(trip?.title || "Viaggio");
 
   useEffect(() => {
     const fetchTrip = async () => {

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plane, Loader2, Lock, ArrowLeft, CheckCircle, Eye, EyeOff, AlertTriangle, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function PasswordStrengthMini({ password }: { password: string }) {
   const checks = {
@@ -37,6 +38,7 @@ function PasswordStrengthMini({ password }: { password: string }) {
 }
 
 export default function ResetPassword() {
+  usePageTitle("Reimposta Password");
   const [, setLocation] = useLocation();
   const search = useSearch();
   const { toast } = useToast();

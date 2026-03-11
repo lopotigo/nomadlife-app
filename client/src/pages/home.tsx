@@ -12,6 +12,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { MomentsBar } from "@/components/moments";
 import { SmartProductsWidget } from "@/components/smart-products-widget";
 import { TravelAlertsBanner } from "@/components/travel-alerts-banner";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function isYouTubeUrl(url: string): boolean {
   return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
@@ -34,6 +35,7 @@ type FeedItem =
   | { type: "trip"; data: PublicTrip; createdAt: Date };
 
 export default function Home() {
+  usePageTitle("Home");
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [posts, setPosts] = useState<PostWithUser[]>([]);

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import {
+import { usePageTitle } from "@/hooks/use-page-title";
   Users, Handshake, Navigation, Loader2, MessageSquare, User as UserIcon, MapPin, X, Plus, Star, Zap, Heart
 } from "lucide-react";
 
@@ -59,6 +60,7 @@ function MatchBadge({ score }: { score: number }) {
 }
 
 export default function Matchmaking() {
+  usePageTitle("Skills Matchmaking");
   const { user } = useAuth();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [gpsStatus, setGpsStatus] = useState<"loading" | "ok" | "error">("loading");

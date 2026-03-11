@@ -19,6 +19,7 @@ import { useUpload } from "@/hooks/use-upload";
 import { motion } from "framer-motion";
 import type { Product, Vendor, LocalListing } from "@shared/schema";
 import { AdBanner } from "@/components/ad-banner";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const CATEGORIES = [
   { id: "all", label: "Tutto", icon: Package },
@@ -72,6 +73,7 @@ interface SmartProductsResponse {
 }
 
 export default function Marketplace() {
+  usePageTitle("Mercato Locale");
   const { user } = useAuth();
   const { t } = useI18n();
   const queryClient = useQueryClient();

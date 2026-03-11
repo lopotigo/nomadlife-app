@@ -6,8 +6,10 @@ import { CheckCircle2, Crown, Zap, Shield, Globe, Users, ArrowRight, Loader2, XC
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { Subscription } from "@shared/schema";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export default function SubscriptionPage() {
+  usePageTitle("Abbonamento");
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();

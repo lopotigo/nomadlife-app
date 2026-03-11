@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import Layout from "@/components/layout";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { useAuth } from "@/lib/auth";
 import { useLocation, useParams, Link } from "wouter";
 import { MapPin, Globe, Award, MessageSquare, Mail, Loader2, ArrowLeft, UserPlus, UserMinus, Users, BookOpen, Image, ChevronRight } from "lucide-react";
@@ -21,6 +22,7 @@ export default function UserProfile() {
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 });
   const [followLoading, setFollowLoading] = useState(false);
   const { toast } = useToast();
+  usePageTitle(user?.fullName || user?.username || "Profilo Utente");
 
   const fetchFollowStatus = useCallback(async () => {
     if (!params.id) return;

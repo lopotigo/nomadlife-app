@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { Heart, MessageCircle, MapPin, ArrowLeft, Share2, Calendar, Users, Send, Trash2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -19,6 +20,7 @@ function adjustColor(hex: string, amount: number): string {
 }
 
 export default function EventDetail() {
+  usePageTitle("Evento");
   const [, params] = useRoute("/event/:id");
   const [event, setEvent] = useState<EventWithHost | null>(null);
   const [loading, setLoading] = useState(true);

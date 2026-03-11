@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Search, BookOpen, MapPin, Globe, Plane, Shield, Wallet, Wifi, Calendar, ChevronRight, ArrowLeft, PenLine } from "lucide-react";
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 type BlogPost = {
   id: string;
@@ -56,6 +57,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function Blog() {
+  usePageTitle("Storie & Guide");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 

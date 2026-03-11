@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import type { User, Trip, TripStop, City, CityGuide } from "@shared/schema";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 type TripWithUser = Trip & { user: User; stops: TripStop[] };
 
@@ -36,6 +37,7 @@ function getGuideCategoryIcon(cat: string) {
 }
 
 export default function SearchPage() {
+  usePageTitle("Cerca");
   const { user: currentUser } = useAuth();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);

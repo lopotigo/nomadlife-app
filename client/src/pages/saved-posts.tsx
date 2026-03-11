@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { Bookmark, ArrowLeft, MapPin, Heart, Loader2, Clock, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function timeAgo(dateStr: string): string {
   const now = new Date();
@@ -132,6 +133,7 @@ function SavedPostCard({ saved, onUnsave, onNavigate }: { saved: any; onUnsave: 
 }
 
 export default function SavedPosts() {
+  usePageTitle("Post Salvati");
   const { user, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [savedPosts, setSavedPosts] = useState<any[]>([]);

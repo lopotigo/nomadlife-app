@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRoute, Link } from "wouter";
 import Layout from "@/components/layout";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { Heart, MessageCircle, MapPin, ArrowLeft, Share2, Calendar, Video, Link as LinkIcon, Plane, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
@@ -20,6 +21,7 @@ function isYouTubeUrl(url: string): boolean {
 }
 
 export default function PostDetail() {
+  usePageTitle("Post");
   const [, params] = useRoute("/post/:id");
   const [post, setPost] = useState<PostWithUser | null>(null);
   const [loading, setLoading] = useState(true);
