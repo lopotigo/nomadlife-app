@@ -1100,7 +1100,7 @@ function PostMapPopupExpanded({
 }
 
 export default function UnifiedMap() {
-  usePageTitle("Mappa");
+  usePageTitle("Mappa", { description: "Esplora la mappa interattiva dei nomadi digitali. Trova coworking, coliving, eventi e altri nomadi in tutto il mondo." });
   const { user, loading: authLoading } = useAuth();
   const [location, setLocation] = useLocation();
   const { t } = useI18n();

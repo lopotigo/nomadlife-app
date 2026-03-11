@@ -57,7 +57,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function Blog() {
-  usePageTitle("Storie & Guide");
+  usePageTitle("Storie & Guide", { description: "Articoli, guide città e consigli pratici per nomadi digitali. Scopri le migliori destinazioni, visti, sostenibilità e geopolitica del lavoro remoto." });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 

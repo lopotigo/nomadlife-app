@@ -28,7 +28,7 @@ The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as
 - AI Social Intelligence features integrated into Marketplace (product recommendations), Profile (interest analysis), Search (nomad check-in badges), Travel Diary (destination suggestions), and Home Feed (suggested connections, personalized products).
 - AI Image Generation functionality.
 - "Moments" (Stories) for ephemeral content sharing.
-- SEO features including dynamic sitemap, robots.txt, JSON-LD, and Open Graph meta tags.
+- SEO features including dynamic sitemap, robots.txt, JSON-LD, Open Graph meta tags, and dynamic per-page meta tags (usePageTitle hook with og:title, og:description, og:image, canonical URL).
 - Social sharing components for various platforms.
 - Three-tier privacy system for location visibility.
 - Local Marketplace (Mercato Locale) for GPS-based peer-to-peer listings.
@@ -37,7 +37,7 @@ The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as
 - Proactive AI Chatbot as a database-connected agent utilizing various tools for booking, affiliate searches, cost analysis, trip planning, and web search.
 - Shareable Eco Trip Card displaying CO2 statistics and an eco score.
 - Crowdsourcing feature for users to add new work spots (Café, Coworking, Library) to the map.
-- Blog section ("Storie & Guide") with articles, city guides, and practical tips.
+- Blog section ("Storie & Guide") with articles, city guides, practical tips, eco-sustainability guides, and geopolitics analysis for nomads. Dynamic page titles per route for Google Analytics.
 - Real-time travel alerts for visa changes, safety warnings, and natural disasters.
 - Proximity nomad notifications when users enter a 50km radius of each other.
 

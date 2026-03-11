@@ -52,7 +52,7 @@ const DAYS: Record<Language, string[]> = {
 };
 
 export default function EventsCalendar() {
-  usePageTitle("Eventi");
+  usePageTitle("Eventi", { description: "Scopri meetup, workshop e networking per nomadi digitali in tutto il mondo. Crea e partecipa a eventi nella tua città." });
   const { user, loading: authLoading } = useAuth();
   const { t, language } = useI18n();
   const [, setLocation] = useLocation();

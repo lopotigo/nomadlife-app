@@ -37,7 +37,7 @@ function getGuideCategoryIcon(cat: string) {
 }
 
 export default function SearchPage() {
-  usePageTitle("Cerca");
+  usePageTitle("Cerca", { description: "Cerca nomadi digitali, coworking, city guide e risorse per lavorare da remoto in tutto il mondo." });
   const { user: currentUser } = useAuth();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);

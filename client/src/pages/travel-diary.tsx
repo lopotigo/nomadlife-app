@@ -162,7 +162,7 @@ function formatDuration(hours: number): string {
 }
 
 export default function TravelDiary() {
-  usePageTitle("Travel Diary");
+  usePageTitle("Travel Diary", { description: "Pianifica i tuoi viaggi eco-friendly, traccia le tappe e condividi il tuo diario di viaggio con la community di nomadi digitali." });
   const { user, loading: authLoading } = useAuth();
   const { t } = useI18n();
   const { theme } = useTheme();

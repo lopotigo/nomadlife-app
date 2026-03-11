@@ -53,7 +53,11 @@ export default function BlogArticle() {
     enabled: !!slug,
   });
 
-  usePageTitle(post?.title || "Articolo");
+  usePageTitle(post?.title || "Articolo", {
+    description: post?.excerpt,
+    image: post?.imageUrl || undefined,
+    url: post ? `https://nomad-life.app/blog/${post.slug}` : undefined,
+  });
 
   const { data: relatedPosts = [] } = useQuery<BlogPost[]>({
     queryKey: ["/api/blog", post?.category],

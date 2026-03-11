@@ -73,7 +73,7 @@ interface SmartProductsResponse {
 }
 
 export default function Marketplace() {
-  usePageTitle("Mercato Locale");
+  usePageTitle("Mercato Locale", { description: "Compra e vendi tra nomadi digitali. Marketplace locale basato su GPS per attrezzatura da viaggio, servizi e prodotti per remote workers." });
   const { user } = useAuth();
   const { t } = useI18n();
   const queryClient = useQueryClient();
