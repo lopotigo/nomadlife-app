@@ -65,16 +65,23 @@ async function sendPushToUser(userId: string, title: string, body: string, url?:
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      const user = await storage.getUserByUsername(username);
+      let user = await storage.getUserByUsername(username);
+      if (!user && username.includes("@")) {
+        user = await storage.getUserByEmail(username);
+      }
       if (!user) {
-        return done(null, false, { message: "Invalid credentials" });
+        console.log(`[Auth] Login failed: user not found for "${username}"`);
+        return done(null, false, { message: "user_not_found" });
       }
       const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) {
-        return done(null, false, { message: "Invalid credentials" });
+        console.log(`[Auth] Login failed: wrong password for "${user.username}"`);
+        return done(null, false, { message: "wrong_password" });
       }
+      console.log(`[Auth] Login success: ${user.username}`);
       return done(null, user);
     } catch (error) {
+      console.error(`[Auth] Login error:`, error);
       return done(error);
     }
   })
@@ -196,18 +203,30 @@ Sitemap: https://nomad-life.app/sitemap.xml
     const { recaptchaToken } = req.body;
     if (process.env.RECAPTCHA_SECRET_KEY) {
       if (!recaptchaToken) {
-        return res.status(400).send({ error: "Verifica di sicurezza richiesta." });
+        return res.status(400).send({ error: "Security verification required." });
       }
       const captchaResult = await verifyRecaptcha(recaptchaToken);
       if (!captchaResult.success || captchaResult.score < 0.3) {
-        return res.status(400).send({ error: "Verifica di sicurezza fallita. Riprova." });
+        return res.status(400).send({ error: "Security verification failed. Please try again." });
       }
     }
-    passport.authenticate("local", (err: any, user: User | false) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).send({ error: "Credenziali non valide" });
+    passport.authenticate("local", (err: any, user: User | false, info: any) => {
+      if (err) {
+        console.error("[Auth] Login error:", err);
+        return res.status(500).send({ error: "Server error. Please try again." });
+      }
+      if (!user) {
+        const msg = info?.message;
+        if (msg === "user_not_found") {
+          return res.status(401).send({ error: "Account not found. Check your username or sign up." });
+        }
+        return res.status(401).send({ error: "Wrong password. Try again or reset your password." });
+      }
       req.login(user, (loginErr) => {
-        if (loginErr) return next(loginErr);
+        if (loginErr) {
+          console.error("[Auth] Session save error:", loginErr);
+          return res.status(500).send({ error: "Login failed. Please try again." });
+        }
         const { password, ...userWithoutPassword } = user;
         res.send(userWithoutPassword);
       });

@@ -271,7 +271,7 @@ export default function Auth() {
       toast({ title: t("auth.welcome_toast"), description: t("auth.login_success") });
       setLocation("/");
     } catch (error: any) {
-      toast({ title: "Accesso fallito", description: error.message, variant: "destructive" });
+      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -330,7 +330,7 @@ export default function Auth() {
       toast({ title: t("auth.account_created"), description: t("auth.account_created_desc") });
       setLocation("/");
     } catch (error: any) {
-      toast({ title: "Registrazione fallita", description: error.message, variant: "destructive" });
+      toast({ title: "Sign Up Failed", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }

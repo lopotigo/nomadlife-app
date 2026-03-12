@@ -313,12 +313,12 @@ export class DrizzleStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await this.db.select().from(schema.users).where(eq(schema.users.username, username));
+    const result = await this.db.select().from(schema.users).where(sql`lower(${schema.users.username}) = lower(${username})`);
     return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await this.db.select().from(schema.users).where(eq(schema.users.email, email));
+    const result = await this.db.select().from(schema.users).where(sql`lower(${schema.users.email}) = lower(${email})`);
     return result[0];
   }
 

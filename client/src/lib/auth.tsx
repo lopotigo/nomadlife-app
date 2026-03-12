@@ -34,7 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (!res.ok) {
-      throw new Error("Invalid credentials");
+      const errorData = await res.json().catch(() => ({ error: "Login failed. Please try again." }));
+      throw new Error(errorData.error || "Login failed");
     }
 
     const data = await res.json();

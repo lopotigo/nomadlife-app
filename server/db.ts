@@ -9,10 +9,14 @@ const pool = new Pool({
   min: 2,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
+  allowExitOnIdle: false,
 });
 
 pool.on("error", (err) => {
   console.error("Unexpected database pool error:", err.message);
+  if (err.message.includes("terminating connection")) {
+    console.log("[DB] Connection terminated by server, pool will auto-reconnect");
+  }
 });
 
 export const db = drizzle(pool, { schema });
