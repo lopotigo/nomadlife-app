@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plane, Loader2, Check, X, MapPin, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Plane, Loader2, Check, X, MapPin, Eye, EyeOff, ShieldCheck, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -345,6 +345,16 @@ export default function Auth() {
           </div>
           <h1 className="text-3xl font-display font-bold mb-2">NomadLife</h1>
           <p className="text-muted-foreground">{t("auth.subtitle")}</p>
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <div className="flex -space-x-2">
+              {["🇮🇹", "🇲🇾", "🇪🇸", "🇱🇹", "🇿🇦", "🇵🇹", "🇨🇴"].map((flag, i) => (
+                <div key={i} className="w-6 h-6 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs" data-testid={`flag-${i}`}>
+                  {flag}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">Nomads from <span className="font-semibold text-foreground">8+ countries</span></p>
+          </div>
         </div>
 
         <Tabs defaultValue="login" className="w-full">
@@ -529,6 +539,16 @@ export default function Auth() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <div className="mt-6 text-center">
+          <p className="text-xs text-muted-foreground mb-2">Not ready to sign up? Explore first:</p>
+          <div className="flex justify-center gap-3">
+            <a href="/blog" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-xs font-medium text-foreground transition-colors" data-testid="link-explore-blog">
+              <BookOpen className="w-3.5 h-3.5" />
+              Stories & Guides
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

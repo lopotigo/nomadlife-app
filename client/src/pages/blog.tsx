@@ -37,14 +37,14 @@ const categoryIcons: Record<string, any> = {
 };
 
 const categoryLabels: Record<string, string> = {
-  "guide": "Guide Città",
-  "tips": "Consigli Pratici",
-  "lifestyle": "Vita Nomade",
-  "finance": "Finanza & Budget",
-  "tech": "Tech & Lavoro",
-  "travel": "Viaggi",
-  "events": "Eventi",
-  "review": "Recensioni",
+  "guide": "City Guides",
+  "tips": "Practical Tips",
+  "lifestyle": "Nomad Life",
+  "finance": "Finance & Budget",
+  "tech": "Tech & Work",
+  "travel": "Travel",
+  "events": "Events",
+  "review": "Reviews",
 };
 
 const categoryColors: Record<string, string> = {
@@ -59,7 +59,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function Blog() {
-  usePageTitle("Storie & Guide", { description: "Articoli, guide città e consigli pratici per nomadi digitali. Scopri le migliori destinazioni, visti, sostenibilità e geopolitica del lavoro remoto." });
+  usePageTitle("Stories & Guides", { description: "Articles, city guides and practical tips for digital nomads. Discover the best destinations, visas, sustainability and remote work." });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -101,15 +101,15 @@ export default function Blog() {
                 </div>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold" data-testid="text-blog-title">Storie & Guide</h1>
-                <p className="text-sm text-muted-foreground">Esperienze, consigli e guide per nomadi digitali</p>
+                <h1 className="text-2xl font-bold" data-testid="text-blog-title">Stories & Guides</h1>
+                <p className="text-sm text-muted-foreground">Experiences, tips & guides for digital nomads</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/blog/editor">
                 <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer" data-testid="button-write-article">
                   <PenLine className="w-4 h-4" />
-                  <span className="hidden sm:inline">Scrivi</span>
+                  <span className="hidden sm:inline">Write</span>
                 </button>
               </Link>
             </div>
@@ -119,7 +119,7 @@ export default function Blog() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Cerca articoli, città, consigli..."
+              placeholder="Search articles, cities, tips..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted border-0 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"

@@ -23,14 +23,14 @@ type BlogPost = {
 };
 
 const categoryLabels: Record<string, string> = {
-  "guide": "Guide Città",
-  "tips": "Consigli Pratici",
-  "lifestyle": "Vita Nomade",
-  "finance": "Finanza & Budget",
-  "tech": "Tech & Lavoro",
-  "travel": "Viaggi",
-  "events": "Eventi",
-  "review": "Recensioni",
+  "guide": "City Guides",
+  "tips": "Practical Tips",
+  "lifestyle": "Nomad Life",
+  "finance": "Finance & Budget",
+  "tech": "Tech & Work",
+  "travel": "Travel",
+  "events": "Events",
+  "review": "Reviews",
 };
 
 const categoryColors: Record<string, string> = {
@@ -253,7 +253,7 @@ export default function BlogArticle() {
 
         {relatedPosts.length > 0 && (
           <section className="mt-12 pt-8 border-t border-border">
-            <h2 className="text-lg font-bold mb-4">Articoli correlati</h2>
+            <h2 className="text-lg font-bold mb-4">Related Articles</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {relatedPosts.map(rp => (
                 <Link key={rp.id} href={`/blog/${rp.slug}`}>
@@ -269,16 +269,50 @@ export default function BlogArticle() {
             </div>
           </section>
         )}
+
+        <section className="mt-10 pt-8 border-t border-border">
+          <h2 className="text-lg font-bold mb-4">Keep Exploring NomadLife</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link href="/">
+              <div className="group rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-4 hover:border-emerald-500/40 hover:shadow-md transition-all cursor-pointer" data-testid="cta-article-map">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-5 h-5 text-emerald-500" />
+                  <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400">Interactive Map</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Discover coworking spaces, events & nomad spots around the world</p>
+              </div>
+            </Link>
+            <Link href="/blog">
+              <div className="group rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-4 hover:border-amber-500/40 hover:shadow-md transition-all cursor-pointer" data-testid="cta-article-blog">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="w-5 h-5 text-amber-500" />
+                  <span className="font-bold text-sm text-amber-600 dark:text-amber-400">All Stories & Guides</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Browse city guides, practical tips & digital nomad reviews</p>
+              </div>
+            </Link>
+            <Link href="/chat">
+              <div className="group rounded-xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20 p-4 hover:border-violet-500/40 hover:shadow-md transition-all cursor-pointer" data-testid="cta-article-community">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="w-5 h-5 text-violet-500" />
+                  <span className="font-bold text-sm text-violet-600 dark:text-violet-400">Join the Community</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Connect with nomads, share tips & find travel companions</p>
+              </div>
+            </Link>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-border py-8 mt-12">
         <div className="max-w-4xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>NomadLife - La community per nomadi digitali</p>
+          <p>NomadLife - The community for digital nomads</p>
           <div className="flex justify-center gap-4 mt-3">
             <Link href="/blog" className="hover:text-primary transition-colors">Blog</Link>
-            <Link href="/" className="hover:text-primary transition-colors">Mappa</Link>
-            <Link href="/booking" className="hover:text-primary transition-colors">Booking</Link>
-            <Link href="/auth" className="hover:text-primary transition-colors">Accedi</Link>
+            <Link href="/" className="hover:text-primary transition-colors">Map</Link>
+            <Link href="/travel-diary" className="hover:text-primary transition-colors">Travel Diary</Link>
+            <Link href="/marketplace" className="hover:text-primary transition-colors">Marketplace</Link>
+            <Link href="/auth" className="hover:text-primary transition-colors">Login</Link>
           </div>
         </div>
       </footer>

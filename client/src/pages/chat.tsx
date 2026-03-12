@@ -127,7 +127,7 @@ function StackedAvatars({ members, max = 4 }: { members: Partial<User>[]; max?: 
 type SidebarTab = "messages" | "community";
 
 export default function Chat() {
-  usePageTitle("Messaggi");
+  usePageTitle("La Community");
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { t } = useI18n();
@@ -760,12 +760,52 @@ export default function Chat() {
                         <span className="text-white/90 text-xs font-semibold uppercase tracking-wider">NomadLife Community</span>
                       </div>
                       <h2 className="text-white font-bold text-lg leading-tight" data-testid="text-community-title">
-                        Canali per la community
+                        Community Channels
                       </h2>
                       <p className="text-white/70 text-sm mt-1.5">
-                        Unisciti ai canali tematici e connettiti con nomadi da tutto il mondo
+                        Join themed channels and connect with nomads from around the world
                       </p>
                     </div>
+                  </div>
+
+                  {/* CTA Cards - Discover More */}
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <Link href="/" data-testid="cta-map">
+                      <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-3 hover:border-emerald-500/40 hover:shadow-md transition-all cursor-pointer">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">🗺️</span>
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Explore Map</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-tight">Discover nomad spots, coworking & events worldwide</p>
+                      </div>
+                    </Link>
+                    <Link href="/blog" data-testid="cta-blog">
+                      <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-3 hover:border-amber-500/40 hover:shadow-md transition-all cursor-pointer">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">📖</span>
+                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Stories & Guides</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-tight">City guides, tips & reviews for digital nomads</p>
+                      </div>
+                    </Link>
+                    <Link href="/travel-diary" data-testid="cta-diary">
+                      <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 p-3 hover:border-blue-500/40 hover:shadow-md transition-all cursor-pointer">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">✈️</span>
+                          <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Travel Diary</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-tight">Plan trips, track expenses & share your routes</p>
+                      </div>
+                    </Link>
+                    <Link href="/marketplace" data-testid="cta-marketplace">
+                      <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-500/10 to-pink-500/10 border border-rose-500/20 p-3 hover:border-rose-500/40 hover:shadow-md transition-all cursor-pointer">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">🛒</span>
+                          <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Marketplace</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-tight">Buy & sell gear, services & equipment locally</p>
+                      </div>
+                    </Link>
                   </div>
 
                   {/* Community Channels */}
