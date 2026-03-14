@@ -33,6 +33,7 @@ import { InFeedAd } from "@/components/ad-banner";
 import { MomentsBar } from "@/components/moments";
 import { FloatingTip } from "@/components/contextual-tip";
 import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
+import { FirstPostNudge } from "@/components/first-post-nudge";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -2607,6 +2608,8 @@ export default function UnifiedMap() {
           { icon: BookOpen, title: "Read nomad guides", description: "Travel tips, visa guides, and city reviews", href: "/blog" },
         ]} />
       </div>
+
+      <FirstPostNudge onCreatePost={() => { setClickedCoords(null); setShowNewPost(true); }} />
 
       <FloatingTip
         tipKey="hasSeenMapTip"

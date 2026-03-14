@@ -12,6 +12,7 @@ interface OnboardingState {
   hasSeenMarketplaceTip: boolean;
   hasSeenBookingTip: boolean;
   hasSeenEventsTip: boolean;
+  hasSeenFirstPostNudge: boolean;
 }
 
 interface OnboardingContextType {
@@ -33,6 +34,7 @@ const defaultState: OnboardingState = {
   hasSeenMarketplaceTip: false,
   hasSeenBookingTip: false,
   hasSeenEventsTip: false,
+  hasSeenFirstPostNudge: false,
 };
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
