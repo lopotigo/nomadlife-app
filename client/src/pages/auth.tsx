@@ -380,6 +380,10 @@ export default function Auth() {
                       placeholder="marco"
                       required
                       disabled={loading}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      autoComplete="username"
+                      spellCheck={false}
                     />
                   </div>
                   <div className="space-y-2">
@@ -392,6 +396,10 @@ export default function Auth() {
                       placeholder="••••••••"
                       required
                       disabled={loading}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      autoComplete="current-password"
+                      spellCheck={false}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading} data-testid="button-login">
@@ -447,6 +455,10 @@ export default function Auth() {
                       placeholder="marco_nomad"
                       required
                       disabled={loading}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      autoComplete="username"
+                      spellCheck={false}
                     />
                   </div>
                   <div className="space-y-2">
@@ -458,6 +470,10 @@ export default function Auth() {
                       data-testid="input-signup-email"
                       placeholder="marco@example.com"
                       required
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      autoComplete="email"
+                      spellCheck={false}
                       disabled={loading}
                     />
                   </div>
