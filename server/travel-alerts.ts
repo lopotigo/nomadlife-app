@@ -159,7 +159,7 @@ export async function checkProximityAndNotify(
   try {
     const radiusKm = 50;
 
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
     
     const nearbyUsers = await db.execute(sql`
       SELECT u.id, u.name, u.username, u.avatar, u.location, u.profession,
@@ -192,7 +192,7 @@ export async function checkProximityAndNotify(
             and(eq(proximityLogs.userId, userId), eq(proximityLogs.nearbyUserId, nearby.id)),
             and(eq(proximityLogs.userId, nearby.id), eq(proximityLogs.nearbyUserId, userId))
           ),
-          gt(proximityLogs.notifiedAt, twentyFourHoursAgo)
+          gt(proximityLogs.notifiedAt, fourteenDaysAgo)
         ))
         .limit(1);
 
