@@ -217,9 +217,12 @@ Sitemap: https://nomad-life.app/sitemap.xml
       }
       if (!user) {
         const msg = info?.message;
+        const attemptedUsername = req.body?.username || "unknown";
         if (msg === "user_not_found") {
+          console.log(`[Auth] Login failed: "${attemptedUsername}" - account not found`);
           return res.status(401).send({ error: "Account not found. Check your username or sign up." });
         }
+        console.log(`[Auth] Login failed: "${attemptedUsername}" - wrong password`);
         return res.status(401).send({ error: "Wrong password. Try again or reset your password." });
       }
       req.login(user, (loginErr) => {
@@ -227,6 +230,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
           console.error("[Auth] Session save error:", loginErr);
           return res.status(500).send({ error: "Login failed. Please try again." });
         }
+        console.log(`[Auth] Login success: ${user.username} (${user.name}) from ${user.location || "unknown"}`);
         const { password, ...userWithoutPassword } = user;
         res.send(userWithoutPassword);
       });
