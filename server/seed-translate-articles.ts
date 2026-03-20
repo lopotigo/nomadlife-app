@@ -1259,6 +1259,170 @@ If you're considering a career change into tech, or you want to build the skills
 - [Get travel insurance](https://www.insubuy.com/travel-medical-insurance/)
 - [Get an eSIM](https://www.airalo.com/?marker=578583)`
   },
+  {
+    slug: "portugal-digital-nomad-visa-complete-guide-2025",
+    title: "Portugal Digital Nomad Visa 2025: The Complete Guide for Remote Workers",
+    excerpt: "Portugal's Digital Nomad Visa (D8) lets you live and work legally in one of Europe's most beloved destinations. Here's everything you need to know — requirements, costs, how to apply, and life in Porto and Lisbon.",
+    category: "visa",
+    city: "Porto",
+    country: "Portugal",
+    content: `# Portugal Digital Nomad Visa 2025: The Complete Guide for Remote Workers
+
+Portugal has become one of the top destinations for digital nomads worldwide — and for good reason. With its warm climate, affordable cost of living, stunning Atlantic coastline, and vibrant expat community, it's hard to beat. And now, with the **Portugal Digital Nomad Visa (D8)**, you can make it official and live here legally while working remotely.
+
+This is everything you need to know in 2025.
+
+---
+
+## What Is the Portugal Digital Nomad Visa (D8)?
+
+The **D8 Visa** — also known as the Digital Nomad Visa or Remote Worker Visa — was launched by Portugal in 2022 and has since become one of the most popular nomad visas in Europe. It allows non-EU nationals to live in Portugal legally for **up to one year (renewable)** while working remotely for foreign clients or employers.
+
+There are two options depending on how long you plan to stay:
+
+- **Short-stay D8** — for stays up to **1 year**
+- **Temporary residence D8** — for stays of **1–2 years**, renewable, with a path to permanent residency
+
+---
+
+## Who Can Apply?
+
+The D8 visa is designed for:
+
+- **Freelancers and self-employed workers** with international clients
+- **Remote employees** working for companies outside Portugal
+- **Entrepreneurs** running online businesses
+
+You do NOT need to be from a specific country — it's open to non-EU/EEA citizens from anywhere in the world (US, UK, Canada, Australia, Brazil, etc.).
+
+---
+
+## Income Requirements
+
+This is the key eligibility criterion. You must prove a **minimum monthly income** of:
+
+- **€3,480/month** (4x the Portuguese minimum wage in 2025) for the short-stay visa
+- **€3,480/month** for the temporary residence permit
+
+You'll need to prove this income through:
+- Bank statements (last 3 months)
+- Employment contract or freelance contracts
+- Tax returns or payslips
+- A letter from your employer confirming remote work
+
+---
+
+## Required Documents
+
+Here's the standard checklist:
+
+1. ✅ Valid passport (at least 6 months validity beyond your planned stay)
+2. ✅ Completed visa application form
+3. ✅ Passport-size photos (recent, white background)
+4. ✅ Proof of income (bank statements, contracts, payslips)
+5. ✅ Proof of accommodation in Portugal (rental contract, Airbnb booking)
+6. ✅ Travel health insurance (minimum €30,000 coverage)
+7. ✅ Criminal record certificate (apostilled, less than 3 months old)
+8. ✅ NIF (Portuguese tax number) — you can get this before arriving
+9. ✅ Visa application fee payment
+
+---
+
+## How to Apply: Step by Step
+
+### Step 1: Get Your NIF (Tax Number)
+You'll need a Portuguese tax identification number (NIF) before applying. You can get one through a Portuguese tax office, a local accountant, or even remotely through certain services.
+
+### Step 2: Open a Portuguese Bank Account
+Some banks accept non-residents. Alternatively, open an account with a digital bank that works in Portugal (like Wise or Revolut) to manage payments.
+
+### Step 3: Apply at the Portuguese Consulate
+Apply at the Portuguese consulate or embassy in your home country. Bring all your documents and pay the visa fee (around €90).
+
+### Step 4: Wait for Approval
+Processing times vary — typically 2 to 8 weeks depending on the consulate.
+
+### Step 5: Arrive in Portugal
+Once your visa is approved, you can enter Portugal. After arrival, you'll need to apply for the **residence permit** at AIMA (the immigration authority, formerly SEF).
+
+---
+
+## Cost of Living in Porto vs Lisbon
+
+Porto is increasingly popular among nomads — it's more affordable than Lisbon with the same quality of life:
+
+| Expense | Porto | Lisbon |
+|---------|-------|--------|
+| 1BR apartment (city center) | €900–1,400/mo | €1,200–2,000/mo |
+| Coworking desk | €150–250/mo | €200–350/mo |
+| Lunch (restaurant) | €8–12 | €10–15 |
+| Coffee | €0.80–1.20 | €0.90–1.50 |
+| Monthly transport pass | €40 | €42 |
+
+---
+
+## Best Neighborhoods for Nomads
+
+**Porto:**
+- **Bonfim** — trendy, lots of cafés and coworking spaces, great vibe
+- **Cedofeita** — artsy, central, walkable
+- **Foz do Douro** — by the ocean, more residential, quieter
+
+**Lisbon:**
+- **Príncipe Real** — upscale, beautiful, great cafés
+- **Mouraria** — authentic, multicultural
+- **LX Factory area (Alcântara)** — creative hub, startups
+
+---
+
+## Coworking Spaces in Porto
+
+Porto has a growing coworking scene. Some popular options:
+
+- **Cowork Porto** — central, well-equipped
+- **Selina Porto** — popular with the nomad crowd, has accommodation too
+- **LACS** — premium coworking with great community events
+- **Second Home Porto** — design-focused, beautiful space
+
+---
+
+## Tax Considerations: NHR Status
+
+Portugal's **Non-Habitual Resident (NHR) tax regime** has changed in 2025 — the original NHR is being replaced by the **IFICI regime** (Incentivo Fiscal à Investigação e Criação de Emprego). Some categories still benefit from favorable flat tax rates on foreign income.
+
+Consult a local tax advisor (gestora de impostos) before setting up your fiscal residency — it's worth the investment.
+
+---
+
+## Is Portugal Worth It in 2025?
+
+**Pros:**
+- Safe, welcoming country with high quality of life
+- Large English-speaking expat community
+- Fast internet and good infrastructure
+- Beautiful scenery, beaches, and weather
+- Path to EU permanent residency and citizenship after 5 years
+
+**Cons:**
+- Housing prices rising fast, especially in Lisbon
+- Bureaucracy can be slow (AIMA appointment waits)
+- NHR tax advantages reduced compared to previous years
+
+---
+
+## Useful Resources
+
+- 🔗 [Official AIMA Immigration Portal](https://aima.gov.pt) — apply for residence permits
+- 🔗 [Portuguese Consulate Finder](https://portaldascomunidades.mne.gov.pt) — find your nearest consulate
+- 🔗 [NomadList Porto](https://nomadlist.com/porto) — cost of living, internet speed, community scores
+- ✈️ [Find cheap flights to Porto](https://www.aviasales.com/?marker=578583)
+- 🏠 [Browse accommodation in Porto](https://tp.media/click?shmarker=578583&promo_id=4132&source_type=link&type=click)
+- 🔒 [Get travel insurance](https://www.insubuy.com/?utm_source=nomadlife&marker=578583)
+
+---
+
+*Ready to make the move? Connect with nomads already living in Porto on NomadLife — ask questions, find coworking buddies, and get tips from people living it daily.*`,
+  },
 ];
 
 async function seedNewEnglishArticles() {
