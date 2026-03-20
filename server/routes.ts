@@ -156,10 +156,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
   app.post("/api/auth/signup", async (req, res, next) => {
     try {
       const { recaptchaToken, ...bodyData } = req.body;
-      if (process.env.RECAPTCHA_SECRET_KEY) {
-        if (!recaptchaToken) {
-          return res.status(400).send({ error: "Verifica di sicurezza richiesta." });
-        }
+      if (process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
         const captchaResult = await verifyRecaptcha(recaptchaToken);
         if (!captchaResult.success || captchaResult.score < 0.3) {
           return res.status(400).send({ error: "Verifica di sicurezza fallita. Riprova." });
@@ -201,10 +198,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
 
   app.post("/api/auth/login", async (req, res, next) => {
     const { recaptchaToken } = req.body;
-    if (process.env.RECAPTCHA_SECRET_KEY) {
-      if (!recaptchaToken) {
-        return res.status(400).send({ error: "Security verification required." });
-      }
+    if (process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
       const captchaResult = await verifyRecaptcha(recaptchaToken);
       if (!captchaResult.success || captchaResult.score < 0.3) {
         return res.status(400).send({ error: "Security verification failed. Please try again." });
