@@ -2113,10 +2113,10 @@ function DiaryStopMapPopup({ stop, index, tripUserId, onStopUpdated }: {
             <img src={currentPhoto.url} className="w-full h-40 object-cover" alt={stop.city} />
             {allPhotos.length > 1 && (
               <>
-                <button onClick={() => setSelectedPhotoIdx(i => (i - 1 + allPhotos.length) % allPhotos.length)} className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => setSelectedPhotoIdx(i => (i - 1 + allPhotos.length) % allPhotos.length)} className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center transition-opacity">
                   <ChevronRight className="w-4 h-4 rotate-180" />
                 </button>
-                <button onClick={() => setSelectedPhotoIdx(i => (i + 1) % allPhotos.length)} className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => setSelectedPhotoIdx(i => (i + 1) % allPhotos.length)} className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center transition-opacity">
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-1">
