@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-const RECAPTCHA_V3_SITE_KEY = "6LdMNXYsAAAAABrnjRNQqrnq-JC4mObOiwcR8Lw1";
+const RECAPTCHA_V3_SITE_KEY = "6Ldy75AsAAAAAAF-LXgzMYGOdM6lFYK3r5BSdk_D";
 
 function loadRecaptchaScript(): Promise<void> {
   return new Promise((resolve, reject) => {
