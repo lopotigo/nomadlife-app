@@ -16,6 +16,19 @@ function updateMeta(property: string, content: string) {
   }
 }
 
+function trackPageView(title: string) {
+  try {
+    const ga = (window as any).gtag;
+    if (typeof ga === "function") {
+      ga("event", "page_view", {
+        page_title: title,
+        page_location: window.location.href,
+        page_path: window.location.pathname + window.location.search,
+      });
+    }
+  } catch (_) {}
+}
+
 interface SEOOptions {
   description?: string;
   image?: string;
@@ -46,6 +59,8 @@ export function usePageTitle(title: string, seo?: SEOOptions) {
       const canonical = document.querySelector('link[rel="canonical"]');
       if (canonical) canonical.setAttribute("href", seo.url);
     }
+
+    trackPageView(fullTitle);
 
     return () => {
       document.title = "NomadLife";
