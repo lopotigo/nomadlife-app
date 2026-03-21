@@ -779,10 +779,11 @@ Sitemap: https://nomad-life.app/sitemap.xml
       if (typeof name !== "string" || name.length < 2 || name.length > 100) {
         return res.status(400).send({ error: "Nome deve essere tra 2 e 100 caratteri" });
       }
-      if (!["cafe", "coworking", "biblioteca"].includes(category)) {
+      if (!["cafe", "coworking", "biblioteca", "luggage_storage"].includes(category)) {
         return res.status(400).send({ error: "Categoria non valida" });
       }
-      if (typeof wifiQuality !== "number" || wifiQuality < 1 || wifiQuality > 5) {
+      const effectiveWifiQuality = category === "luggage_storage" ? 1 : wifiQuality;
+      if (category !== "luggage_storage" && (typeof wifiQuality !== "number" || wifiQuality < 1 || wifiQuality > 5)) {
         return res.status(400).send({ error: "Qualità Wi-Fi deve essere tra 1 e 5" });
       }
       if (typeof latitude !== "number" || latitude < -90 || latitude > 90 || typeof longitude !== "number" || longitude < -180 || longitude > 180) {
@@ -792,7 +793,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
         userId: (req.user as any).id,
         name: name.trim(),
         category,
-        wifiQuality,
+        wifiQuality: effectiveWifiQuality,
         powerOutlets: !!powerOutlets,
         notes: notes?.trim() || null,
         latitude,

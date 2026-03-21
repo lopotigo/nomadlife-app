@@ -7,7 +7,7 @@ import {
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
   Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye,
-  Pencil, Wifi, Zap, BookOpen, Coffee
+  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -1932,7 +1932,7 @@ export default function UnifiedMap() {
                 key={`spot-${spot.id}`}
                 position={[spot.latitude, spot.longitude]}
                 icon={L.divIcon({
-                  html: `<div style="width:36px;height:36px;border-radius:50%;background:${spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : '#6366f1'};color:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">
+                  html: `<div style="width:36px;height:36px;border-radius:50%;background:${spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : spot.category === 'luggage_storage' ? '#8b5cf6' : '#6366f1'};color:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       ${spot.category === 'cafe' ? '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>' : spot.category === 'coworking' ? '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>' : '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/>'}
                     </svg>
@@ -1944,23 +1944,24 @@ export default function UnifiedMap() {
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
                   <div className="flex items-center gap-2 px-1 py-0.5">
-                    <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : '#6366f1' }}>
-                      {spot.category === 'cafe' ? <Coffee className="w-3 h-3 text-white" /> : spot.category === 'coworking' ? <Wifi className="w-3 h-3 text-white" /> : <BookOpen className="w-3 h-3 text-white" />}
+                    <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : spot.category === 'luggage_storage' ? '#8b5cf6' : '#6366f1' }}>
+                      {spot.category === 'cafe' ? <Coffee className="w-3 h-3 text-white" /> : spot.category === 'coworking' ? <Wifi className="w-3 h-3 text-white" /> : spot.category === 'luggage_storage' ? <BaggageClaim className="w-3 h-3 text-white" /> : <BookOpen className="w-3 h-3 text-white" />}
                     </div>
                     <div>
                       <p className="text-xs font-semibold">{spot.name}</p>
-                      <p className="text-[10px] text-gray-500">{spot.category === 'cafe' ? 'Café' : spot.category === 'coworking' ? 'Coworking' : 'Biblioteca'}</p>
+                      <p className="text-[10px] text-gray-500">{spot.category === 'cafe' ? 'Café' : spot.category === 'coworking' ? 'Coworking' : spot.category === 'luggage_storage' ? 'Deposito Bagagli' : 'Biblioteca'}</p>
                     </div>
                   </div>
                 </Tooltip>
                 <Popup className="custom-popup" maxWidth={300} minWidth={260} autoPanPadding={[20, 20]} autoPan={true}>
                   <div className="popup-animate-in p-3 w-[260px]" data-testid={`popup-spot-${spot.id}`}>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : '#6366f1' }}>
-                        {spot.category === 'cafe' ? 'Café' : spot.category === 'coworking' ? 'Coworking' : 'Biblioteca'}
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : spot.category === 'luggage_storage' ? '#8b5cf6' : '#6366f1' }}>
+                        {spot.category === 'cafe' ? 'Café' : spot.category === 'coworking' ? 'Coworking' : spot.category === 'luggage_storage' ? 'Deposito Bagagli' : 'Biblioteca'}
                       </span>
                     </div>
                     <p className="font-bold text-sm mb-1">{spot.name}</p>
+                    {spot.category !== 'luggage_storage' && (
                     <div className="flex items-center gap-3 mb-2">
                       <div className="flex items-center gap-1">
                         <Wifi className="w-3 h-3 text-blue-500" />
@@ -1972,12 +1973,15 @@ export default function UnifiedMap() {
                         </div>
                       </div>
                     </div>
+                    )}
+                    {spot.category !== 'luggage_storage' && (
                     <div className="flex items-center gap-1 mb-2">
                       <Zap className={`w-3 h-3 ${spot.powerOutlets ? 'text-green-500' : 'text-gray-400'}`} />
                       <span className="text-xs text-gray-600">
                         Prese: {spot.powerOutlets ? 'Disponibili' : 'Non disponibili'}
                       </span>
                     </div>
+                    )}
                     {spot.notes && (
                       <p className="text-xs text-gray-500 mb-2 italic">"{spot.notes}"</p>
                     )}
@@ -3109,11 +3113,14 @@ function AddSpotModal({
                 <SelectItem value="biblioteca">
                   <span className="flex items-center gap-2"><BookOpen className="w-4 h-4" /> Biblioteca</span>
                 </SelectItem>
+                <SelectItem value="luggage_storage">
+                  <span className="flex items-center gap-2"><BaggageClaim className="w-4 h-4" /> Deposito Bagagli</span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div>
+          {category !== "luggage_storage" && <div>
             <Label>Qualità Wi-Fi</Label>
             <div className="flex gap-1 mt-1">
               {[1, 2, 3, 4, 5].map((s) => (
@@ -3128,9 +3135,9 @@ function AddSpotModal({
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
-          <div className="flex items-center justify-between">
+          {category !== "luggage_storage" && <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-yellow-500" />
               Prese elettriche
@@ -3140,13 +3147,13 @@ function AddSpotModal({
               onCheckedChange={setPowerOutlets}
               data-testid="switch-power-outlets"
             />
-          </div>
+          </div>}
 
           <div>
             <Label htmlFor="spot-notes">Note (opzionale)</Label>
             <Textarea
               id="spot-notes"
-              placeholder="Wi-Fi veloce, silenzioso, buon caffè..."
+              placeholder={category === "luggage_storage" ? "Orari, prezzi, sicurezza..." : "Wi-Fi veloce, silenzioso, buon caffè..."}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
