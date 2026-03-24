@@ -121,7 +121,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const { ensureTablesExist } = await import("./db");
+  const { ensureTablesExist, pool } = await import("./db");
+
+  try {
+    await pool.query("SELECT 1");
+    console.log("[DB] Database connection warmed up");
+  } catch (e: any) {
+    console.warn("[DB] Startup ping failed, will retry on first request:", e.message);
+  }
+
   await ensureTablesExist();
 
   await registerRoutes(httpServer, app);
@@ -141,6 +149,12 @@ app.use((req, res, next) => {
       checkTravelAlerts().catch(err => console.error("[Travel Alerts] Periodic check error:", err));
     }, 24 * 60 * 60 * 1000);
     console.log("[Travel Alerts] Scheduled: runs daily in production.");
+
+    setInterval(async () => {
+      try {
+        await pool.query("SELECT 1");
+      } catch (_) {}
+    }, 4 * 60 * 1000);
   } else {
     console.log("[Travel Alerts] Skipped in development mode.");
   }

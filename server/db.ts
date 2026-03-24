@@ -5,22 +5,42 @@ import * as schema from "@shared/schema";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 10,
-  min: 2,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  allowExitOnIdle: false,
+  max: 5,
+  min: 0,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 20000,
+  allowExitOnIdle: true,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
 });
 
 pool.on("error", (err) => {
   console.error("Unexpected database pool error:", err.message);
-  if (err.message.includes("terminating connection")) {
-    console.log("[DB] Connection terminated by server, pool will auto-reconnect");
-  }
+});
+
+pool.on("connect", () => {
+  console.log("[DB] New connection established");
 });
 
 export const db = drizzle(pool, { schema });
 export { pool };
+
+export async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 1000): Promise<T> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      const isRetryable = err.message?.includes("timeout") || err.message?.includes("terminated") || err.message?.includes("ECONNRESET") || err.message?.includes("connection");
+      if (isRetryable && attempt < retries) {
+        console.warn(`[DB] Retry ${attempt}/${retries} after error: ${err.message}`);
+        await new Promise((res) => setTimeout(res, delayMs * attempt));
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
 
 export async function ensureTablesExist() {
   try {
