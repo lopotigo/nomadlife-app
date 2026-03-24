@@ -70,9 +70,9 @@ function Router() {
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/terms" component={Terms} />
-      <Route path="/">{() => <ProtectedRoute component={Home} />}</Route>
-      <Route path="/map">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
-      <Route path="/feed">{() => <ProtectedRoute component={MapFeed} />}</Route>
+      <Route path="/">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
+      <Route path="/feed">{() => <ProtectedRoute component={Home} />}</Route>
+      <Route path="/map-feed">{() => <ProtectedRoute component={MapFeed} />}</Route>
       <Route path="/booking">{() => <ProtectedRoute component={Booking} />}</Route>
       <Route path="/coworking">{() => <ProtectedRoute component={Booking} />}</Route>
       <Route path="/chat">{() => <ProtectedRoute component={Chat} />}</Route>

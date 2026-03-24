@@ -57,8 +57,7 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         </div>
         
         <nav className="flex flex-col gap-1 overflow-y-auto flex-1 min-h-0 pr-1">
-          <NavItem href="/" icon={HomeIcon} label="Home" active={location === "/"} />
-          <NavItem href="/map" icon={Map} label={t("nav.map")} active={location === "/map"} />
+          <NavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
           <NavItem href="/search" icon={Search} label={t("nav.search")} active={location === "/search"} />
           <NavItem href="/travel-diary" icon={Plane} label={t("nav.travel_diary")} active={location === "/travel-diary"} />
           <NavItem href="/events-calendar" icon={Calendar} label={t("nav.events_calendar")} active={location === "/events-calendar"} />
@@ -87,9 +86,9 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-lg border-t border-border flex justify-around items-center h-16 px-1 z-50">
-        <MobileNavItem href="/" icon={HomeIcon} label="Home" active={location === "/"} />
-        <MobileNavItem href="/map" icon={Map} label={t("nav.map")} active={location === "/map"} />
+        <MobileNavItem href="/" icon={Map} label={t("nav.map")} active={location === "/"} />
         <MobileNavItem href="/travel-diary" icon={Plane} label={t("nav.trips")} active={location === "/travel-diary"} />
+        <MobileNavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
         <MobileNavItem href="/chat" icon={MessageSquare} label={t("nav.chat")} active={location === "/chat"} />
         <button 
           onClick={() => setShowMoreMenu(!showMoreMenu)}

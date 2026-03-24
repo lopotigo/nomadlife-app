@@ -15,14 +15,12 @@ Preferred communication style: Simple, everyday language.
 The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as the build tool. State management utilizes TanStack React Query for server state and React Context for authentication. Styling is handled by Tailwind CSS v4 with shadcn/ui (New York style) and Framer Motion for animations.
 
 **Routing (important):**
-- `/` → Home dashboard (home.tsx) — social feed + AI context card + mini map widget
-- `/map` → UnifiedMap (full interactive map with markers, places, events)
-- `/feed` → MapFeed (legacy map+feed hybrid)
-- Mobile nav: Home `/`, Map `/map`, Trips `/travel-diary`, Chat `/chat`, More (menu)
+- `/` → UnifiedMap (common map for all users — the main entry point)
+- `/feed` → Home (home.tsx) — social feed with AI context strip, moments, posts
+- `/map-feed` → MapFeed (legacy map+feed hybrid)
 
 **Key UI/UX and Features:**
-- Home dashboard with: personalized NomadContextCard (greeting + city + stats + quick links), MiniMapWidget (soft rounded mini map with user position), AIContextStrip (contextual NomadBot suggestion), then MomentsBar, TravelAlertsBanner, CreatePostForm, and social feed (posts/events/trips).
-- Map-centric exploration at `/map` with interactive markers for locations and trip stops.
+- Map-centric feed with interactive markers for locations and trip stops.
 - User profiles featuring travel statistics, avatar builder, and a "Travel Diary" for managing trips.
 - Interactive map for exploration, eco-routing, event discovery, and navigation.
 - Social features including multi-format post creation, QR code sharing, comments, and PWA support.
