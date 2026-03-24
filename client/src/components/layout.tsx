@@ -63,35 +63,23 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
         </div>
 
         <nav className="flex flex-col gap-0.5 overflow-y-auto flex-1 min-h-0 pr-1">
-          {/* Esplora */}
+          {/* Primary navigation */}
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-4 mb-2">Esplora</p>
           <NavItem href="/" icon={Map} label="Mappa Comune" active={location === "/"} />
           <NavItem href="/diary" icon={Compass} label="Il mio Diary" active={location === "/diary"} highlight />
-          <NavItem href="/travel-diary" icon={Plane} label="Travel Diary" active={location === "/travel-diary"} />
-          <NavItem href="/events-calendar" icon={Calendar} label="Eventi" active={location === "/events-calendar"} />
 
           <div className="my-3 border-t border-border/50" />
 
-          {/* Community */}
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-4 mb-2">Community</p>
           <NavItem href="/chat" icon={MessageSquare} label={t("nav.messages")} active={location === "/chat"} />
           <NavItem href="/search" icon={Search} label={t("nav.search")} active={location === "/search"} />
-          <NavItem href="/matchmaking" icon={Users} label="Matchmaking" active={location === "/matchmaking"} />
 
           <div className="my-3 border-t border-border/50" />
 
-          {/* Servizi */}
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-4 mb-2">Servizi</p>
           <NavItem href="/booking" icon={Briefcase} label={t("nav.booking")} active={location === "/booking"} />
           <NavItem href="/marketplace" icon={ShoppingBag} label={t("nav.marketplace")} active={location === "/marketplace"} />
           <NavItem href="/blog" icon={BookOpen} label="Blog" active={location === "/blog" || location.startsWith("/blog/")} />
-          <NavItem href="/saved" icon={Bookmark} label="Salvati" active={location === "/saved"} />
-
-          <div className="my-3 border-t border-border/50" />
-
-          {/* Profilo */}
-          <NavItem href="/profile" icon={User} label="Profilo" active={location === "/profile"} />
-          <NavItem href="/avatar-builder" icon={Sparkles} label="Avatar Builder" active={location === "/avatar-builder"} />
 
           {adminCheck?.isAdmin && (
             <>
