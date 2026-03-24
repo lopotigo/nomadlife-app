@@ -162,6 +162,12 @@ export function AiChatbot() {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleOpenBot = () => setIsOpen(true);
+    window.addEventListener("open-nomadbot", handleOpenBot);
+    return () => window.removeEventListener("open-nomadbot", handleOpenBot);
+  }, []);
+
   const acquireLocation = () => {
     if (userLocation) return;
     if (!navigator.geolocation) return;

@@ -112,12 +112,13 @@ export default function DiaryPage() {
     );
   }, []);
 
-  const { data: trips = [] } = useQuery<Trip[]>({
+  const { data: rawTrips } = useQuery<Trip[]>({
     queryKey: ["/api/my-trips"],
     queryFn: () => fetch("/api/my-trips", { credentials: "include" }).then(r => r.json()),
   });
+  const trips: Trip[] = Array.isArray(rawTrips) ? rawTrips : [];
 
-  const { data: nearbyNomads = [] } = useQuery<NearbyNomad[]>({
+  const { data: rawNearbyNomads } = useQuery<NearbyNomad[]>({
     queryKey: ["/api/matchmaking/nearby", userLocation?.lat, userLocation?.lng],
     queryFn: () => {
       if (!userLocation) return Promise.resolve([]);
@@ -125,14 +126,17 @@ export default function DiaryPage() {
     },
     enabled: !!userLocation,
   });
+  const nearbyNomads: NearbyNomad[] = Array.isArray(rawNearbyNomads) ? rawNearbyNomads : [];
 
-  const { data: savedPosts = [] } = useQuery<any[]>({
+  const { data: rawSavedPosts } = useQuery<any[]>({
     queryKey: ["/api/saved-posts"],
   });
+  const savedPosts: any[] = Array.isArray(rawSavedPosts) ? rawSavedPosts : [];
 
-  const { data: eventRegistrations = [] } = useQuery<any[]>({
+  const { data: rawEventRegistrations } = useQuery<any[]>({
     queryKey: ["/api/event-registrations"],
   });
+  const eventRegistrations: any[] = Array.isArray(rawEventRegistrations) ? rawEventRegistrations : [];
 
   const allStops = trips.flatMap(trip =>
     (trip.stops || [])
