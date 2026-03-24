@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, type ChangeEvent } from "reac
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
-import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane, ChevronRight, LinkIcon } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, MoreHorizontal, Loader2, Plus, Camera, X, Upload, RotateCcw, Send, Trash2, Navigation, Wallet, Route, Calendar, Users, MapPinned, Plane, ChevronRight, LinkIcon, Bot, Globe, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,8 @@ import { MomentsBar } from "@/components/moments";
 import { SmartProductsWidget } from "@/components/smart-products-widget";
 import { TravelAlertsBanner } from "@/components/travel-alerts-banner";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { MapContainer, TileLayer, Circle } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 function isYouTubeUrl(url: string): boolean {
   return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)/.test(url);
@@ -34,6 +36,13 @@ type FeedItem =
   | { type: "event"; data: EventWithHost; createdAt: Date }
   | { type: "trip"; data: PublicTrip; createdAt: Date };
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Buongiorno";
+  if (h < 18) return "Buon pomeriggio";
+  return "Buona sera";
+}
+
 export default function Home() {
   usePageTitle("Home");
   const { user, loading: authLoading } = useAuth();
@@ -43,6 +52,9 @@ export default function Home() {
   const [publicTrips, setPublicTrips] = useState<PublicTrip[]>([]);
   const [liveTrips, setLiveTrips] = useState<LiveTrip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [geoLat, setGeoLat] = useState<number | null>(null);
+  const [geoLng, setGeoLng] = useState<number | null>(null);
+  const [geoCity, setGeoCity] = useState<string | null>(null);
 
   const fetchPosts = useCallback(() => {
     fetch("/api/posts", { credentials: "include" })
@@ -99,6 +111,33 @@ export default function Home() {
     fetchLiveTrips();
   }, [user, authLoading, setLocation, fetchPosts, fetchEvents, fetchPublicTrips, fetchLiveTrips]);
 
+  useEffect(() => {
+    const applyGeo = (lat: number, lng: number) => {
+      setGeoLat(lat);
+      setGeoLng(lng);
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+        .then(r => r.json())
+        .then(d => {
+          const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county;
+          if (city) setGeoCity(city);
+        })
+        .catch(() => {});
+    };
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => applyGeo(pos.coords.latitude, pos.coords.longitude),
+        () => {
+          if (user?.latitude && user?.longitude) applyGeo(user.latitude, user.longitude);
+          if (user?.location) setGeoCity(user.location);
+        },
+        { timeout: 5000 }
+      );
+    } else if (user?.latitude && user?.longitude) {
+      applyGeo(user.latitude, user.longitude);
+      if (user?.location) setGeoCity(user.location);
+    }
+  }, [user]);
+
   const feedItems: FeedItem[] = [
     ...posts.map((p) => ({ type: "post" as const, data: p, createdAt: new Date(p.createdAt) })),
     ...events.map((e) => ({ type: "event" as const, data: e, createdAt: new Date(e.createdAt) })),
@@ -129,29 +168,38 @@ export default function Home() {
     );
   }
 
+  const firstName = user?.name?.split(" ")[0] || user?.username || "";
+  const displayCity = geoCity || user?.location;
+
   return (
     <Layout>
-      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border/40 p-4 flex justify-between items-center">
-        <h1 className="text-xl font-display font-bold">Feed</h1>
-        <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-          <span className="sr-only">Notifications</span>
-          <div className="w-5 h-5 rounded-full border-2 border-muted-foreground/30" />
-        </button>
-      </header>
+      <div className="p-4 space-y-4">
+        <NomadContextCard user={user} city={displayCity || null} eventsCount={events.length} greeting={getGreeting()} />
 
-      <div className="p-4 space-y-6">
+        <MiniMapWidget lat={geoLat} lng={geoLng} />
+
+        <AIContextStrip city={displayCity || null} />
+
         <TravelAlertsBanner />
         <MomentsBar />
-        
+
         {liveTrips.length > 0 && <LiveTripsSection trips={liveTrips} />}
-        
+
         <CreatePostForm onPostCreated={fetchPosts} />
-        
-        <div className="space-y-6">
+
+        <div className="space-y-5">
           {feedItems.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No posts yet. Start exploring!</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-16 space-y-3"
+            >
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
+                <Globe className="w-7 h-7 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground font-medium">Il feed è ancora silenzioso</p>
+              <p className="text-sm text-muted-foreground/70">Sii il primo a condividere la tua avventura!</p>
+            </motion.div>
           ) : (
             feedItems.map((item, index) => {
               const card = (() => {
@@ -167,17 +215,195 @@ export default function Home() {
                 return null;
               })();
               return (
-                <>
+                <div key={`feed-item-${index}`}>
                   {card}
                   {index === 2 && <SmartProductsWidget key="smart-widget" />}
                   {index === 4 && <SuggestedNomads key="suggested-nomads" />}
-                </>
+                </div>
               );
             })
           )}
         </div>
       </div>
     </Layout>
+  );
+}
+
+function NomadContextCard({ user, city, eventsCount, greeting }: { user: User | null; city: string | null; eventsCount: number; greeting: string }) {
+  const firstName = user?.name?.split(" ")[0] || user?.username || "";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-5 text-white shadow-lg"
+      data-testid="nomad-context-card"
+    >
+      <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/5 rounded-full" />
+      <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-white/5 rounded-full" />
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-4">
+          {user?.avatar ? (
+            <img src={user.avatar} className="w-14 h-14 rounded-full border-2 border-white/30 object-cover shadow-md" alt="avatar" />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold border-2 border-white/20">
+              {(user?.name || user?.username || "?")[0]?.toUpperCase()}
+            </div>
+          )}
+          <div>
+            <p className="text-sm text-white/75">{greeting},</p>
+            <p className="text-xl font-bold leading-tight">{firstName}!</p>
+            {city ? (
+              <div className="flex items-center gap-1.5 text-xs text-white/70 mt-0.5">
+                <MapPin className="w-3 h-3" />
+                <span>Sei a <strong className="text-white/90">{city}</strong></span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-xs text-white/60 mt-0.5">
+                <Globe className="w-3 h-3" />
+                <span>{user?.profession || "Digital Nomad"}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold">{user?.countriesVisited ?? 0}</p>
+            <p className="text-[10px] text-white/70 mt-0.5">paesi</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold">{user?.citiesVisited ?? 0}</p>
+            <p className="text-[10px] text-white/70 mt-0.5">città</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold">{eventsCount}</p>
+            <p className="text-[10px] text-white/70 mt-0.5">eventi</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Link href="/map" className="flex-1">
+            <button className="w-full bg-white/15 hover:bg-white/25 transition-colors rounded-xl px-3 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5" data-testid="link-explore-map">
+              <MapPin className="w-3.5 h-3.5" />
+              Esplora
+            </button>
+          </Link>
+          <Link href="/matchmaking" className="flex-1">
+            <button className="w-full bg-white/15 hover:bg-white/25 transition-colors rounded-xl px-3 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5" data-testid="link-matchmaking">
+              <Users className="w-3.5 h-3.5" />
+              Nomadi
+            </button>
+          </Link>
+          <Link href="/travel-diary" className="flex-1">
+            <button className="w-full bg-white/15 hover:bg-white/25 transition-colors rounded-xl px-3 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5" data-testid="link-travel-diary">
+              <Plane className="w-3.5 h-3.5" />
+              Viaggi
+            </button>
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function MiniMapWidget({ lat, lng }: { lat: number | null; lng: number | null }) {
+  const center: [number, number] = lat !== null && lng !== null ? [lat, lng] : [20, 0];
+  const zoom = lat !== null && lng !== null ? 13 : 2;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.1 }}
+      className="relative rounded-2xl overflow-hidden shadow-sm border border-border/30"
+      style={{ height: "190px" }}
+      data-testid="mini-map-widget"
+    >
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        scrollWheelZoom={false}
+        zoomControl={false}
+        dragging={false}
+        doubleClickZoom={false}
+        attributionControl={false}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+        {lat !== null && lng !== null && (
+          <>
+            <Circle
+              center={[lat, lng]}
+              radius={400}
+              pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.15, weight: 2 }}
+            />
+            <Circle
+              center={[lat, lng]}
+              radius={80}
+              pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.6, weight: 0 }}
+            />
+          </>
+        )}
+      </MapContainer>
+      <div className="absolute inset-0 pointer-events-none rounded-2xl ring-1 ring-inset ring-black/5" />
+      <Link href="/map">
+        <button
+          className="absolute bottom-3 right-3 z-[1000] bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 border border-white/50"
+          data-testid="button-open-full-map"
+        >
+          <MapPin className="w-3 h-3 text-emerald-500" />
+          Apri mappa completa
+          <ChevronRight className="w-3 h-3 text-muted-foreground" />
+        </button>
+      </Link>
+      {lat === null && (
+        <div className="absolute inset-0 z-[999] flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
+          <div className="bg-card/95 rounded-xl px-4 py-2.5 shadow text-center">
+            <p className="text-xs font-medium text-muted-foreground">Condividi la posizione per vedere cosa c'è intorno a te</p>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+function AIContextStrip({ city }: { city: string | null }) {
+  const h = new Date().getHours();
+  let tip = "";
+  let sub = "";
+  if (h < 12) {
+    tip = city ? `Stai cercando un buon caffè con wifi a ${city}?` : "Dove lavori stamattina?";
+    sub = "NomadBot può trovarlo per te";
+  } else if (h < 18) {
+    tip = city ? `Pomeriggio produttivo a ${city}? Ecco i coworking vicini.` : "Cerchi un posto dove lavorare?";
+    sub = "Chiedi a NomadBot";
+  } else {
+    tip = city ? `Sera libera a ${city}? Scopri eventi per nomadi.` : "Vuoi trovare eventi vicino a te?";
+    sub = "NomadBot ti guida";
+  }
+
+  return (
+    <Link href="/chat">
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-violet-500/8 to-blue-500/8 border border-violet-400/20 rounded-2xl cursor-pointer hover:border-violet-400/40 hover:from-violet-500/12 hover:to-blue-500/12 transition-all group"
+        data-testid="ai-context-strip"
+      >
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-violet-500/25 transition-shadow">
+          <Bot className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-snug">{tip}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-violet-400" />
+            {sub}
+          </p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+      </motion.div>
+    </Link>
   );
 }
 
