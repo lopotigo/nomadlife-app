@@ -10,29 +10,12 @@ import { apiRequest } from "@/lib/queryClient";
 import { usePageTitle } from "@/hooks/use-page-title";
 
 function PasswordStrengthMini({ password }: { password: string }) {
-  const checks = {
-    minLength: password.length >= 8,
-    hasUppercase: /[A-Z]/.test(password),
-    hasNumber: /[0-9]/.test(password),
-    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-  };
-  const allPassed = Object.values(checks).every(Boolean);
-
   if (!password) return null;
-
+  const ok = password.length >= 8;
   return (
-    <div className="space-y-1.5">
-      {[
-        { key: "minLength", label: "Almeno 8 caratteri" },
-        { key: "hasUppercase", label: "Una lettera maiuscola" },
-        { key: "hasNumber", label: "Un numero" },
-        { key: "hasSpecial", label: "Un carattere speciale" },
-      ].map(({ key, label }) => (
-        <div key={key} className={`flex items-center gap-1.5 text-xs ${(checks as any)[key] ? "text-emerald-500" : "text-gray-400"}`}>
-          {(checks as any)[key] ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
-          {label}
-        </div>
-      ))}
+    <div className={`flex items-center gap-1.5 text-xs ${ok ? "text-emerald-500" : "text-gray-400"}`}>
+      {ok ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+      Almeno 8 caratteri
     </div>
   );
 }
@@ -81,15 +64,8 @@ export default function ResetPassword() {
       return;
     }
 
-    const checks = {
-      minLength: password.length >= 8,
-      hasUppercase: /[A-Z]/.test(password),
-      hasNumber: /[0-9]/.test(password),
-      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    };
-
-    if (!Object.values(checks).every(Boolean)) {
-      toast({ title: "Password non valida", description: "La password deve rispettare tutti i requisiti.", variant: "destructive" });
+    if (password.length < 8) {
+      toast({ title: "Password troppo corta", description: "La password deve avere almeno 8 caratteri.", variant: "destructive" });
       return;
     }
 
