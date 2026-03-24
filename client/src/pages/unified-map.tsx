@@ -1550,7 +1550,7 @@ export default function UnifiedMap() {
   return (
     <Layout fullWidth>
       <div className="flex flex-col h-full overflow-hidden">
-        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0 z-10 sticky top-0">
+        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0 z-10 sticky top-0 mx-3 mt-3 rounded-2xl overflow-hidden shadow-md">
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
@@ -2100,7 +2100,10 @@ export default function UnifiedMap() {
             )}
             {countryFilter && <ZoomToCountry lat={countryFilter.lat} lng={countryFilter.lng} />}
           </MapContainer>
-          
+
+          {/* Soft frame overlay — visual ring around the map */}
+          <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/10 dark:ring-white/10 pointer-events-none z-[999]" />
+
           {countryFilter && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-primary text-primary-foreground rounded-full px-4 py-2 shadow-lg flex items-center gap-2 text-sm font-semibold" data-testid="banner-country-filter">
               <Users className="w-4 h-4" />
