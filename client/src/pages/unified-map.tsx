@@ -7,7 +7,7 @@ import {
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
   Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye,
-  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim
+  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim, Bot, Sparkles, ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -2437,6 +2437,36 @@ export default function UnifiedMap() {
           <div className="border-b border-gray-200/50 dark:border-gray-700/50 -mx-4 mb-2">
             <MomentsBar onMomentCreated={fetchData} />
           </div>
+
+          {/* AI Context Strip */}
+          <Link href="/chat">
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-violet-500/8 to-blue-500/8 border border-violet-400/20 rounded-2xl cursor-pointer hover:border-violet-400/40 hover:from-violet-500/12 hover:to-blue-500/12 transition-all group"
+              data-testid="home-ai-strip"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow-violet-500/25 transition-shadow">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium leading-snug">
+                  {new Date().getHours() < 12
+                    ? "Dove lavori stamattina? Cerco un café con wifi per te"
+                    : new Date().getHours() < 18
+                    ? "Pomeriggio produttivo? Vedi i coworking vicini a te"
+                    : "Sera libera? Scopri eventi nomadi in zona"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-violet-400" />
+                  Chiedi a NomadBot
+                </p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
+            </motion.div>
+          </Link>
+
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Heart className="w-5 h-5 text-red-400" />
             Feed

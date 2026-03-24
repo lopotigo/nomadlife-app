@@ -1,4 +1,5 @@
 import { Switch, Route, Redirect } from "wouter";
+import DiaryPage from "@/pages/diary";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/terms" component={Terms} />
       <Route path="/">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
+      <Route path="/diary">{() => <ProtectedRoute component={DiaryPage} />}</Route>
       <Route path="/feed">{() => <ProtectedRoute component={Home} />}</Route>
       <Route path="/map-feed">{() => <ProtectedRoute component={MapFeed} />}</Route>
       <Route path="/booking">{() => <ProtectedRoute component={Booking} />}</Route>

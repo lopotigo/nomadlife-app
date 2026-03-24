@@ -15,8 +15,9 @@ Preferred communication style: Simple, everyday language.
 The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as the build tool. State management utilizes TanStack React Query for server state and React Context for authentication. Styling is handled by Tailwind CSS v4 with shadcn/ui (New York style) and Framer Motion for animations.
 
 **Routing (important):**
-- `/` → UnifiedMap (common map for all users — the main entry point)
-- `/feed` → Home (home.tsx) — social feed with AI context strip, moments, posts
+- `/` → UnifiedMap (Mappa Comune — community map, main entry point for all users)
+- `/diary` → DiaryPage (diary.tsx) — personal map hub: user's trips, moments, nearby nomads, hub
+- `/feed` → Home (home.tsx) — legacy social feed (still available)
 - `/map-feed` → MapFeed (legacy map+feed hybrid)
 
 **Key UI/UX and Features:**
