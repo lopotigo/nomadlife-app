@@ -30,7 +30,6 @@ import { ShareQRModal, handleShare } from "@/components/share-qr-modal";
 import { EventPosterModal } from "@/components/event-poster-modal";
 import { WeatherWidget } from "@/components/weather-widget";
 import { InFeedAd } from "@/components/ad-banner";
-import { MomentsBar } from "@/components/moments";
 import { FloatingTip } from "@/components/contextual-tip";
 import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { FirstPostNudge } from "@/components/first-post-nudge";
@@ -2434,9 +2433,6 @@ export default function UnifiedMap() {
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
-          <div className="border-b border-gray-200/50 dark:border-gray-700/50 -mx-4 mb-2">
-            <MomentsBar onMomentCreated={fetchData} />
-          </div>
 
           {/* AI Context Strip */}
           <motion.button

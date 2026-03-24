@@ -1,19 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Popup, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Circle, Popup, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useToast } from "@/hooks/use-toast";
 import { MomentsBar } from "@/components/moments";
+import { CurvedRouteLine } from "@/components/map-route-line";
 import {
   Map, Plane, Camera, Users, Bookmark, User, Plus,
   MapPin, Calendar, Star, ChevronUp, ChevronDown,
   Heart, Globe, Navigation, Sparkles, Share2, ExternalLink,
-  X, Compass, BookOpen, Settings
+  X, Compass, BookOpen, Settings, CheckCircle2, Loader2,
+  Edit3, Eye
 } from "lucide-react";
 
 const TABS = [
@@ -66,6 +68,11 @@ const PANEL_HEIGHTS: Record<PanelState, string> = {
   full: "88vh",
 };
 
+const TRIP_COLORS = [
+  "#6366f1", "#3b82f6", "#10b981", "#f59e0b",
+  "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6",
+];
+
 function createStopIcon(color: string, order: number) {
   return L.divIcon({
     html: `<div style="width:32px;height:32px;border-radius:50%;background:${color};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${order}</div>`,
@@ -85,17 +92,38 @@ function createNomadIcon(avatar: string | null | undefined, username: string) {
   });
 }
 
+function MapController({ center, zoom }: { center: [number, number] | null; zoom?: number }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.flyTo(center, zoom || map.getZoom(), { duration: 1.2 });
+    }
+  }, [center, zoom, map]);
+  return null;
+}
+
 export default function DiaryPage() {
   const { user } = useAuth();
   const { theme } = useTheme();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabId>("trips");
   const [panelState, setPanelState] = useState<PanelState>("half");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([45, 10]);
+  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
+  const [flyZoom, setFlyZoom] = useState<number | undefined>(undefined);
+  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartState = useRef<PanelState>("half");
+
+  // Create trip modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newTripName, setNewTripName] = useState("");
+  const [newTripColor, setNewTripColor] = useState(TRIP_COLORS[0]);
+  const [newTripStartDate, setNewTripStartDate] = useState("");
+  const [newTripEndDate, setNewTripEndDate] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const tileUrl = theme === "dark"
     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -106,15 +134,16 @@ export default function DiaryPage() {
       (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
-        setMapCenter([loc.lat, loc.lng]);
       },
       () => {}
     );
   }, []);
 
+  // Use the endpoint that returns trips WITH stops
   const { data: rawTrips } = useQuery<Trip[]>({
-    queryKey: ["/api/my-trips"],
-    queryFn: () => fetch("/api/my-trips", { credentials: "include" }).then(r => r.json()),
+    queryKey: ["/api/users", user?.id, "trips"],
+    queryFn: () => fetch(`/api/users/${user?.id}/trips`, { credentials: "include" }).then(r => r.json()),
+    enabled: !!user?.id,
   });
   const trips: Trip[] = Array.isArray(rawTrips) ? rawTrips : [];
 
@@ -138,11 +167,24 @@ export default function DiaryPage() {
   });
   const eventRegistrations: any[] = Array.isArray(rawEventRegistrations) ? rawEventRegistrations : [];
 
+  const selectedTrip = trips.find(t => t.id === selectedTripId) || null;
+
+  // All stops from all trips for the map
   const allStops = trips.flatMap(trip =>
     (trip.stops || [])
       .filter(s => s.latitude && s.longitude)
       .map(s => ({ ...s, tripColor: trip.color, tripName: trip.name, tripId: trip.id }))
   );
+
+  // Stops from the currently selected trip (highlighted)
+  const selectedStops = selectedTrip
+    ? (selectedTrip.stops || []).filter(s => s.latitude && s.longitude)
+    : [];
+
+  // Route positions for drawing the line
+  const selectedPositions: [number, number][] = selectedStops
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map(s => [s.latitude!, s.longitude!]);
 
   const togglePanel = () => {
     setPanelState(prev => prev === "peek" ? "half" : prev === "half" ? "full" : "half");
@@ -164,19 +206,77 @@ export default function DiaryPage() {
     else if (delta < -60) setPanelState(prev => prev === "full" ? "half" : "peek");
   };
 
-  const publishTrip = async (tripId: number) => {
+  const selectTrip = (trip: Trip) => {
+    if (selectedTripId === trip.id) {
+      setSelectedTripId(null);
+      return;
+    }
+    setSelectedTripId(trip.id);
+    const stops = (trip.stops || []).filter(s => s.latitude && s.longitude);
+    if (stops.length > 0) {
+      const firstStop = stops[0];
+      setFlyTarget([firstStop.latitude!, firstStop.longitude!]);
+      setFlyZoom(6);
+      setPanelState("peek");
+    }
+  };
+
+  const publishTrip = async (tripId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
-      await fetch(`/api/trips/${tripId}`, {
+      const res = await fetch(`/api/trips/${tripId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ isPublic: true }),
       });
+      if (!res.ok) throw new Error();
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "trips"] });
       toast({ title: "Viaggio condiviso!", description: "Ora visibile sulla Mappa Comune." });
     } catch {
       toast({ title: "Errore", description: "Non è stato possibile condividere il viaggio.", variant: "destructive" });
     }
   };
+
+  const createTrip = async () => {
+    if (!newTripName.trim()) return;
+    setCreating(true);
+    try {
+      const body: any = {
+        name: newTripName.trim(),
+        color: newTripColor,
+        isPublic: false,
+      };
+      if (newTripStartDate) body.startDate = newTripStartDate;
+      if (newTripEndDate) body.endDate = newTripEndDate;
+
+      const res = await fetch("/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      const created = await res.json();
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "trips"] });
+      setShowCreateModal(false);
+      setNewTripName("");
+      setNewTripStartDate("");
+      setNewTripEndDate("");
+      setNewTripColor(TRIP_COLORS[0]);
+      toast({ title: "Viaggio creato!", description: `"${body.name}" è pronto. Aggiungi le tue tappe.` });
+    } catch {
+      toast({ title: "Errore", description: "Non è stato possibile creare il viaggio.", variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const mapCenter: [number, number] = userLocation
+    ? [userLocation.lat, userLocation.lng]
+    : allStops.length > 0
+    ? [allStops[0].latitude!, allStops[0].longitude!]
+    : [45, 10];
 
   return (
     <Layout fullWidth>
@@ -186,6 +286,11 @@ export default function DiaryPage() {
           <div className="flex items-center gap-2 bg-card/90 backdrop-blur-md rounded-2xl px-3 py-2 shadow-md border border-border/50 pointer-events-auto">
             <Compass className="w-4 h-4 text-primary" />
             <span className="font-semibold text-sm">Il mio Diary</span>
+            {trips.length > 0 && (
+              <span className="text-[10px] bg-primary/15 text-primary rounded-full px-2 py-0.5 font-medium">
+                {trips.length} {trips.length === 1 ? "viaggio" : "viaggi"}
+              </span>
+            )}
           </div>
           <Link href="/profile">
             <div className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-lg cursor-pointer pointer-events-auto hover:scale-105 transition-transform" data-testid="diary-profile-avatar">
@@ -196,6 +301,22 @@ export default function DiaryPage() {
               />
             </div>
           </Link>
+        </div>
+
+        {/* FAB: Crea viaggio */}
+        <div className="absolute bottom-0 left-4 z-[1001] pointer-events-none"
+          style={{ bottom: `calc(${PANEL_HEIGHTS[panelState]} + 16px)`, transition: "bottom 0.4s ease" }}>
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            onClick={() => setShowCreateModal(true)}
+            className="w-12 h-12 rounded-full bg-primary shadow-lg text-white flex items-center justify-center pointer-events-auto hover:bg-primary/90 active:scale-95 transition-transform"
+            data-testid="diary-fab-create"
+            title="Crea nuovo viaggio"
+          >
+            <Plus className="w-5 h-5" />
+          </motion.button>
         </div>
 
         {/* Map */}
@@ -214,6 +335,8 @@ export default function DiaryPage() {
               url={tileUrl}
             />
 
+            <MapController center={flyTarget} zoom={flyZoom} />
+
             {/* User location */}
             {userLocation && (
               <>
@@ -230,30 +353,48 @@ export default function DiaryPage() {
               </>
             )}
 
-            {/* Trip stops */}
-            {allStops.map(stop => (
-              <Marker
-                key={`stop-${stop.id}`}
-                position={[stop.latitude!, stop.longitude!]}
-                icon={createStopIcon(stop.tripColor, stop.orderIndex + 1)}
-              >
-                <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
-                  <div className="text-xs">
-                    <p className="font-semibold">{stop.location}</p>
-                    <p className="text-muted-foreground">{stop.tripName}</p>
-                  </div>
-                </Tooltip>
-                <Popup maxWidth={240} minWidth={200} autoPan>
-                  <div className="p-2">
-                    <p className="font-bold text-sm mb-1">{stop.location}</p>
-                    <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-                      <Plane className="w-3 h-3" /> {stop.tripName}
-                    </p>
-                    {stop.notes && <p className="text-xs italic text-muted-foreground">"{stop.notes}"</p>}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+            {/* Route line for selected trip */}
+            {selectedPositions.length >= 2 && (
+              <CurvedRouteLine
+                positions={selectedPositions}
+                color={selectedTrip?.color || "#6366f1"}
+                opacity={0.9}
+              />
+            )}
+
+            {/* Trip stops — all trips (dimmed if one is selected) */}
+            {allStops.map(stop => {
+              const isDimmed = selectedTripId !== null && stop.tripId !== selectedTripId;
+              return (
+                <Marker
+                  key={`stop-${stop.id}`}
+                  position={[stop.latitude!, stop.longitude!]}
+                  icon={createStopIcon(isDimmed ? "#aaa" : stop.tripColor, stop.orderIndex + 1)}
+                  opacity={isDimmed ? 0.35 : 1}
+                >
+                  <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
+                    <div className="text-xs">
+                      <p className="font-semibold">{stop.location}</p>
+                      <p className="text-muted-foreground">{stop.tripName}</p>
+                    </div>
+                  </Tooltip>
+                  <Popup maxWidth={240} minWidth={200} autoPan>
+                    <div className="p-2">
+                      <p className="font-bold text-sm mb-1">{stop.location}</p>
+                      <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                        <Plane className="w-3 h-3" /> {stop.tripName}
+                      </p>
+                      {stop.notes && <p className="text-xs italic text-muted-foreground">"{stop.notes}"</p>}
+                      <Link href={`/travel-diary`}>
+                        <button className="mt-2 w-full text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                          Modifica nel Travel Diary
+                        </button>
+                      </Link>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
 
             {/* Nearby nomads (visible in Nomadi tab) */}
             {activeTab === "nomads" && nearbyNomads.map(nomad => nomad.latitude && nomad.longitude ? (
@@ -331,6 +472,8 @@ export default function DiaryPage() {
           {/* Tab content */}
           <div className="flex-1 overflow-y-auto">
             <AnimatePresence mode="wait">
+
+              {/* ── VIAGGI ── */}
               {activeTab === "trips" && (
                 <motion.div
                   key="trips"
@@ -344,57 +487,100 @@ export default function DiaryPage() {
                       <Plane className="w-4 h-4 text-primary" />
                       I miei viaggi ({trips.length})
                     </h3>
-                    <Link href="/travel-diary">
-                      <button className="text-xs text-primary font-medium flex items-center gap-1 hover:underline" data-testid="diary-trips-manage">
-                        Gestisci <ExternalLink className="w-3 h-3" />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-xl font-medium flex items-center gap-1 hover:bg-primary/90 transition-colors"
+                        data-testid="diary-create-trip-btn"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Nuovo
                       </button>
-                    </Link>
+                      <Link href="/travel-diary">
+                        <button className="text-xs text-primary font-medium flex items-center gap-1 hover:underline" data-testid="diary-trips-manage">
+                          Gestisci <ExternalLink className="w-3 h-3" />
+                        </button>
+                      </Link>
+                    </div>
                   </div>
 
                   {trips.length === 0 ? (
                     <div className="text-center py-8">
                       <Plane className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Nessun viaggio ancora.</p>
-                      <Link href="/travel-diary">
-                        <button className="mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium" data-testid="diary-create-trip">
-                          Crea il tuo primo viaggio
-                        </button>
-                      </Link>
+                      <p className="text-sm text-muted-foreground mb-1">Nessun viaggio ancora.</p>
+                      <p className="text-xs text-muted-foreground/60 mb-3">Crea il tuo primo viaggio e aggiungi le tappe sulla mappa.</p>
+                      <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium"
+                        data-testid="diary-create-first-trip"
+                      >
+                        Crea il tuo primo viaggio
+                      </button>
                     </div>
-                  ) : trips.map(trip => (
-                    <div key={trip.id} className="bg-muted/40 rounded-2xl p-3 flex items-center gap-3" data-testid={`diary-trip-${trip.id}`}>
-                      <div className="w-3 h-12 rounded-full flex-shrink-0" style={{ background: trip.color }} />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{trip.name}</p>
-                        <p className="text-xs text-muted-foreground">{(trip.stops || []).length} tappe</p>
-                        {trip.isPublic && (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-green-600 font-medium mt-0.5">
-                            <Globe className="w-3 h-3" /> Pubblico
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        {!trip.isPublic && (
-                          <button
-                            onClick={() => publishTrip(trip.id)}
-                            className="p-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                            title="Condividi sulla mappa comune"
-                            data-testid={`diary-share-trip-${trip.id}`}
+                  ) : (
+                    <>
+                      {selectedTripId && (
+                        <div className="flex items-center gap-2 text-xs bg-primary/8 text-primary rounded-xl px-3 py-2">
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Viaggio evidenziato sulla mappa. Tocca di nuovo per deselezionare.</span>
+                          <button onClick={() => setSelectedTripId(null)} className="ml-auto">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                      {trips.map(trip => {
+                        const stopsWithCoords = (trip.stops || []).filter(s => s.latitude && s.longitude);
+                        const isSelected = trip.id === selectedTripId;
+                        return (
+                          <div
+                            key={trip.id}
+                            onClick={() => selectTrip(trip)}
+                            className={`rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition-all ${
+                              isSelected
+                                ? "bg-primary/10 border border-primary/30 shadow-sm"
+                                : "bg-muted/40 hover:bg-muted/60 border border-transparent"
+                            }`}
+                            data-testid={`diary-trip-${trip.id}`}
                           >
-                            <Share2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        <Link href={`/trip/${trip.id}`}>
-                          <button className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid={`diary-view-trip-${trip.id}`}>
-                            <Map className="w-4 h-4" />
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                            <div className="w-3 h-12 rounded-full flex-shrink-0" style={{ background: trip.color }} />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm truncate">{trip.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {(trip.stops || []).length} tappe
+                                {stopsWithCoords.length > 0 && ` · ${stopsWithCoords.length} sulla mappa`}
+                              </p>
+                              {trip.isPublic && (
+                                <span className="inline-flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400 font-medium mt-0.5">
+                                  <Globe className="w-3 h-3" /> Pubblico sulla mappa
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                              {!trip.isPublic && (
+                                <button
+                                  onClick={(e) => publishTrip(trip.id, e)}
+                                  className="p-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                                  title="Condividi sulla mappa comune"
+                                  data-testid={`diary-share-trip-${trip.id}`}
+                                >
+                                  <Share2 className="w-4 h-4" />
+                                </button>
+                              )}
+                              <Link href={`/travel-diary`}>
+                                <button className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid={`diary-edit-trip-${trip.id}`}>
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
                 </motion.div>
               )}
 
+              {/* ── MOMENTI ── */}
               {activeTab === "moments" && (
                 <motion.div
                   key="moments"
@@ -416,6 +602,7 @@ export default function DiaryPage() {
                 </motion.div>
               )}
 
+              {/* ── NOMADI ── */}
               {activeTab === "nomads" && (
                 <motion.div
                   key="nomads"
@@ -478,6 +665,7 @@ export default function DiaryPage() {
                 </motion.div>
               )}
 
+              {/* ── HUB ── */}
               {activeTab === "hub" && (
                 <motion.div
                   key="hub"
@@ -491,15 +679,14 @@ export default function DiaryPage() {
                     Il mio Hub personale
                   </h3>
 
-                  {/* Quick access grid */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { href: "/profile", icon: User, label: "Profilo", color: "bg-violet-500/10 text-violet-600", testId: "hub-profile" },
-                      { href: "/avatar-builder", icon: Sparkles, label: "Avatar", color: "bg-pink-500/10 text-pink-600", testId: "hub-avatar" },
-                      { href: "/saved", icon: Bookmark, label: "Salvati", color: "bg-amber-500/10 text-amber-600", testId: "hub-saved", badge: savedPosts.length },
-                      { href: "/events-calendar", icon: Calendar, label: "I miei eventi", color: "bg-green-500/10 text-green-600", testId: "hub-events", badge: eventRegistrations.length },
-                      { href: "/booking", icon: Globe, label: "Prenotazioni", color: "bg-blue-500/10 text-blue-600", testId: "hub-booking" },
-                      { href: "/subscription", icon: Star, label: "Premium", color: "bg-orange-500/10 text-orange-600", testId: "hub-subscription" },
+                      { href: "/profile", icon: User, label: "Profilo", color: "bg-violet-500/10 text-violet-600 dark:text-violet-400", testId: "hub-profile" },
+                      { href: "/avatar-builder", icon: Sparkles, label: "Avatar", color: "bg-pink-500/10 text-pink-600 dark:text-pink-400", testId: "hub-avatar" },
+                      { href: "/saved", icon: Bookmark, label: "Salvati", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400", testId: "hub-saved", badge: savedPosts.length },
+                      { href: "/events-calendar", icon: Calendar, label: "I miei eventi", color: "bg-green-500/10 text-green-600 dark:text-green-400", testId: "hub-events", badge: eventRegistrations.length },
+                      { href: "/booking", icon: Globe, label: "Prenotazioni", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400", testId: "hub-booking" },
+                      { href: "/subscription", icon: Star, label: "Premium", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400", testId: "hub-subscription" },
                     ].map(item => {
                       const Icon = item.icon;
                       return (
@@ -521,7 +708,6 @@ export default function DiaryPage() {
                     })}
                   </div>
 
-                  {/* Recent saved posts preview */}
                   {savedPosts.length > 0 && (
                     <div className="mt-2">
                       <div className="flex items-center justify-between mb-2">
@@ -545,7 +731,6 @@ export default function DiaryPage() {
                     </div>
                   )}
 
-                  {/* Event registrations preview */}
                   {eventRegistrations.length > 0 && (
                     <div className="mt-2">
                       <div className="flex items-center justify-between mb-2">
@@ -573,6 +758,114 @@ export default function DiaryPage() {
             </AnimatePresence>
           </div>
         </motion.div>
+
+        {/* ── CREATE TRIP MODAL ── */}
+        <AnimatePresence>
+          {showCreateModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end sm:items-center justify-center p-4"
+              onClick={(e) => { if (e.target === e.currentTarget) setShowCreateModal(false); }}
+            >
+              <motion.div
+                initial={{ y: 60, opacity: 0, scale: 0.97 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 60, opacity: 0, scale: 0.97 }}
+                transition={{ type: "spring", damping: 26, stiffness: 300 }}
+                className="bg-card rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-border/50"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <Plane className="w-5 h-5 text-primary" />
+                    Nuovo viaggio
+                  </h2>
+                  <button onClick={() => setShowCreateModal(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Nome del viaggio *</label>
+                    <input
+                      type="text"
+                      value={newTripName}
+                      onChange={e => setNewTripName(e.target.value)}
+                      placeholder="Es. Estate in Asia, Giro d'Europa…"
+                      className="w-full px-4 py-3 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 focus:bg-background transition-all"
+                      data-testid="diary-new-trip-name"
+                      autoFocus
+                      onKeyDown={e => { if (e.key === "Enter" && newTripName.trim()) createTrip(); }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Colore del percorso</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {TRIP_COLORS.map(color => (
+                        <button
+                          key={color}
+                          onClick={() => setNewTripColor(color)}
+                          className="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 active:scale-95"
+                          style={{
+                            background: color,
+                            borderColor: newTripColor === color ? "white" : "transparent",
+                            boxShadow: newTripColor === color ? `0 0 0 2px ${color}` : "none",
+                          }}
+                          data-testid={`diary-color-${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Data inizio</label>
+                      <input
+                        type="date"
+                        value={newTripStartDate}
+                        onChange={e => setNewTripStartDate(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all"
+                        data-testid="diary-new-trip-start"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Data fine</label>
+                      <input
+                        type="date"
+                        value={newTripEndDate}
+                        onChange={e => setNewTripEndDate(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all"
+                        data-testid="diary-new-trip-end"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground/70 flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-primary" />
+                    Dopo aver creato il viaggio, aggiungi le tappe nel Travel Diary per vederle sulla mappa.
+                  </p>
+
+                  <button
+                    onClick={createTrip}
+                    disabled={!newTripName.trim() || creating}
+                    className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-primary/90 active:scale-[0.98] transition-all"
+                    data-testid="diary-confirm-create-trip"
+                  >
+                    {creating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    {creating ? "Creazione…" : "Crea viaggio"}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </Layout>
   );
