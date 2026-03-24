@@ -13,7 +13,10 @@ export async function sendPasswordResetEmail(to: string, resetToken: string, use
     return false;
   }
 
-  const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://nomad-life.app"}/reset-password?token=${resetToken}`;
+  const baseUrl = process.env.NODE_ENV === "production"
+    ? "https://nomad-life.app"
+    : `https://${process.env.REPLIT_DEV_DOMAIN || "localhost:5000"}`;
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
   const msg = {
     to,
