@@ -3,13 +3,14 @@ import { Link, useLocation } from "wouter";
 import {
   Map, Briefcase, User, MessageSquare, Plane, Search,
   Calendar, ShoppingBag, MoreHorizontal, ShieldCheck,
-  Bookmark, Users, BookOpen, Compass, Star, X, Sparkles
+  Bookmark, Users, BookOpen, Compass, Star, X, Sparkles, Settings
 } from "lucide-react";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { useI18n } from "@/lib/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useGpsTracking } from "@/hooks/use-gps-tracking";
+import { useAuth } from "@/lib/auth";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ interface LayoutProps {
 export default function Layout({ children, fullWidth = false }: LayoutProps) {
   const [location] = useLocation();
   const { t } = useI18n();
+  const { user } = useAuth();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   useGpsTracking();
 
@@ -102,6 +104,24 @@ export default function Layout({ children, fullWidth = false }: LayoutProps) {
             </button>
           </Link>
         </div>
+
+        {/* Profile card at the bottom */}
+        {user && (
+          <Link href="/profile">
+            <div className="flex-shrink-0 mt-3 flex items-center gap-3 p-3 rounded-2xl hover:bg-muted/60 transition-colors cursor-pointer group border border-border/40" data-testid="sidebar-profile-card">
+              <img
+                src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                alt={user.username}
+                className="w-9 h-9 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{user.name || user.username}</p>
+                <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+              </div>
+              <Settings className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            </div>
+          </Link>
+        )}
       </aside>
 
       {/* Mobile Bottom Navigation */}

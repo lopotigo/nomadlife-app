@@ -441,11 +441,29 @@ export default function DiaryPage() {
             onClick={togglePanel}
             data-testid="diary-panel-handle"
           >
-            <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-2" />
-            <div className="flex gap-1 items-center text-muted-foreground">
-              {panelState === "full" ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
-            </div>
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-1" />
           </div>
+
+          {/* Mini profile header — visible in peek & half state */}
+          {panelState !== "full" && user && (
+            <Link href="/profile">
+              <div className="flex-shrink-0 flex items-center gap-3 px-4 py-2 hover:bg-muted/40 transition-colors cursor-pointer" data-testid="diary-profile-header">
+                <img
+                  src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                  alt={user.username}
+                  className="w-8 h-8 rounded-full object-cover border-2 border-primary/30 flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold truncate leading-tight">{user.name || user.username}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{user.location || "Il mio Diary"}</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted-foreground font-medium">{trips.length} viaggi</span>
+                  <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                </div>
+              </div>
+            </Link>
+          )}
 
           {/* Tab bar */}
           <div className="flex-shrink-0 flex border-b border-border/50 px-2">
