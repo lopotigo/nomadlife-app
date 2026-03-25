@@ -128,6 +128,12 @@ export default function DiaryPage() {
   const [newTripEndDate, setNewTripEndDate] = useState("");
   const [creating, setCreating] = useState(false);
 
+  // Create post modal state
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [postContent, setPostContent] = useState("");
+  const [postLocation, setPostLocation] = useState("");
+  const [creatingPost, setCreatingPost] = useState(false);
+
   // Add stop modal state
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopCity, setStopCity] = useState("");
@@ -341,6 +347,32 @@ export default function DiaryPage() {
     }
   };
 
+  const createPost = async () => {
+    if (!postContent.trim()) return;
+    setCreatingPost(true);
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          content: postContent.trim(),
+          type: "text",
+          ...(postLocation.trim() && { location: postLocation.trim() }),
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setShowPostModal(false);
+      setPostContent("");
+      setPostLocation("");
+      toast({ title: "Post pubblicato!", description: "Il tuo post è visibile nel feed." });
+    } catch {
+      toast({ title: "Errore", description: "Non è stato possibile pubblicare il post.", variant: "destructive" });
+    } finally {
+      setCreatingPost(false);
+    }
+  };
+
   const mapCenter: [number, number] = userLocation
     ? [userLocation.lat, userLocation.lng]
     : allStops.length > 0
@@ -444,14 +476,13 @@ export default function DiaryPage() {
                   className="flex items-center gap-2"
                 >
                   <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Scrivi post</span>
-                  <a
-                    href="/feed"
-                    onClick={() => setShowFabMenu(false)}
+                  <button
+                    onClick={() => { setShowPostModal(true); setShowFabMenu(false); }}
                     className="w-10 h-10 rounded-full bg-amber-500 shadow text-white flex items-center justify-center hover:bg-amber-600 active:scale-95 transition-all"
                     data-testid="diary-fab-post"
                   >
                     <PenLine className="w-4 h-4" />
-                  </a>
+                  </button>
                 </motion.div>
 
                 {/* Evento */}
@@ -1046,6 +1077,82 @@ export default function DiaryPage() {
                     {creating ? "Creazione…" : "Crea viaggio"}
                   </button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── MODAL SCRIVI POST ── */}
+        <AnimatePresence>
+          {showPostModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end justify-center"
+              onClick={e => { if (e.target === e.currentTarget) setShowPostModal(false); }}
+            >
+              <motion.div
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="w-full bg-card rounded-t-3xl shadow-2xl p-6 pb-8 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {user && (
+                      <img
+                        src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                        className="w-8 h-8 rounded-full border-2 border-amber-400/30"
+                        alt={user.username}
+                      />
+                    )}
+                    <div>
+                      <p className="text-sm font-bold">{user?.name || user?.username}</p>
+                      <p className="text-[11px] text-muted-foreground">Condividi con la community</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowPostModal(false)} className="p-2 rounded-full hover:bg-muted transition-colors" data-testid="diary-post-modal-close">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <textarea
+                  value={postContent}
+                  onChange={e => setPostContent(e.target.value)}
+                  placeholder="Cosa vuoi condividere? Un'esperienza, un consiglio, un luogo…"
+                  rows={4}
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-amber-400/50 transition-all resize-none"
+                  data-testid="diary-post-content"
+                />
+
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                  <input
+                    type="text"
+                    value={postLocation}
+                    onChange={e => setPostLocation(e.target.value)}
+                    placeholder="Dove sei? (opzionale)"
+                    className="flex-1 px-3 py-2 rounded-xl bg-muted/50 border border-border/60 text-xs focus:outline-none focus:border-amber-400/50 transition-all"
+                    data-testid="diary-post-location"
+                  />
+                </div>
+
+                <button
+                  onClick={createPost}
+                  disabled={!postContent.trim() || creatingPost}
+                  className="w-full py-3 bg-amber-500 text-white rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-amber-600 active:scale-[0.98] transition-all"
+                  data-testid="diary-confirm-post"
+                >
+                  {creatingPost ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <PenLine className="w-4 h-4" />
+                  )}
+                  {creatingPost ? "Pubblicazione…" : "Pubblica"}
+                </button>
               </motion.div>
             </motion.div>
           )}
