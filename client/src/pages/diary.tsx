@@ -15,7 +15,7 @@ import {
   MapPin, Calendar, Star, ChevronUp, ChevronDown,
   Heart, Globe, Navigation, Sparkles, Share2, ExternalLink,
   X, Compass, BookOpen, Settings, CheckCircle2, Loader2,
-  Edit3, Eye
+  Edit3, Eye, PenLine
 } from "lucide-react";
 
 const TABS = [
@@ -117,6 +117,9 @@ export default function DiaryPage() {
   const dragStartY = useRef<number>(0);
   const dragStartState = useRef<PanelState>("half");
 
+  // FAB menu state
+  const [showFabMenu, setShowFabMenu] = useState(false);
+
   // Create trip modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTripName, setNewTripName] = useState("");
@@ -124,6 +127,16 @@ export default function DiaryPage() {
   const [newTripStartDate, setNewTripStartDate] = useState("");
   const [newTripEndDate, setNewTripEndDate] = useState("");
   const [creating, setCreating] = useState(false);
+
+  // Add stop modal state
+  const [showStopModal, setShowStopModal] = useState(false);
+  const [stopCity, setStopCity] = useState("");
+  const [stopCountry, setStopCountry] = useState("");
+  const [stopDate, setStopDate] = useState(new Date().toISOString().slice(0, 10));
+  const [stopTransport, setStopTransport] = useState<string>("plane");
+  const [stopNotes, setStopNotes] = useState("");
+  const [stopTripId, setStopTripId] = useState<string>("");
+  const [addingStop, setAddingStop] = useState(false);
 
   const tileUrl = theme === "dark"
     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -272,6 +285,62 @@ export default function DiaryPage() {
     }
   };
 
+  const addStop = async () => {
+    if (!stopCity.trim() || !stopCountry.trim() || !stopTripId) return;
+    setAddingStop(true);
+    try {
+      // Geocode city + country via Nominatim
+      let lat: number | undefined;
+      let lng: number | undefined;
+      try {
+        const geo = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(stopCity + ", " + stopCountry)}&limit=1`
+        );
+        const geoData = await geo.json();
+        if (geoData.length > 0) {
+          lat = parseFloat(geoData[0].lat);
+          lng = parseFloat(geoData[0].lon);
+        }
+      } catch { /* geocoding failed, proceed without coords */ }
+
+      // Count existing stops in the trip to set orderIndex
+      const existingStops = allStops.filter(s => String(s.tripId) === stopTripId);
+      const orderIndex = existingStops.length;
+
+      const body: any = {
+        city: stopCity.trim(),
+        country: stopCountry.trim(),
+        arrivalDate: stopDate,
+        transportMode: stopTransport,
+        notes: stopNotes.trim() || undefined,
+        orderIndex,
+        ...(lat !== undefined && { latitude: lat }),
+        ...(lng !== undefined && { longitude: lng }),
+      };
+
+      const res = await fetch(`/api/trips/${stopTripId}/stops`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "trips"] });
+      setShowStopModal(false);
+      setStopCity("");
+      setStopCountry("");
+      setStopNotes("");
+      setStopDate(new Date().toISOString().slice(0, 10));
+      setStopTransport("plane");
+      if (lat && lng) setFlyTarget([lat, lng]);
+      toast({ title: "Tappa aggiunta!", description: `${stopCity} aggiunta al viaggio.` });
+    } catch {
+      toast({ title: "Errore", description: "Non è stato possibile aggiungere la tappa.", variant: "destructive" });
+    } finally {
+      setAddingStop(false);
+    }
+  };
+
   const mapCenter: [number, number] = userLocation
     ? [userLocation.lat, userLocation.lng]
     : allStops.length > 0
@@ -303,21 +372,118 @@ export default function DiaryPage() {
           </Link>
         </div>
 
-        {/* FAB: Crea viaggio */}
-        <div className="absolute bottom-0 left-4 z-[1001] pointer-events-none"
-          style={{ bottom: `calc(${PANEL_HEIGHTS[panelState]} + 16px)`, transition: "bottom 0.4s ease" }}>
+        {/* FAB multi-azione */}
+        <div
+          className="absolute left-4 z-[1001] flex flex-col-reverse items-start gap-2"
+          style={{ bottom: `calc(${PANEL_HEIGHTS[panelState]} + 16px)`, transition: "bottom 0.4s ease" }}
+        >
+          {/* Main FAB button */}
           <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            onClick={() => setShowCreateModal(true)}
-            className="w-12 h-12 rounded-full bg-primary shadow-lg text-white flex items-center justify-center pointer-events-auto hover:bg-primary/90 active:scale-95 transition-transform"
-            data-testid="diary-fab-create"
-            title="Crea nuovo viaggio"
+            onClick={() => setShowFabMenu(v => !v)}
+            className={`w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center hover:opacity-90 active:scale-95 transition-all ${showFabMenu ? "bg-destructive" : "bg-primary"}`}
+            data-testid="diary-fab-toggle"
           >
-            <Plus className="w-5 h-5" />
+            <motion.div animate={{ rotate: showFabMenu ? 45 : 0 }} transition={{ duration: 0.2 }}>
+              <Plus className="w-5 h-5" />
+            </motion.div>
           </motion.button>
+
+          {/* FAB menu options */}
+          <AnimatePresence>
+            {showFabMenu && (
+              <>
+                {/* Viaggio */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                  transition={{ delay: 0.0, duration: 0.18 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Nuovo viaggio</span>
+                  <button
+                    onClick={() => { setShowCreateModal(true); setShowFabMenu(false); }}
+                    className="w-10 h-10 rounded-full bg-indigo-500 shadow text-white flex items-center justify-center hover:bg-indigo-600 active:scale-95 transition-all"
+                    data-testid="diary-fab-trip"
+                  >
+                    <Plane className="w-4 h-4" />
+                  </button>
+                </motion.div>
+
+                {/* Tappa */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                  transition={{ delay: 0.06, duration: 0.18 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Aggiungi tappa</span>
+                  <button
+                    onClick={() => {
+                      setStopTripId(selectedTripId ? String(selectedTripId) : trips.length > 0 ? String(trips[0].id) : "");
+                      setShowStopModal(true);
+                      setShowFabMenu(false);
+                    }}
+                    className="w-10 h-10 rounded-full bg-emerald-500 shadow text-white flex items-center justify-center hover:bg-emerald-600 active:scale-95 transition-all"
+                    data-testid="diary-fab-stop"
+                  >
+                    <MapPin className="w-4 h-4" />
+                  </button>
+                </motion.div>
+
+                {/* Post */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                  transition={{ delay: 0.12, duration: 0.18 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Scrivi post</span>
+                  <a
+                    href="/feed"
+                    onClick={() => setShowFabMenu(false)}
+                    className="w-10 h-10 rounded-full bg-amber-500 shadow text-white flex items-center justify-center hover:bg-amber-600 active:scale-95 transition-all"
+                    data-testid="diary-fab-post"
+                  >
+                    <PenLine className="w-4 h-4" />
+                  </a>
+                </motion.div>
+
+                {/* Evento */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                  transition={{ delay: 0.18, duration: 0.18 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Crea evento</span>
+                  <a
+                    href="/events-calendar"
+                    onClick={() => setShowFabMenu(false)}
+                    className="w-10 h-10 rounded-full bg-rose-500 shadow text-white flex items-center justify-center hover:bg-rose-600 active:scale-95 transition-all"
+                    data-testid="diary-fab-event"
+                  >
+                    <Calendar className="w-4 h-4" />
+                  </a>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Backdrop when FAB menu open */}
+        {showFabMenu && (
+          <div
+            className="absolute inset-0 z-[1000]"
+            onClick={() => setShowFabMenu(false)}
+          />
+        )}
 
         {/* Map */}
         <div
@@ -863,7 +1029,7 @@ export default function DiaryPage() {
 
                   <p className="text-xs text-muted-foreground/70 flex items-start gap-1.5">
                     <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-primary" />
-                    Dopo aver creato il viaggio, aggiungi le tappe nel Travel Diary per vederle sulla mappa.
+                    Dopo aver creato il viaggio, usa il (+) per aggiungere tappe direttamente sulla mappa.
                   </p>
 
                   <button
@@ -880,6 +1046,153 @@ export default function DiaryPage() {
                     {creating ? "Creazione…" : "Crea viaggio"}
                   </button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── MODAL AGGIUNGI TAPPA ── */}
+        <AnimatePresence>
+          {showStopModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end justify-center"
+              onClick={e => { if (e.target === e.currentTarget) setShowStopModal(false); }}
+            >
+              <motion.div
+                initial={{ y: 60, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 60, opacity: 0 }}
+                transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                className="w-full bg-card rounded-t-3xl shadow-2xl p-6 pb-8 space-y-4 max-h-[85vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <h2 className="font-bold text-base">Aggiungi tappa</h2>
+                  </div>
+                  <button onClick={() => setShowStopModal(false)} className="p-2 rounded-full hover:bg-muted transition-colors" data-testid="diary-stop-modal-close">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Trip selector */}
+                {trips.length > 0 && (
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Viaggio</label>
+                    <select
+                      value={stopTripId}
+                      onChange={e => setStopTripId(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all"
+                      data-testid="diary-stop-trip-select"
+                    >
+                      <option value="">— Seleziona viaggio —</option>
+                      {trips.map(t => (
+                        <option key={t.id} value={String(t.id)}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {trips.length === 0 && (
+                  <p className="text-sm text-muted-foreground bg-muted/50 rounded-2xl px-4 py-3">Prima crea un viaggio, poi potrai aggiungere tappe.</p>
+                )}
+
+                {/* City + Country */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Città *</label>
+                    <input
+                      type="text"
+                      value={stopCity}
+                      onChange={e => setStopCity(e.target.value)}
+                      placeholder="es. Bali"
+                      className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all"
+                      data-testid="diary-stop-city"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Paese *</label>
+                    <input
+                      type="text"
+                      value={stopCountry}
+                      onChange={e => setStopCountry(e.target.value)}
+                      placeholder="es. Indonesia"
+                      className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all"
+                      data-testid="diary-stop-country"
+                    />
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Data di arrivo *</label>
+                  <input
+                    type="date"
+                    value={stopDate}
+                    onChange={e => setStopDate(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all"
+                    data-testid="diary-stop-date"
+                  />
+                </div>
+
+                {/* Transport mode */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Come ci arrivi?</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {[
+                      { id: "plane", label: "✈️ Aereo" },
+                      { id: "train", label: "🚂 Treno" },
+                      { id: "car", label: "🚗 Auto" },
+                      { id: "bike", label: "🚴 Bici" },
+                      { id: "walk", label: "🚶 A piedi" },
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setStopTransport(t.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${stopTransport === t.id ? "bg-primary text-primary-foreground border-primary" : "bg-muted/50 border-border/50 text-muted-foreground hover:border-primary/40"}`}
+                        data-testid={`diary-stop-transport-${t.id}`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Note (opzionale)</label>
+                  <textarea
+                    value={stopNotes}
+                    onChange={e => setStopNotes(e.target.value)}
+                    placeholder="Cosa vuoi ricordare di questa tappa?"
+                    rows={2}
+                    className="w-full px-3 py-2.5 rounded-2xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:border-primary/50 transition-all resize-none"
+                    data-testid="diary-stop-notes"
+                  />
+                </div>
+
+                <p className="text-[11px] text-muted-foreground/70 flex items-start gap-1.5">
+                  <Globe className="w-3 h-3 flex-shrink-0 mt-0.5 text-emerald-500" />
+                  La posizione viene trovata automaticamente dalla città e paese che hai inserito.
+                </p>
+
+                <button
+                  onClick={addStop}
+                  disabled={!stopCity.trim() || !stopCountry.trim() || !stopTripId || addingStop}
+                  className="w-full py-3 bg-emerald-500 text-white rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-emerald-600 active:scale-[0.98] transition-all"
+                  data-testid="diary-confirm-add-stop"
+                >
+                  {addingStop ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4" />
+                  )}
+                  {addingStop ? "Aggiunta in corso…" : "Aggiungi tappa"}
+                </button>
               </motion.div>
             </motion.div>
           )}
