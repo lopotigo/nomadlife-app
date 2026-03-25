@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Bell, Check, Heart, MessageCircle, UserPlus, Plane, MapPin, Navigation, AlertTriangle, Shield, Radar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Notification } from "@shared/schema";
 
 function getNotificationRoute(notification: Notification): string | null {
@@ -82,24 +83,25 @@ function timeAgo(dateStr: string | Date): string {
 
 export function NotificationsDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [, setLocation] = useLocation();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
-  const fetchUnreadCount = async () => {
-    try {
+  const { data: unreadData } = useQuery<{ count: number }>({
+    queryKey: ["/api/notifications/unread-count"],
+    queryFn: async () => {
       const res = await fetch("/api/notifications/unread-count", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.count);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+      if (!res.ok) return { count: 0 };
+      return res.json();
+    },
+    refetchInterval: 30000,
+    staleTime: 25000,
+  });
+
+  const unreadCount = unreadData?.count ?? 0;
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -119,7 +121,9 @@ export function NotificationsDropdown() {
     try {
       await fetch(`/api/notifications/${id}/read`, { method: "POST", credentials: "include" });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      queryClient.setQueryData(["/api/notifications/unread-count"], (old: { count: number } | undefined) =>
+        ({ count: Math.max(0, (old?.count ?? 1) - 1) })
+      );
     } catch (err) {
       console.error(err);
     }
@@ -129,7 +133,7 @@ export function NotificationsDropdown() {
     try {
       await fetch("/api/notifications/read-all", { method: "POST", credentials: "include" });
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      setUnreadCount(0);
+      queryClient.setQueryData(["/api/notifications/unread-count"], { count: 0 });
     } catch (err) {
       console.error(err);
     }
@@ -145,12 +149,6 @@ export function NotificationsDropdown() {
       setLocation(route);
     }
   };
-
-  useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (isOpen) {
