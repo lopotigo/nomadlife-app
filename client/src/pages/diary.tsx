@@ -866,7 +866,7 @@ export default function DiaryPage() {
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
             <AnimatePresence mode="wait">
 
               {/* ── VIAGGI ── */}
