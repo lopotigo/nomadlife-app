@@ -261,9 +261,6 @@ export default function DiaryPage() {
   const dragStartY = useRef<number>(0);
   const dragStartState = useRef<PanelState>("half");
 
-  // FAB menu state
-  const [showFabMenu, setShowFabMenu] = useState(false);
-
   // Create trip modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTripName, setNewTripName] = useState("");
@@ -593,117 +590,6 @@ export default function DiaryPage() {
           </div>
         </div>
 
-        {/* FAB multi-azione */}
-        <div
-          className="absolute left-4 z-[1001] flex flex-col-reverse items-start gap-2"
-          style={{ bottom: `calc(${PANEL_HEIGHTS[panelState]} + 72px + 16px)`, transition: "bottom 0.4s ease" }}
-        >
-          {/* Main FAB button */}
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            onClick={() => setShowFabMenu(v => !v)}
-            className={`w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center hover:opacity-90 active:scale-95 transition-all ${showFabMenu ? "bg-destructive" : "bg-primary"}`}
-            data-testid="diary-fab-toggle"
-          >
-            <motion.div animate={{ rotate: showFabMenu ? 45 : 0 }} transition={{ duration: 0.2 }}>
-              <Plus className="w-5 h-5" />
-            </motion.div>
-          </motion.button>
-
-          {/* FAB menu options */}
-          <AnimatePresence>
-            {showFabMenu && (
-              <>
-                {/* Viaggio */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                  transition={{ delay: 0.0, duration: 0.18 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Nuovo viaggio</span>
-                  <button
-                    onClick={() => { setShowCreateModal(true); setShowFabMenu(false); }}
-                    className="w-10 h-10 rounded-full bg-indigo-500 shadow text-white flex items-center justify-center hover:bg-indigo-600 active:scale-95 transition-all"
-                    data-testid="diary-fab-trip"
-                  >
-                    <Plane className="w-4 h-4" />
-                  </button>
-                </motion.div>
-
-                {/* Tappa */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                  transition={{ delay: 0.06, duration: 0.18 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Aggiungi tappa</span>
-                  <button
-                    onClick={() => {
-                      setStopTripId(selectedTripId ? String(selectedTripId) : trips.length > 0 ? String(trips[0].id) : "");
-                      setShowStopModal(true);
-                      setShowFabMenu(false);
-                    }}
-                    className="w-10 h-10 rounded-full bg-emerald-500 shadow text-white flex items-center justify-center hover:bg-emerald-600 active:scale-95 transition-all"
-                    data-testid="diary-fab-stop"
-                  >
-                    <MapPin className="w-4 h-4" />
-                  </button>
-                </motion.div>
-
-                {/* Post */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                  transition={{ delay: 0.12, duration: 0.18 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Scrivi post</span>
-                  <button
-                    onClick={() => { setShowPostModal(true); setShowFabMenu(false); }}
-                    className="w-10 h-10 rounded-full bg-amber-500 shadow text-white flex items-center justify-center hover:bg-amber-600 active:scale-95 transition-all"
-                    data-testid="diary-fab-post"
-                  >
-                    <PenLine className="w-4 h-4" />
-                  </button>
-                </motion.div>
-
-                {/* Evento */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                  transition={{ delay: 0.18, duration: 0.18 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="bg-card/95 backdrop-blur-sm text-foreground text-xs font-medium px-2.5 py-1 rounded-xl shadow border border-border/50 whitespace-nowrap">Crea evento</span>
-                  <a
-                    href="/events-calendar"
-                    onClick={() => setShowFabMenu(false)}
-                    className="w-10 h-10 rounded-full bg-rose-500 shadow text-white flex items-center justify-center hover:bg-rose-600 active:scale-95 transition-all"
-                    data-testid="diary-fab-event"
-                  >
-                    <Calendar className="w-4 h-4" />
-                  </a>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Backdrop when FAB menu open */}
-        {showFabMenu && (
-          <div
-            className="absolute inset-0 z-[1000]"
-            onClick={() => setShowFabMenu(false)}
-          />
-        )}
 
         {/* Map */}
         <div
@@ -1531,7 +1417,11 @@ export default function DiaryPage() {
         </AnimatePresence>
 
         {/* ── Bottom Navigation ── */}
-        <BottomNav onFabClick={() => setShowFabMenu(v => !v)} activePage="diary" />
+        <BottomNav
+          activePage="diary"
+          onCreatePost={() => setShowPostModal(true)}
+          onCreateTrip={() => setShowCreateModal(true)}
+        />
 
       </div>
     </div>

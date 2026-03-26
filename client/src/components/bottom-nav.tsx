@@ -2,23 +2,71 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Compass, BookOpen, Plus, MessageCircle, User2,
+  Compass, BookOpen, Plus, MessageCircle,
   Briefcase, ShoppingBag, BookMarked, Calendar,
   Users, Bookmark, ShieldCheck, X, MoreHorizontal,
-  Map, Star
+  Star, User2, PenLine, Camera, Plane
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 
-interface BottomNavProps {
-  onFabClick: () => void;
+export interface BottomNavActions {
+  onCreatePost?: () => void;
+  onCreateMoment?: () => void;
+  onCreateEvent?: () => void;
+  onCreateTrip?: () => void;
+}
+
+interface BottomNavProps extends BottomNavActions {
   activePage?: "mappa" | "diary" | "chat";
 }
 
-export function BottomNav({ onFabClick, activePage }: BottomNavProps) {
+const FAB_ACTIONS = [
+  {
+    key: "post",
+    label: "Scrivi post",
+    sublabel: "Condividi un pensiero o luogo",
+    icon: PenLine,
+    color: "bg-blue-500",
+    shadow: "shadow-blue-500/30",
+  },
+  {
+    key: "moment",
+    label: "Crea Momento",
+    sublabel: "Storia di 24 ore sulla mappa",
+    icon: Camera,
+    color: "bg-orange-500",
+    shadow: "shadow-orange-500/30",
+  },
+  {
+    key: "event",
+    label: "Aggiungi evento",
+    sublabel: "Meetup, workshop, nomad event",
+    icon: Calendar,
+    color: "bg-violet-500",
+    shadow: "shadow-violet-500/30",
+  },
+  {
+    key: "trip",
+    label: "Nuovo viaggio",
+    sublabel: "Crea un itinerario con tappe",
+    icon: Plane,
+    color: "bg-emerald-500",
+    shadow: "shadow-emerald-500/30",
+  },
+] as const;
+
+export function BottomNav({
+  activePage,
+  onCreatePost,
+  onCreateMoment,
+  onCreateEvent,
+  onCreateTrip,
+}: BottomNavProps) {
   const { user } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [showMore, setShowMore] = useState(false);
+  const [showFab, setShowFab] = useState(false);
 
   const { data: adminCheck } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/admin/check"],
@@ -42,9 +90,84 @@ export function BottomNav({ onFabClick, activePage }: BottomNavProps) {
     ...(adminCheck?.isAdmin ? [{ href: "/admin", icon: ShieldCheck, label: "Admin" }] : []),
   ];
 
+  const handleFabAction = (key: typeof FAB_ACTIONS[number]["key"]) => {
+    setShowFab(false);
+    switch (key) {
+      case "post":
+        onCreatePost ? onCreatePost() : navigate("/feed");
+        break;
+      case "moment":
+        onCreateMoment ? onCreateMoment() : navigate("/diary");
+        break;
+      case "event":
+        onCreateEvent ? onCreateEvent() : navigate("/events-calendar");
+        break;
+      case "trip":
+        onCreateTrip ? onCreateTrip() : navigate("/diary");
+        break;
+    }
+  };
+
   return (
     <>
-      {/* More overlay backdrop */}
+      {/* FAB menu */}
+      <AnimatePresence>
+        {showFab && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 z-[1090]"
+              onClick={() => setShowFab(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 60, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.95 }}
+              transition={{ type: "spring", damping: 28, stiffness: 320 }}
+              className="fixed bottom-[80px] inset-x-0 mx-4 bg-card rounded-3xl shadow-2xl border border-border/60 overflow-hidden z-[1095]"
+            >
+              <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                <span className="font-bold text-sm text-foreground">Crea</span>
+                <button
+                  onClick={() => setShowFab(false)}
+                  className="p-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+                  data-testid="fab-close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="p-3 space-y-1.5 pb-4">
+                {FAB_ACTIONS.map((action, i) => {
+                  const Icon = action.icon;
+                  return (
+                    <motion.button
+                      key={action.key}
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      onClick={() => handleFabAction(action.key)}
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted/60 active:scale-[0.98] transition-all text-left"
+                      data-testid={`fab-action-${action.key}`}
+                    >
+                      <div className={`w-10 h-10 rounded-2xl ${action.color} ${action.shadow} shadow-lg flex items-center justify-center flex-shrink-0`}>
+                        <Icon className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground">{action.label}</p>
+                        <p className="text-[11px] text-muted-foreground">{action.sublabel}</p>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* More overlay */}
       <AnimatePresence>
         {showMore && (
           <>
@@ -63,7 +186,7 @@ export function BottomNav({ onFabClick, activePage }: BottomNavProps) {
               className="fixed bottom-[72px] inset-x-0 bg-card border-t border-border rounded-t-3xl p-5 z-[1095] shadow-2xl"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="font-bold text-sm">Menu</span>
+                <span className="font-bold text-sm">Altro</span>
                 <button
                   onClick={() => setShowMore(false)}
                   className="p-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors"
@@ -84,11 +207,9 @@ export function BottomNav({ onFabClick, activePage }: BottomNavProps) {
                     >
                       <div
                         className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-colors cursor-pointer ${
-                          isActive
-                            ? "bg-primary/10 text-primary"
-                            : "text-muted-foreground hover:bg-muted"
+                          isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
                         }`}
-                        data-testid={`bottomnav-more-${item.href.replace("/", "").replace("/", "-")}`}
+                        data-testid={`bottomnav-more-${item.label.toLowerCase()}`}
                       >
                         <Icon className="w-5 h-5" />
                         <span className="text-[10px] font-medium text-center leading-tight">{item.label}</span>
@@ -122,9 +243,14 @@ export function BottomNav({ onFabClick, activePage }: BottomNavProps) {
           <span className="text-[10px] font-medium">Diario</span>
         </Link>
 
+        {/* Central FAB */}
         <button
-          onClick={onFabClick}
-          className="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl -mt-5 border-4 border-background"
+          onClick={() => { setShowMore(false); setShowFab(v => !v); }}
+          className={`flex flex-col items-center justify-center w-14 h-14 rounded-full text-white shadow-xl -mt-5 border-4 border-background transition-all ${
+            showFab
+              ? "bg-destructive rotate-45"
+              : "bg-gradient-to-br from-primary to-primary/80"
+          }`}
           data-testid="nav-create"
         >
           <Plus className="w-6 h-6" />
@@ -140,7 +266,7 @@ export function BottomNav({ onFabClick, activePage }: BottomNavProps) {
         </Link>
 
         <button
-          onClick={() => setShowMore(v => !v)}
+          onClick={() => { setShowFab(false); setShowMore(v => !v); }}
           className={`flex flex-col items-center gap-0.5 px-3 py-2 transition-colors ${showMore ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
           data-testid="nav-altro"
         >

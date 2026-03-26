@@ -1178,7 +1178,6 @@ export default function UnifiedMap() {
   const [showNewPost, setShowNewPost] = useState(false);
   const [showNewEvent, setShowNewEvent] = useState(false);
   const [showAddSpot, setShowAddSpot] = useState(false);
-  const [fabOpen, setFabOpen] = useState(false);
   const [spotLocations, setSpotLocations] = useState<(Location & { user: User })[]>([]);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite" | "event"; id: string; title: string } | null>(null);
@@ -2358,73 +2357,6 @@ export default function UnifiedMap() {
             </Button>
           </div>
           
-          <div className="absolute bottom-[88px] right-4 z-[1002]">
-            <div className="relative">
-              <AnimatePresence>
-                {fabOpen && (
-                  <>
-                    <motion.button
-                      initial={{ opacity: 0, y: 0, scale: 0.3 }}
-                      animate={{ opacity: 1, y: -180, scale: 1 }}
-                      exit={{ opacity: 0, y: 0, scale: 0.3 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.05 }}
-                      className="absolute bottom-0 right-0 flex items-center gap-2 cursor-pointer"
-                      onClick={() => { setFabOpen(false); setShowAddSpot(true); }}
-                      data-testid="menu-add-spot"
-                    >
-                      <span className="bg-card text-card-foreground text-xs font-medium px-2 py-1 rounded-lg shadow-md whitespace-nowrap">Aggiungi Spot</span>
-                      <div className="w-11 h-11 rounded-full bg-emerald-500 text-white shadow-lg flex items-center justify-center">
-                        <MapPin className="w-5 h-5" />
-                      </div>
-                    </motion.button>
-                    <motion.button
-                      initial={{ opacity: 0, y: 0, scale: 0.3 }}
-                      animate={{ opacity: 1, y: -120, scale: 1 }}
-                      exit={{ opacity: 0, y: 0, scale: 0.3 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.02 }}
-                      className="absolute bottom-0 right-0 flex items-center gap-2 cursor-pointer"
-                      onClick={() => { setFabOpen(false); setShowNewEvent(true); }}
-                      data-testid="menu-new-event"
-                    >
-                      <span className="bg-card text-card-foreground text-xs font-medium px-2 py-1 rounded-lg shadow-md whitespace-nowrap">Crea Evento</span>
-                      <div className="w-11 h-11 rounded-full bg-purple-500 text-white shadow-lg flex items-center justify-center">
-                        <Calendar className="w-5 h-5" />
-                      </div>
-                    </motion.button>
-                    <motion.button
-                      initial={{ opacity: 0, y: 0, scale: 0.3 }}
-                      animate={{ opacity: 1, y: -60, scale: 1 }}
-                      exit={{ opacity: 0, y: 0, scale: 0.3 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className="absolute bottom-0 right-0 flex items-center gap-2 cursor-pointer"
-                      onClick={() => { setFabOpen(false); setClickedCoords(null); setShowNewPost(true); }}
-                      data-testid="menu-new-post"
-                    >
-                      <span className="bg-card text-card-foreground text-xs font-medium px-2 py-1 rounded-lg shadow-md whitespace-nowrap">Nuovo Post</span>
-                      <div className="w-11 h-11 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center">
-                        <Pencil className="w-5 h-5" />
-                      </div>
-                    </motion.button>
-                  </>
-                )}
-              </AnimatePresence>
-              <motion.button
-                animate={{ rotate: fabOpen ? 45 : 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform relative z-10"
-                onClick={() => setFabOpen(!fabOpen)}
-                data-testid="button-create-menu"
-              >
-                <Plus className="w-6 h-6" />
-              </motion.button>
-            </div>
-          </div>
-          {fabOpen && (
-            <div 
-              className="absolute inset-0 z-[999]" 
-              onClick={() => setFabOpen(false)}
-            />
-          )}
           
           <AnimatePresence>
             {showFilters && (
@@ -2597,7 +2529,11 @@ export default function UnifiedMap() {
 
 
         {/* ── Bottom Navigation ── */}
-        <BottomNav onFabClick={() => setFabOpen(!fabOpen)} activePage="mappa" />
+        <BottomNav
+          activePage="mappa"
+          onCreatePost={() => setShowNewPost(true)}
+          onCreateEvent={() => setShowNewEvent(true)}
+        />
 
       <CreatePostModal
         open={showNewPost}
