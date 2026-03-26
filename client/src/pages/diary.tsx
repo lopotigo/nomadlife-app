@@ -65,8 +65,8 @@ interface NearbyNomad {
 
 const PANEL_HEIGHTS: Record<PanelState, string> = {
   peek: "88px",
-  half: "52vh",
-  full: "88vh",
+  half: "48vh",
+  full: "72vh",
 };
 
 const TRIP_COLORS = [
@@ -250,7 +250,7 @@ export default function DiaryPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabId>("trips");
-  const [panelState, setPanelState] = useState<PanelState>("half");
+  const [panelState, setPanelState] = useState<PanelState>("peek");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
   const [flyZoom, setFlyZoom] = useState<number | undefined>(undefined);
@@ -291,13 +291,31 @@ export default function DiaryPage() {
     ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
     : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
+  const locateMe = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(loc);
+        setFlyTarget([loc.lat, loc.lng]);
+        setFlyZoom(12);
+      },
+      () => {
+        toast({ title: "Posizione non disponibile", description: "Abilita la geolocalizzazione nelle impostazioni del browser.", variant: "destructive" });
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  }, [toast]);
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
+        setFlyTarget([loc.lat, loc.lng]);
+        setFlyZoom(12);
       },
-      () => {}
+      () => {},
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
     );
   }, []);
 
@@ -553,15 +571,25 @@ export default function DiaryPage() {
               </span>
             )}
           </div>
-          <Link href="/profile">
-            <div className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-lg cursor-pointer pointer-events-auto hover:scale-105 transition-transform" data-testid="diary-profile-avatar">
-              <img
-                src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`}
-                className="w-full h-full object-cover"
-                alt="Profilo"
-              />
-            </div>
-          </Link>
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <button
+              onClick={locateMe}
+              className="w-9 h-9 rounded-full bg-card/90 backdrop-blur-md border border-border/50 shadow-md flex items-center justify-center hover:bg-card transition-colors"
+              title="Centrami sulla mappa"
+              data-testid="diary-locate-btn"
+            >
+              <Navigation className="w-4 h-4 text-blue-500" />
+            </button>
+            <Link href="/profile">
+              <div className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-lg cursor-pointer hover:scale-105 transition-transform" data-testid="diary-profile-avatar">
+                <img
+                  src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`}
+                  className="w-full h-full object-cover"
+                  alt="Profilo"
+                />
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* FAB multi-azione */}
@@ -838,7 +866,7 @@ export default function DiaryPage() {
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
             <AnimatePresence mode="wait">
 
               {/* ── VIAGGI ── */}
