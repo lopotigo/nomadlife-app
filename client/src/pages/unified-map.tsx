@@ -32,6 +32,7 @@ import { InFeedAd } from "@/components/ad-banner";
 import { FloatingTip } from "@/components/contextual-tip";
 import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { FirstPostNudge } from "@/components/first-post-nudge";
+import { BottomNav } from "@/components/bottom-nav";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -2596,33 +2597,7 @@ export default function UnifiedMap() {
 
 
         {/* ── Bottom Navigation ── */}
-        <div className="absolute bottom-0 left-0 right-0 z-[1100] h-[72px] bg-card/95 backdrop-blur-md border-t border-border/50 flex items-center justify-around px-2">
-          <Link href="/" className="flex flex-col items-center gap-0.5 px-3 py-2 text-primary" data-testid="nav-mappa">
-            <Compass className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Mappa</span>
-          </Link>
-          <Link href="/diary" className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-diary">
-            <BookOpen className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Diario</span>
-          </Link>
-          <button
-            onClick={() => setFabOpen(!fabOpen)}
-            className="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl -mt-5 border-4 border-background"
-            data-testid="nav-create"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
-          <Link href="/chat" className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-chat">
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Chat</span>
-          </Link>
-          <Link href={user ? `/user/${user.id}` : "/auth"} className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-profile">
-            {user?.avatar
-              ? <img src={user.avatar} className="w-5 h-5 rounded-full object-cover border border-border/30" alt="" />
-              : <User2 className="w-5 h-5" />}
-            <span className="text-[10px] font-medium">Profilo</span>
-          </Link>
-        </div>
+        <BottomNav onFabClick={() => setFabOpen(!fabOpen)} activePage="mappa" />
 
       <CreatePostModal
         open={showNewPost}
