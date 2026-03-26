@@ -288,6 +288,35 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
   return null;
 }
 
+function FlyToUserLocation({ location, active, trigger }: { location: [number, number] | null; active: boolean; trigger: number }) {
+  const map = useMap();
+  const hasFlewRef = useRef(false);
+  useEffect(() => {
+    if (location && active && !hasFlewRef.current) {
+      hasFlewRef.current = true;
+      map.flyTo(location, 13, { duration: 1.5 });
+    }
+  }, [location, active, map]);
+  useEffect(() => {
+    if (location && trigger > 0) {
+      map.flyTo(location, 13, { duration: 1.2 });
+    }
+  }, [trigger]);
+  return null;
+}
+
+function createUserLocationIcon() {
+  return L.divIcon({
+    html: `<div style="position:relative;width:22px;height:22px;">
+      <div style="position:absolute;inset:-8px;border-radius:50%;background:rgba(59,130,246,0.15);animation:userPulse 2s ease-in-out infinite;"></div>
+      <div style="width:22px;height:22px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.6);"></div>
+    </div>`,
+    className: "",
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
+}
+
 // CurvedRouteLine imported from shared component
 
 function StopMapPopup({ stop, trip, openDirections, onShare }: {
@@ -1132,6 +1161,9 @@ export default function UnifiedMap() {
   const [loadingNomads, setLoadingNomads] = useState(false);
   const [showNomadDrawer, setShowNomadDrawer] = useState(false);
   const [showBottomSheet, setShowBottomSheet] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [locatingUser, setLocatingUser] = useState(false);
+  const [flyTrigger, setFlyTrigger] = useState(0);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [pulsingPosts, setPulsingPosts] = useState<Set<string>>(new Set());
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
@@ -1157,6 +1189,28 @@ export default function UnifiedMap() {
     dateTo: "",
     maxDistance: 0,
   });
+
+  const locateUser = useCallback((onSuccess?: (lat: number, lng: number) => void) => {
+    if (!navigator.geolocation) return;
+    setLocatingUser(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUserLocation([lat, lng]);
+        setLocatingUser(false);
+        onSuccess?.(lat, lng);
+      },
+      () => {
+        setLocatingUser(false);
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }, []);
+
+  useEffect(() => {
+    locateUser();
+  }, []);
 
   const handleShowNomadsByCountry = useCallback(async (country: string, lat: number, lng: number) => {
     setCountryFilter({ country, lat, lng });
@@ -1514,7 +1568,10 @@ export default function UnifiedMap() {
     });
     
     if (allPoints.length === 0) {
-      return { mapCenter: [20, 50] as [number, number], mapZoom: 2 };
+      if (userLocation) {
+        return { mapCenter: userLocation, mapZoom: 13 };
+      }
+      return { mapCenter: [20, 10] as [number, number], mapZoom: 2 };
     }
     
     const avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
@@ -1534,7 +1591,7 @@ export default function UnifiedMap() {
     else zoom = 8;
     
     return { mapCenter: [avgLat, avgLng] as [number, number], mapZoom: zoom };
-  }, [postsWithCoords, tripsToShow, highlightedTripId]);
+  }, [postsWithCoords, tripsToShow, highlightedTripId, userLocation]);
 
   if (authLoading || loading) {
     return (
@@ -1558,7 +1615,20 @@ export default function UnifiedMap() {
               url={tileUrl}
             />
             <MapClickHandler onMapClick={handleMapClick} />
+            <FlyToUserLocation location={userLocation} active={!highlightedTripId} trigger={flyTrigger} />
             
+            {userLocation && (
+              <Marker
+                position={userLocation}
+                icon={createUserLocationIcon()}
+                zIndexOffset={1000}
+              >
+                <Tooltip direction="top" offset={[0, -14]} opacity={0.95} permanent={false} className="nomad-tooltip">
+                  <span className="text-xs font-semibold">📍 Sei qui</span>
+                </Tooltip>
+              </Marker>
+            )}
+
             <MarkerClusterGroup
               chunkedLoading
               maxClusterRadius={40}
@@ -2208,6 +2278,19 @@ export default function UnifiedMap() {
           </div>
           
           <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => locateUser(() => setFlyTrigger(t => t + 1))}
+              disabled={locatingUser}
+              className="bg-card/90 backdrop-blur-md text-xs gap-1 px-2.5"
+              title="Centrami sulla mappa"
+              data-testid="button-locate-me"
+            >
+              {locatingUser
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Navigation className="w-3.5 h-3.5 text-blue-500" />}
+            </Button>
             <Button
               variant="outline"
               size="sm"

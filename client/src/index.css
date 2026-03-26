@@ -181,6 +181,11 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes userPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.6); opacity: 0.15; }
+}
+
 .popup-animate-in {
   animation: popupSlideIn 0.25s ease-out;
 }
