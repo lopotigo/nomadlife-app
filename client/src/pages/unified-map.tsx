@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, useMemo, Fragment, useRef } from "react";
-import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
 import { 
@@ -7,7 +6,7 @@ import {
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
   Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye,
-  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim, Bot, Sparkles
+  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim, Bot, Sparkles, ChevronUp, User2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -1132,6 +1131,7 @@ export default function UnifiedMap() {
   const [countryNomads, setCountryNomads] = useState<any[]>([]);
   const [loadingNomads, setLoadingNomads] = useState(false);
   const [showNomadDrawer, setShowNomadDrawer] = useState(false);
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [pulsingPosts, setPulsingPosts] = useState<Set<string>>(new Set());
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
@@ -1538,18 +1538,15 @@ export default function UnifiedMap() {
 
   if (authLoading || loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-screen bg-background">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </Layout>
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
     );
   }
 
   return (
-    <Layout fullWidth>
-      <div className="flex flex-col h-full overflow-hidden">
-        <div className="relative h-[50vh] min-h-[300px] flex-shrink-0 z-10 sticky top-0 mx-3 mt-3 rounded-2xl overflow-hidden shadow-md">
+    <div className="fixed inset-0 overflow-hidden bg-background" data-testid="unified-map-page">
+        <div className="absolute inset-0 z-0">
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
@@ -2120,7 +2117,7 @@ export default function UnifiedMap() {
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="absolute bottom-0 left-0 right-0 z-[1000] bg-card rounded-t-2xl shadow-2xl border-t border-border/50 max-h-[45vh] flex flex-col"
+                className="absolute bottom-[72px] left-0 right-0 z-[1000] bg-card rounded-t-2xl shadow-2xl border-t border-border/50 max-h-[45vh] flex flex-col"
                 data-testid="drawer-nomads"
               >
                 <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/30">
@@ -2223,7 +2220,7 @@ export default function UnifiedMap() {
             </Button>
           </div>
           
-          <div className="absolute bottom-4 right-4 z-[1002]">
+          <div className="absolute bottom-[88px] right-4 z-[1002]">
             <div className="relative">
               <AnimatePresence>
                 {fabOpen && (
@@ -2367,8 +2364,32 @@ export default function UnifiedMap() {
           </AnimatePresence>
           
         </div>
-        
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-20">
+
+        {/* ── Bottom Sheet — Feed ── */}
+        <AnimatePresence>
+          {showBottomSheet && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute bottom-[72px] left-0 right-0 z-[1001] bg-card rounded-t-2xl shadow-2xl border-t border-border/50 max-h-[58vh] flex flex-col"
+              data-testid="bottom-sheet-feed"
+            >
+              <div className="flex flex-col items-center pt-2 pb-0">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-1" />
+                <div className="flex items-center justify-between w-full px-4 py-2 border-b border-border/30">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-red-400" />
+                    <span className="font-semibold text-sm">Feed Community</span>
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{posts.length + events.length}</span>
+                  </div>
+                  <button onClick={() => setShowBottomSheet(false)} className="p-1 rounded-full hover:bg-muted transition-colors" data-testid="button-close-feed">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-4">
 
           {/* AI Context Strip — informational tip, NomadBot always floating */}
           <motion.div
@@ -2446,9 +2467,58 @@ export default function UnifiedMap() {
               );
             });
           })()}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Feed toggle pill — visible when sheet is closed ── */}
+        <AnimatePresence>
+          {!showBottomSheet && (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setShowBottomSheet(true)}
+              className="absolute bottom-[80px] left-1/2 -translate-x-1/2 z-[1001] flex items-center gap-2 bg-card/95 backdrop-blur-md text-foreground px-4 py-2 rounded-full shadow-lg border border-border/50 text-sm font-semibold"
+              data-testid="button-open-feed"
+            >
+              <ChevronUp className="w-4 h-4 text-primary" />
+              Feed · {posts.length + events.length} contenuti
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* ── Bottom Navigation ── */}
+        <div className="absolute bottom-0 left-0 right-0 z-[1100] h-[72px] bg-card/95 backdrop-blur-md border-t border-border/50 flex items-center justify-around px-2">
+          <Link href="/" className="flex flex-col items-center gap-0.5 px-3 py-2 text-primary" data-testid="nav-mappa">
+            <Compass className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Mappa</span>
+          </Link>
+          <Link href="/diary" className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-diary">
+            <BookOpen className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Diario</span>
+          </Link>
+          <button
+            onClick={() => setFabOpen(!fabOpen)}
+            className="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl -mt-5 border-4 border-background"
+            data-testid="nav-create"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+          <Link href="/chat" className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-chat">
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Chat</span>
+          </Link>
+          <Link href={user ? `/user/${user.id}` : "/auth"} className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-profile">
+            {user?.avatar
+              ? <img src={user.avatar} className="w-5 h-5 rounded-full object-cover border border-border/30" alt="" />
+              : <User2 className="w-5 h-5" />}
+            <span className="text-[10px] font-medium">Profilo</span>
+          </Link>
         </div>
-      </div>
-      
+
       <CreatePostModal
         open={showNewPost}
         coords={clickedCoords}
@@ -2590,7 +2660,7 @@ export default function UnifiedMap() {
         description="Below the map you'll find posts, events, and trips from the community. Tap any content to see details!"
         delay={8000}
       />
-    </Layout>
+    </div>
   );
 }
 
