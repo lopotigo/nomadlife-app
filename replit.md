@@ -46,6 +46,7 @@ The frontend is built with React 18, TypeScript, Wouter for routing, and Vite as
 - Blog section ("Storie & Guide") with articles, city guides, practical tips, eco-sustainability guides, and geopolitics analysis for nomads. Dynamic page titles per route for Google Analytics.
 - Real-time travel alerts for visa changes, safety warnings, and natural disasters.
 - Proximity nomad notifications when users enter a 50km radius of each other.
+- Contextual stop panel in the Travel Diary: clicking a trip stop (marker on map or item in the expanded stop list) opens a StopContextCard inside the diary panel showing Travelpayouts hotel/flight search links, local coworking spots (from DB), and local events (from DB) — all inline without page navigation.
 
 ### Backend
 

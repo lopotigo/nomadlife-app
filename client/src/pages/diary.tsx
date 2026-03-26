@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, Tooltip, useMap } from "react-leaflet";
+import { searchFlights, searchHotels, searchKiwiFlights } from "@/lib/travelpayouts";
 import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +16,7 @@ import {
   MapPin, Calendar, Star, ChevronUp, ChevronDown,
   Heart, Globe, Navigation, Sparkles, Share2, ExternalLink,
   X, Compass, BookOpen, Settings, CheckCircle2, Loader2,
-  Edit3, Eye, PenLine
+  Edit3, Eye, PenLine, Hotel, Coffee, Wifi, Building2, ArrowRight
 } from "lucide-react";
 
 const TABS = [
@@ -102,6 +103,147 @@ function MapController({ center, zoom }: { center: [number, number] | null; zoom
   return null;
 }
 
+// ── Stop Context Card ─────────────────────────────────────────────────────────
+interface StopContextCardProps {
+  stop: TripStop & { tripColor: string; tripName: string; tripId: number };
+  onClose: () => void;
+}
+
+function StopContextCard({ stop, onClose }: StopContextCardProps) {
+  const city = stop.location.split(",")[0].trim();
+
+  const { data: rawEvents } = useQuery<any[]>({
+    queryKey: ["/api/events", city],
+    queryFn: () =>
+      fetch(`/api/events?city=${encodeURIComponent(city)}&limit=3`, { credentials: "include" })
+        .then(r => r.json())
+        .then(d => (Array.isArray(d) ? d : [])),
+    staleTime: 5 * 60 * 1000,
+  });
+  const events: any[] = Array.isArray(rawEvents) ? rawEvents : [];
+
+  const { data: rawPlaces } = useQuery<any[]>({
+    queryKey: ["/api/places", city, "coworking"],
+    queryFn: () =>
+      fetch(`/api/places?city=${encodeURIComponent(city)}&type=coworking&limit=3`, { credentials: "include" })
+        .then(r => r.json())
+        .then(d => (Array.isArray(d) ? d : [])),
+    staleTime: 5 * 60 * 1000,
+  });
+  const coworkingPlaces: any[] = Array.isArray(rawPlaces) ? rawPlaces : [];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 8 }}
+      className="rounded-2xl border border-amber-500/30 bg-amber-500/6 overflow-hidden"
+      data-testid="stop-context-card"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: stop.tripColor }} />
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-sm truncate">{stop.location}</p>
+          <p className="text-[11px] text-muted-foreground truncate">{stop.tripName}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-full hover:bg-muted/60 transition-colors text-muted-foreground flex-shrink-0"
+          data-testid="stop-context-close"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Quick actions — Travelpayouts */}
+      <div className="grid grid-cols-2 gap-2 px-3 pb-2">
+        <button
+          onClick={() => searchHotels(city)}
+          className="flex items-center gap-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-2.5 text-xs font-semibold hover:bg-blue-500/20 transition-colors"
+          data-testid="stop-hotels-btn"
+        >
+          <Hotel className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Hotel a {city}</span>
+          <ExternalLink className="w-3 h-3 ml-auto opacity-60 flex-shrink-0" />
+        </button>
+        <button
+          onClick={() => searchFlights(undefined, city)}
+          className="flex items-center gap-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 px-3 py-2.5 text-xs font-semibold hover:bg-purple-500/20 transition-colors"
+          data-testid="stop-flights-btn"
+        >
+          <Plane className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Voli per {city}</span>
+          <ExternalLink className="w-3 h-3 ml-auto opacity-60 flex-shrink-0" />
+        </button>
+      </div>
+
+      {/* Coworking spots */}
+      {coworkingPlaces.length > 0 && (
+        <div className="px-3 pb-2">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <Wifi className="w-3 h-3" /> Coworking
+          </p>
+          <div className="space-y-1">
+            {coworkingPlaces.slice(0, 2).map((place: any) => (
+              <div key={place.id} className="flex items-center gap-2 rounded-lg bg-card/60 px-2.5 py-1.5">
+                <Building2 className="w-3.5 h-3.5 text-primary/70 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">{place.name}</p>
+                  {place.address && <p className="text-[10px] text-muted-foreground truncate">{place.address}</p>}
+                </div>
+                {place.rating && (
+                  <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-0.5">
+                    <Star className="w-2.5 h-2.5 fill-current" />{place.rating}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Local events */}
+      {events.length > 0 && (
+        <div className="px-3 pb-3">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <Calendar className="w-3 h-3" /> Eventi a {city}
+          </p>
+          <div className="space-y-1">
+            {events.slice(0, 2).map((event: any) => (
+              <div key={event.id} className="flex items-center gap-2 rounded-lg bg-card/60 px-2.5 py-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">{event.title}</p>
+                  {event.date && (
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {new Date(event.date).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* If no coworking or events, show a link to the community map */}
+      {coworkingPlaces.length === 0 && events.length === 0 && (
+        <div className="px-3 pb-3">
+          <Link href={`/?city=${encodeURIComponent(city)}`}>
+            <button className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary/8 text-primary text-xs font-medium px-3 py-2 hover:bg-primary/15 transition-colors" data-testid="stop-explore-map-btn">
+              <Map className="w-3.5 h-3.5" />
+              Esplora {city} sulla mappa
+              <ArrowRight className="w-3.5 h-3.5 ml-auto" />
+            </button>
+          </Link>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 export default function DiaryPage() {
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -113,6 +255,7 @@ export default function DiaryPage() {
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
   const [flyZoom, setFlyZoom] = useState<number | undefined>(undefined);
   const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
+  const [selectedStop, setSelectedStop] = useState<(TripStop & { tripColor: string; tripName: string; tripId: number }) | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartState = useRef<PanelState>("half");
@@ -228,9 +371,11 @@ export default function DiaryPage() {
   const selectTrip = (trip: Trip) => {
     if (selectedTripId === trip.id) {
       setSelectedTripId(null);
+      setSelectedStop(null);
       return;
     }
     setSelectedTripId(trip.id);
+    setSelectedStop(null);
     const stops = (trip.stops || []).filter(s => s.latitude && s.longitude);
     if (stops.length > 0) {
       const firstStop = stops[0];
@@ -238,6 +383,21 @@ export default function DiaryPage() {
       setFlyZoom(6);
       setPanelState("peek");
     }
+  };
+
+  const selectStop = (stop: TripStop & { tripColor: string; tripName: string; tripId: number }) => {
+    if (selectedStop?.id === stop.id) {
+      setSelectedStop(null);
+      return;
+    }
+    setSelectedStop(stop);
+    setSelectedTripId(stop.tripId);
+    if (stop.latitude && stop.longitude) {
+      setFlyTarget([stop.latitude, stop.longitude]);
+      setFlyZoom(12);
+    }
+    setActiveTab("trips");
+    setPanelState("half");
   };
 
   const publishTrip = async (tripId: number, e: React.MouseEvent) => {
@@ -562,33 +722,23 @@ export default function DiaryPage() {
             {/* Trip stops — all trips (dimmed if one is selected) */}
             {allStops.map(stop => {
               const isDimmed = selectedTripId !== null && stop.tripId !== selectedTripId;
+              const isStopSelected = selectedStop?.id === stop.id;
               return (
                 <Marker
                   key={`stop-${stop.id}`}
                   position={[stop.latitude!, stop.longitude!]}
-                  icon={createStopIcon(isDimmed ? "#aaa" : stop.tripColor, stop.orderIndex + 1)}
+                  icon={createStopIcon(isStopSelected ? "#f59e0b" : isDimmed ? "#aaa" : stop.tripColor, stop.orderIndex + 1)}
                   opacity={isDimmed ? 0.35 : 1}
+                  eventHandlers={{
+                    click: () => selectStop(stop),
+                  }}
                 >
                   <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
                     <div className="text-xs">
                       <p className="font-semibold">{stop.location}</p>
-                      <p className="text-muted-foreground">{stop.tripName}</p>
+                      <p className="text-muted-foreground">{stop.tripName} · Tocca per info</p>
                     </div>
                   </Tooltip>
-                  <Popup maxWidth={240} minWidth={200} autoPan>
-                    <div className="p-2">
-                      <p className="font-bold text-sm mb-1">{stop.location}</p>
-                      <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
-                        <Plane className="w-3 h-3" /> {stop.tripName}
-                      </p>
-                      {stop.notes && <p className="text-xs italic text-muted-foreground">"{stop.notes}"</p>}
-                      <Link href={`/travel-diary`}>
-                        <button className="mt-2 w-full text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                          Modifica nel Travel Diary
-                        </button>
-                      </Link>
-                    </div>
-                  </Popup>
                 </Marker>
               );
             })}
@@ -734,59 +884,102 @@ export default function DiaryPage() {
                     </div>
                   ) : (
                     <>
-                      {selectedTripId && (
+                      {selectedTripId && !selectedStop && (
                         <div className="flex items-center gap-2 text-xs bg-primary/8 text-primary rounded-xl px-3 py-2">
                           <Eye className="w-3.5 h-3.5" />
-                          <span>Viaggio evidenziato sulla mappa. Tocca di nuovo per deselezionare.</span>
-                          <button onClick={() => setSelectedTripId(null)} className="ml-auto">
+                          <span>Viaggio evidenziato sulla mappa. Tocca una tappa per dettagli.</span>
+                          <button onClick={() => { setSelectedTripId(null); setSelectedStop(null); }} className="ml-auto">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       )}
+
+                      {/* ── STOP CONTEXT CARD ── */}
+                      {selectedStop && (
+                        <StopContextCard
+                          stop={selectedStop}
+                          onClose={() => setSelectedStop(null)}
+                        />
+                      )}
+
                       {trips.map(trip => {
                         const stopsWithCoords = (trip.stops || []).filter(s => s.latitude && s.longitude);
                         const isSelected = trip.id === selectedTripId;
                         return (
-                          <div
-                            key={trip.id}
-                            onClick={() => selectTrip(trip)}
-                            className={`rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition-all ${
-                              isSelected
-                                ? "bg-primary/10 border border-primary/30 shadow-sm"
-                                : "bg-muted/40 hover:bg-muted/60 border border-transparent"
-                            }`}
-                            data-testid={`diary-trip-${trip.id}`}
-                          >
-                            <div className="w-3 h-12 rounded-full flex-shrink-0" style={{ background: trip.color }} />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm truncate">{trip.name}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {(trip.stops || []).length} tappe
-                                {stopsWithCoords.length > 0 && ` · ${stopsWithCoords.length} sulla mappa`}
-                              </p>
-                              {trip.isPublic && (
-                                <span className="inline-flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400 font-medium mt-0.5">
-                                  <Globe className="w-3 h-3" /> Pubblico sulla mappa
-                                </span>
-                              )}
+                          <div key={trip.id}>
+                            <div
+                              onClick={() => selectTrip(trip)}
+                              className={`rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition-all ${
+                                isSelected
+                                  ? "bg-primary/10 border border-primary/30 shadow-sm"
+                                  : "bg-muted/40 hover:bg-muted/60 border border-transparent"
+                              }`}
+                              data-testid={`diary-trip-${trip.id}`}
+                            >
+                              <div className="w-3 h-12 rounded-full flex-shrink-0" style={{ background: trip.color }} />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm truncate">{trip.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {(trip.stops || []).length} tappe
+                                  {stopsWithCoords.length > 0 && ` · ${stopsWithCoords.length} sulla mappa`}
+                                </p>
+                                {trip.isPublic && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400 font-medium mt-0.5">
+                                    <Globe className="w-3 h-3" /> Pubblico sulla mappa
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                                {!trip.isPublic && (
+                                  <button
+                                    onClick={(e) => publishTrip(trip.id, e)}
+                                    className="p-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                                    title="Condividi sulla mappa comune"
+                                    data-testid={`diary-share-trip-${trip.id}`}
+                                  >
+                                    <Share2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                                <Link href={`/travel-diary`}>
+                                  <button className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid={`diary-edit-trip-${trip.id}`}>
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                </Link>
+                              </div>
                             </div>
-                            <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                              {!trip.isPublic && (
-                                <button
-                                  onClick={(e) => publishTrip(trip.id, e)}
-                                  className="p-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                                  title="Condividi sulla mappa comune"
-                                  data-testid={`diary-share-trip-${trip.id}`}
-                                >
-                                  <Share2 className="w-4 h-4" />
-                                </button>
-                              )}
-                              <Link href={`/travel-diary`}>
-                                <button className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid={`diary-edit-trip-${trip.id}`}>
-                                  <Edit3 className="w-4 h-4" />
-                                </button>
-                              </Link>
-                            </div>
+                            {/* Stops list — shown when trip is selected */}
+                            {isSelected && (trip.stops || []).length > 0 && (
+                              <div className="mt-1 ml-4 mb-1 space-y-0.5" onClick={e => e.stopPropagation()}>
+                                {(trip.stops || [])
+                                  .sort((a, b) => a.orderIndex - b.orderIndex)
+                                  .map(stop => {
+                                    const isStopActive = selectedStop?.id === stop.id;
+                                    return (
+                                      <button
+                                        key={stop.id}
+                                        onClick={() => selectStop({ ...stop, tripColor: trip.color, tripName: trip.name, tripId: trip.id })}
+                                        className={`w-full flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left transition-colors ${
+                                          isStopActive
+                                            ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                                            : "hover:bg-muted/60 text-foreground"
+                                        }`}
+                                        data-testid={`diary-stop-btn-${stop.id}`}
+                                      >
+                                        <div
+                                          className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold"
+                                          style={{ fontSize: "9px", background: isStopActive ? "#f59e0b" : trip.color }}
+                                        >
+                                          {stop.orderIndex + 1}
+                                        </div>
+                                        <span className="text-xs font-medium truncate flex-1">{stop.location}</span>
+                                        {stop.latitude && stop.longitude && (
+                                          <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
