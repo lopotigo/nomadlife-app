@@ -5,7 +5,6 @@ import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
-import Layout from "@/components/layout";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +15,8 @@ import {
   MapPin, Calendar, Star, ChevronUp, ChevronDown,
   Heart, Globe, Navigation, Sparkles, Share2, ExternalLink,
   X, Compass, BookOpen, Settings, CheckCircle2, Loader2,
-  Edit3, Eye, PenLine, Hotel, Coffee, Wifi, Building2, ArrowRight
+  Edit3, Eye, PenLine, Hotel, Coffee, Wifi, Building2, ArrowRight,
+  MessageCircle, User2
 } from "lucide-react";
 
 const TABS = [
@@ -540,8 +540,8 @@ export default function DiaryPage() {
     : [45, 10];
 
   return (
-    <Layout fullWidth>
-      <div className="relative h-full flex flex-col overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden bg-background">
+      <div className="relative w-full h-full overflow-hidden">
         {/* Top bar */}
         <div className="absolute top-0 inset-x-0 z-[1001] flex items-center justify-between px-4 pt-4 pointer-events-none">
           <div className="flex items-center gap-2 bg-card/90 backdrop-blur-md rounded-2xl px-3 py-2 shadow-md border border-border/50 pointer-events-auto">
@@ -567,7 +567,7 @@ export default function DiaryPage() {
         {/* FAB multi-azione */}
         <div
           className="absolute left-4 z-[1001] flex flex-col-reverse items-start gap-2"
-          style={{ bottom: `calc(${PANEL_HEIGHTS[panelState]} + 16px)`, transition: "bottom 0.4s ease" }}
+          style={{ bottom: `calc(${PANEL_HEIGHTS[panelState]} + 72px + 16px)`, transition: "bottom 0.4s ease" }}
         >
           {/* Main FAB button */}
           <motion.button
@@ -678,8 +678,11 @@ export default function DiaryPage() {
 
         {/* Map */}
         <div
-          className="flex-1 relative"
-          style={{ transition: "all 0.4s ease", marginBottom: panelState === "peek" ? "88px" : panelState === "half" ? "52vh" : "88vh" }}
+          className="absolute inset-x-0 top-0"
+          style={{
+            bottom: `calc(${PANEL_HEIGHTS[panelState]} + 72px)`,
+            transition: "bottom 0.4s ease"
+          }}
         >
           <MapContainer
             center={mapCenter}
@@ -775,10 +778,10 @@ export default function DiaryPage() {
         {/* Bottom Panel */}
         <motion.div
           ref={panelRef}
-          className="absolute bottom-0 inset-x-0 bg-card border-t border-border/50 shadow-2xl z-[1000] flex flex-col"
+          className="absolute inset-x-0 bg-card border-t border-border/50 shadow-2xl z-[1000] flex flex-col"
           animate={{ height: PANEL_HEIGHTS[panelState] }}
           transition={{ type: "spring", damping: 28, stiffness: 280 }}
-          style={{ borderRadius: "20px 20px 0 0" }}
+          style={{ borderRadius: "20px 20px 0 0", bottom: "72px" }}
         >
           {/* Drag handle */}
           <div
@@ -1497,7 +1500,37 @@ export default function DiaryPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ── Bottom Navigation ── */}
+        <div className="absolute bottom-0 left-0 right-0 z-[1100] h-[72px] bg-card/95 backdrop-blur-md border-t border-border/50 flex items-center justify-around px-2">
+          <Link href="/" className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="diary-nav-mappa">
+            <Compass className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Mappa</span>
+          </Link>
+          <Link href="/diary" className="flex flex-col items-center gap-0.5 px-3 py-2 text-primary" data-testid="diary-nav-diary">
+            <BookOpen className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Diario</span>
+          </Link>
+          <button
+            onClick={() => { setShowFabMenu(v => !v); }}
+            className="flex flex-col items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl -mt-5 border-4 border-background"
+            data-testid="diary-nav-create"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+          <Link href="/chat" className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="diary-nav-chat">
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Chat</span>
+          </Link>
+          <Link href={user ? `/user/${user.id}` : "/auth"} className="flex flex-col items-center gap-0.5 px-3 py-2 text-muted-foreground hover:text-foreground transition-colors" data-testid="diary-nav-profile">
+            {user?.avatar
+              ? <img src={user.avatar} className="w-5 h-5 rounded-full object-cover border border-border/30" alt="" />
+              : <User2 className="w-5 h-5" />}
+            <span className="text-[10px] font-medium">Profilo</span>
+          </Link>
+        </div>
+
       </div>
-    </Layout>
+    </div>
   );
 }
