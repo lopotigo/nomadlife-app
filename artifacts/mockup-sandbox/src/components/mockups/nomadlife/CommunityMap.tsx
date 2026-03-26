@@ -1,222 +1,159 @@
 import { useState } from "react";
-import {
-  Heart, Calendar, Sparkles, MessageCircle, Plane, Users, Compass, MapPin,
-  Search, Bell, SlidersHorizontal, X, ChevronDown, Wifi, Coffee, Zap,
-  Star, Navigation, Plus
-} from "lucide-react";
+import { Heart, Calendar, Sparkles, MessageCircle, Plane, Users, Compass, MapPin, SlidersHorizontal, X, Wifi, Coffee, Star, Navigation, Plus } from "lucide-react";
 
 const FILTERS = [
-  { key: "posts", label: "Post", icon: Heart, color: "bg-rose-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "events", label: "Eventi", icon: Calendar, color: "bg-violet-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "moments", label: "Momenti", icon: Sparkles, color: "bg-orange-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "groups", label: "Gruppi", icon: MessageCircle, color: "bg-cyan-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "trips", label: "Viaggi", icon: Plane, color: "bg-amber-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "following", label: "Seguiti", icon: Users, color: "bg-blue-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "guides", label: "Guide", icon: Compass, color: "bg-violet-600", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
-  { key: "spots", label: "Spot", icon: MapPin, color: "bg-emerald-500", activeText: "text-white", inactive: "bg-zinc-800 text-zinc-400 border border-zinc-700" },
+  { key: "posts", label: "Post", icon: Heart, bg: "#ef4444" },
+  { key: "events", label: "Eventi", icon: Calendar, bg: "#8b5cf6" },
+  { key: "moments", label: "Momenti", icon: Sparkles, bg: "#f97316" },
+  { key: "groups", label: "Gruppi", icon: MessageCircle, bg: "#06b6d4" },
+  { key: "trips", label: "Viaggi", icon: Plane, bg: "#f59e0b" },
+  { key: "following", label: "Seguiti", icon: Users, bg: "#3b82f6" },
+  { key: "guides", label: "Guide", icon: Compass, bg: "#7c3aed" },
+  { key: "spots", label: "Spot", icon: MapPin, bg: "#10b981" },
 ];
 
-const MAP_MARKERS = [
-  { id: 1, x: 38, y: 42, type: "post", color: "bg-rose-500", label: "Marco R.", sub: "Berlino" },
-  { id: 2, x: 55, y: 30, type: "event", color: "bg-violet-500", label: "Nomad Meetup", sub: "Amsterdam" },
-  { id: 3, x: 28, y: 58, type: "spot", color: "bg-emerald-500", label: "Betahaus", sub: "Barcellona" },
-  { id: 4, x: 62, y: 55, type: "trip", color: "bg-amber-500", label: "Sofia M.", sub: "Vienna→Praha" },
-  { id: 5, x: 45, y: 68, type: "moment", color: "bg-orange-500", label: "Luca T.", sub: "Roma" },
-  { id: 6, x: 72, y: 40, type: "guide", color: "bg-violet-600", label: "City Guide", sub: "Varsavia" },
-  { id: 7, x: 20, y: 35, type: "following", color: "bg-blue-500", label: "Anna K.", sub: "Lisbona" },
+const MARKERS = [
+  { id: 1, x: "30%", y: "42%", type: "posts", label: "Marco R.", sub: "Berlino", color: "#ef4444", Icon: Heart },
+  { id: 2, x: "52%", y: "28%", type: "events", label: "Nomad Meetup", sub: "Amsterdam", color: "#8b5cf6", Icon: Calendar },
+  { id: 3, x: "22%", y: "60%", type: "spots", label: "Betahaus", sub: "Barcellona", color: "#10b981", Icon: MapPin },
+  { id: 4, x: "64%", y: "52%", type: "trips", label: "Sofia M.", sub: "Vienna→Praha", color: "#f59e0b", Icon: Plane },
+  { id: 5, x: "44%", y: "70%", type: "moments", label: "Luca T.", sub: "Roma", color: "#f97316", Icon: Sparkles },
 ];
 
 export function CommunityMap() {
-  const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>({
+  const [active, setActive] = useState<Record<string, boolean>>({
     posts: true, events: true, moments: false, groups: false,
     trips: true, following: true, guides: false, spots: true,
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [activeMarker, setActiveMarker] = useState<number | null>(3);
+  const [popup, setPopup] = useState<number | null>(3);
 
-  const toggle = (key: string) => setActiveFilters(f => ({ ...f, [key]: !f[key] }));
-
-  const visibleMarkers = MAP_MARKERS.filter(m => activeFilters[m.type]);
+  const toggle = (k: string) => setActive(f => ({ ...f, [k]: !f[k] }));
 
   return (
-    <div className="w-full h-screen bg-zinc-950 flex flex-col overflow-hidden font-sans relative">
+    <div style={{ width: "100%", height: "100vh", background: "#09090b", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "system-ui, sans-serif", color: "white" }}>
       {/* Header */}
-      <div className="relative z-20 px-4 pt-4 pb-2 flex flex-col gap-2">
-        <div className="flex items-center justify-between">
+      <div style={{ padding: "16px 16px 8px", zIndex: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <div>
-            <h1 className="text-white font-bold text-xl tracking-tight">Mappa Comune</h1>
-            <p className="text-zinc-500 text-xs">247 nomadi attivi ora</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-              <Bell className="w-4 h-4 text-zinc-400" />
-            </button>
-            <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-              <Search className="w-4 h-4 text-zinc-400" />
-            </button>
+            <div style={{ fontWeight: 700, fontSize: 20 }}>Mappa Comune</div>
+            <div style={{ color: "#71717a", fontSize: 12 }}>247 nomadi attivi ora</div>
           </div>
         </div>
-
         {/* Pill bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
           {FILTERS.map(f => {
-            const active = activeFilters[f.key];
+            const isOn = active[f.key];
             const Icon = f.icon;
             return (
               <button
                 key={f.key}
                 onClick={() => toggle(f.key)}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  active ? `${f.color} text-white shadow-lg` : f.inactive
-                }`}
+                style={{
+                  flexShrink: 0, display: "flex", alignItems: "center", gap: 6,
+                  padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500,
+                  border: "none", cursor: "pointer", transition: "all 0.15s",
+                  background: isOn ? f.bg : "#27272a",
+                  color: isOn ? "white" : "#a1a1aa",
+                  outline: isOn ? `2px solid ${f.bg}40` : "none",
+                }}
               >
-                <Icon className="w-3 h-3" />
+                <Icon size={12} />
                 {f.label}
               </button>
             );
           })}
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700"
-          >
-            <SlidersHorizontal className="w-3 h-3" />
+          <button style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500, border: "1px solid #3f3f46", cursor: "pointer", background: "#27272a", color: "#a1a1aa" }}>
+            <SlidersHorizontal size={12} />
             Avanzato
           </button>
         </div>
       </div>
 
-      {/* Map background */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* Fake map tiles */}
-        <div className="absolute inset-0 bg-zinc-900">
-          {/* Grid lines to simulate map */}
-          <svg className="absolute inset-0 w-full h-full opacity-10">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#6366f1" strokeWidth="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-          {/* Simulated roads */}
-          <svg className="absolute inset-0 w-full h-full opacity-20">
-            <line x1="0" y1="40%" x2="100%" y2="45%" stroke="#4f46e5" strokeWidth="2"/>
-            <line x1="30%" y1="0" x2="35%" y2="100%" stroke="#4f46e5" strokeWidth="1.5"/>
-            <line x1="60%" y1="0" x2="55%" y2="100%" stroke="#4f46e5" strokeWidth="2"/>
-            <line x1="0" y1="70%" x2="100%" y2="65%" stroke="#4f46e5" strokeWidth="1"/>
-            <path d="M0,30 Q50,20 100,35" stroke="#6366f1" strokeWidth="1" fill="none"/>
-            <path d="M10,80 Q60,60 90,85" stroke="#6366f1" strokeWidth="1.5" fill="none"/>
-          </svg>
-          {/* Water area */}
-          <div className="absolute top-10 right-10 w-32 h-20 rounded-2xl bg-blue-950/40 border border-blue-900/30"/>
-        </div>
+      {/* Map */}
+      <div style={{ flex: 1, position: "relative", background: "#18181b" }}>
+        {/* Grid */}
+        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
+          <defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0L0 0 0 40" fill="none" stroke="#6366f1" strokeWidth="0.5"/></pattern></defs>
+          <rect width="100%" height="100%" fill="url(#g)" />
+        </svg>
+        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.15 }}>
+          <line x1="0" y1="42%" x2="100%" y2="38%" stroke="#4f46e5" strokeWidth="2"/>
+          <line x1="30%" y1="0" x2="32%" y2="100%" stroke="#4f46e5" strokeWidth="1.5"/>
+          <line x1="62%" y1="0" x2="60%" y2="100%" stroke="#4f46e5" strokeWidth="2"/>
+        </svg>
 
-        {/* Map markers */}
-        {visibleMarkers.map(m => (
-          <button
-            key={m.id}
-            onClick={() => setActiveMarker(activeMarker === m.id ? null : m.id)}
-            style={{ left: `${m.x}%`, top: `${m.y}%` }}
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10 group"
-          >
-            <div className={`w-9 h-9 rounded-full ${m.color} flex items-center justify-center shadow-lg border-2 border-white/20 transition-transform group-hover:scale-110 ${activeMarker === m.id ? 'scale-110 ring-2 ring-white/40' : ''}`}>
-              {(() => {
-                const filter = FILTERS.find(f => f.key === m.type);
-                if (!filter) return null;
-                const Icon = filter.icon;
-                return <Icon className="w-4 h-4 text-white" />;
-              })()}
-            </div>
-            {/* Pulse */}
-            <div className={`absolute inset-0 rounded-full ${m.color} opacity-30 animate-ping`}/>
-          </button>
+        {/* Markers */}
+        {MARKERS.filter(m => active[m.type]).map(m => (
+          <div key={m.id} style={{ position: "absolute", left: m.x, top: m.y, transform: "translate(-50%, -50%)", zIndex: 10 }}>
+            <button
+              onClick={() => setPopup(popup === m.id ? null : m.id)}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: m.color, border: "2px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 4px 12px ${m.color}60` }}
+            >
+              <m.Icon size={16} color="white" />
+            </button>
+          </div>
         ))}
 
-        {/* Popup for active marker */}
-        {activeMarker !== null && (() => {
-          const m = MAP_MARKERS.find(x => x.id === activeMarker);
-          if (!m) return null;
+        {/* Popup */}
+        {popup !== null && (() => {
+          const m = MARKERS.find(x => x.id === popup);
+          if (!m || !active[m.type]) return null;
           return (
-            <div
-              style={{ left: `${Math.min(m.x, 70)}%`, top: `${Math.max(m.y - 20, 5)}%` }}
-              className="absolute z-20 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl p-3 w-56"
-            >
-              <button onClick={() => setActiveMarker(null)} className="absolute top-2 right-2">
-                <X className="w-3 h-3 text-zinc-500" />
-              </button>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-7 h-7 rounded-full ${m.color} flex items-center justify-center`}>
-                  {(() => {
-                    const filter = FILTERS.find(f => f.key === m.type);
-                    if (!filter) return null;
-                    const Icon = filter.icon;
-                    return <Icon className="w-3.5 h-3.5 text-white" />;
-                  })()}
+            <div style={{ position: "absolute", left: "8px", top: "8px", zIndex: 30, background: "#1c1c1e", border: "1px solid #3f3f46", borderRadius: 16, padding: 12, width: 220, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
+              <button onClick={() => setPopup(null)} style={{ position: "absolute", top: 8, right: 8, background: "none", border: "none", cursor: "pointer" }}><X size={14} color="#71717a" /></button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: m.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <m.Icon size={14} color="white" />
                 </div>
                 <div>
-                  <p className="text-white text-sm font-semibold">{m.label}</p>
-                  <p className="text-zinc-500 text-xs">{m.sub}</p>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{m.label}</div>
+                  <div style={{ color: "#71717a", fontSize: 12 }}>{m.sub}</div>
                 </div>
               </div>
-              {m.type === "spot" && (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1 text-xs text-zinc-400">
-                    <Wifi className="w-3 h-3 text-emerald-400" />
-                    <span>WiFi 120 Mbps</span>
+              {m.type === "spots" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#a1a1aa" }}>
+                    <Wifi size={12} color="#10b981" /> WiFi 120 Mbps
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-zinc-400">
-                    <Coffee className="w-3 h-3 text-amber-400" />
-                    <span>Caffè incluso</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#a1a1aa" }}>
+                    <Coffee size={12} color="#f59e0b" /> Caffè incluso
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-zinc-400">
-                    <Zap className="w-3 h-3 text-yellow-400" />
-                    <span>Prese disponibili</span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-2">
-                    {[1,2,3,4,5].map(s => (
-                      <Star key={s} className={`w-3 h-3 ${s <= 4 ? 'text-amber-400 fill-amber-400' : 'text-zinc-600'}`} />
-                    ))}
-                    <span className="text-xs text-zinc-500 ml-1">4.2</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+                    {[1,2,3,4,5].map(s => <Star key={s} size={12} color={s <= 4 ? "#f59e0b" : "#3f3f46"} fill={s <= 4 ? "#f59e0b" : "none"} />)}
+                    <span style={{ fontSize: 11, color: "#71717a", marginLeft: 4 }}>4.2</span>
                   </div>
                 </div>
               )}
-              {m.type === "post" && (
-                <p className="text-xs text-zinc-300 mt-1">"Berlino in inverno è sottovalutata dai nomadi — coworking vuoti, prezzi bassi 🔥"</p>
-              )}
-              {m.type === "event" && (
-                <div className="mt-1">
-                  <p className="text-xs text-zinc-400">Venerdì 28 mar · 19:00</p>
-                  <p className="text-xs text-zinc-300 mt-0.5">23 partecipanti confermati</p>
-                  <button className="mt-2 w-full bg-violet-500 text-white text-xs py-1 rounded-lg font-medium">Partecipa</button>
+              {m.type === "events" && (
+                <div>
+                  <div style={{ fontSize: 12, color: "#a1a1aa" }}>Venerdì 28 mar · 19:00</div>
+                  <div style={{ fontSize: 12, color: "#e4e4e7", marginTop: 2 }}>23 partecipanti</div>
+                  <button style={{ marginTop: 8, width: "100%", background: "#8b5cf6", color: "white", border: "none", borderRadius: 8, padding: "6px 0", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Partecipa</button>
                 </div>
+              )}
+              {m.type === "posts" && (
+                <div style={{ fontSize: 12, color: "#d4d4d8", fontStyle: "italic" }}>"Berlino in inverno è sottovalutata — coworking vuoti, prezzi bassi 🔥"</div>
               )}
             </div>
           );
         })()}
 
-        {/* Bottom controls */}
-        <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
-          <button className="w-9 h-9 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center shadow">
-            <Navigation className="w-4 h-4 text-zinc-300" />
-          </button>
-          <button className="w-9 h-9 bg-zinc-800 border border-zinc-700 rounded-full flex items-center justify-center shadow">
-            <Plus className="w-4 h-4 text-zinc-300" />
-          </button>
-        </div>
-
-        {/* Counter bar */}
-        <div className="absolute bottom-4 left-4 right-16 z-10">
-          <div className="bg-zinc-900/90 backdrop-blur border border-zinc-800 rounded-2xl px-4 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {FILTERS.filter(f => activeFilters[f.key]).map(f => (
-                <div key={f.key} className="flex items-center gap-1">
-                  <div className={`w-2 h-2 rounded-full ${f.color}`} />
-                  <span className="text-xs text-zinc-400">{f.label}</span>
-                </div>
-              ))}
-            </div>
-            <span className="text-xs text-zinc-500">{visibleMarkers.length} marker</span>
+        {/* Bottom bar */}
+        <div style={{ position: "absolute", bottom: 16, left: 16, right: 56, background: "rgba(24,24,27,0.92)", border: "1px solid #27272a", borderRadius: 16, padding: "8px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            {FILTERS.filter(f => active[f.key]).slice(0,4).map(f => (
+              <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: f.bg }} />
+                <span style={{ fontSize: 11, color: "#a1a1aa" }}>{f.label}</span>
+              </div>
+            ))}
           </div>
+          <span style={{ fontSize: 11, color: "#52525b" }}>{MARKERS.filter(m => active[m.type]).length} marker</span>
+        </div>
+        {/* Controls */}
+        <div style={{ position: "absolute", bottom: 16, right: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+          <button style={{ width: 36, height: 36, background: "#27272a", border: "1px solid #3f3f46", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Navigation size={16} color="#d4d4d8" /></button>
+          <button style={{ width: 36, height: 36, background: "#27272a", border: "1px solid #3f3f46", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><Plus size={16} color="#d4d4d8" /></button>
         </div>
       </div>
     </div>
