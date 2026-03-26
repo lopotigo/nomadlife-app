@@ -294,6 +294,27 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
   return null;
 }
 
+function MapCenterTracker({ onCityChange }: { onCityChange: (city: string) => void }) {
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useMapEvents({
+    moveend: (e) => {
+      const center = e.target.getCenter();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${center.lat}&lon=${center.lng}&format=json&accept-language=it`)
+          .then(r => r.json())
+          .then(d => {
+            const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county || "";
+            const country = d.address?.country_code?.toUpperCase() || "";
+            if (city) onCityChange(`${city}${country ? ", " + country : ""}`);
+          })
+          .catch(() => {});
+      }, 800);
+    },
+  });
+  return null;
+}
+
 function FlyToUserLocation({ location, active, trigger }: { location: [number, number] | null; active: boolean; trigger: number }) {
   const map = useMap();
   const hasFlewRef = useRef(false);
@@ -1167,6 +1188,7 @@ export default function UnifiedMap() {
   const [loadingNomads, setLoadingNomads] = useState(false);
   const [showNomadDrawer, setShowNomadDrawer] = useState(false);
   const [feedState, setFeedState] = useState<'peek' | 'open'>('peek');
+  const [mapCenterCity, setMapCenterCity] = useState("La tua zona");
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locatingUser, setLocatingUser] = useState(false);
   const [flyTrigger, setFlyTrigger] = useState(0);
@@ -1621,6 +1643,7 @@ export default function UnifiedMap() {
               url={tileUrl}
             />
             <MapClickHandler onMapClick={handleMapClick} />
+            <MapCenterTracker onCityChange={setMapCenterCity} />
             <FlyToUserLocation location={userLocation} active={!highlightedTripId} trigger={flyTrigger} />
             
             {userLocation && !isNaN(userLocation[0]) && !isNaN(userLocation[1]) && (
@@ -2253,33 +2276,58 @@ export default function UnifiedMap() {
             </h1>
           </div>
 
-          {/* ── Filter pill bar ── always visible, horizontally scrollable */}
+          {/* ── Filter pill bar ── Tutto / Post / Cowork / Eventi */}
           <div className="absolute top-14 left-0 right-0 z-[900] px-3 pointer-events-none">
             <div className="flex gap-2 overflow-x-auto pb-1 pointer-events-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-              {([
-                { key: "showPosts", label: "Post", emoji: "❤️", active: filters.showPosts, color: "bg-red-500" },
-                { key: "showEvents", label: "Eventi", emoji: "📅", active: filters.showEvents, color: "bg-purple-500" },
-                { key: "showMoments", label: "Momenti", emoji: "✨", active: filters.showMoments, color: "bg-orange-500" },
-                { key: "showGroups", label: "Gruppi", emoji: "💬", active: filters.showGroups, color: "bg-cyan-500" },
-                { key: "showMyTrips", label: "Viaggi", emoji: "✈️", active: filters.showMyTrips, color: "bg-amber-500" },
-                { key: "showFollowingTrips", label: "Seguiti", emoji: "👥", active: filters.showFollowingTrips, color: "bg-blue-500" },
-                { key: "showCityGuides", label: "Guide", emoji: "🏙️", active: filters.showCityGuides, color: "bg-violet-500" },
-                { key: "showSpots", label: "Spot", emoji: "📍", active: filters.showSpots, color: "bg-emerald-500" },
-              ] as const).map(item => (
-                <button
-                  key={item.key}
-                  onClick={() => setFilters(f => ({ ...f, [item.key]: !item.active }))}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md border ${
-                    item.active
-                      ? `${item.color} text-white border-transparent`
-                      : "bg-card/90 backdrop-blur-md text-muted-foreground border-border/50 hover:border-primary/30"
-                  }`}
-                  data-testid={`pill-filter-${item.key}`}
-                >
-                  <span className="text-[11px]">{item.emoji}</span>
-                  {item.label}
-                </button>
-              ))}
+              {/* Tutto — master toggle */}
+              {(() => {
+                const allOn = filters.showPosts && filters.showEvents && filters.showSpots && filters.showMoments && filters.showGroups && filters.showMyTrips && filters.showCityGuides;
+                return (
+                  <button
+                    onClick={() => setFilters(f => ({ ...f, showPosts: !allOn, showEvents: !allOn, showSpots: !allOn, showMoments: !allOn, showGroups: !allOn, showMyTrips: !allOn, showCityGuides: !allOn, showFollowingTrips: !allOn }))}
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all shadow-md ${allOn ? "bg-foreground text-background" : "bg-card/90 backdrop-blur-md text-muted-foreground border border-border/50"}`}
+                    data-testid="pill-filter-tutto"
+                  >
+                    Tutto
+                  </button>
+                );
+              })()}
+              {/* Post */}
+              <button
+                onClick={() => setFilters(f => ({ ...f, showPosts: !f.showPosts }))}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md border ${filters.showPosts ? "bg-blue-500/90 text-white border-transparent" : "bg-card/90 backdrop-blur-md text-muted-foreground border-border/50"}`}
+                data-testid="pill-filter-showPosts"
+              >
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h7"/></svg>
+                Post
+              </button>
+              {/* Cowork */}
+              <button
+                onClick={() => setFilters(f => ({ ...f, showSpots: !f.showSpots }))}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md border ${filters.showSpots ? "bg-emerald-500/90 text-white border-transparent" : "bg-card/90 backdrop-blur-md text-muted-foreground border-border/50"}`}
+                data-testid="pill-filter-showSpots"
+              >
+                <Wifi className="w-3 h-3" />
+                Cowork
+              </button>
+              {/* Eventi */}
+              <button
+                onClick={() => setFilters(f => ({ ...f, showEvents: !f.showEvents }))}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md border ${filters.showEvents ? "bg-purple-500/90 text-white border-transparent" : "bg-card/90 backdrop-blur-md text-muted-foreground border-border/50"}`}
+                data-testid="pill-filter-showEvents"
+              >
+                <Calendar className="w-3 h-3" />
+                Eventi
+              </button>
+              {/* Viaggi */}
+              <button
+                onClick={() => setFilters(f => ({ ...f, showMyTrips: !f.showMyTrips, showFollowingTrips: !f.showMyTrips }))}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md border ${filters.showMyTrips ? "bg-amber-500/90 text-white border-transparent" : "bg-card/90 backdrop-blur-md text-muted-foreground border-border/50"}`}
+                data-testid="pill-filter-showMyTrips"
+              >
+                <Plane className="w-3 h-3" />
+                Viaggi
+              </button>
             </div>
           </div>
           
@@ -2456,69 +2504,50 @@ export default function UnifiedMap() {
 
         {/* ── Bottom Sheet — Feed (sempre visibile, peek / open) ── */}
         <motion.div
-          animate={{ y: feedState === 'open' ? 0 : "calc(100% - 64px)" }}
+          animate={{ y: feedState === 'open' ? 0 : "calc(100% - 72px)" }}
           transition={{ type: "spring", damping: 28, stiffness: 320 }}
           className="absolute bottom-[72px] left-0 right-0 z-[1001] bg-card rounded-t-2xl shadow-2xl border-t border-border/50 flex flex-col"
-          style={{ height: "62vh" }}
+          style={{ height: "65vh" }}
           data-testid="bottom-sheet-feed"
         >
-          {/* ── Handle + Header — tap per espandere/collassare ── */}
+          {/* ── Handle ── */}
+          <div className="flex justify-center pt-2.5 pb-1">
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </div>
+          {/* ── Header — tap per espandere/collassare ── */}
           <button
             onClick={() => setFeedState(feedState === 'open' ? 'peek' : 'open')}
-            className="w-full flex flex-col items-center pt-2 pb-1 cursor-pointer select-none"
+            className="w-full flex items-center justify-between px-4 pb-3 cursor-pointer select-none"
             data-testid="button-toggle-feed"
             aria-label={feedState === 'open' ? 'Chiudi feed' : 'Apri feed'}
           >
-            <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-2" />
-            <div className="flex items-center justify-between w-full px-4 pb-2 border-b border-border/30">
-              <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-red-400" />
-                <span className="font-semibold text-sm">Feed Community</span>
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{posts.length + events.length}</span>
-              </div>
+            <div className="flex flex-col items-start gap-0.5">
+              <span className="font-bold text-base text-foreground">{mapCenterCity}</span>
+              <span className="text-xs text-muted-foreground">{posts.length + events.length + spotLocations.length} contenuti nella zona visibile</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowFilters(!showFilters); }}
+                className="px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-primary/20"
+                data-testid="button-filtra"
+              >
+                Filtra
+              </button>
               <motion.div animate={{ rotate: feedState === 'open' ? 180 : 0 }} transition={{ duration: 0.25 }}>
                 <ChevronUp className="w-4 h-4 text-muted-foreground" />
               </motion.div>
             </div>
           </button>
+          <div className="border-t border-border/30 mx-4" />
               <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-4">
 
-          {/* AI Context Strip — informational tip, NomadBot always floating */}
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex items-start gap-3 p-3.5 bg-gradient-to-r from-violet-500/8 to-blue-500/8 border border-violet-400/20 rounded-2xl"
-            data-testid="home-ai-strip"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium leading-snug">
-                {new Date().getHours() < 12
-                  ? "Buongiorno nomade! Stai cercando un café con wifi? Usa il filtro spot qui sopra."
-                  : new Date().getHours() < 18
-                  ? "Pomeriggio produttivo? Trova coworking e spot di lavoro sulla mappa."
-                  : "Sera libera? Esplora gli eventi e momenti dei nomadi vicino a te."}
-              </p>
-              <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-violet-400" />
-                Suggerimento NomadBot · tocca il bot in basso per chattare
-              </p>
-            </div>
-          </motion.div>
-
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Heart className="w-5 h-5 text-red-400" />
-            Feed
-          </h2>
           
           {(() => {
             const feedItems: FeedItem[] = [
               ...posts.map((p) => ({ type: "post" as const, data: p, createdAt: new Date(p.createdAt) })),
               ...events.map((e) => ({ type: "event" as const, data: e as EventWithHost, createdAt: new Date(e.createdAt) })),
               ...followingTrips.map((t) => ({ type: "trip" as const, data: t, createdAt: new Date(t.createdAt || Date.now()) })),
+              ...(filters.showSpots ? spotLocations.map((s) => ({ type: "spot" as any, data: s, createdAt: new Date(s.createdAt || Date.now()) })) : []),
             ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
             if (feedItems.length === 0) {
@@ -2547,6 +2576,9 @@ export default function UnifiedMap() {
                 }
                 if (item.type === "trip") {
                   return <FeedTripCard key={`trip-${item.data.id}`} trip={item.data} />;
+                }
+                if (item.type === "spot") {
+                  return <FeedSpotCard key={`spot-${item.data.id}`} spot={item.data as any} />;
                 }
                 return null;
               })();
@@ -3730,107 +3762,105 @@ function FeedPostCard({
     }
   };
 
+  const avatarColors = ["bg-emerald-500", "bg-blue-500", "bg-violet-500", "bg-amber-500", "bg-rose-500", "bg-cyan-500", "bg-indigo-500", "bg-pink-500"];
+  const avatarColor = avatarColors[(post.user.username || "?").charCodeAt(0) % avatarColors.length];
+  const initial = (post.user.name || post.user.username || "?")[0].toUpperCase();
+  const timeAgo = (() => {
+    const diff = Date.now() - new Date(post.createdAt).getTime();
+    const h = Math.floor(diff / 3600000);
+    const d = Math.floor(diff / 86400000);
+    if (d > 0) return `${d}g fa`;
+    if (h > 0) return `${h}h fa`;
+    return "ora";
+  })();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl p-4 border border-border shadow-sm"
+      className="bg-card rounded-2xl p-4 border border-border/40 shadow-sm"
       data-testid={`post-card-${post.id}`}
     >
-      <div className="flex items-start gap-3">
-        <Link href={`/user/${post.userId}`}>
-          <img
-            src={post.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.username}`}
-            alt={post.user.name}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-3">
+        <Link href={`/user/${post.userId}`} className="flex-shrink-0">
+          {post.user.avatar
+            ? <img src={post.user.avatar} alt={post.user.name} className="w-10 h-10 rounded-full object-cover" />
+            : <div className={`w-10 h-10 rounded-full ${avatarColor} flex items-center justify-center`}>
+                <span className="text-white font-bold text-base">{initial}</span>
+              </div>
+          }
         </Link>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <Link href={`/user/${post.userId}`}>
-              <span className="font-semibold hover:underline">{post.user.name}</span>
-            </Link>
-            <span className="text-muted-foreground text-sm">@{post.user.username}</span>
-          </div>
-          {post.location && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-              <MapPin className="w-3 h-3" />
-              <span>{post.location}</span>
-            </div>
-          )}
+          <Link href={`/user/${post.userId}`}>
+            <span className="font-semibold text-sm hover:underline">{post.user.name || post.user.username}</span>
+          </Link>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {post.location ? `${post.location} · ` : ""}{timeAgo}
+          </p>
         </div>
       </div>
-      
+
+      {/* Content */}
       <Link href={`/post/${post.id}`} className="block cursor-pointer group">
-        <p className="mt-3 text-sm group-hover:text-primary/90 transition-colors">{post.content}</p>
-        
+        <p className="text-sm leading-relaxed group-hover:text-primary/90 transition-colors">{post.content}</p>
         {post.imageUrl && (
-          <img
-            src={post.imageUrl}
-            alt=""
-            className="mt-3 rounded-xl w-full max-h-64 object-cover group-hover:opacity-95 transition-opacity"
-          />
+          <img src={post.imageUrl} alt="" className="mt-3 rounded-xl w-full max-h-56 object-cover" />
         )}
       </Link>
 
       {!post.imageUrl && post.videoUrl && (
         post.videoUrl.startsWith("http") && isYouTubeUrl(post.videoUrl)
           ? <YouTubeEmbed url={post.videoUrl} className="mt-3" />
-          : <video src={post.videoUrl} controls className="mt-3 rounded-xl w-full max-h-64 object-cover" />
+          : <video src={post.videoUrl} controls className="mt-3 rounded-xl w-full max-h-56 object-cover" />
       )}
-
       {!post.imageUrl && !post.videoUrl && post.linkUrl && isYouTubeUrl(post.linkUrl) && (
         <YouTubeEmbed url={post.linkUrl} className="mt-3" />
       )}
-
       {post.linkUrl && !isYouTubeUrl(post.linkUrl) && (
         <a href={post.linkUrl} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-2 p-2.5 bg-muted rounded-xl hover:bg-muted/80 transition-colors">
           <LinkIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
           <span className="text-sm text-blue-500 truncate">{post.linkUrl}</span>
         </a>
       )}
-
       {post.tripId && (
         <Link href={`/trip/${post.tripId}`}>
-          <div className="mt-2 flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 cursor-pointer hover:bg-primary/20 transition-colors" data-testid={`trip-badge-${post.id}`}>
+          <div className="mt-2 flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 hover:bg-primary/20 transition-colors" data-testid={`trip-badge-${post.id}`}>
             <Plane className="w-4 h-4 text-primary" />
-            <span className="text-xs font-medium text-primary">Viaggio allegato - clicca per vedere</span>
+            <span className="text-xs font-medium text-primary">Viaggio allegato</span>
           </div>
         </Link>
       )}
-      
-      <div className="flex items-center gap-4 mt-3 text-muted-foreground">
-        <button 
+
+      {/* Actions */}
+      <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border/30">
+        <button
           onClick={() => onLike(post.id)}
-          className={`flex items-center gap-1 text-sm transition-colors ${likedPosts.has(post.id) ? 'text-red-500' : 'hover:text-red-400'}`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${likedPosts.has(post.id) ? 'text-red-500 bg-red-500/10' : 'text-muted-foreground hover:text-red-400 hover:bg-red-400/10'}`}
           data-testid={`button-like-${post.id}`}
         >
-          <Heart 
-            className={`w-4 h-4 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} 
-          />
-          <span>{post.likes}</span>
+          <Heart className={`w-3.5 h-3.5 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500' : ''}`} />
+          <span>{post.likes || 0}</span>
         </button>
-        <button 
+        <button
           onClick={handleToggleComments}
-          className="flex items-center gap-1 text-sm hover:text-primary transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
           data-testid={`button-comments-${post.id}`}
         >
-          <MessageCircle className="w-4 h-4" />
-          <span>{commentsCount}</span>
+          Rispondi
         </button>
-        <button 
+        <button
+          onClick={() => onShare(post)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+        >
+          Condividi
+        </button>
+        <button
           onClick={() => onSave(post.id)}
-          className={`ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${savedPosts.has(post.id) ? 'bg-primary/15 text-primary' : 'hover:bg-muted hover:text-primary'}`}
+          className={`ml-auto p-1.5 rounded-full transition-all ${savedPosts.has(post.id) ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}
           data-testid={`button-save-${post.id}`}
         >
-          <Bookmark className={`w-4 h-4 ${savedPosts.has(post.id) ? 'fill-primary' : ''}`} />
-          <span>{savedPosts.has(post.id) ? 'Salvato' : 'Salva'}</span>
-        </button>
-        <button 
-          onClick={() => onShare(post)}
-          className="p-1 hover:text-primary transition-colors"
-        >
-          <Share2 className="w-4 h-4" />
+          <Bookmark className={`w-3.5 h-3.5 ${savedPosts.has(post.id) ? 'fill-primary' : ''}`} />
         </button>
       </div>
 
@@ -4272,5 +4302,58 @@ function FeedTripCard({ trip }: { trip: Trip }) {
         </div>
       </motion.div>
     </Link>
+  );
+}
+
+function FeedSpotCard({ spot }: { spot: Location & { user: User } }) {
+  const isOpen = (() => {
+    const h = new Date().getHours();
+    return h >= 8 && h < 21;
+  })();
+
+  const categoryColors: Record<string, string> = {
+    "Caffè": "bg-amber-500",
+    "Coworking": "bg-emerald-500",
+    "Biblioteca": "bg-blue-500",
+  };
+  const bg = categoryColors[spot.category] || "bg-emerald-500";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-2xl p-4 border border-border/40 shadow-sm"
+      data-testid={`spot-card-${spot.id}`}
+    >
+      <div className="flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
+          <Wifi className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-semibold text-sm">{spot.name}</span>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${isOpen ? "bg-emerald-500/20 text-emerald-400" : "bg-muted text-muted-foreground"}`}>
+              {isOpen ? "Aperto ora" : "Chiuso"}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">{spot.category}</p>
+        </div>
+      </div>
+      {spot.notes && (
+        <p className="mt-3 text-sm leading-relaxed text-foreground/80">{spot.notes}</p>
+      )}
+      <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <Wifi className="w-3 h-3 text-emerald-400" />
+          WiFi: {spot.wifiQuality}/5
+        </span>
+        {spot.powerOutlets && (
+          <span className="flex items-center gap-1">
+            <Zap className="w-3 h-3 text-amber-400" />
+            Prese disponibili
+          </span>
+        )}
+      </div>
+    </motion.div>
   );
 }
