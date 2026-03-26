@@ -2179,16 +2179,47 @@ export default function UnifiedMap() {
               NomadLife
             </h1>
           </div>
+
+          {/* ── Filter pill bar ── always visible, horizontally scrollable */}
+          <div className="absolute top-14 left-0 right-0 z-[900] px-3 pointer-events-none">
+            <div className="flex gap-2 overflow-x-auto pb-1 pointer-events-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+              {([
+                { key: "showPosts", label: "Post", emoji: "❤️", active: filters.showPosts, color: "bg-red-500" },
+                { key: "showEvents", label: "Eventi", emoji: "📅", active: filters.showEvents, color: "bg-purple-500" },
+                { key: "showMoments", label: "Momenti", emoji: "✨", active: filters.showMoments, color: "bg-orange-500" },
+                { key: "showGroups", label: "Gruppi", emoji: "💬", active: filters.showGroups, color: "bg-cyan-500" },
+                { key: "showMyTrips", label: "Viaggi", emoji: "✈️", active: filters.showMyTrips, color: "bg-amber-500" },
+                { key: "showFollowingTrips", label: "Seguiti", emoji: "👥", active: filters.showFollowingTrips, color: "bg-blue-500" },
+                { key: "showCityGuides", label: "Guide", emoji: "🏙️", active: filters.showCityGuides, color: "bg-violet-500" },
+                { key: "showSpots", label: "Spot", emoji: "📍", active: filters.showSpots, color: "bg-emerald-500" },
+              ] as const).map(item => (
+                <button
+                  key={item.key}
+                  onClick={() => setFilters(f => ({ ...f, [item.key]: !item.active }))}
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-md border ${
+                    item.active
+                      ? `${item.color} text-white border-transparent`
+                      : "bg-card/90 backdrop-blur-md text-muted-foreground border-border/50 hover:border-primary/30"
+                  }`}
+                  data-testid={`pill-filter-${item.key}`}
+                >
+                  <span className="text-[11px]">{item.emoji}</span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
           
           <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className="bg-card/90 backdrop-blur-md"
+              className="bg-card/90 backdrop-blur-md text-xs gap-1"
               data-testid="button-filters"
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Avanzato</span>
             </Button>
           </div>
           
@@ -2276,103 +2307,8 @@ export default function UnifiedMap() {
                 </div>
                 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Heart className="w-4 h-4 text-red-400" />
-                      Post
-                    </label>
-                    <Switch
-                      checked={filters.showPosts}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showPosts: v }))}
-                      data-testid="switch-posts"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-purple-400" />
-                      Eventi
-                    </label>
-                    <Switch
-                      checked={filters.showEvents}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showEvents: v }))}
-                      data-testid="switch-events"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Camera className="w-4 h-4 text-orange-400" />
-                      Momenti
-                    </label>
-                    <Switch
-                      checked={filters.showMoments}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showMoments: v }))}
-                      data-testid="switch-moments"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <MessageCircle className="w-4 h-4 text-cyan-400" />
-                      {t("map.filter_groups")}
-                    </label>
-                    <Switch
-                      checked={filters.showGroups}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showGroups: v }))}
-                      data-testid="switch-groups"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Plane className="w-4 h-4 text-amber-400" />
-                      Miei Viaggi
-                    </label>
-                    <Switch
-                      checked={filters.showMyTrips}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showMyTrips: v }))}
-                      data-testid="switch-my-trips"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Users className="w-4 h-4 text-blue-400" />
-                      Seguiti
-                    </label>
-                    <Switch
-                      checked={filters.showFollowingTrips}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showFollowingTrips: v }))}
-                      data-testid="switch-following"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Compass className="w-4 h-4 text-violet-400" />
-                      Guide Città
-                    </label>
-                    <Switch
-                      checked={filters.showCityGuides}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showCityGuides: v }))}
-                      data-testid="switch-city-guides"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-emerald-400" />
-                      Spot
-                    </label>
-                    <Switch
-                      checked={filters.showSpots}
-                      onCheckedChange={(v) => setFilters(f => ({ ...f, showSpots: v }))}
-                      data-testid="switch-spots"
-                    />
-                  </div>
-                  
-                  <div className="border-t border-border/50 pt-3 mt-3 space-y-3">
+                  <p className="text-xs text-muted-foreground">Usa le pillole in alto per mostrare/nascondere i contenuti sulla mappa.</p>
+                  <div className="border-t border-border/50 pt-3 space-y-3">
                     <p className="text-xs font-semibold text-muted-foreground uppercase">Filtri avanzati</p>
                     
                     <div>
