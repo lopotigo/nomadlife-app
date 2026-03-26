@@ -292,13 +292,13 @@ function FlyToUserLocation({ location, active, trigger }: { location: [number, n
   const map = useMap();
   const hasFlewRef = useRef(false);
   useEffect(() => {
-    if (location && active && !hasFlewRef.current) {
+    if (location && !isNaN(location[0]) && !isNaN(location[1]) && active && !hasFlewRef.current) {
       hasFlewRef.current = true;
       map.flyTo(location, 13, { duration: 1.5 });
     }
   }, [location, active, map]);
   useEffect(() => {
-    if (location && trigger > 0) {
+    if (location && !isNaN(location[0]) && !isNaN(location[1]) && trigger > 0) {
       map.flyTo(location, 13, { duration: 1.2 });
     }
   }, [trigger]);
@@ -1617,7 +1617,7 @@ export default function UnifiedMap() {
             <MapClickHandler onMapClick={handleMapClick} />
             <FlyToUserLocation location={userLocation} active={!highlightedTripId} trigger={flyTrigger} />
             
-            {userLocation && (
+            {userLocation && !isNaN(userLocation[0]) && !isNaN(userLocation[1]) && (
               <Marker
                 position={userLocation}
                 icon={createUserLocationIcon()}
