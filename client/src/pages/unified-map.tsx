@@ -279,6 +279,12 @@ function adjustColor(hex: string, amount: number): string {
 
 // createStopMarkerIcon imported from shared component
 
+function isValidCoord(lat: any, lng: any): boolean {
+  const la = parseFloat(lat);
+  const lo = parseFloat(lng);
+  return isFinite(la) && isFinite(lo) && !isNaN(la) && !isNaN(lo);
+}
+
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
     click: (e) => {
@@ -1408,7 +1414,7 @@ export default function UnifiedMap() {
 
   
   const postsWithCoords = useMemo(() => 
-    filters.showPosts ? posts.filter(p => p.latitude && p.longitude) : [],
+    filters.showPosts ? posts.filter(p => isValidCoord(p.latitude, p.longitude)) : [],
     [posts, filters.showPosts]
   );
 
@@ -1432,7 +1438,7 @@ export default function UnifiedMap() {
     if (!filters.showEvents) return [];
     
     return events.filter(e => {
-      if (!e.latitude || !e.longitude) return false;
+      if (!isValidCoord(e.latitude, e.longitude)) return false;
       if (filters.maxBudget < 500 && e.price > filters.maxBudget) return false;
       if (filters.dateFrom && new Date(e.startDate) < new Date(filters.dateFrom)) return false;
       if (filters.dateTo && new Date(e.startDate) > new Date(filters.dateTo)) return false;
@@ -1442,12 +1448,12 @@ export default function UnifiedMap() {
 
   const momentsWithCoords = useMemo(() => {
     if (!filters.showMoments) return [];
-    return moments.filter(m => m.latitude && m.longitude);
+    return moments.filter(m => isValidCoord(m.latitude, m.longitude));
   }, [moments, filters.showMoments]);
 
   const groupsWithCoords = useMemo(() => {
     if (!filters.showGroups) return [];
-    return chatGroups.filter(g => g.latitude && g.longitude);
+    return chatGroups.filter(g => isValidCoord(g.latitude, g.longitude));
   }, [chatGroups, filters.showGroups]);
 
   const { data: cityGuidesData } = useQuery<CityGuide[]>({
@@ -1461,7 +1467,7 @@ export default function UnifiedMap() {
 
   const cityGuidesWithCoords = useMemo(() => {
     if (!filters.showCityGuides || !cityGuidesData) return [];
-    return cityGuidesData.filter(g => g.latitude && g.longitude);
+    return cityGuidesData.filter(g => isValidCoord(g.latitude, g.longitude));
   }, [cityGuidesData, filters.showCityGuides]);
 
   const handleJoinGroup = async (groupId: string) => {
@@ -1993,7 +1999,7 @@ export default function UnifiedMap() {
               );
             })}
             
-            {filters.showSpots && spotLocations.map((spot) => (
+            {filters.showSpots && spotLocations.filter(s => isValidCoord(s.latitude, s.longitude)).map((spot) => (
               <Marker
                 key={`spot-${spot.id}`}
                 position={[spot.latitude, spot.longitude]}
@@ -2069,7 +2075,7 @@ export default function UnifiedMap() {
             ))}
 
             {tripsToShow.map((trip) => {
-              const validStops = trip.stops.filter(s => s.latitude && s.longitude).sort((a, b) => a.orderIndex - b.orderIndex);
+              const validStops = trip.stops.filter(s => isValidCoord(s.latitude, s.longitude)).sort((a, b) => a.orderIndex - b.orderIndex);
               const positions: [number, number][] = validStops.map(s => [s.latitude!, s.longitude!]);
               
               return (
