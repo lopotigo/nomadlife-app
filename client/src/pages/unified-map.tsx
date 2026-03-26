@@ -2127,9 +2127,9 @@ export default function UnifiedMap() {
                   });
                 }}
               >
-                {countryNomads.filter((n: any) => n.latitude && n.longitude).map((nomad) => {
-                  const lat = nomad.latitude;
-                  const lng = nomad.longitude;
+                {countryNomads.filter((n: any) => isValidCoord(n.latitude, n.longitude)).map((nomad) => {
+                  const lat = parseFloat(nomad.latitude);
+                  const lng = parseFloat(nomad.longitude);
                   return (
                     <Marker
                       key={`nomad-${nomad.id}`}

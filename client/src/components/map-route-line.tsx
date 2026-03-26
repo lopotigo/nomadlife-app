@@ -11,13 +11,16 @@ export function CurvedRouteLine({ positions, color = "#3b82f6", dashed = false, 
   const map = useMap();
   
   useEffect(() => {
-    if (positions.length < 2) return;
+    const validPositions = positions.filter(
+      p => isFinite(p[0]) && isFinite(p[1]) && !isNaN(p[0]) && !isNaN(p[1])
+    );
+    if (validPositions.length < 2) return;
     
     const curvedPoints: L.LatLng[] = [];
     
-    for (let i = 0; i < positions.length - 1; i++) {
-      const start = L.latLng(positions[i][0], positions[i][1]);
-      const end = L.latLng(positions[i + 1][0], positions[i + 1][1]);
+    for (let i = 0; i < validPositions.length - 1; i++) {
+      const start = L.latLng(validPositions[i][0], validPositions[i][1]);
+      const end = L.latLng(validPositions[i + 1][0], validPositions[i + 1][1]);
       
       const midLat = (start.lat + end.lat) / 2;
       const midLng = (start.lng + end.lng) / 2;
@@ -35,7 +38,7 @@ export function CurvedRouteLine({ positions, color = "#3b82f6", dashed = false, 
         curvedPoints.push(L.latLng(lat, lng));
       }
     }
-    curvedPoints.push(L.latLng(positions[positions.length - 1][0], positions[positions.length - 1][1]));
+    curvedPoints.push(L.latLng(validPositions[validPositions.length - 1][0], validPositions[validPositions.length - 1][1]));
     
     const layers: L.Polyline[] = [];
     const opacityScale = opacity / 0.9;
