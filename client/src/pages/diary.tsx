@@ -638,7 +638,11 @@ export default function DiaryPage() {
             )}
 
             {/* Trip stops — all trips (dimmed if one is selected) */}
-            {allStops.map(stop => {
+            {allStops.filter(stop =>
+              stop.latitude != null && stop.longitude != null &&
+              isFinite(stop.latitude) && isFinite(stop.longitude) &&
+              !isNaN(stop.latitude) && !isNaN(stop.longitude)
+            ).map(stop => {
               const isDimmed = selectedTripId !== null && stop.tripId !== selectedTripId;
               const isStopSelected = selectedStop?.id === stop.id;
               return (
