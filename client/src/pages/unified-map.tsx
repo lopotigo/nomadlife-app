@@ -1718,6 +1718,7 @@ export default function UnifiedMap() {
                 key={`event-${event.id}`}
                 position={[parseFloat(String(event.latitude)), parseFloat(String(event.longitude))]}
                 icon={createEventMarkerIcon(event.imageUrl, event.color || "#a855f7")}
+                eventHandlers={{ click: (e) => { e.originalEvent?.stopPropagation(); } }}
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
                   <div className="flex items-center gap-2 px-1 py-0.5">
@@ -1732,15 +1733,15 @@ export default function UnifiedMap() {
                 </Tooltip>
                 <Popup className="custom-popup" maxWidth={340} minWidth={260} autoPanPadding={[20, 20]} autoPan={true}>
                   <div className="popup-animate-in p-3 w-[260px]">
-                    <Link href={`/event/${event.id}`} className="flex items-center gap-2 mb-2 hover:bg-gray-100 rounded-lg p-1 -m-1 transition-colors cursor-pointer">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
                         <Calendar className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-bold text-sm hover:underline">{event.title}</p>
+                        <p className="font-bold text-sm">{event.title}</p>
                         <p className="text-xs text-gray-500">{event.city}, {event.country}</p>
                       </div>
-                    </Link>
+                    </div>
                     {event.imageUrl && (
                       <img src={event.imageUrl} className="w-full h-28 object-cover rounded-xl mb-2" alt="" />
                     )}
@@ -2104,6 +2105,7 @@ export default function UnifiedMap() {
                       key={`stop-${stop.id}`}
                       position={[parseFloat(String(stop.latitude)), parseFloat(String(stop.longitude))]}
                       icon={createStopMarkerIcon(stop.orderIndex, trip.color, trip.user?.avatar, stop.imageUrl)}
+                      eventHandlers={{ click: (e) => { e.originalEvent?.stopPropagation(); } }}
                     >
                       <Popup className="custom-popup" maxWidth={340} minWidth={300} autoPanPadding={[20, 20]} autoPan={true}>
                         <StopMapPopup
@@ -2145,6 +2147,7 @@ export default function UnifiedMap() {
                     <Marker
                       key={`nomad-${nomad.id}`}
                       position={[lat, lng]}
+                      eventHandlers={{ click: (e) => { e.originalEvent?.stopPropagation(); } }}
                       icon={L.divIcon({
                         html: `<div style="width:40px;height:40px;border-radius:50%;border:3px solid #10b981;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.3);background:white;">
                           <img src="${nomad.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${nomad.username}`}" style="width:100%;height:100%;object-fit:cover;" />
