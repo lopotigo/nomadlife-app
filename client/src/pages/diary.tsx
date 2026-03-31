@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MomentsBar } from "@/components/moments";
 import { CurvedRouteLine } from "@/components/map-route-line";
 import { BottomNav } from "@/components/bottom-nav";
+import { MapErrorBoundary } from "@/components/map-error-boundary";
 import {
   Map, Plane, Camera, Users, Bookmark, User, Plus,
   MapPin, Calendar, Star, ChevronUp, ChevronDown,
@@ -555,11 +556,18 @@ export default function DiaryPage() {
     }
   };
 
-  const mapCenter: [number, number] = userLocation
-    ? [userLocation.lat, userLocation.lng]
-    : allStops.length > 0
-    ? [allStops[0].latitude!, allStops[0].longitude!]
-    : [45, 10];
+  const safeCoord = (n: number | null | undefined): number | null => {
+    if (n == null || !isFinite(n) || isNaN(n)) return null;
+    return n;
+  };
+  const firstStopLat = safeCoord(allStops[0]?.latitude);
+  const firstStopLng = safeCoord(allStops[0]?.longitude);
+  const mapCenter: [number, number] =
+    userLocation && isFinite(userLocation.lat) && isFinite(userLocation.lng)
+      ? [userLocation.lat, userLocation.lng]
+      : firstStopLat !== null && firstStopLng !== null
+      ? [firstStopLat, firstStopLng]
+      : [45, 10];
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-background">
@@ -605,6 +613,7 @@ export default function DiaryPage() {
             transition: "bottom 0.4s ease"
           }}
         >
+          <MapErrorBoundary>
           <MapContainer
             center={mapCenter}
             zoom={userLocation ? 11 : 4}
@@ -654,7 +663,7 @@ export default function DiaryPage() {
               return (
                 <Marker
                   key={`stop-${stop.id}`}
-                  position={[stop.latitude!, stop.longitude!]}
+                  position={[parseFloat(String(stop.latitude)), parseFloat(String(stop.longitude))]}
                   icon={createStopIcon(isStopSelected ? "#f59e0b" : isDimmed ? "#aaa" : stop.tripColor, stop.orderIndex + 1)}
                   opacity={isDimmed ? 0.35 : 1}
                   eventHandlers={{
@@ -675,7 +684,7 @@ export default function DiaryPage() {
             {activeTab === "nomads" && nearbyNomads.map(nomad => nomad.latitude && nomad.longitude ? (
               <Marker
                 key={`nomad-${nomad.id}`}
-                position={[nomad.latitude, nomad.longitude]}
+                position={[parseFloat(String(nomad.latitude)), parseFloat(String(nomad.longitude))]}
                 icon={createNomadIcon(nomad.avatar, nomad.username)}
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
@@ -698,6 +707,7 @@ export default function DiaryPage() {
               </Marker>
             ) : null)}
           </MapContainer>
+          </MapErrorBoundary>
         </div>
 
         {/* Bottom Panel */}

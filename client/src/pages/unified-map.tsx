@@ -33,6 +33,7 @@ import { FloatingTip } from "@/components/contextual-tip";
 import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { FirstPostNudge } from "@/components/first-post-nudge";
 import { BottomNav } from "@/components/bottom-nav";
+import { MapErrorBoundary } from "@/components/map-error-boundary";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -1444,13 +1445,16 @@ export default function UnifiedMap() {
     const groups: { lat: number; lng: number; posts: PostWithUser[] }[] = [];
     const threshold = 0.005;
     postsWithCoords.forEach(post => {
+      const lat = parseFloat(String(post.latitude));
+      const lng = parseFloat(String(post.longitude));
+      if (!isFinite(lat) || !isFinite(lng) || isNaN(lat) || isNaN(lng)) return;
       const existing = groups.find(g =>
-        Math.abs(g.lat - post.latitude!) < threshold && Math.abs(g.lng - post.longitude!) < threshold
+        Math.abs(g.lat - lat) < threshold && Math.abs(g.lng - lng) < threshold
       );
       if (existing) {
         existing.posts.push(post);
       } else {
-        groups.push({ lat: post.latitude!, lng: post.longitude!, posts: [post] });
+        groups.push({ lat, lng, posts: [post] });
       }
     });
     return groups;
@@ -1632,6 +1636,7 @@ export default function UnifiedMap() {
   return (
     <div className="fixed inset-0 overflow-hidden bg-background" data-testid="unified-map-page">
         <div className="absolute inset-0 z-0">
+          <MapErrorBoundary>
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
@@ -1728,7 +1733,7 @@ export default function UnifiedMap() {
             {eventsWithCoords.map((event) => (
               <Marker
                 key={`event-${event.id}`}
-                position={[event.latitude!, event.longitude!]}
+                position={[parseFloat(String(event.latitude)), parseFloat(String(event.longitude))]}
                 icon={createEventMarkerIcon(event.imageUrl, event.color || "#a855f7")}
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
@@ -1809,7 +1814,7 @@ export default function UnifiedMap() {
             {momentsWithCoords.map((moment) => (
               <Marker
                 key={`moment-${moment.id}`}
-                position={[moment.latitude!, moment.longitude!]}
+                position={[parseFloat(String(moment.latitude)), parseFloat(String(moment.longitude))]}
                 icon={createMomentMarkerIcon(moment.mediaUrl, moment.mediaType, (moment as MomentWithUser).user?.avatar)}
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
@@ -1957,7 +1962,7 @@ export default function UnifiedMap() {
               return (
                 <Marker
                   key={`cityguide-${guide.id}`}
-                  position={[guide.latitude, guide.longitude]}
+                  position={[parseFloat(String(guide.latitude)), parseFloat(String(guide.longitude))]}
                   icon={createCityGuideMarkerIcon(guide.category)}
                 >
                   <Tooltip direction="top" offset={[0, -10]} opacity={0.95} className="nomad-tooltip">
@@ -2025,7 +2030,7 @@ export default function UnifiedMap() {
             {filters.showSpots && spotLocations.filter(s => isValidCoord(s.latitude, s.longitude)).map((spot) => (
               <Marker
                 key={`spot-${spot.id}`}
-                position={[spot.latitude, spot.longitude]}
+                position={[parseFloat(String(spot.latitude)), parseFloat(String(spot.longitude))]}
                 icon={L.divIcon({
                   html: `<div style="width:36px;height:36px;border-radius:50%;background:${spot.category === 'cafe' ? '#f59e0b' : spot.category === 'coworking' ? '#10b981' : spot.category === 'luggage_storage' ? '#8b5cf6' : '#6366f1'};color:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);border:2px solid white;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2114,7 +2119,7 @@ export default function UnifiedMap() {
                   {validStops.map((stop, idx) => (
                     <Marker
                       key={`stop-${stop.id}`}
-                      position={[stop.latitude!, stop.longitude!]}
+                      position={[parseFloat(String(stop.latitude)), parseFloat(String(stop.longitude))]}
                       icon={createStopMarkerIcon(stop.orderIndex, trip.color, trip.user?.avatar, stop.imageUrl)}
                     >
                       <Popup className="custom-popup" maxWidth={340} minWidth={300} autoPanPadding={[20, 20]} autoPan={true}>
@@ -2195,6 +2200,7 @@ export default function UnifiedMap() {
             )}
             {countryFilter && <ZoomToCountry lat={countryFilter.lat} lng={countryFilter.lng} />}
           </MapContainer>
+          </MapErrorBoundary>
 
           {/* Soft frame overlay — visual ring around the map */}
           <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/10 dark:ring-white/10 pointer-events-none z-[999]" />
