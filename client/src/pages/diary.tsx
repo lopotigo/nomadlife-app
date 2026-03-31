@@ -365,7 +365,7 @@ export default function DiaryPage() {
     .map(s => [s.latitude!, s.longitude!]);
 
   const togglePanel = () => {
-    setPanelState(prev => prev === "peek" ? "half" : prev === "half" ? "full" : "half");
+    setPanelState(prev => prev === "peek" ? "half" : prev === "half" ? "full" : "peek");
   };
 
   const handleTabClick = (tabId: TabId) => {
@@ -374,11 +374,13 @@ export default function DiaryPage() {
   };
 
   const handleDragStart = (e: React.PointerEvent) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
     dragStartY.current = e.clientY;
     dragStartState.current = panelState;
   };
 
   const handleDragEnd = (e: React.PointerEvent) => {
+    e.currentTarget.releasePointerCapture(e.pointerId);
     const delta = dragStartY.current - e.clientY;
     if (delta > 60) setPanelState(prev => prev === "peek" ? "half" : "full");
     else if (delta < -60) setPanelState(prev => prev === "full" ? "half" : "peek");
