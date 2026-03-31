@@ -115,7 +115,7 @@ interface StopContextCardProps {
 }
 
 function StopContextCard({ stop, onClose }: StopContextCardProps) {
-  const city = stop.location.split(",")[0].trim();
+  const city = (stop.location ?? "").split(",")[0].trim();
 
   const { data: rawEvents } = useQuery<any[]>({
     queryKey: ["/api/events", city],
