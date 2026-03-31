@@ -97,7 +97,11 @@ function createNomadIcon(avatar: string | null | undefined, username: string) {
 function MapController({ center, zoom }: { center: [number, number] | null; zoom?: number }) {
   const map = useMap();
   useEffect(() => {
-    if (center) {
+    if (
+      center &&
+      isFinite(center[0]) && isFinite(center[1]) &&
+      !isNaN(center[0]) && !isNaN(center[1])
+    ) {
       map.flyTo(center, zoom || map.getZoom(), { duration: 1.2 });
     }
   }, [center, zoom, map]);
