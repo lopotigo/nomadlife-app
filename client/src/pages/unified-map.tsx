@@ -1110,9 +1110,9 @@ function PostMapPopupExpanded({
             <Heart className={`w-3.5 h-3.5 ${pulsingPosts.has(post.id) ? 'heart-pulse' : ''} ${likedPosts.has(post.id) ? 'fill-red-500' : ''}`} /> 
             {post.likes}
           </button>
-          <Link href={`/post/${post.id}`} className="flex items-center gap-1 hover:text-primary transition-colors">
+          <span className="flex items-center gap-1">
             <MessageCircle className="w-3.5 h-3.5" /> {post.commentsCount}
-          </Link>
+          </span>
         </div>
         <div className="flex items-center gap-1">
           {post.latitude && post.longitude && (
@@ -1640,7 +1640,6 @@ export default function UnifiedMap() {
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
-            tap={false}
             className="h-full w-full z-0"
             style={{ background: theme === "dark" ? "#1a1a2e" : "#e8e8e8" }}
           >
@@ -1671,6 +1670,7 @@ export default function UnifiedMap() {
                   <Marker
                     key={`group-${gi}`}
                     position={[group.lat, group.lng]}
+                    eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e.originalEvent); } }}
                     icon={hasMultiple
                       ? L.divIcon({
                           html: `<div style="position:relative;width:44px;height:44px;">
