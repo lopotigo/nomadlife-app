@@ -2481,7 +2481,7 @@ export default function UnifiedMap() {
             </div>
           </button>
           <div className="border-t border-border/30 mx-4" />
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-4">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-4 space-y-4 pb-4" style={{ touchAction: "pan-y" }}>
 
           
           {(() => {
@@ -2533,7 +2533,7 @@ export default function UnifiedMap() {
               );
             });
           })()}
-              </div>
+          </div>
         </motion.div>
 
 
