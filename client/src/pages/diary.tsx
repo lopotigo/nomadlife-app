@@ -255,7 +255,7 @@ export default function DiaryPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabId>("trips");
-  const [panelState, setPanelState] = useState<PanelState>("peek");
+  const [panelState, setPanelState] = useState<PanelState>("half");
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [flyTarget, setFlyTarget] = useState<[number, number] | null>(null);
   const [flyZoom, setFlyZoom] = useState<number | undefined>(undefined);
@@ -780,20 +780,28 @@ export default function DiaryPage() {
                       <Plane className="w-4 h-4 text-primary" />
                       I miei viaggi ({trips.length})
                     </h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setShowCreateModal(true)}
-                        className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-xl font-medium flex items-center gap-1 hover:bg-primary/90 transition-colors"
+                        className="text-xs bg-primary text-primary-foreground px-2.5 py-1.5 rounded-xl font-medium flex items-center gap-1 hover:bg-primary/90 transition-colors"
                         data-testid="diary-create-trip-btn"
+                        title="Crea nuovo viaggio"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        Nuovo
+                        Viaggio
                       </button>
-                      <Link href="/travel-diary">
-                        <button className="text-xs text-primary font-medium flex items-center gap-1 hover:underline" data-testid="diary-trips-manage">
-                          Gestisci <ExternalLink className="w-3 h-3" />
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => {
+                          if (selectedTripId) setStopTripId(String(selectedTripId));
+                          setShowStopModal(true);
+                        }}
+                        className="text-xs bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2.5 py-1.5 rounded-xl font-medium flex items-center gap-1 hover:bg-emerald-500/25 transition-colors"
+                        data-testid="diary-add-stop-header-btn"
+                        title="Aggiungi tappa a un viaggio"
+                      >
+                        <MapPin className="w-3.5 h-3.5" />
+                        Tappa
+                      </button>
                     </div>
                   </div>
 
@@ -812,6 +820,12 @@ export default function DiaryPage() {
                     </div>
                   ) : (
                     <>
+                      {!selectedTripId && trips.length > 0 && (
+                        <div className="flex items-center gap-2 text-xs bg-muted/60 text-muted-foreground rounded-xl px-3 py-2">
+                          <Compass className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>Tocca un viaggio per vederlo sulla mappa e aggiungere tappe.</span>
+                        </div>
+                      )}
                       {selectedTripId && !selectedStop && (
                         <div className="flex items-center gap-2 text-xs bg-primary/8 text-primary rounded-xl px-3 py-2">
                           <Eye className="w-3.5 h-3.5" />
@@ -876,7 +890,7 @@ export default function DiaryPage() {
                               </div>
                             </div>
                             {/* Stops list — shown when trip is selected */}
-                            {isSelected && (trip.stops || []).length > 0 && (
+                            {isSelected && (
                               <div className="mt-1 ml-4 mb-1 space-y-0.5" onClick={e => e.stopPropagation()}>
                                 {(trip.stops || [])
                                   .sort((a, b) => a.orderIndex - b.orderIndex)
@@ -899,13 +913,25 @@ export default function DiaryPage() {
                                         >
                                           {stop.orderIndex + 1}
                                         </div>
-                                        <span className="text-xs font-medium truncate flex-1">{stop.location}</span>
+                                        <span className="text-xs font-medium truncate flex-1">{stop.location || "Tappa senza nome"}</span>
                                         {stop.latitude && stop.longitude && (
                                           <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                                         )}
                                       </button>
                                     );
                                   })}
+                                {/* Add stop button — always visible when trip is expanded */}
+                                <button
+                                  onClick={() => {
+                                    setStopTripId(String(trip.id));
+                                    setShowStopModal(true);
+                                  }}
+                                  className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 border border-dashed border-emerald-500/30 hover:bg-emerald-500/8 transition-colors mt-0.5"
+                                  data-testid={`diary-add-stop-inline-${trip.id}`}
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  Aggiungi tappa
+                                </button>
                               </div>
                             )}
                           </div>
