@@ -1189,6 +1189,7 @@ export default function UnifiedMap() {
   const [loadingNomads, setLoadingNomads] = useState(false);
   const [showNomadDrawer, setShowNomadDrawer] = useState(false);
   const [feedState, setFeedState] = useState<'peek' | 'open'>('peek');
+  const [activePostGroup, setActivePostGroup] = useState<{ lat: number; lng: number; posts: PostWithUser[] } | null>(null);
   const [mapCenterCity, setMapCenterCity] = useState("La tua zona");
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [locatingUser, setLocatingUser] = useState(false);
@@ -1427,13 +1428,18 @@ export default function UnifiedMap() {
   }, [user, authLoading, fetchData]);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
+    // If a post card is open, close it first (don't open new post modal)
+    if (activePostGroup) {
+      setActivePostGroup(null);
+      return;
+    }
     if (!user) {
       setLocation("/auth");
       return;
     }
     setClickedCoords({ lat, lng });
     setShowNewPost(true);
-  }, [user, setLocation]);
+  }, [user, setLocation, activePostGroup]);
 
   
   const postsWithCoords = useMemo(() => 
@@ -1670,7 +1676,7 @@ export default function UnifiedMap() {
                   <Marker
                     key={`group-${gi}`}
                     position={[group.lat, group.lng]}
-                    eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e.originalEvent); } }}
+                    eventHandlers={{ click: () => { setActivePostGroup(group); setFeedState('peek'); } }}
                     icon={hasMultiple
                       ? L.divIcon({
                           html: `<div style="position:relative;width:44px;height:44px;">
@@ -1698,17 +1704,6 @@ export default function UnifiedMap() {
                         {hasMultiple && <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-full">+{group.posts.length - 1}</span>}
                       </div>
                     </Tooltip>
-                    <Popup className="custom-popup" maxWidth={340} minWidth={280} autoPanPadding={[20, 20]} autoPan={true}>
-                      <PostCarouselPopup
-                        posts={group.posts}
-                        likedPosts={likedPosts}
-                        pulsingPosts={pulsingPosts}
-                        savedPosts={savedPosts}
-                        onLike={handleLike}
-                        onSave={handleSave}
-                        onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
-                      />
-                    </Popup>
                   </Marker>
                 );
               })}
@@ -2580,6 +2575,57 @@ export default function UnifiedMap() {
           }
         }}
       />
+
+      {/* ── Post Group Bottom Card (Google-Maps style, mobile-first) ── */}
+      <AnimatePresence>
+        {activePostGroup && (
+            <motion.div
+              key="post-card"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 320 }}
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={{ top: 0, bottom: 0.3 }}
+              onDragEnd={(_e, info) => { if (info.offset.y > 80) setActivePostGroup(null); }}
+              className="fixed bottom-[72px] left-0 right-0 z-[1200] bg-card rounded-t-2xl shadow-2xl border-t border-border/40"
+              style={{ maxHeight: "72vh", overflow: "hidden", display: "flex", flexDirection: "column" }}
+              data-testid="post-group-bottom-card"
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-2.5 pb-1 flex-shrink-0">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+              </div>
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 pb-2 flex-shrink-0">
+                <span className="text-sm font-semibold text-foreground">
+                  {activePostGroup.posts.length === 1 ? "Post" : `${activePostGroup.posts.length} post in questa zona`}
+                </span>
+                <button
+                  onClick={() => setActivePostGroup(null)}
+                  className="w-7 h-7 rounded-full bg-muted flex items-center justify-center"
+                  aria-label="Chiudi"
+                >
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+              <div className="border-t border-border/30 mx-4 mb-0 flex-shrink-0" />
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto overscroll-contain" style={{ touchAction: "pan-y" }}>
+                <PostCarouselPopup
+                  posts={activePostGroup.posts}
+                  likedPosts={likedPosts}
+                  pulsingPosts={pulsingPosts}
+                  savedPosts={savedPosts}
+                  onLike={handleLike}
+                  onSave={handleSave}
+                  onShare={(p) => handleShare("post", p.id, (p.content || "").substring(0, 50) + "...", () => setShareModal({ open: true, type: "post", id: p.id, title: (p.content || "").substring(0, 50) + "..." }))}
+                />
+              </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
 
       {shareModal && (
         <ShareQRModal
