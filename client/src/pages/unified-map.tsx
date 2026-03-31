@@ -663,7 +663,7 @@ function StopMapPopup({ stop, trip, openDirections, onShare }: {
           </div>
           {trip.isOwn
             ? <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Tu</span>
-            : <Link href={`/user/${trip.user?.id || trip.userId}`} className="text-[10px] font-semibold text-primary/80 hover:text-primary whitespace-nowrap">Profilo</Link>
+            : <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">Nomade</span>
           }
         </div>
       </div>
@@ -3703,18 +3703,16 @@ function FeedPostCard({
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-3">
-        <Link href={`/user/${post.userId}`} className="flex-shrink-0">
+        <div className="flex-shrink-0">
           {post.user.avatar
             ? <img src={post.user.avatar} alt={post.user.name} className="w-10 h-10 rounded-full object-cover" />
             : <div className={`w-10 h-10 rounded-full ${avatarColor} flex items-center justify-center`}>
                 <span className="text-white font-bold text-base">{initial}</span>
               </div>
           }
-        </Link>
+        </div>
         <div className="flex-1 min-w-0">
-          <Link href={`/user/${post.userId}`}>
-            <span className="font-semibold text-sm hover:underline">{post.user.name || post.user.username}</span>
-          </Link>
+          <span className="font-semibold text-sm">{post.user.name || post.user.username}</span>
           <p className="text-xs text-muted-foreground mt-0.5">
             {post.location ? `${post.location} · ` : ""}{timeAgo}
           </p>
