@@ -651,10 +651,7 @@ function StopMapPopup({ stop, trip, openDirections, onShare }: {
           </button>
         </div>
 
-        <a
-          href={`/user/${trip.user?.id || trip.userId}`}
-          className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-xl p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
+        <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-xl p-2">
           <img
             src={trip.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.user?.username || trip.userId}`}
             className="w-7 h-7 rounded-full object-cover ring-2 ring-primary/20"
@@ -664,8 +661,11 @@ function StopMapPopup({ stop, trip, openDirections, onShare }: {
             <p className="font-semibold text-[11px] text-primary">{trip.user?.name || "Utente"}</p>
             <p className="text-[10px] text-gray-400 truncate">{trip.title}</p>
           </div>
-          {trip.isOwn && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Tu</span>}
-        </a>
+          {trip.isOwn
+            ? <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">Tu</span>
+            : <Link href={`/user/${trip.user?.id || trip.userId}`} className="text-[10px] font-semibold text-primary/80 hover:text-primary whitespace-nowrap">Profilo</Link>
+          }
+        </div>
       </div>
     </div>
   );
@@ -2188,9 +2188,12 @@ export default function UnifiedMap() {
                           </div>
                           {nomad.profession && <p className="text-xs text-gray-600 mb-1">{nomad.profession}</p>}
                           {nomad.location && <p className="text-[10px] text-gray-400 flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{nomad.location}</p>}
-                          <Link href={`/user/${nomad.id}`} className="block mt-2 text-xs font-semibold text-primary hover:underline text-center">
-                            Vedi profilo
-                          </Link>
+                          <div className="mt-2 flex justify-center">
+                            <Link href={`/user/${nomad.id}`} className="inline-flex items-center gap-1 text-xs font-semibold text-primary border border-primary/30 rounded-lg px-3 py-1 hover:bg-primary/10 transition-colors">
+                              <User2 className="w-3 h-3" />
+                              Vedi profilo
+                            </Link>
+                          </div>
                         </div>
                       </Popup>
                     </Marker>
