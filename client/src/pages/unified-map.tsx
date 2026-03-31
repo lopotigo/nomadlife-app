@@ -1640,6 +1640,7 @@ export default function UnifiedMap() {
           <MapContainer
             center={mapCenter}
             zoom={mapZoom}
+            tap={false}
             className="h-full w-full z-0"
             style={{ background: theme === "dark" ? "#1a1a2e" : "#e8e8e8" }}
           >
@@ -1663,24 +1664,7 @@ export default function UnifiedMap() {
               </Marker>
             )}
 
-            <MarkerClusterGroup
-              chunkedLoading
-              maxClusterRadius={40}
-              spiderfyOnMaxZoom={true}
-              showCoverageOnHover={false}
-              zoomToBoundsOnClick={true}
-              disableClusteringAtZoom={18}
-              iconCreateFunction={(cluster: any) => {
-                const count = cluster.getChildCount();
-                return L.divIcon({
-                  html: `<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 3px 12px rgba(99,102,241,0.5);border:2px solid white;">${count}</div>`,
-                  className: "",
-                  iconSize: L.point(36, 36),
-                  iconAnchor: L.point(18, 18),
-                });
-              }}
-            >
-              {groupedPosts.map((group, gi) => {
+            {groupedPosts.map((group, gi) => {
                 const firstPost = group.posts[0];
                 const hasMultiple = group.posts.length > 1;
                 return (
@@ -1728,7 +1712,6 @@ export default function UnifiedMap() {
                   </Marker>
                 );
               })}
-            </MarkerClusterGroup>
 
             {eventsWithCoords.map((event) => (
               <Marker
