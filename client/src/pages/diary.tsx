@@ -364,6 +364,13 @@ export default function DiaryPage() {
   });
   const eventRegistrations: any[] = Array.isArray(rawEventRegistrations) ? rawEventRegistrations : [];
 
+  const { data: rawFollowedTrips } = useQuery<any[]>({
+    queryKey: ["/api/followed-users-trips"],
+    queryFn: () => fetch("/api/followed-users-trips", { credentials: "include" }).then(r => r.ok ? r.json() : []),
+    enabled: !!user,
+  });
+  const followedTrips: any[] = Array.isArray(rawFollowedTrips) ? rawFollowedTrips : [];
+
   const selectedTrip = trips.find(t => t.id === selectedTripId) || null;
 
   // All stops from all trips for the map
@@ -1145,8 +1152,8 @@ export default function DiaryPage() {
                                     <Share2 className="w-4 h-4" />
                                   </button>
                                 )}
-                                <Link href={`/travel-diary`}>
-                                  <button className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors" data-testid={`diary-edit-trip-${trip.id}`}>
+                                <Link href={`/trip/${trip.id}`}>
+                                  <button className="p-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors" title="Apri dettaglio viaggio" data-testid={`diary-edit-trip-${trip.id}`}>
                                     <Edit3 className="w-4 h-4" />
                                   </button>
                                 </Link>
@@ -1372,6 +1379,71 @@ export default function DiaryPage() {
                               <p className="text-xs font-medium truncate">
                                 {reg.event?.title || reg.title || "Evento"}
                               </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Viaggi che seguo */}
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                        <Eye className="w-3 h-3" /> Viaggi che seguo
+                      </p>
+                    </div>
+                    {followedTrips.length === 0 ? (
+                      <div className="flex flex-col items-center gap-1.5 py-4 bg-muted/30 rounded-xl">
+                        <Plane className="w-6 h-6 text-muted-foreground/40" />
+                        <p className="text-[11px] text-muted-foreground text-center">
+                          Segui altri nomadi per vedere i loro viaggi in tempo reale
+                        </p>
+                        <Link href="/search">
+                          <span className="text-[11px] text-primary font-medium hover:underline">Cerca nomadi →</span>
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {followedTrips.slice(0, 5).map((trip: any) => (
+                          <Link key={trip.id} href={`/trip/${trip.id}`}>
+                            <div className="flex items-center gap-3 bg-muted/40 rounded-xl p-2.5 hover:bg-muted/60 transition-colors" data-testid={`hub-followed-trip-${trip.id}`}>
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                {trip.user?.avatarUrl
+                                  ? <img src={trip.user.avatarUrl} className="w-8 h-8 rounded-full object-cover" alt="" />
+                                  : <Plane className="w-4 h-4 text-primary" />
+                                }
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{trip.title || "Viaggio"}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">
+                                  {trip.user?.name || trip.user?.username || "Nomade"} · {trip.status === "in_progress" ? "🟢 In corso" : trip.status === "completed" ? "✅ Completato" : "📅 Pianificato"}
+                                </p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* I miei viaggi recenti con link diretto */}
+                  {trips.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> I miei viaggi
+                      </p>
+                      <div className="space-y-2">
+                        {trips.slice(0, 3).map((trip, idx) => (
+                          <Link key={trip.id} href={`/trip/${trip.id}`}>
+                            <div className="flex items-center gap-3 bg-muted/40 rounded-xl p-2.5 hover:bg-muted/60 transition-colors" data-testid={`hub-my-trip-${trip.id}`}>
+                              <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: TRIP_COLORS[idx % TRIP_COLORS.length] }} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{trip.title}</p>
+                                <p className="text-[10px] text-muted-foreground">{(trip.stops?.length ?? 0)} tappe</p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                             </div>
                           </Link>
                         ))}
