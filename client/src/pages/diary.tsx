@@ -36,21 +36,25 @@ interface TripStop {
   id: number;
   latitude: number | null;
   longitude: number | null;
-  location: string;
+  city: string;
+  country?: string | null;
   orderIndex: number;
   imageUrl?: string | null;
   notes?: string | null;
+  arrivalDate?: string | null;
 }
 
 interface Trip {
-  id: number;
-  name: string;
-  color: string;
+  id: string;
+  title: string;
   stops: TripStop[];
   isPublic: boolean;
   startDate?: string | null;
   endDate?: string | null;
+  startLocation?: string | null;
+  endLocation?: string | null;
   description?: string | null;
+  color?: string | null;
 }
 
 interface NearbyNomad {
@@ -117,7 +121,7 @@ interface StopContextCardProps {
 }
 
 function StopContextCard({ stop, onClose }: StopContextCardProps) {
-  const city = (stop.location ?? "").split(",")[0].trim();
+  const city = (stop.city ?? "").split(",")[0].trim();
 
   const { data: rawEvents } = useQuery<any[]>({
     queryKey: ["/api/events", city],
@@ -151,7 +155,7 @@ function StopContextCard({ stop, onClose }: StopContextCardProps) {
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
         <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: stop.tripColor }} />
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm truncate">{stop.location}</p>
+          <p className="font-bold text-sm truncate">{stop.city}</p>
           <p className="text-[11px] text-muted-foreground truncate">{stop.tripName}</p>
         </div>
         <button
@@ -363,10 +367,10 @@ export default function DiaryPage() {
   const selectedTrip = trips.find(t => t.id === selectedTripId) || null;
 
   // All stops from all trips for the map
-  const allStops = trips.flatMap(trip =>
+  const allStops = trips.flatMap((trip, tripIdx) =>
     (trip.stops || [])
       .filter(s => s.latitude && s.longitude)
-      .map(s => ({ ...s, tripColor: trip.color, tripName: trip.name, tripId: trip.id }))
+      .map(s => ({ ...s, tripColor: TRIP_COLORS[tripIdx % TRIP_COLORS.length], tripName: trip.title, tripId: trip.id }))
   );
 
   // Stops from the currently selected trip (highlighted)
@@ -652,15 +656,19 @@ export default function DiaryPage() {
     if (!autoTripId && gps) {
       // Auto-create trip "Diario – [City] [Date]"
       try {
-        const tripName = cityName
+        const tripTitle = cityName
           ? `Diario – ${cityName}`
           : `Diario – ${new Date().toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}`;
         const tRes = await fetch("/api/trips", {
           method: "POST", credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: tripName, color: "#6366f1", isPublic: false,
-            startDate: new Date().toISOString().slice(0, 10),
+            title: tripTitle,
+            isPublic: false,
+            startDate: new Date().toISOString(),
+            startLocation: cityName || "Posizione corrente",
+            endLocation: cityName || "Posizione corrente",
+            status: "in_progress",
           }),
         });
         if (tRes.ok) {
@@ -672,9 +680,11 @@ export default function DiaryPage() {
               method: "POST", credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                location: cityName || "Posizione corrente",
+                city: cityName || "Posizione corrente",
+                country: "",
                 latitude: gps.lat, longitude: gps.lng,
                 orderIndex: 0,
+                arrivalDate: new Date().toISOString(),
               }),
             }).catch(() => {});
           }
@@ -855,7 +865,7 @@ export default function DiaryPage() {
                 >
                   <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
                     <div className="text-xs">
-                      <p className="font-semibold">{stop.location}</p>
+                      <p className="font-semibold">{stop.city}</p>
                       <p className="text-muted-foreground">{stop.tripName} · Tocca per info</p>
                     </div>
                   </Tooltip>
@@ -1096,7 +1106,8 @@ export default function DiaryPage() {
                         />
                       )}
 
-                      {trips.map(trip => {
+                      {trips.map((trip, tripIdx) => {
+                        const tripColor = TRIP_COLORS[tripIdx % TRIP_COLORS.length];
                         const stopsWithCoords = (trip.stops || []).filter(s => s.latitude && s.longitude);
                         const isSelected = trip.id === selectedTripId;
                         return (
@@ -1110,9 +1121,9 @@ export default function DiaryPage() {
                               }`}
                               data-testid={`diary-trip-${trip.id}`}
                             >
-                              <div className="w-3 h-12 rounded-full flex-shrink-0" style={{ background: trip.color }} />
+                              <div className="w-3 h-12 rounded-full flex-shrink-0" style={{ background: tripColor }} />
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm truncate">{trip.name}</p>
+                                <p className="font-semibold text-sm truncate">{trip.title}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {(trip.stops || []).length} tappe
                                   {stopsWithCoords.length > 0 && ` · ${stopsWithCoords.length} sulla mappa`}
@@ -1151,7 +1162,7 @@ export default function DiaryPage() {
                                     return (
                                       <button
                                         key={stop.id}
-                                        onClick={() => selectStop({ ...stop, tripColor: trip.color, tripName: trip.name, tripId: trip.id })}
+                                        onClick={() => selectStop({ ...stop, tripColor: tripColor, tripName: trip.title, tripId: trip.id })}
                                         className={`w-full flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left transition-colors ${
                                           isStopActive
                                             ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
@@ -1161,11 +1172,11 @@ export default function DiaryPage() {
                                       >
                                         <div
                                           className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold"
-                                          style={{ fontSize: "9px", background: isStopActive ? "#f59e0b" : trip.color }}
+                                          style={{ fontSize: "9px", background: isStopActive ? "#f59e0b" : tripColor }}
                                         >
                                           {stop.orderIndex + 1}
                                         </div>
-                                        <span className="text-xs font-medium truncate flex-1">{stop.location || "Tappa senza nome"}</span>
+                                        <span className="text-xs font-medium truncate flex-1">{stop.city || "Tappa senza nome"}</span>
                                         {stop.latitude && stop.longitude && (
                                           <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                                         )}
