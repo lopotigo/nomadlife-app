@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { MomentsBar } from "@/components/moments";
 import { CurvedRouteLine } from "@/components/map-route-line";
 import { BottomNav } from "@/components/bottom-nav";
@@ -18,7 +19,7 @@ import {
   Heart, Globe, Navigation, Sparkles, Share2, ExternalLink,
   X, Compass, BookOpen, Settings, CheckCircle2, Loader2,
   Edit3, Eye, PenLine, Hotel, Coffee, Wifi, Building2, ArrowRight,
-  MessageCircle, User2
+  MessageCircle, User2, Utensils, Mountain, Briefcase, Home, Undo2
 } from "lucide-react";
 
 const TABS = [
@@ -279,6 +280,15 @@ export default function DiaryPage() {
   const [postContent, setPostContent] = useState("");
   const [postLocation, setPostLocation] = useState("");
   const [creatingPost, setCreatingPost] = useState(false);
+
+  // ── Quick Publish state ──
+  const [quickText, setQuickText] = useState("");
+  const [quickPhotoPreview, setQuickPhotoPreview] = useState<string | null>(null);
+  const [quickPhotoUrl, setQuickPhotoUrl] = useState<string | null>(null);
+  const [quickPublishing, setQuickPublishing] = useState(false);
+  const [undoPostId, setUndoPostId] = useState<string | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const quickFileRef = useRef<HTMLInputElement>(null);
 
   // Add stop modal state
   const [showStopModal, setShowStopModal] = useState(false);
@@ -556,6 +566,179 @@ export default function DiaryPage() {
     }
   };
 
+  // ── Quick Publish: photo select ──
+  const handleQuickPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setQuickPhotoPreview(dataUrl);
+      // Upload to object storage
+      try {
+        const urlRes = await fetch("/api/object-storage/upload-url", { method: "POST", credentials: "include" });
+        if (urlRes.ok) {
+          const { uploadURL, objectPath } = await urlRes.json();
+          await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+          setQuickPhotoUrl(objectPath);
+        }
+      } catch { /* photo upload optional — continue without */ }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── Quick Publish: haversine distance (km) ──
+  const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+
+  // ── Quick Publish core ──
+  const quickPublish = async (category: string) => {
+    if (!user) return;
+    setQuickPublishing(true);
+
+    // 1. Get GPS (fresh or cached)
+    const getGps = (): Promise<{ lat: number; lng: number } | null> =>
+      new Promise(resolve => {
+        if (userLocation) return resolve(userLocation);
+        navigator.geolocation.getCurrentPosition(
+          p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+          () => resolve(null),
+          { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
+        );
+      });
+    const gps = await getGps();
+
+    // 2. Reverse geocode city name (Nominatim, fire-and-forget)
+    let cityName = "";
+    if (gps) {
+      try {
+        const geoRes = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${gps.lat}&lon=${gps.lng}`,
+          { headers: { "Accept-Language": "it", "User-Agent": "NomadLife/1.0" } }
+        );
+        if (geoRes.ok) {
+          const geo = await geoRes.json();
+          cityName = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || "";
+        }
+      } catch { /* continue */ }
+    }
+
+    // 3. Build post content: category + user text
+    const categoryLabel: Record<string, string> = {
+      workspace: "☕️ Workspace",
+      alloggio: "🏠 Alloggio",
+      food: "🍕 Food",
+      lifestyle: "🏔️ Lifestyle",
+    };
+    const label = categoryLabel[category] || category;
+    const fullContent = quickText.trim()
+      ? `${label} — ${quickText.trim()}`
+      : `${label}${cityName ? ` a ${cityName}` : ""}`;
+
+    // 4. Find nearest trip (haversine < 50km) or auto-create one
+    let autoTripId: number | null = null;
+    if (gps && allStops.length > 0) {
+      let bestDist = Infinity, bestId: number | null = null;
+      for (const s of allStops) {
+        if (s.latitude == null || s.longitude == null) continue;
+        const d = haversineKm(gps.lat, gps.lng, s.latitude as number, s.longitude as number);
+        if (d < bestDist) { bestDist = d; bestId = s.tripId; }
+      }
+      if (bestDist <= 50 && bestId !== null) autoTripId = bestId;
+    }
+    if (!autoTripId && gps) {
+      // Auto-create trip "Diario – [City] [Date]"
+      try {
+        const tripName = cityName
+          ? `Diario – ${cityName}`
+          : `Diario – ${new Date().toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}`;
+        const tRes = await fetch("/api/trips", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: tripName, color: "#6366f1", isPublic: false,
+            startDate: new Date().toISOString().slice(0, 10),
+          }),
+        });
+        if (tRes.ok) {
+          const trip = await tRes.json();
+          autoTripId = trip.id;
+          // Create a stop at current position
+          if (gps) {
+            await fetch(`/api/trips/${trip.id}/stops`, {
+              method: "POST", credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                location: cityName || "Posizione corrente",
+                latitude: gps.lat, longitude: gps.lng,
+                orderIndex: 0,
+              }),
+            }).catch(() => {});
+          }
+        }
+      } catch { /* continue without trip */ }
+    }
+
+    // 5. Publish post
+    try {
+      const body: Record<string, unknown> = {
+        content: fullContent,
+        type: "text",
+        ...(gps && { latitude: gps.lat, longitude: gps.lng }),
+        ...(cityName && { location: cityName }),
+        ...(autoTripId && { tripId: String(autoTripId) }),
+        ...(quickPhotoUrl && { imageUrl: quickPhotoUrl }),
+      };
+      const res = await fetch("/api/posts", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      const post = await res.json();
+      const postId = post.id;
+
+      // Clear inputs
+      setQuickText("");
+      setQuickPhotoPreview(null);
+      setQuickPhotoUrl(null);
+
+      // Undo toast — 5 seconds
+      setUndoPostId(postId);
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = setTimeout(() => setUndoPostId(null), 5000);
+
+      // Refresh trips & diary queries
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "trips"] });
+
+      toast({
+        title: `${label} pubblicato!`,
+        description: cityName ? `Zona: ${cityName}` : "Posizione registrata.",
+        action: (
+          <ToastAction
+            altText="Annulla"
+            onClick={async () => {
+              if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+              setUndoPostId(null);
+              await fetch(`/api/posts/${postId}`, { method: "DELETE", credentials: "include" });
+              queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "trips"] });
+              toast({ title: "Post annullato" });
+            }}
+          >
+            Annulla
+          </ToastAction>
+        ),
+      });
+    } catch {
+      toast({ title: "Errore", description: "Pubblicazione fallita.", variant: "destructive" });
+    } finally {
+      setQuickPublishing(false);
+    }
+  };
+
   const safeCoord = (n: number | null | undefined): number | null => {
     if (n == null || !isFinite(n) || isNaN(n)) return null;
     return n;
@@ -728,6 +911,68 @@ export default function DiaryPage() {
           >
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-1" />
           </div>
+
+          {/* ── Quick Publish Bar ── */}
+          <div className="flex-shrink-0 px-3 pb-2">
+            {/* Photo preview */}
+            {quickPhotoPreview && (
+              <div className="relative mb-2">
+                <img src={quickPhotoPreview} className="w-full h-28 object-cover rounded-xl" alt="" />
+                <button
+                  onClick={() => { setQuickPhotoPreview(null); setQuickPhotoUrl(null); }}
+                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center"
+                >
+                  <X className="w-3.5 h-3.5 text-white" />
+                </button>
+              </div>
+            )}
+
+            {/* Text input row */}
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={quickText}
+                onChange={e => setQuickText(e.target.value)}
+                placeholder="Cosa stai facendo? (opzionale)"
+                className="flex-1 h-9 px-3 rounded-xl bg-muted/60 border border-border/40 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/50 transition-all"
+                data-testid="quick-publish-text"
+              />
+              <button
+                onClick={() => quickFileRef.current?.click()}
+                className="w-9 h-9 rounded-xl bg-muted/60 border border-border/40 flex items-center justify-center flex-shrink-0 hover:bg-muted transition-colors"
+                title="Aggiungi foto"
+                data-testid="quick-publish-photo-btn"
+              >
+                <Camera className="w-4 h-4 text-muted-foreground" />
+              </button>
+              <input ref={quickFileRef} type="file" accept="image/*" className="hidden" onChange={handleQuickPhotoSelect} />
+            </div>
+
+            {/* Category buttons */}
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { key: "workspace", emoji: "☕️", label: "Workspace", color: "bg-amber-500/15 text-amber-600 hover:bg-amber-500/25 active:scale-95 border-amber-500/20" },
+                { key: "alloggio",  emoji: "🏠", label: "Alloggio",  color: "bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 active:scale-95 border-blue-500/20" },
+                { key: "food",      emoji: "🍕", label: "Food",      color: "bg-rose-500/15 text-rose-600 hover:bg-rose-500/25 active:scale-95 border-rose-500/20" },
+                { key: "lifestyle", emoji: "🏔️", label: "Lifestyle", color: "bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 active:scale-95 border-emerald-500/20" },
+              ].map(cat => (
+                <button
+                  key={cat.key}
+                  onClick={() => quickPublish(cat.key)}
+                  disabled={quickPublishing}
+                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl border text-[10px] font-semibold transition-all ${cat.color} ${quickPublishing ? "opacity-50 pointer-events-none" : ""}`}
+                  data-testid={`quick-publish-${cat.key}`}
+                >
+                  {quickPublishing
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span className="text-base leading-none">{cat.emoji}</span>
+                  }
+                  <span className="leading-none">{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="border-t border-border/30 mx-3 mb-0" />
 
           {/* Mini profile header — visible in peek & half state */}
           {panelState !== "full" && user && (
