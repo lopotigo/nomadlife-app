@@ -912,67 +912,64 @@ export default function DiaryPage() {
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mb-1" />
           </div>
 
-          {/* ── Quick Publish Bar ── */}
-          <div className="flex-shrink-0 px-3 pb-2">
-            {/* Photo preview */}
+          {/* ── Quick Publish Bar (compact) ── */}
+          <div className="flex-shrink-0 px-3 pt-1 pb-2 border-b border-border/30">
+            {/* Photo preview — only when a photo is selected */}
             {quickPhotoPreview && (
-              <div className="relative mb-2">
-                <img src={quickPhotoPreview} className="w-full h-28 object-cover rounded-xl" alt="" />
+              <div className="relative mb-1.5">
+                <img src={quickPhotoPreview} className="w-full h-20 object-cover rounded-lg" alt="" />
                 <button
                   onClick={() => { setQuickPhotoPreview(null); setQuickPhotoUrl(null); }}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center"
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center"
                 >
-                  <X className="w-3.5 h-3.5 text-white" />
+                  <X className="w-3 h-3 text-white" />
                 </button>
               </div>
             )}
 
-            {/* Text input row */}
-            <div className="flex items-center gap-2 mb-2">
+            {/* Single row: input + camera + 4 category pills */}
+            <div className="flex items-center gap-1.5">
               <input
                 type="text"
                 value={quickText}
                 onChange={e => setQuickText(e.target.value)}
-                placeholder="Cosa stai facendo? (opzionale)"
-                className="flex-1 h-9 px-3 rounded-xl bg-muted/60 border border-border/40 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/50 transition-all"
+                placeholder="Aggiungi nota…"
+                className="w-0 flex-1 h-8 px-2.5 rounded-lg bg-muted/60 border border-border/40 text-xs placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-all min-w-0"
                 data-testid="quick-publish-text"
               />
               <button
                 onClick={() => quickFileRef.current?.click()}
-                className="w-9 h-9 rounded-xl bg-muted/60 border border-border/40 flex items-center justify-center flex-shrink-0 hover:bg-muted transition-colors"
-                title="Aggiungi foto"
+                className="w-8 h-8 rounded-lg bg-muted/60 border border-border/40 flex items-center justify-center flex-shrink-0"
+                title="Foto"
                 data-testid="quick-publish-photo-btn"
               >
-                <Camera className="w-4 h-4 text-muted-foreground" />
+                <Camera className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
               <input ref={quickFileRef} type="file" accept="image/*" className="hidden" onChange={handleQuickPhotoSelect} />
-            </div>
 
-            {/* Category buttons */}
-            <div className="grid grid-cols-4 gap-1.5">
+              {/* Category pills */}
               {[
-                { key: "workspace", emoji: "☕️", label: "Workspace", color: "bg-amber-500/15 text-amber-600 hover:bg-amber-500/25 active:scale-95 border-amber-500/20" },
-                { key: "alloggio",  emoji: "🏠", label: "Alloggio",  color: "bg-blue-500/15 text-blue-600 hover:bg-blue-500/25 active:scale-95 border-blue-500/20" },
-                { key: "food",      emoji: "🍕", label: "Food",      color: "bg-rose-500/15 text-rose-600 hover:bg-rose-500/25 active:scale-95 border-rose-500/20" },
-                { key: "lifestyle", emoji: "🏔️", label: "Lifestyle", color: "bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 active:scale-95 border-emerald-500/20" },
+                { key: "workspace", emoji: "☕️", label: "Work",  color: "bg-amber-500/15 text-amber-700 border-amber-500/25 active:bg-amber-500/30" },
+                { key: "alloggio",  emoji: "🏠", label: "Stay",  color: "bg-blue-500/15 text-blue-700 border-blue-500/25 active:bg-blue-500/30" },
+                { key: "food",      emoji: "🍕", label: "Food",  color: "bg-rose-500/15 text-rose-700 border-rose-500/25 active:bg-rose-500/30" },
+                { key: "lifestyle", emoji: "🏔️", label: "Life",  color: "bg-emerald-500/15 text-emerald-700 border-emerald-500/25 active:bg-emerald-500/30" },
               ].map(cat => (
                 <button
                   key={cat.key}
                   onClick={() => quickPublish(cat.key)}
                   disabled={quickPublishing}
-                  className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl border text-[10px] font-semibold transition-all ${cat.color} ${quickPublishing ? "opacity-50 pointer-events-none" : ""}`}
+                  className={`flex items-center gap-1 h-8 px-2 rounded-lg border text-[10px] font-semibold flex-shrink-0 transition-all active:scale-95 ${cat.color} ${quickPublishing ? "opacity-50 pointer-events-none" : ""}`}
                   data-testid={`quick-publish-${cat.key}`}
                 >
                   {quickPublishing
-                    ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <span className="text-base leading-none">{cat.emoji}</span>
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : <span className="text-sm leading-none">{cat.emoji}</span>
                   }
-                  <span className="leading-none">{cat.label}</span>
+                  <span>{cat.label}</span>
                 </button>
               ))}
             </div>
           </div>
-          <div className="border-t border-border/30 mx-3 mb-0" />
 
           {/* Mini profile header — visible in peek & half state */}
           {panelState !== "full" && user && (
