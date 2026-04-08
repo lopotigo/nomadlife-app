@@ -158,7 +158,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
       const { recaptchaToken, ...bodyData } = req.body;
       if (process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
         const captchaResult = await verifyRecaptcha(recaptchaToken);
-        if (!captchaResult.success || captchaResult.score < 0.3) {
+        if (!captchaResult.success || captchaResult.score < 0.1) {
           return res.status(400).send({ error: "Verifica di sicurezza fallita. Riprova." });
         }
       }
