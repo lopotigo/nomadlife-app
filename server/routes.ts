@@ -198,7 +198,8 @@ Sitemap: https://nomad-life.app/sitemap.xml
 
   app.post("/api/auth/login", async (req, res, next) => {
     const { recaptchaToken } = req.body;
-    if (process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
+    const isDev = process.env.NODE_ENV !== "production";
+    if (!isDev && process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
       const captchaResult = await verifyRecaptcha(recaptchaToken);
       if (!captchaResult.success || captchaResult.score < 0.3) {
         return res.status(400).send({ error: "Security verification failed. Please try again." });
