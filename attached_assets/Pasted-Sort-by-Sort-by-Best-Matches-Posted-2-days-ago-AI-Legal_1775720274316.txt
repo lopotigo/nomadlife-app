@@ -1,0 +1,312 @@
+Sort by
+Sort by: Best Matches
+
+Posted 2 days ago
+AI Legal Tools Architect - Claude / MCP Plugins & Legal Workflow Automation
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$200K+
+spent
+
+Location United States
+Hourly: $15.00 - $40.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+We are seeking an experienced AI Legal Tools Architect to lead the development of Claude and MCP plugins for automating legal workflows. The ideal candidate will possess a strong understanding of legal technology and experience in building AI-driven solutions. You will be responsible for designing robust architectures, integrating plugins, and enhancing workflow efficiencies. If you have a background in legal tech and a passion for innovation, we would love to hear from you! About Us Lengea is a fast-growing national US law firm specializing in healthcare and medical spa law. We represent over 2000 clients across the country and operate at the intersection of legal expertise and operational innovation. We are building out an AI-powered legal practice and looking for a skilled technologist to architect and optimize our tools using Claude and the Anthropic ecosystem. The Role We are looking for an experienced AI/automation engineer to help us design, build, and optimize legal tools and plugins within Claude Cowork Enterprise. This is a hands-on technical role with significant creative latitude — you'll be working directly with firm leadership to identify workflows ripe for automation and then build them. What You'll Work On Designing and building custom MCP (Model Context Protocol) servers and Claude Cowork plugins tailored to legal workflows Document automation — contract drafting templates, review workflows, and clause libraries integrated with Claude Client intake and CRM automation — intelligent onboarding flows, matter intake, and client communication tools Legal research tools — AI-powered memo generation, case research pipelines, and summarization workflows Evaluating and integrating third-party legal tech tools into our Claude-based stack What We're Looking For Proven experience building with the Anthropic Claude API and/or Claude tool ecosystem Familiarity with MCP (Model Context Protocol) and building custom servers or connectors Strong background in automation and workflow engineering (n8n, Zapier, Make, or custom code) Experience in legal tech is a strong plus but not required — curiosity about the legal industry is a must Excellent communicator who can translate technical concepts for non-technical stakeholders Self-directed, organized, and comfortable working with firm leadership directly Nice to Have Experience with legal document management systems (Clio, MyCase, etc.) Prior work building AI tools for professional services firms Familiarity with HIPAA compliance and data privacy requirements Engagement This is an hourly contract. We expect an initial scoping phase followed by iterative builds. The right person could grow into a long-term relationship as we continue expanding our AI infrastructure. To apply, please share examples of AI tools or automation workflows you've built — links, screenshots, or brief descriptions. Proposals without examples will not be considered.
+
+Artificial Intelligence
+
+API
+
+Python
+
+C#
+
+JavaScript
+Proposals: 50+
+Posted yesterday
+AI Bot Developer for Text Generation & Workflow Automation
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$31
+spent
+
+Location DEU
+Fixed price
+Intermediate
+Est. budget:
+$50.00
+I am looking for an experienced developer to build a custom AI bot that helps me generate texts and automate my workflow. What I need: • AI bot that learns from my existing texts • Generates new content based on my style • Creates: • descriptions • message plans • similar structured content Key Requirements: • The bot should adapt to my writing style (not generic AI output) • High-quality, human-like text generation • Ability to improve over time based on input Tech (open to suggestions): • OpenAI / custom models / fine-tuning • Automation tools / API integration Additional Info: • I will provide example texts for training • Long-term collaboration possible • Focus on quality and consistency Let me know how you would approach this and what tech stack you would use.
+
+Artificial Intelligence
+
+Chatbot Development
+
+Bot Development
+Proposals: 20 to 50
+Posted yesterday
+AI Automation Specialist Needed
+ 
+Unverified
+Payment unverified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Canada
+Hourly
+Intermediate
+Est. time:
+1 to 3 months, 30+ hrs/week
+We are seeking an experienced AI Automation Specialist to help streamline our processes using cutting-edge automation techniques. Your expertise will play a crucial role in enhancing our operational efficiency through AI-driven solutions. The ideal candidate will have a strong background in developing and implementing automation frameworks that leverage artificial intelligence technologies. If you are passionate about optimizing workflows and have a track record of successful AI deployments, we want to hear from you!
+
+Artificial Intelligence
+
+Automation
+
+Python
+
+Machine Learning
+
+Data Scraping
+Proposals: 20 to 50
+Posted yesterday
+AI Automation Workflow Developer
+ 
+Unverified
+Payment unverified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Malaysia
+Fixed price
+Intermediate
+Est. budget:
+$200.00
+We are seeking a skilled developer to create AI-driven automation workflows that can streamline our operations and save our team over 10 hours per week. The ideal candidate will have experience in building and optimizing automation solutions tailored to business needs. You will be responsible for analyzing existing processes, designing workflows, and implementing solutions that enhance efficiency. If you have a passion for AI and automation, we want to hear from you!
+
+Artificial Intelligence
+
+Automation
+
+Python
+
+API
+
+Java
+
+Node.js
+
+JavaScript
+
+JSON
+
+Internet of Things
+Proposals: 15 to 20
+Posted 2 days ago
+Looking for an AI Automation Implementation Partner: Voice Agents, Chat Agents, Workflow Automation
+ 
+Verified
+Payment verified
+Rating is 4.9 out of 5.
+4.9
+$20K+
+spent
+
+Location United States
+Hourly: $25.00 - $65.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+I’m the founder of one of the first AI automation agencies in Mexico. I handle all sales and client acquisition. I need a technical partner who can deliver. Mexico’s AI market is projected to reach $12.5 billion by 2030, growing at a CAGR of 28.5%. 81% of companies in Mexico have either implemented AI or plan to do so in the next two years. And unlike the US, there is virtually no established competition in the AI automation space serving small and mid-size Mexican businesses. The market is wide open. How this works: I source the leads, qualify them, and do a full discovery call to understand their pain points, current workflows, software stack, and customer acquisition systems. I then share all of that with you so we can build an implementation plan and price together. I handle all client communication throughout. You focus entirely on delivery. I’m selling AI voice agents, chat agents, workflow automations, and custom integrations. I need someone fluent in tools like GoHighLevel, Make or N8N, Replit for vibe coding solutions, API integrations, and end-to-end implementation. Compensation: Two options, whichever works best for you: ∙ Revenue share ∙ You send me a net price per project and I mark it up to sell it I sell. You deliver. Everyone wins. If this sounds like a partnership you want to be part of, let’s talk!
+
+Automation
+
+AI Agent Development
+
+AI Builder
+
+Automated Workflow
+Proposals: 50+
+Posted 2 days ago
+Retell.ai Developer — Voice AI + Automation Integration
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$2K+
+spent
+
+Location USA
+Fixed price
+Expert
+Est. budget:
+$100.00
+We're looking for a skilled developer to set up and configure a Retell.ai voice agent integrated with Google Sheets, email automation, and appointment scheduling. The system should be able to pull contact data from a spreadsheet, make outbound AI calls, and follow up via phone, email — all in a seamless automated workflow. Scope of Work -Script has already been uploaded into Retell • Connect Retell.ai to a Google Sheet so the agent pulls contact info and triggers calls automatically • Set up logic so the agent calls each row/contact on the sheet without manual input • Integrate an email function — send follow-up emails/calls after each call based on outcome • Set up scheduling — allow the AI or a follow-up workflow to book appointments automatically • Test the full end-to-end flow and confirm everything works reliably What You'll Be Working With • Retell.ai — voice agent platform • Google Sheets — contact data source for triggering calls • Gmail / SMTP — follow-up email delivery • Calendly or Cal.com — appointment scheduling integration • Make, Zapier, or n8n — automation glue between all tools (if needed) Requirements • Hands-on experience with Retell.ai (agent setup, prompts, webhooks) • Comfortable with Google Sheets API or automation tools like Make, Zapier, or n8n • Ability to set up transactional email (Gmail API, SMTP, or similar) • Experience integrating a scheduling tool (Calendly, Cal.com, or Google Calendar) • Can deliver clean documentation or a short walkthrough video of the finished setup Nice to Have • Prior experience with AI voice agent workflows or outbound call automation • Familiarity with CRM tools or lead management systems • Experience building multi-step automations with conditional logic (e.g. if call answered → send email; if voicemail → retry) Deliverables • Fully configured Retell.ai agent with our script loaded • Google Sheets integration that auto-triggers calls from new rows • Automated follow-up emails sent based on call outcome • Scheduling link or calendar integration embedded in the workflow • Brief documentation or Loom walkthrough of the full system To Apply Please share examples of similar Retell.ai or voice AI projects you've built. Include a brief overview of the tools you'd use for this specific integration and an estimated timeline to complete.
+
+Artificial Intelligence
+
+Artificial Neural Network
+
+Machine Learning
+
+Chatbot Development
+
+Deep Learning
+Proposals: 20 to 50
+Posted yesterday
+AI Automation Tool Completion
+ 
+Unverified
+Payment unverified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Canada
+Fixed price
+Intermediate
+Est. budget:
+$3,000.00
+**Job Description:** We are currently on the lookout for a highly skilled and motivated freelancer to assist in the final stages of development for an innovative AI automation tool tailored specifically for a unique business niche (Automotive Industry). This project represents an exciting opportunity to contribute to the advancement of technology within a specialized field, and we are eager to find someone with the right expertise to help us bring our vision to fruition. The ideal candidate for this role will possess a robust background in AI automation, with a proven track record of successfully delivering high-quality projects independently. We are particularly interested in individuals who have experience in developing and optimizing AI tools, as well as a deep understanding of user experience design principles. Your ability to work autonomously while adhering to deadlines will be crucial, as you will be responsible for finalizing an existing tool that is already in progress. Key responsibilities will include: 1. **Finalizing Development**: Collaborate with our team to complete the existing AI automation tool, ensuring all functionalities are fully developed and operational. 2. **Business Requirements Alignment**: Rigorously assess the tool against established business requirements to ensure it meets the needs of our target audience and effectively addresses specific challenges within the niche. 3. **User Experience Enhancement**: Take the lead in refining the user interface and overall user experience, making certain that the tool is intuitive, user-friendly, and accessible to a diverse range of users. 4. **Testing and Quality Assurance**: Conduct thorough testing to identify any bugs or issues, implementing necessary changes to ensure the tool performs seamlessly across various platforms. 5. **Documentation and Training**: Provide comprehensive documentation for both users and internal team members, and if necessary, assist in creating training materials to facilitate smooth adoption of the tool. 6. **Feedback Integration**: Actively seek and incorporate feedback from stakeholders to continuously improve the tool and ensure it evolves to meet changing business needs. If you are passionate about the fields of artificial intelligence and automation and are excited about the prospect of working on a challenging project that has the potential to make a significant impact, we would love to hear from you! Your expertise will be invaluable as we strive to finalize this innovative tool and bring it to market. We look forward to reviewing your application and discussing how you can contribute to our team's success.
+
+Artificial Intelligence
+
+Automation
+
+API
+
+HTML
+
+Java
+Proposals: 10 to 15
+Posted 2 days ago
+AI Developer / AI Implementation Engineer for CPA Firm
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location United States
+Hourly: $8.00 - $12.00
+Intermediate
+Est. time:
+1 to 3 months, Less than 30 hrs/week
+We are seeking an AI Developer / Implementation Engineer to integrate artificial intelligence solutions into our CPA firm. The ideal candidate will have experience in developing AI tools to enhance data processing, automate workflows, and improve client services. You should be familiar with AI frameworks and have a solid understanding of machine learning algorithms relevant to the finance sector. If you have a passion for technology and a background in accounting, we want to hear from you!
+
+Azure AI Vision
+
+AI Development
+
+AI Bot
+
+Artificial Intelligence
+
+Artificial Neural Network
++7
+Proposals: Less than 5
+Posted yesterday
+AI Agent Engineer for Sales Automation
+ 
+Verified
+Payment verified
+Rating is 4.9 out of 5.
+4.9
+$90K+
+spent
+
+Location United States
+Hourly: $19.00 - $60.00
+Expert
+Est. time:
+1 to 3 months, Less than 30 hrs/week
+New Silver is looking for an engineer experienced with OpenClaw and Claude (or other agentic infra) to design and build agentic infrastructure for our business, starting with a Sales agent that can send outbound emails. The initial scope includes architecting the agent workflow, defining integrations and safeguards, implementing email-sending capabilities, and creating a foundation that can support additional business agents over time. Strong experience with LLM-powered systems, autonomous workflows, prompt/system design, backend integrations, and production reliability is important. Experience building secure, business-facing automation and documenting architecture clearly is preferred.
+
+AI Development
+
+Claude 3.5 Sonnet
+Proposals: 50+
+Posted yesterday
+Workflow Automation Expert
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$700+
+spent
+
+Location Australia
+Fixed price
+Intermediate
+Est. budget:
+$400.00
+Job Title: Automation Specialist Needed to Build Weekly Client Update Email System Using Asana Job Post: Hi there, Please click the link below here to get a better understanding of the project: https://docs.google.com/document/d/12b2wIfzFFQ7lmmqpfYnWRdm9yb_b76gxVUXgJkHxT_g/edit?usp=sharing Thanks,
+
+Automation
+
+AI Development
+
+Make.com
+
+Zapier
+
+API
+Proposals: 50+
+Jobs Per Page:   
+10
+
+Pagination
+Current page 1 of 500 1
+go to page 2
+go to page 3
+go to page 4
+...
+Current page 1 of 500
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices California Consumer Privacy Act (CCPA) Opt-Out
+Accessibility
+Desktop App
+Cookie Policy
+Enterprise Solutions
+Release notes
+Follow Us
+Visit Upwork on Facebook
+
+Read Upwork company news on LinkedIn
+
+Follow @Upwork on Twitter
+
+Watch Upwork videos on YouTube
+
+Follow Upwork on Instagram
+
+Mobile app
+Download Upwork app from iTunes
+
+Download Upwork app from Google Play
+
+© 2015 - 2026 Upwork® Global LLC
