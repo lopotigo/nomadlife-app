@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, Fragment, useRef } from "react";
+import React, { useEffect, useState, useCallback, useMemo, Fragment, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation } from "wouter";
 import { 
@@ -687,7 +687,24 @@ function StarRating({ rating, size = 12 }: { rating: number; size?: number }) {
 
 const POPUP_AUTO_CLOSE_MS = 10000;
 
-function PopupAutoClose({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number }) {
+class PopupAutoCloseErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch() {}
+  render() {
+    return this.state.hasError ? null : this.props.children;
+  }
+}
+
+function PopupAutoCloseInner({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number }) {
   const map = useMap();
   const barRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -743,6 +760,14 @@ function PopupAutoClose({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number 
         style={{ width: '100%' }}
       />
     </div>
+  );
+}
+
+function PopupAutoClose({ duration = POPUP_AUTO_CLOSE_MS }: { duration?: number }) {
+  return (
+    <PopupAutoCloseErrorBoundary>
+      <PopupAutoCloseInner duration={duration} />
+    </PopupAutoCloseErrorBoundary>
   );
 }
 
