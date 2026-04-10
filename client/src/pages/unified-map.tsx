@@ -1701,7 +1701,7 @@ export default function UnifiedMap() {
                   <Marker
                     key={`group-${gi}`}
                     position={[group.lat, group.lng]}
-                    eventHandlers={{ click: () => { setActivePostGroup(group); setFeedState('peek'); } }}
+                    eventHandlers={{ click: (e) => { e.originalEvent?.stopPropagation(); setActivePostGroup(group); setFeedState('peek'); } }}
                     icon={hasMultiple
                       ? L.divIcon({
                           html: `<div style="position:relative;width:44px;height:44px;">
