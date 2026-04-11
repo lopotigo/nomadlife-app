@@ -68,3 +68,7 @@ PostgreSQL, hosted on Neon, serves as the primary database. Drizzle ORM with dri
 - **Security**: Google reCAPTCHA v3
 - **AI**: OpenAI (via Replit AI Integrations)
 - **Web Search**: Tavily API
+
+## Promemoria Federico (da fare)
+
+- **telmi (domani)**: Wellfound ha bloccato la candidatura per anni di esperienza. Piano: trovare il founder su LinkedIn o telmi.app e scrivere direttamente con messaggio breve + link nomad-life.app. Template: *"Hi, I applied via Wellfound but got filtered out on years of experience. I built a full-stack platform solo this year (nomad-life.app) and I think I can help you take the prototype to production. Worth a quick call?"*
