@@ -1,0 +1,187 @@
+
+
+
+Open job in a new window
+
+Astro Developer for Pixel-Accurate Landing Page + Stripe + Calendly Integration
+
+Posted yesterday
+
+Worldwide
+Summary
+Hi, I am looking for a reliable student or junior developer who can build a clean, modern, and responsive website in Astro.
+
+This is not a large agency project. I am looking for someone technically solid, and easy to communicate with.
+
+Scope of work
+- The first phase includes:
+Build a pixel-perfect Astro website based on my design reference / Figma / existing examples
+Make the site responsive for desktop and mobile
+- Set up a clean structure so the project remains easy to maintain
+- Integrate Stripe Checkout for payments
+Integrate Calendly (or open source variant) for booking calls
+- Deploy the website so it is live and working
+- Provide a short handover documentation with the most important steps
+
+Important
+At this stage, I am not looking for a full Moodle or n8n setup in this project.
+
+This first job is focused on:
+- Astro frontend
+- deployment
+- Stripe integration
+- Calendly integration (or open source variant)
+
+If the collaboration goes well, there may be a second phase later for more technical platform work.
+
+What I am looking for
+Please apply only if you have experience with:
+- Astro
+- responsive frontend development
+- clean HTML/CSS/JavaScript or TypeScript
+- integrating Stripe Checkout
+- embedding or integrating Calendly
+- deployment of modern frontend projects
+
+Nice to have
+It is a plus if you also understand:
+- DNS / domains / subdomains
+- basic server deployment
+- Git / GitHub
+- working with clear design references
+
+Budget
+I prefer working with a fixed-price milestone.
+This is intended as a small first project, so please keep your offer realistic and student-friendly.
+
+To apply, please send:
+2–3 relevant examples of websites you built yourself
+A short explanation of your Astro experience
+Whether you have integrated Stripe Checkout before
+Whether you have integrated Calendly before
+Your proposed fixed price for this first phase
+Your estimated timeline
+
+Small test question
+Please answer this question in your application:
+How would you structure an Astro project so that it stays clean, responsive, and easy to extend later with additional pages or integrations?
+
+I am looking for someone practical, honest, and structured.
+Clear communication is very important to me.
+
+Thank you.
+
+Figma: https://www.figma.com/proto/ZavPpTvZvK2rIbew1N771r/Untitled?node-id=186-56&p=f&viewport=25%2C484%2C0.27&t=bAIlonHsPNPItc9F-1&scaling=min-zoom&content-scaling=fixed&page-id=176%3A14
+
+$150.00
+Fixed-price
+
+Intermediate
+I am looking for a mix of experience and value
+Project Type: Ongoing project
+You will be asked to answer the following questions when submitting a proposal:
+
+How would you structure an Astro project so that it stays clean, responsive, and easy to extend later with additional pages or integrations?
+Skills and Expertise
+
+Mandatory skills
+Ecommerce Website
+Full-Stack Development
+PHP
+JavaScript
+MySQL
+HTML
+CSS
+HTML5
+Landing Page
+Web Development
+Activity on this job
+
+Proposals:
+
+20 to 50
+Last viewed by client:
+
+yesterday
+Interviewing:
+0
+Invites sent:
+0
+Unanswered invites:
+0
+Upgrade your membership to see the bid range  
+Send a proposal for: 18 Connects
+Available Connects: 99
+About the client
+
+Payment method verified
+Rating is 5.0 out of 5.
+5.0
+5.00 of 32 reviews
+Switzerland
+Utzenstorf 10:36 AM
+35 jobs posted
+100% hire rate, 2 open jobs
+$6.9K total spent
+48 hires, 5 active
+$15.00 /hr avg hourly rate paid
+19 hours
+Education
+Individual client
+Member since Jun 10, 2023
+Job link
+Copy link
+Client's recent history (44)
+
+Jobs in progress
+
+Professional Video & Photo Editing
+Rating is 5.0 out of 5.
+5.0
+To freelancer: Teodor T. 
+Rating is 5.0 out of 5.
+5.0
+ Teodor did an excellent job on this project. He handled the photo selection and color grading very professionally, and the final result looks great. C… more
+Mar 2026 - Apr 2026
+Fixed-price
+Creative UI Designer Needed for One Hero Section Concept for Educational Brand
+Rating is 5.0 out of 5.
+5.0
+ Noel was a very responsive client, and the best part of working with him was how smooth the entire process was from start to finish. He knew exactly w… more
+To freelancer: Andreea Catalina P. 
+Rating is 5.0 out of 5.
+5.0
+ Andreea did an excellent job on this project. She created four very well-designed hero section concepts for a desktop UX design, each with a distinct … more
+Mar 2026 - Mar 2026
+Fixed-price $50.00
+Creative UI Designer Needed for One Hero Section Concept for Educational Brand
+Rating is 5.0 out of 5.
+5.0
+ Really enjoyed working together. Clear communication, constructive feedback, and a smooth overall process. Would definitely work together again.
+To freelancer: Stephan K. 
+Rating is 5.0 out of 5.
+5.0
+ Stephan did an excellent job on this project. He delivered on time, communicated clearly throughout the process, and showed a strong understanding of … more
+Mar 2026 - Mar 2026
+Fixed-price $58.15
+WordPress Developer + UX/UI Designer
+Rating is 5.0 out of 5.
+5.0
+ It was a great experience working with Neol. Instructions were crystal clear, communication was smooth.
+To freelancer: Wasim Saleem Saigal M. 
+Rating is 5.0 out of 5.
+5.0
+ Wasim did an excellent job on my WordPress website. The implementation was very good, everything works properly, and he delivered on time. What I appr… more
+Jan 2026 - Mar 2026
+Fixed-price $1,100.00
+Workbook & Notebook Design (Cover + Interior) – Print-Ready | “Mathe mit Noel”
+Rating is 5.0 out of 5.
+5.0
+ Working with Noel was a truly great experience. He always provides clear, detailed feedback, which makes the design process smooth and efficient. His … more
+To freelancer: Sharon S. 
+Rating is 5.0 out of 5.
+5.0
+ I am extremely satisfied with my collaboration with Sharon. She designed my workbook and delivered outstanding work. The quality of the design is exce… more
+Dec 2025 - Feb 2026
+Fixed-price $337.16
+View more (37)
