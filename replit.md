@@ -72,3 +72,9 @@ PostgreSQL, hosted on Neon, serves as the primary database. Drizzle ORM with dri
 ## Promemoria Federico (da fare)
 
 - **telmi (domani)**: Wellfound ha bloccato la candidatura per anni di esperienza. Piano: trovare il founder su LinkedIn o telmi.app e scrivere direttamente con messaggio breve + link nomad-life.app. Template: *"Hi, I applied via Wellfound but got filtered out on years of experience. I built a full-stack platform solo this year (nomad-life.app) and I think I can help you take the prototype to production. Worth a quick call?"*
+
+### Upwork — opportunità da seguire (domani)
+- **Astro Landing Page ($150)** — cliente Svizzera, 5.0 rating, $6k spesi, cerca junior/studente. Stripe + Calendly integration. Prima candidatura inviata oggi → da monitorare risposta.
+- **UX/UI Developer for Travel App ($35-55/hr)** — junior OK, app di viaggio, 1-3 mesi. NomadLife perfetto come portfolio. Da candidare.
+- **Junior Full-Stack Dev Marketing/DTC Funnels ($25-47/hr)** — 6+ mesi, lavoro continuativo, cercano junior con mentalità conversione. Da candidare.
+- **AI-Driven Restoration Platform (OperionAI)** — TypeScript, Node.js, PostgreSQL, OpenAI API. Stack identico. Expert level ma vale tentare. Da candidare.
