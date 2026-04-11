@@ -1,0 +1,328 @@
+Sort by
+Sort by: Best Matches
+
+Posted 8 hours ago
+AI-Driven Restoration Platform Development
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location United States
+Hourly
+Expert
+Est. time:
+3 to 6 months, 30+ hrs/week
+We’re building OperionAI, an AI-native operating system for property restoration companies, designed to replace fragmented tools with a single, intelligent platform. Built from the ground up with modern architecture and deep AI integration, it serves as the operational backbone for the entire business, streamlining every stage of the job lifecycle from intake to final billing. Beyond job management, the platform will power estimating, business development, equipment tracking, sales and marketing, KPI and financial tracking at both the company and job level, as well as AI-driven call answering and scheduling. The system will also automate core operational workflows, handling tasks like sending and responding to emails with carriers, clients, and referral partners, reducing manual work and enabling teams to operate with greater speed and efficiency. Our goal is to bring real-time intelligence, automation, and scale to an industry that still relies heavily on manual processes and disconnected systems. This is a ground-up build, not a maintenance role. You’ll be working directly with the founder to design and bring a complex, production-grade system to life. ⸻ 🧩 What We’re Building OperionAI will include: • 📱 A mobile app for field technicians • 💻 A web-based management dashboard • ⚙️ A scalable backend with automation workflows • 🤖 Deep AI integrations across the product The goal is to replace fragmented tools with a single intelligent system that handles operations, documentation, and decision-making. ⸻ 🔧 What You’ll Own You’ll play a key role in architecting and building the core platform: 📱 Mobile Field App (React Native) • Structured, step-by-step job workflows (no skipped steps) • Room-based data model (photos, logs, equipment tied to locations) • Camera integration for documentation • GPS tracking and travel logging • Offline-first functionality with sync • QR-based equipment tracking • Drying logs with real-time and sensor data ⚙️ Backend & API (Node.js + PostgreSQL) • REST API with authentication and role-based access • Multi-tenant architecture (company-level data isolation) • Job lifecycle engine with automation triggers • Task/state workflow enforcement • Equipment inventory and deployment tracking • Data pipelines for AI processing and integrations ⸻ 🤖 AI as a Core Layer (Not an Add-on) AI is deeply embedded into the product: • AI intake agent (calls + SMS workflows) • Policy document analysis (PDF/image parsing) • Automated estimate generation from structured data + images • Insurance-ready report generation • Receipt and check scanning (data extraction) ⸻ 🔌 Integrations • Communication APIs (calls + SMS automation) • Google Maps (GPS tracking, routing, ETA alerts) • Email systems (SendGrid or similar) • Cloud storage for media and documents • Future integrations: CRM and industry tools ⸻ 🧠 Required Experience • React Native (Expo preferred) — production apps • Node.js + TypeScript backend development • PostgreSQL + Prisma (or similar ORM) • REST API design and architecture • Mobile features (camera, GPS, file uploads) • Experience working with AI APIs (OpenAI, Claude, etc.) • Third-party integrations (communications, maps, email) ⸻ ⭐ Bonus (Strong Plus) • SaaS platform experience (multi-tenant systems) • Workflow engines / state machines • Offline-first mobile systems • OCR / document parsing • Real-time systems (WebSockets, queues) • Field service or operations software experience ⸻ 🧱 Tech Stack • Frontend: React + Next.js • Mobile: React Native • Backend: Node.js (TypeScript / Express) • Database: PostgreSQL • ORM: Prisma • AI: Claude / OpenAI • Infrastructure: Vercel + Railway ⸻ 🎯 Who This Is For This is not a junior role or a task-based position. We’re looking for someone who: • Thinks in systems, workflows, and architecture • Can take ownership from concept → production • Has built real, scalable applications • Understands the realities of mobile-first, field-based software
+
+Web Development
+
+HTML5
+
+JavaScript
+
+PHP
+
+Node.js
+
+TypeScript
+
+PostgreSQL
+
+OpenAI API
++17
+Proposals: 20 to 50
+Posted yesterday
+Astro Developer for Pixel-Accurate Landing Page + Stripe + Calendly Integration
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$6K+
+spent
+
+Location Switzerland
+Fixed price
+Intermediate
+Est. budget:
+$150.00
+Hi, I am looking for a reliable student or junior developer who can build a clean, modern, and responsive website in Astro. This is not a large agency project. I am looking for someone technically solid, and easy to communicate with. Scope of work - The first phase includes: Build a pixel-perfect Astro website based on my design reference / Figma / existing examples Make the site responsive for desktop and mobile - Set up a clean structure so the project remains easy to maintain - Integrate Stripe Checkout for payments Integrate Calendly (or open source variant) for booking calls - Deploy the website so it is live and working - Provide a short handover documentation with the most important steps Important At this stage, I am not looking for a full Moodle or n8n setup in this project. This first job is focused on: - Astro frontend - deployment - Stripe integration - Calendly integration (or open source variant) If the collaboration goes well, there may be a second phase later for more technical platform work. What I am looking for Please apply only if you have experience with: - Astro - responsive frontend development - clean HTML/CSS/JavaScript or TypeScript - integrating Stripe Checkout - embedding or integrating Calendly - deployment of modern frontend projects Nice to have It is a plus if you also understand: - DNS / domains / subdomains - basic server deployment - Git / GitHub - working with clear design references Budget I prefer working with a fixed-price milestone. This is intended as a small first project, so please keep your offer realistic and student-friendly. To apply, please send: 2–3 relevant examples of websites you built yourself A short explanation of your Astro experience Whether you have integrated Stripe Checkout before Whether you have integrated Calendly before Your proposed fixed price for this first phase Your estimated timeline Small test question Please answer this question in your application: How would you structure an Astro project so that it stays clean, responsive, and easy to extend later with additional pages or integrations? I am looking for someone practical, honest, and structured. Clear communication is very important to me. Thank you. Figma: https://www.figma.com/proto/ZavPpTvZvK2rIbew1N771r/Untitled?node-id=186-56&p=f&viewport=25%2C484%2C0.27&t=bAIlonHsPNPItc9F-1&scaling=min-zoom&content-scaling=fixed&page-id=176%3A14
+
+Full-Stack Development
+
+Web Development
+
+Ecommerce Website
+
+PHP
+
+JavaScript
+
+MySQL
+
+HTML
++3
+Proposals: 20 to 50
+
+Featured
+Posted yesterday
+UX/UI Designer for Travel App
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location United States
+Hourly: $35.00 - $55.00
+Expert
+Est. time:
+1 to 3 months, 30+ hrs/week
+Job Description: Junior UX Developer (Contract-to-Hire) The Role As a Junior UX Developer, you will serve as the bridge between high-fidelity Figma designs and a scalable, AI-driven backend. You are a "Pixel-Perfect" specialist who leverages modern frontend frameworks to build intuitive, high-impact user interfaces. You will navigate the ambiguity of a 0-to-1 startup environment, partnering with our Tech Lead to transform complex AI interactions into a seamless mobile and web experience. About Road Dawg We are building an intelligent ultra personalized travel companion app powered by advanced AI, designed to make every journey feel more intuitive, personalized, and truly rewarding. We're creating this for people just like us, those for whom travel isn't just a hobby or occasional escape, but a core part of who we are. It's in our DNA, the open road calls, the itch to explore new places runs deep, and the best stories come from real miles logged, unexpected detours, and moments that only happen when you're out there living it. We want teammates who live that lifestyle, who draw from their own adventures to infuse the app with an authentic vibe and intuition that resonates with fellow travelers. If road trips, spontaneous getaways, discovering hidden gems, or turning long drives into meaningful experiences are woven into your life, not just something you read about, you'll bring the empathy, insight, and passion that turns good features into something users feel was built exactly for them. This role is about building for people like you. Strategic Influence Design-to-Code Translation: Lead the technical implementation of Figma components into a clean, responsive codebase using Capacitor/Ionic or React Native. High-Impact Polish: Drive the "look and feel" of the Alpha launch by ensuring every transition, button state, and layout is executed with executive-level precision. Tech-Forward Workflow: Pioneer the use of AI-assisted coding (e.g., Gemini, Cursor, Copilot) to accelerate frontend builds and optimize asset delivery. Job Responsibilities Figma-to-Mobile Execution: Architect and manage a library of reusable UI components that match our design specs 1:1, ensuring a world-class foundation for our Beta release. Frontend Data Health: Collaborate with the Backend Lead to integrate RESTful APIs and handle complex state management (loading, error, and success states) for AI-driven features. User Flow Optimization: Identify and solve friction points in the "Road Dawg" user journey through rapid prototyping and iterative UI testing. Asset Governance: Oversee the optimization of icons, logos, and media assets to ensure high performance on both iOS and Android platforms. Requirements Education: Bachelor’s degree in Computer Science, Graphic Design (with a technical focus), or a related quantitative field. Experience: 0–2 years of experience in frontend development, mobile app development, or a dedicated UI/UX engineering role. Technical Mastery: Proficiency in HTML5, CSS3 (Tailwind/Sass), and JavaScript/TypeScript. Hands-on experience with Figma (specifically extracting assets and inspecting CSS properties). Foundational knowledge of React or Vue.js. The "Startup" Mindset: Demonstrated ability to simplify complex interfaces for diverse audiences, balancing rigorous technical depth with "investor-ready" aesthetics. Communication: Exceptional interpersonal skills with the ability to "translate" design needs into technical requirements for the Backend Lead.
+
+User Interface Design
+
+User Experience Design
+
+Mobile UI Design
+
+App Design
+
+Human-Centered Design
++27
+Proposals: 5 to 10
+Posted 2 days ago
+QUICK MONEY: React Native Developer – Debugging, Setup, and Feature Support
+ 
+Verified
+Payment verified
+Rating is 4.8 out of 5.
+4.8
+$100K+
+spent
+
+Location India
+Fixed price
+Entry Level
+Est. budget:
+$30.00
+BUDGET IS A PLACEHOLDER AT THE MOMENT I have paid more than 108k+ USD to freelancers in last few months. I have worked with more than 130 developers here and currently working with 130 developers. I am looking for a junior or early-career React Native developer who is comfortable working with existing projects and solving technical problems This is not a greenfield build. The work involves understanding an existing codebase, resolving setup issues, and helping implement small improvements or extensions. The ideal candidate is someone who: ✔️ enjoys debugging and figuring out why things don’t work ✔️ is comfortable using tools like ChatGPT, documentation, and StackOverflow to solve issues quickly ✔️ can experiment, test, and iterate instead of getting stuck This role is suitable for developers who are building real-world experience and want consistent small tasks rather than large one-time projects. Primary Skills • React Native • JavaScript / TypeScript • Android build environment • Working with existing repositories • Debugging build or dependency issues • Git Preferred Experience (not mandatory) • Running React Native apps from existing repositories • Fixing dependency conflicts or build errors • Working with APIs and JSON responses • Understanding asynchronous flows in mobile apps Experience with audio framework is a plus. The developer will need to set up the project first on his local at his own cost so the requirement can be explained well. If the collaboration works well, there will be additional tasks afterward. Need to be experienced to provide iOS builds as well.
+
+React Native
+
+JavaScript
+
+Android
+
+iOS
+Proposals: 20 to 50
+Posted yesterday
+Python Developer Needed — Stabilization of Existing SEO Automation Script
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$700+
+spent
+
+Location Estonia
+Fixed price
+Expert
+Est. budget:
+$50.00
+Context I have developed a fully automated SEO pipeline in Python with the help of Claude Code (AI) over several weeks. The script exists, has been tested on real WordPress sites, and produces results in broad terms. It represents approximately 3,000 lines of Python spread across several files, with a Git history of over 30 commits. The core problem: development was done reactively — fix one bug, create another. The code works partially but has become unstable and unpredictable. I am looking for someone to conduct a serious audit, stabilize the entire pipeline end-to-end, and put tests in place that prevent regressions. I will not be doing any testing or validation myself. The script must be delivered ready to use, proven by automated tests and a successful end-to-end run on a real WordPress test site. What the Script Does Automated pipeline running on a Linux Ubuntu VPS (Contabo) orchestrated by workflow_global.py. The consultant is responsible for stabilizing the entire pipeline — from Haloscan export to WordPress production — as a single, reliable end-to-end workflow. Fixing individual bugs in isolation is not sufficient. All 6 steps must work together without manual intervention, without crashes, and without producing incorrect results at any stage. 1. Haloscan Export (Playwright) → Downloads CSV files: organic keywords, top pages, competitor gap 2. GPT Freudix Analysis → Analyzes Haloscan data, generates initial cluster structure → Writes results to Google Sheets 3. SEMrush + KGR Validation — main file: semrush_validation.py → Connects to 8 SEMrush accounts via RankerFox + Playwright → GPT generates angles and search seeds per category → SEMrush Keyword Magic Tool: filters by volume/KD/length → Haloscan Bulk KGR: validates KGR ≤ 0.25 → Fallback via SEMrush "results" field if no KGR data → Automatic angle pivot if a category is exhausted → Phase 6: GPT builds final cluster structure 4. Cluster Verification (workflow_check_clusters.py) → Validates structure before production → Must block fabricated keywords from reaching production → Must require manual validation before any production step 5. WordPress Production → Categories, authors, Otomatic configuration 6. Images + Internal Linking → Google Sheets API, WordPress REST API Tech Stack Python 3, Playwright, OpenAI API (GPT-4o), Google Sheets API, Google Drive API, WordPress REST API, Git, Linux VPS Ubuntu Full List of Known Issues Playwright Infrastructure Frequent crashes: "Event loop is closed", "Target crashed" browser.close() and playwright_ctx.stop() crash if Playwright is already in a broken state Crash handlers added during fixes sometimes get overwritten in subsequent correction sessions SEMrush Account Detection probe_sem_urls() returns 0/8 available accounts even when 6 are actually working Recurring false negatives that stop the script unnecessarily Diagnosis of dead vs. working accounts is unreliable Keyword Generation When SEMrush is unavailable, GPT fabricates fictional keywords with no real volume or KGR data These keywords sometimes reach production without the script raising an error The guard that blocks Phase 6 when 0 real keywords exist has been broken multiple times during fixes Infinite Loops An infinite loop generated 15 GB of logs in 12 minutes The script can run indefinitely on certain uncaught error conditions Protections Getting Overwritten Critical rules added get overwritten during subsequent correction sessions No automated tests — nothing prevents a fix from breaking an existing protection Haloscan Context Misuse GPT seeds were being influenced by the site's existing Haloscan keywords even when irrelevant to the requested categories Partial fix in place but fragile Phase 6 GPT Oscillates between too strict and too permissive depending on the correction session No stable behavior guaranteed across runs Logging No log rotation — a single run can generate 5 to 15 GB log files No per-phase timing instrumentation Required Test Environment The consultant must provide their own test environment. I will not provide access to my production sites for testing purposes. The consultant must have: - A WordPress test site with admin access and Application Password configured - An active SEMrush account (free plan acceptable) to validate Playwright connections independently - A Linux environment (local or cloud) with Python 3.10+ I will provide: SSH access to the Contabo VPS Read access to a sample Google Sheet API credentials: OpenAI, Google Sheets, Haloscan Full Git repository with complete history Existing documentation (CLAUDE.md) Required Skills Mandatory: Strong Python 3 (not junior level) Playwright or Selenium — required Experience with REST APIs (Google, OpenAI, WordPress) pytest for automated testing Git — history reading, rollback, branching Linux / VPS — process management, logs Useful but not mandatory: GPT-4o and prompt engineering Google Sheets API Basic SEO knowledge Deliverables and Acceptance Criteria I will not be doing any manual testing or validation. The script must be delivered ready to use. The script is considered stable when the complete pipeline — all 6 steps — runs successfully from start to finish on a real WordPress test site, without any manual intervention at any stage. A fix that solves one problem but breaks another step of the pipeline will not be accepted. Delivery is accepted when ALL of the following are met: 1. Automated test suite A pytest suite covering all critical cases passes with 0 failures on the provided VPS. Tests must cover at minimum: SEMrush account detection returns correct results Phase 6 does not run when 0 real keywords exist Cluster validation blocks fabricated keywords from reaching production Manual validation is required before any production step No infinite loops on empty or error conditions Playwright crashes are caught and handled gracefully A fix in one phase does not break another phase 2. Written acceptance report Before final delivery, the consultant provides a document showing: Each problem listed above → how it was fixed The specific test that proves the problem cannot recur Results of a complete end-to-end run on their WordPress test site Confirmation that all 6 pipeline steps completed without manual intervention 3. End-to-end run A full pipeline run from Haloscan export to WordPress cluster structure, completed without manual intervention, on a real WordPress test site, with real keywords validated by SEMrush and KGR data. 4. Guarantee period If any of the listed bugs reappear within 2 weeks of delivery, the consultant fixes them at no additional cost. What This Is NOT Not a from-scratch development project No SEO expertise required No frontend work No full refactoring I will not be available for daily testing, feedback loops, or back-and-forth validation
+
+Python
+Proposals: 5 to 10
+Posted yesterday
+Junior Full-Stack Dev (Marketing-Focused) – DTC / Ecom Funnels (Work Directly with Senior Engineer)
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$2K+
+spent
+
+Location PRI
+Hourly: $25.00 - $47.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+We’re looking for a junior developer with a strong marketing mindset to work directly under our lead engineer building out high-performance DTC funnel infrastructure. This is NOT a typical dev role. You’ll be working on systems that directly impact conversion rate, revenue, and scale — not just “building features.” --- ### What we’re building: - Custom funnel + checkout systems (replacing tools like ClickFunnels / Checkout Champ) - Backend logic tied to conversion + monetization (rebills, offers, flows) - High-speed page builds, duplication, and testing infrastructure --- ### Tech Stack: - Hosting: Digital Ocean - Server: Linux (Ubuntu 24) - Stack: LEMP - PHP: v8.1 - Database: MySQL - Languages: HTML, CSS, JavaScript, PHP - Frameworks/Libraries: Bootstrap 5.3.2, jQuery --- ### What you’ll be doing: - Building and modifying funnel pages (fast iteration environment) - Supporting backend logic tied to offers, upsells, and flows - Working alongside senior dev (Scott) to expand internal systems - Helping create tools that allow us to launch and test pages quickly - Implementing front-end changes that improve conversion rate --- ### What we’re looking for: - Solid fundamentals in HTML, CSS, JavaScript, and PHP - Comfortable working in a LEMP stack - Able to move fast and iterate (this is NOT slow enterprise dev work) - Strong attention to detail --- ### HUGE PLUS: - Understanding of CRO (conversion rate optimization) - Experience with DTC / eCommerce / Nutra funnels - Ability to think: - “Will this increase conversion?” - not just “Does this work?” --- ### What success looks like: - You can take a page or flow and improve it quickly - You understand how small changes impact revenue - You get faster and more autonomous over time --- ### Compensation: - Flexible (hourly or monthly depending on fit) - Long-term role with room to grow - Direct exposure to high-level marketing + scaling systems --- ### Important: Please include: 1. Examples of projects or pages you’ve worked on 2. Your experience with PHP / LEMP stack 3. Any exposure to CRO, funnels, or eCommerce 4. Why this role interests you (we’re looking for builders, not just coders) --- We move fast, test aggressively, and build systems that directly print revenue. If that excites you, this is a great opportunity.
+
+Web Development
+
+CSS
+
+HTML
+
+JavaScript
+Proposals: 10 to 15
+
+Featured
+Posted 8 hours ago
+Full Stack Developer Needed for Fintech Services Provider
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$400+
+spent
+
+Location United States
+Hourly
+Intermediate
+Est. time:
+More than 6 months, 30+ hrs/week
+We are looking for a highly capable Full Stack Developer to join our delivery team. You will play a critical role in designing, building, and scaling modern fintech platforms, working across both front-end and back-end layers. This is a hands-on role for someone who thrives in a fast-paced, solution-oriented environment and is motivated by delivering real business impact—not just code. Key Responsibilities Design, develop, and maintain end-to-end web applications using Angular and .NET Build and manage RESTful APIs to support scalable and secure integrations Integrate cloud-native services within the Microsoft Azure ecosystem (e.g., Logic Apps, API Management, Functions) Collaborate with cross-functional teams (UX, product, architecture) to translate business requirements into technical solutions Ensure high standards of code quality, performance, and scalability Participate in the full software development lifecycle: design, development, testing, deployment, and support Troubleshoot and resolve issues across the full stack Contribute to architectural decisions and continuously improve development practices Mentor junior developers and actively participate in code reviews Qualifications Bachelor’s degree in Computer Science, Engineering, or equivalent practical experience Proven experience as a Full Stack Developer with strong delivery track record Strong proficiency in: .NET (C#, ASP.NET, Web API) Angular (Angular 2+), TypeScript, HTML, CSS, JavaScript Experience working with Microsoft Azure services Solid understanding of REST APIs, integrations, and microservices architecture Experience with relational databases (e.g., SQL Server) and ORM frameworks Familiarity with Github and development workflows Strong understanding of Agile/Scrum methodologies Excellent problem-solving skills and attention to detail Nice to Have Experience in the insurance or financial services industry Exposure to DevOps practices (CI/CD pipelines, automation) Experience with other cloud platforms (e.g., AWS)
+
+JavaScript
+
+API
+
+.NET Framework
+
+ASP.NET
+
+C#
+Proposals: 15 to 20
+Posted 2 days ago
+Senior Python + AWS Engineer Needed for Production Readiness Audit (APIs, Sumsub, Claude, RegTech)
+ 
+Unverified
+Payment unverified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Mauritius
+Hourly: $30.00 - $50.00
+Expert
+Est. time:
+1 to 3 months, Less than 30 hrs/week
+We are looking for a senior backend / systems engineer to perform a deep technical audit of our RegTech / compliance platform before production rollout. This is not a frontend job and not a basic bug-fixing task. We need someone who can think like a senior backend engineer, DevOps reviewer, integration specialist, and production risk auditor. Platform scope Our platform includes: • Python backend • Client onboarding portal • Compliance back office • AWS-hosted environment • PostgreSQL database • Sumsub integration • Claude / LLM integration • Workflow-heavy compliance and decisioning logic What you will do You will review and validate: • Backend architecture and critical workflows • Sumsub integration applicant creation, token generation, webhook handling, mapping, status sync, retry/error handling • Claude / AI integration API connection, schema validation, fallback handling, timeout/error handling, workflow safety • AWS / infrastructure environment variables, secrets, storage, deployment setup, database connectivity, health checks, logging • End-to-end workflows across: • client portal • back office • document verification • screening / checks • memo / decision workflow • audit trail What we need from you You must be able to: • trace workflows end to end • identify broken integrations and fragile logic • detect silent failures, weak fallbacks, and missing production guards • verify whether workflows are actually working in practice, not just present in code • assess whether the system is genuinely ready for production Deliverables Please provide: • technical audit report • integration audit report • workflow validation findings • infrastructure / config review • issue list by severity: critical / high / medium / low • prioritized remediation plan • final go / no-go production readiness recommendation Required experience You should have strong experience in: • Python backend systems • AWS infrastructure / deployment • PostgreSQL • REST APIs and webhook-heavy integrations • production debugging • end-to-end workflow validation • system reliability / production hardening Strong bonus Strong preference for candidates with experience in: • Sumsub • Claude / Anthropic API • fintech / RegTech / KYC / AML platforms • audit-heavy or workflow-heavy systems • security / production risk reviews This is a strong fit if you have done work like: • audited a live SaaS platform before launch • debugged third-party integrations that failed silently • reviewed AWS environments for production readiness • traced issues across backend, infra, DB, and external APIs • worked on compliance, payments, onboarding, or regulated systems Proposal instructions To be considered, your proposal must include: 1. A brief summary of your most relevant experience 2. Similar projects involving Python + AWS + API integrations 3. Any experience with Sumsub, KYC vendors, Claude, or LLM-based workflows 4. Your estimated timeline for: • audit only • audit + limited fixes 5. Your approach to reviewing production readiness end to end Important Please do not apply if you are: • junior • mainly frontend-focused • mainly a prompt engineer • unable to work across backend + infra + integrations We are looking for someone senior, practical, detail-oriented, and highly rigorous about production risk. Engagement structure Preferred structure: • Phase 1: audit and findings • Phase 2: approved fixes • Phase 3: retest and production sign-off Please start your proposal with: AUDIT-READY and then list: • years of Python experience • years of AWS experience • whether you have worked with Sumsub • whether you have worked with Claude / Anthropic • whether you have audited a production system before Applications without relevant backend/AWS/integration experience will be ignored.
+
+API Development
+
+PostgreSQL
+
+Python
+
+Amazon Web Services
+
+API
+
+RESTful API
+
+DevOps
+
+Database
+Proposals: 15 to 20
+
+Featured
+Posted 2 weeks ago
+Senior Developer (Full Stack) MUST BE IN AUSTRALIA NEWZEALAND OR SE ASIA
+ 
+Verified
+Payment verified
+Rating is 4.2 out of 5.
+4.2
+$4M+
+spent
+
+Location Australia
+Hourly: $25.00 - $40.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+Senior Developer (Full Stack) WordPress Experience mandatory Good to Great Schools Australia Limited About the Organisation Good to Great Schools Australia (GGSA) partners with schools and school systems to support school improvement along a journey from Poor to Fair, Fair to Good and Good to Great. GGSA is modern and innovative, and we are well set up to support roles from being carried out at home. About the Role We are looking for a Senior Developer who can create engaging and interactive online learning experiences using PHP, WordPress and Learn Dash. You will be responsible for developing and maintaining our website, customising themes and plugins, and integrating various e-learning features and functionalities. You will lead the team and review code before development goes through production. As part of a collaborative and forward-thinking team, you will design and deliver cutting-edge web applications that underpin our school and teacher support programmes. This role demands a developer with expertise across front-end and back-end technologies, particularly within cloud-based environments, who thrives in a fast-paced, dynamic setting. Key Responsibilities Strong knowledge of PHP, especially in WordPress development and debugging (PHP 8.1+). Experience with headless CMS architecture, specifically with NextJS. Experience with WordPress themes and plugins, including Learndash, WooCommerce, Divi, etc. Familiarity with front-end technologies, such as HTML5, CSS3, JavaScript, jQuery, Bootstrap, and experience with TypeScript, React/NextJs, SCSS. Familiarity with web development tooling, including phpcs, phpmd, phpstan, phpunit, codecept, Docker BuildKit, TS config, eslint, prettier, postcss, tailwind, and advanced webpack configuration. Experience with containerisation using Docker/compose, including managing dependencies with composer and npm/yarn/pnpm. Experience with GraphQL APIs, particularly using Hasura. Knowledge of database management systems, particularly MySQL/MariaDB (10+) Understanding of Git workflow and familiarity with CLI/terminal commands. Ability to create responsive and adaptive web designs that work across different devices and browsers Understanding of web development best practices, such as SEO, accessibility, performance, security, etc. Good communication and collaboration skills, as well as the ability to work independently and manage multiple projects. Experience leading a development team, providing guidance and ensuring code quality. A portfolio of previous web development projects that demonstrate your skills and creativity. Contribute to team knowledge sharing, mentor junior developers, and participate in code reviews. Work independently while maintaining a strong, continuous flow of communication within a remote-first team. Desirable Skills Experience with other e-learning platforms or tools, such as Moodle, SCORM, LMS, etc. Knowledge of web design principles and tools, such as Adobe Photoshop, Illustrator, Figma, etc. Familiarity with web development frameworks or libraries, such as Laravel, React, Vue, etc. Background in education technology or experience in an Agile development environment. Knowledge of DevOps practices and experience with CI/CD pipelines. Benefits Fully remote position, offering flexibility and a balanced work-life structure. Opportunity to lead a greenfield project and work with modern technologies. A collaborative and supportive team, contributing to meaningful work in the education sector. Preferred Qualifications Bachelor's degree in computer science, Information Technology, or a related field, or equivalent experience. How to Apply Applicants need to submit a resume and an application letter that addresses the essential selection criteria above. GGSA does NOT consider applications who do not address the selection criteria. If you are looking for the next stage of your career and have a desire to contribute to a not-for-profit organisation that supports Australian schools, we'd love to hear from you! **All applications will be reviewed for authenticity, and responses may be checked using AI-detection tools as part of our screening process.**
+
+Web Development
+
+Docker
+
+PHP
+
+Apollo.io
+Proposals: Less than 5
+Posted 2 weeks ago
+Junior Software Developer at Poland
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Ecuador
+Hourly: $15.00 - $35.00
+Intermediate
+Est. time:
+More than 6 months, Less than 30 hrs/week
+Location: Remote (Poland) !!!Not require to have senior level.!!! About the Role: We are looking for a motivated Junior Developer to join our team. This is an entry-level position, and prior software development experience is not required. You will have the opportunity to learn, grow, and gain hands-on experience in a supportive environment. Key Requirements: Must be located in Poland Fluent in English (spoken and written) Strong willingness to learn new technologies and programming concepts Good communication and teamwork skills Problem-solving mindset and eagerness to take initiative What You’ll Do: Participate in basic coding tasks, testing, and software learning projects Assist senior developers with development and maintenance tasks Learn and grow in front-end, back-end, or full-stack development Collaborate with team members on small-scale projects and experiments Benefits: Work remotely from your location Mentorship from experienced developers Opportunity to gain real-world software development experience Flexible work schedule How to Apply: Please submit your resume and a short introduction in English. No prior coding experience is required.
+
+Web Development
+
+English
+
+HTML
+
+PHP
+
+HTML5
+
+CSS
+Proposals: 5 to 10
+Jobs Per Page:   
+10
+
+Pagination
+Current page 1 of 14 1
+go to page 2
+go to page 3
+go to page 4
+...
+Current page 1 of 14
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices California Consumer Privacy Act (CCPA) Opt-Out
+Accessibility
+Desktop App
+Cookie Policy
+Enterprise Solutions
+Release notes
+Follow Us
+Visit Upwork on Facebook
+
+Read Upwork company news on LinkedIn
+
+Follow @Upwork on Twitter
+
+Watch Upwork videos on YouTube
+
+Follow Upwork on Instagram
+
+Mobile app
+Download Upwork app from iTunes
+
+Download Upwork app from Google Play
+
+© 2015 - 2026 Upwork® Global LLC
