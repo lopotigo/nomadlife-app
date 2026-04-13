@@ -1,0 +1,203 @@
+Always Friday
+Condividi
+Mostra altre opzioni
+Senior Full Stack Engineer
+Italia · 1 giorno fa · 90 persone hanno cliccato sul pulsante “Candidati”
+Risposte gestite esternamente a LinkedIn
+ 
+55 €K/anno - 65 €K/anno
+
+ Da remoto
+Corrisponde alle tue preferenze per le offerte di lavoro: il tipo di luogo di lavoro è Da remoto.
+
+ A tempo pieno
+Corrisponde alle tue preferenze per le offerte di lavoro: il tipo di offerta è A tempo pieno.
+
+Candidati
+ 
+Salva
+Salva Senior Full Stack Engineer presso Always Friday
+Senior Full Stack Engineer
+Always Friday · Italia (Da remoto)
+
+Candidati
+ 
+Salva
+Salva Senior Full Stack Engineer presso Always Friday
+Mostra altre opzioni
+Informazioni sull’offerta di lavoro
+We're a 9-person startup (4 founders + 5 team members) building the first AI-powered humanless event agency. We have 40+ AI agents in production, 30+ reusable UI components, real-time streaming interfaces, and real paying customers. We need a senior full stack engineer who can build features end-to-end - from database schema to API routes to polished React UI. Equity included.
+Companies tell our AI what they need - a corporate retreat for 200, a team building in Tuscany, a product launch in Milan - and our platform handles the rest: gathering the brief through conversation, searching venues, processing supplier proposals, and managing the entire event lifecycle.
+No forms. No back-and-forth emails. Just natural language.
+Our stack
+
+TypeScript monorepo (Turborepo + Bun), Next.js 16, React 19, Tailwind CSS, Radix UI, PostgreSQL, Prisma ORM, Mastra Framework, Azure OpenAI (GPT-5.2), AWS ECS.
+The Team
+
+We're 9 people total - 4 founders and 5 team members. Two co-founders work on the product daily: Lorenzo (CTO) and Daniele (CPO). The engineering team is Lorenzo and a Founding Engineer. You'd be the third engineer, working directly with both co-founders.
+How We Work
+
+
+Ship daily: CI/CD goes straight to ECS. Your code hits production the same day.
+
+AI-first: We build with Claude Code, Cursor, whatever makes us faster. We'll give you a Claude Code subscription or the AI tool you prefer.
+
+Pragmatic: Simple solutions, DRY code, iterate based on real usage. No over-engineering.
+
+Flexible: Core hours 9:15-18:15 CET. We care about output.
+
+Fast: Slack message > meeting. Always.
+
+
+Tasks
+Why This Role
+
+We're building a platform where AI agents handle real business workflows - and every feature touches the full stack: database models for event data, API routes that orchestrate AI workflows, and React interfaces that stream results in real time. You'll work on proposal management systems, venue search with live updates, conversational UIs, and complex data management - all powered by AI underneath.
+You won't be siloed. You'll own features from database migration to production UI.
+What You'll Do
+
+You won't be experimenting in a notebook. You'll be building and shipping to real customers.
+First month - Learn the system, ship real things:
+
+Understand the codebase: monorepo structure, shared packages, how AI streaming reaches the UI
+
+Pair with Lorenzo on existing features - fix bugs, improve API routes, refine UI interactions
+
+Ship your first end-to-end feature to production
+
+
+Months 2-3 - Build independently:
+
+Design database schemas (ZenStack/Prisma) and write migrations for new features
+
+Build API routes with proper validation (Zod), pagination, and error handling
+
+Create React pages and components that integrate with AI streaming
+
+Own features end-to-end: from data model to API to UI
+
+
+Months 3-6 - Own entire feature areas:
+
+Architect complex features from scratch (real-time streaming, drag-and-drop interfaces, multi-step forms)
+
+Build integrations with external services (email, document processing, third-party APIs)
+
+Improve developer experience: shared packages, type safety across the monorepo
+
+Start shaping what we build next, not just how
+
+
+After that - You're one of three engineers building the product. You'll have opinions on architecture, push back on ideas that don't make sense, and drive features from "we should do X" to production. The scope grows as fast as you do.
+What's Already Built
+
+We're not pre-product. We have a mature codebase: 40+ AI agents across 5 major workflows, 30+ reusable UI components, 20+ custom hooks, a streaming event system for real-time AI updates, and complex data management interfaces (proposals, pricing, venues). Real customers use it today.
+You'll work in a TypeScript monorepo: Next.js web app with App Router, Mastra + Hono AI service, shared database and streaming packages - all deployed on AWS ECS.
+Requirements
+Must-have (MANDATORY):
+
+
+5+ years building software, with strong full stack experience
+
+Next.js App Router production experience (Next.js 15+)
+
+React 19 expertise with complex state management (custom hooks, context)
+
+TypeScript at an advanced level (generics, Zod, type inference)
+
+PostgreSQL and ORM (Prisma or similar): schema design, migrations, query optimization
+
+API design: RESTful APIs, validation, pagination, error handling
+
+Tailwind CSS: responsive layouts, component styling
+
+Component libraries (Radix UI, shadcn/ui, or similar)
+
+
+Non-negotiable:
+
+
+Italian: native/fluent - customer-facing work requires it
+
+English: strong - docs, research, team communication
+
+Based in Italy, remote
+
+
+Nice-to-have:
+
+
+AI/LLM integration experience (prompt engineering, streaming APIs)
+
+Mastra Framework or similar agent orchestration tools
+
+Monorepo tooling (Turborepo, Bun)
+
+Real-time data (Server-Sent Events, WebSockets, streaming)
+
+AWS (ECS, S3, Lambda), Docker, Terraform
+
+Testing frameworks (Jest, React Testing Library, Playwright)
+
+Observability (Sentry, OpenTelemetry)
+
+Figma proficiency
+
+
+A heads up: this is a startup. You'll be in the trenches with us. Some days you'll solve problems no one has solved before. Some days you'll have to figure things out from scratch with no playbook. Ownership is total - from database schema to production UI, it's yours. It's not easy, but if you want comfort and hand-holding, this isn't the place.
+Benefits
+
+€55-65k RAL
+
+Stock Options: we are a seed startup and joining now means you could make a huge amount of money if we make it
+
+Private Health Insurance (Generali). It's a pretty good one
+
+Fully remote in Italy. We have an office and you are welcome to join but that's up to you (no pressure at all)
+
+MacBook Pro as your company device
+
+Claude Code subscription (or AI tool of your choice)
+
+Direct product influence. In a team of 10, everything you build matters
+
+You'll build the full stack of the first humanless event agency in Italy - and shape where it goes
+
+
+Tell us about a feature you've built end-to-end that you're proud of - from database to UI. Share your GitHub, portfolio, or anything that shows how you think about building software. We'd love to hear from engineers who enjoy owning the full picture.
+Indicata dall’azienda
+Livello di retribuzione a Italia
+La retribuzione esatta può variare in base a competenze, esperienza e località.
+Retribuzione base
+55.000 €/anno - 65.000 €/anno
+Informazioni sull’azienda
+Logo dell’azienda Always Friday
+Always Friday
+2032 follower
+
+Segui
+Sviluppo di software  11-50 dipendenti  19 su LinkedIn
+Always Friday è la piattaforma end-to-end che porta ordine, efficienza e misurabilità nell’organizzazione e gestione degli eventi della tua azienda.
+La nostra missione è sostituire la frammentazione e la dispersione tipica degli eventi aziendali con un sistema unico che permetta alle aziende di organizzare eventi in modo rapido, trasparente e senza sprechi di tempo o risorse.
+
+Con Always Friday puoi:
+- Cercare e prenotare location verificate con disponibilità e prezzi in tempo reale
+- Selezionare e ordinare catering per ogni esigenza, dai coffee break alle cene di gala
+- Gestire i trasporti (auto, bus, voli) per partecipanti, ospiti e speaker
+- Acquistare merchandising personalizzato e materiali stampati per l’evento
+- Trovare e ingaggiare professionisti specifici: sommelier, speaker, coach, host e molti altri
+- Aggiungere attività ed esperienze (team building, workshop, format interattivi).
+
+Come funziona, in 4 step:
+1) Plan – Inserisci obiettivi, numeri e preferenze: F.R.I.D.A.Y, il nostro AI Event Co-Pilot, ti propone soluzioni su misura.
+2) Explore – Scopri le opzioni in linea con obiettivi, budget e criteri, con prezzi e disponibilità trasparenti.
+3) Book – Conferma l’evento e ricevi il supporto operativo di un event manager dedicato.
+4) Track – Gestisci pagamenti, fornitori e avanzamento logistico da un’unica dashboard—con una sola fattura.
+
+In media, ogni evento organizzato con Always Friday fa risparmiare 68 ore di lavoro. E con i nostri Experience Credits ottieni il 5% di ritorno su ogni evento, da usare per il successivo.
+
+Always Friday: il nuovo standard per gli eventi corporate.
+
+…
+Visualizza altro
+Visualizza altro
