@@ -1,0 +1,117 @@
+Informazioni sull’offerta di lavoro
+Hi 👋🏾 I’m Abhik, Ashby's Co-Founder and VP of Engineering. As someone who could design and build software, this position is close to my heart. I always felt I had a unique perspective because I could play with design ideas and iterate in code. My ideas could start in Figma but then be grounded (or sometimes more creative) in code. My prototypes used actual logic and data. My changes cascaded throughout the app for comprehensive critique (thanks, React component system!). But, every company made me pick one —I couldn’t design and build. At Ashby, you can.
+
+While Every Engineer Can Design And Build, You’ll Tackle Our Most Challenging Design Problems And Help Others Improve Their Designs By Expanding And Enhancing Our In-house Design System And Consulting On Bespoke Work. To Ground It With Examples, Engineers Who Can Design At Ashby Have
+
+Redesigned our mobile web app by talking with customers who use it often, wireframing new flows, implementing its design system, and using it to make the wireframes a reality.
+Built a set of flexible, composable components in our design system that allow other engineers to build custom autocompletes. These autocompletes can contain filters, options to create new records, etc.
+Helped another engineer improve their design's information hierarchy and scannability for viewing a candidate’s assessments. Recruiters can quickly parse information and pick out anomalies.
+
+These projects reflect what we’re accomplishing at Ashby: improving the productivity of working professionals (starting with talent teams) with intelligent and powerful software. We put a lot of effort into designing products that are approachable to beginners but mastered & extended by power users. In many ways, spreadsheets set the bar here.
+
+We have notable customers like Notion, Linear, Shopify, and Snowflake. Our growth and retention metrics are best-in-class among our peers: we have tens of millions in ARR, growing >100% year over year, over 2500 customers, very low churn, and many years of runway. We’ll share more details once we meet, but you now probably have a good idea as to why we're hiring for this role 😅.
+
+What We’re Building
+
+As engineers, we are used to tooling that makes us better at what we do. When we started Ashby, we saw the opposite with Talent Acquisition software. Recruiting teams were leveling up how they did their work, but instead of software meeting this new standard, it held them back.
+
+Scheduling a final round is an excellent example. Recruiting teams wanted to schedule candidates faster, track interviewer preparation and quality, and do it with half the headcount. A recruiter needed to manually collect availability from the candidate, identify qualified interviewers, perform “Calendar Tetris” to find who is available to interview the candidate, schedule on the earliest date possible, and make any last-minute adjustments as availability changed. They must do this while considering the interview load on each individual and whether interviewers need to be trained and shadowing others. 🥵 TA software didn’t help.
+
+As hiring managers, we know TA is a critical function, and as engineers, we know software can do better. So, we built and continue to build Ashby to give TA teams the highest standard of tooling. Software that’s intelligent and powerful. Software that provides insights into where they’re failing and automates or simplifies many of the tasks they’re underwater with. We want other functions and departments to be jealous of what TA teams can do with Ashby, and today they often are!
+
+Engineering Culture
+
+Our Engineering Culture Is Motivated By Benji’s (my Co-founder And CEO) And My Belief That a Small, Talented Team, Given The Right Environment, Can Build High-quality Software Fast (and Work Regular Hours!). We Do It Through
+
+Minimal process with ownership over decisions normally made by product and design
+Natural collaboration and deliberate communication
+Investing in tools and abstractions that give us leverage
+Putting effort into building a diverse team
+
+Minimal Process & Lots of Ownership
+
+The best engineers we’ve worked with delivered reliably magical outcomes. They took customer problems and relentlessly drove them to solutions that were not only successful but often brilliant and creative. While they did this with minimal oversight, stakeholders were never in the dark as to what was going on, and no setback was a surprise.
+
+Traditional product-development processes aren’t meant for the best engineers. Their purpose is to create consistent outcomes regardless of the engineer’s skill. But, consistency comes at the expense of an engineer’s time and freedom—both ingredients necessary to generate those magical outcomes. As a result, process stifles the best engineers and doesn’t give others the opportunity to practice the behaviors that made the best engineers the “best.”
+
+At Ashby, we want to build an environment that encourages every engineer to be their best. So, at Ashby, every Engineer runs their project. Product Managers (and Designers) build strategy, do customer research, and hand off problem briefs to Engineers. Engineers take on the rest: they research the problem, write product specs, build wireframes, and implement their solution end-to-end. We rely on engineers, not process, to push information outward to the relevant folks (e.g., Product Managers) and pull folks in to help (e.g., Designers, Infra). It’s a new level of ownership for many engineers, but we’d rather an engineer fail a bit and coach up their skills than use process as a crutch. Not everyone succeeds in our culture, but those who do thrive.
+
+Collaboration is Natural & Communication is Deliberate
+
+Our engineering team consists of lifelong learners who are talented but also humble and kind (meet them here!). These attributes create an environment where collaboration happens naturally. We combine this with research, prototyping, and written proposals to see around corners and get feedback from the team across time zones. Focus time is something that we hold sacred, and, with thoughtful and deliberate communication, engineers are in <2h meetings per week (I wrote about it here).
+
+To drive it home, here's a recent calendar of an engineer who has been with us for over 4 years:
+
+We also meet in person at least twice a year, once as a department and once as a company. You also have a small budget to meet up with folks in your city/region.
+
+Increase Leverage, not Team Size
+
+We Built Ashby With The Quality, Breadth, And Depth That Many Customers Would Expect From Much Larger Teams Over Larger Time Scales. We’ve Done This Through Investment In
+
+Great developer tooling. Our CI/CD takes ~10m, and we deploy at least 15x a day. A debugger that works out of the box. Everyone on the team has contributed to our developer experience 💪🏾.
+Building blocks to create powerful and customizable products fast. At the core of Ashby is a set of common components (analytics modeling and query language, policy engine, workflow engine, design system) that we constantly improve. Each improvement to a common component cascades throughout our app (short video below).
+
+And a Demo Of One Of These Building Blocks
+
+Here’s an impromptu quote from Arjun in our company Slack of what it’s like to build a feature at Ashby:
+
+Put Effort into Diversity
+
+Diverse teams drive innovation and better outcomes. Having seen my mother and partner build their careers as minority women in non-diverse fields, I want to make sure Ashby creates opportunities for the next generation of engineers from underrepresented groups.
+
+Today, 21% of engineers at Ashby are from underrepresented groups. It’s not great, and we are taking conscious steps to improve, like sourcing diverse candidates, providing generous paid family leave, no leetcode interviews, and more.
+
+Interview Process
+
+At Ashby, our team and interview process want to help you show your best self. We’ll dive into past projects and simulate working together via pair programming, writing product and tech specs collaboratively, and talking through decisions. There are no leetcode or whiteboard exercises.
+
+Our Interview Process Is Three Rounds
+
+Introduction call with Hiring Manager (15 to 30m, live)
+A technical screen where we pair in our actual codebase (1h, live)
+Three non-coding interviews that focus on product thinking, technical design, and infrastructure (3h 15m, live can be split across multiple days)
+
+Depending on our leadership team’s bandwidth, we may start with an additional 30m screen with a recruiter.
+
+Your hiring manager will be your main point of contact and prep you for interviews. Each round will have written guidance so you know what to expect (you’ll need minimal preparation). You’ll meet 4 to 6 people in engineering (with 5-15 minutes in each interview to ask them questions). If we don’t give an offer, we’ll provide feedback!
+
+Your First Three Months at Ashby
+
+We want an exceptional onboarding experience for every new hire. At Ashby, your dev environment is set up with a single script, you push your first product change on day one, and you spend the rest of your time shipping product changes that give you a tour of our codebase and best practices. The product changes increase in scope and ambiguity from simple copy changes to the delivery of a prominent, impactful feature. Your manager will do a 30, 60, and 90-day review to give feedback and calibrate on how we work together.
+
+It’s a team effort to get you successfully onboarded; you’ll have a peer paired with you to answer questions, pair program, and check in often to see if you need help. The rest of the team will run training sessions on our culture, product, engineering process, and technical architecture.
+
+Technology Stack
+
+I’m sharing our tech stack with the caveat that we don’t require previous experience in it (but a love of typed languages is helpful 😀): TypeScript (frontend & backend), React, GraphQL API, Node.js, Postgres, Redis.
+
+When they joined Ashby, many of our engineers switched from other languages like Swift and Kotlin (Ben), platforms like iOS (Tom) and Windows (Sergey). We care more about fundamentals (e.g., debugging, abstractions) and how fast you learn. For folks on the team who switched, it's nice seeing changes hot reload versus waiting for XCode to compile 😅.
+
+Benefits
+
+Competitive salary and equity.
+10-year exercise window for stock options. You shouldn’t feel pressure to purchase stock options if you leave Ashby —do it when you feel financially comfortable.
+Unlimited PTO, and we will encourage you to take it.
+A minimum of 12 weeks of fully paid parental leave, covered by Ashby. For folks outside the US, it may be longer to be in line with regional requirements.
+Generous equipment, software, and office furniture budget. Get what you need to be happy and productive!
+$100/month education budget with more expensive items (like conferences) covered with manager approval.
+If you’re in the US, we offer top-tier health insurance for you and your dependents, with 100% of premiums covered by Ashby. In other countries, we provide high-quality supplemental health insurance for you and your dependents, also fully covered by us.
+
+Ashby’s success hinges on hiring great people and creating an environment where we can be happy, feel challenged, and do our best work. We’re being deliberate about building that environment from the ground up. I hope that excites you enough to apply.
+
+Ashby provides equal employment opportunities (EEO) to all employees and applicants for employment without regard to race, color, religion, sex, national origin, age, disability, genetics, sexual orientation, gender identity, or gender expression. We are committed to a diverse and inclusive workforce and welcome people from all backgrounds, experiences, perspectives, and abilities.
+Indicata dall’azienda
+Livello di retribuzione a Italia
+La retribuzione esatta può variare in base a competenze, esperienza e località.
+Retribuzione base
+141.000 €/anno - 226.000 €/anno
+Raggiungi i tuoi obiettivi più velocemente con Premium
+
+Accedi a informazioni esclusive sui candidati, scopri le offerte di lavoro per cui rientreresti fra i migliori candidati, e tanto altro
+
+
+
+
+Dina e milioni di altri utenti usano Premium
+Prova Premium per 0 ฿
+Prova gratuita di 1 mese con assistenza 24/7. Ti invieremo un promemoria 7 giorni prima della fine del periodo di prova.
