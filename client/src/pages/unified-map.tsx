@@ -33,6 +33,7 @@ import { FloatingTip } from "@/components/contextual-tip";
 import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { FirstPostNudge } from "@/components/first-post-nudge";
 import { BottomNav } from "@/components/bottom-nav";
+import { QuickCheckIn } from "@/components/quick-checkin";
 import { MapErrorBoundary } from "@/components/map-error-boundary";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
@@ -1203,6 +1204,7 @@ export default function UnifiedMap() {
   const [showFilters, setShowFilters] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [showNewEvent, setShowNewEvent] = useState(false);
+  const [showCheckIn, setShowCheckIn] = useState(false);
   const [showAddSpot, setShowAddSpot] = useState(false);
   const [spotLocations, setSpotLocations] = useState<(Location & { user: User })[]>([]);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -2553,7 +2555,9 @@ export default function UnifiedMap() {
           activePage="mappa"
           onCreatePost={() => setShowNewPost(true)}
           onCreateEvent={() => setShowNewEvent(true)}
+          onCheckIn={() => setShowCheckIn(true)}
         />
+        <QuickCheckIn open={showCheckIn} onClose={() => setShowCheckIn(false)} />
 
       <CreatePostModal
         open={showNewPost}

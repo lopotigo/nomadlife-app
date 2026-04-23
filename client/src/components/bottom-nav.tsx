@@ -5,7 +5,7 @@ import {
   Compass, BookOpen, Plus, MessageCircle,
   Briefcase, ShoppingBag, BookMarked, Calendar,
   Users, Bookmark, ShieldCheck, X, MoreHorizontal,
-  Star, User2, PenLine, Camera, Plane
+  Star, User2, PenLine, Camera, Plane, MapPin
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ export interface BottomNavActions {
   onCreateMoment?: () => void;
   onCreateEvent?: () => void;
   onCreateTrip?: () => void;
+  onCheckIn?: () => void;
 }
 
 interface BottomNavProps extends BottomNavActions {
@@ -22,6 +23,14 @@ interface BottomNavProps extends BottomNavActions {
 }
 
 const FAB_ACTIONS = [
+  {
+    key: "checkin",
+    label: "Sono qui",
+    sublabel: "Aggiungi questa tappa al viaggio",
+    icon: MapPin,
+    color: "bg-emerald-500",
+    shadow: "shadow-emerald-500/30",
+  },
   {
     key: "post",
     label: "Scrivi post",
@@ -51,8 +60,8 @@ const FAB_ACTIONS = [
     label: "Nuovo viaggio",
     sublabel: "Crea un itinerario con tappe",
     icon: Plane,
-    color: "bg-emerald-500",
-    shadow: "shadow-emerald-500/30",
+    color: "bg-sky-500",
+    shadow: "shadow-sky-500/30",
   },
 ] as const;
 
@@ -62,6 +71,7 @@ export function BottomNav({
   onCreateMoment,
   onCreateEvent,
   onCreateTrip,
+  onCheckIn,
 }: BottomNavProps) {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
@@ -93,6 +103,9 @@ export function BottomNav({
   const handleFabAction = (key: typeof FAB_ACTIONS[number]["key"]) => {
     setShowFab(false);
     switch (key) {
+      case "checkin":
+        onCheckIn ? onCheckIn() : navigate("/diary");
+        break;
       case "post":
         onCreatePost ? onCreatePost() : navigate("/feed");
         break;
