@@ -1,0 +1,250 @@
+
+Browse jobs that match your experience to a client's hiring preferences. Ordered by most relevant.
+Posted 15 minutes ago
+Chat Bot Implementation
+Fixed-price - Intermediate - Est. Budget: $250
+I am looking for an experienced developer to update the UI of my existing website/app and integrate an AI chatbot module. The work includes improving layout, spacing, typography, colors, buttons, responsiveness, and overall user experience while keeping the current brand style. The chatbot should match the site design and answer user questions using my provided business or website data. It can be integrated with OpenAI or another suitable AI API, with basic loading states, fallback replies, and error handling. Please write clean, maintainable code and provide short handoff notes explaining what was changed. Ideal candidates should have strong frontend/UI experience and previous AI chatbot integration experience. When applying, please share relevant examples, your recommended approach, estimated timeline, and cost.
+more about "Chat Bot Implementation"
+Skills
+Data Entry
+Web Development
+Illustration
+JavaScript
+Adobe Illustrator
+Online Chat Support
+Customer Service
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  New Zealand
+Proposals: Less than 5
+
+Featured
+Posted 1 hour ago
+Claude AI Specialist or Architect
+Hourly: $25-$60 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+Description: We are building Lexy, an edtech platform focused on dyslexia screening and support, and are looking for an AI Systems Specialist to help us properly set up and integrate AI tools (primarily Claude) across our product and internal operations. This is not a pure developer role. We need someone who understands: How to design and structure AI systems How to set up workflows and agents How to make everything simple and usable for a non-technical founder What You’ll Be Doing: Help define how AI should be used across Lexy Set up and structure Claude workflows, projects, and usage Build or guide the setup of AI agents and automations Work closely with: Founder (non-technical, product-focused) Developer (implementation support) Translate ideas into clear systems and execution steps Help integrate AI into: Admin dashboard insights Sales / CRM automation Internal workflows (Notion, prompts, documentation) Key Requirement (Important) You must have: Hands-on experience setting up real AI workflows using Claude Experience building or structuring AI agents or multi-step automations Ability to create systems that are easy for a non-technical CEO to manage Coding experience is a plus, but not required. Ideal Candidate: Strong understanding of Claude (Anthropic) and prompt/system design Familiar with multi-model setups (Claude + others where useful) Experience with: Notion workflows AI-powered operations CRM or sales automation systems Able to think in systems, not just tasks Clear communicator who can explain and simplify Scope: Initial: Audit needs + design AI setup Then: Implement core workflows and systems Ongoing: Optimize and expand usage Timeline: Start ASAP Bonus (Nice to Have): Experience working with startups or founders directly Background in edtech, SaaS, or data-heavy products Important: We are looking for someone who can think, structure, and execute—not just “use ChatGPT.” If you’ve built real AI systems or workflows, explain what you built and how it was used. Optional (Add This to Filter Candidates) Screening Questions: Describe a real AI workflow or system you built using Claude (or similar). What was the outcome? How would you structure AI usage for a non-technical founder managing a startup? Have you built or designed AI agents? If yes, explain how they worked. What tools (besides Claude) do you typically combine for best results?
+more about "Claude AI Specialist or Architect"
+Skills
+Artificial Intelligence
+Claude
+Agent GPT
+API Integration
+Automation
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $9K+ spent 
+
+  Jordan
+Proposals: 50+
+Posted 16 minutes ago
+Developer Needed for Deploying and Optimizing Image Processing Models
+Hourly: $18-$45 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are seeking a skilled developer to deploy and optimize two open-source models focused on image upscaling and background removal. The primary goal is to enhance the performance for the fastest processing speed and create an API for seamless integration. If you have experience with image processing and optimization, we would love to hear from you. Please provide examples of similar projects you've worked on to ensure a good fit for our requirements.
+more about "Developer Needed for Deploying and Optimizing Image Processing Models"
+Skills
+AI Development
+AI Model Development
+Python
+Machine Learning
+JavaScript
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $2K+ spent 
+
+  Israel
+Proposals: 10 to 15
+Posted 45 minutes ago
+AI Systems Builder for Business Backend
+Fixed-price - Intermediate - Est. Budget: $2,500
+Title: AI Systems Builder (Claude + Automation) Focus: High-Ticket Sales, Marketing & Delivery System Business: Barnaby’s Holistic Solutions (BHS) About the Business Barnaby’s Holistic Solutions designs, builds, launches, and manages boutique wellness hospitality assets. We do not sell services or courses. We sell a high-ticket, structured product that takes buyers through: Enquiry → Discovery → Proposal → Commitment → Build → Launch → Management Our goal is to build a fully automated backend system that supports both: * Buyer acquisition (marketing + sales) * Buyer delivery (operations + project tracking) The Role We are looking for a hands-on AI Systems Builder to design and implement a complete business backend system using: * Claude (AI logic + content + analysis) * Zapier or Make (automation layer) * Airtable or Notion (CRM + operations) This is NOT a strategy role. This is a build and implement role What You Will Build 1. Marketing & Content Engine * Weekly content system (strategy → creation → publishing support) * Lead magnet + landing page integration * Email capture + nurture system 2. Lead Capture & Qualification System * Form → CRM → AI processing * Claude-based lead scoring (high / medium / low intent) * Automated, personalised responses 3. CRM & Pipeline System * Full deal flow tracking: * Lead * Qualified * Call booked * Proposal sent * Committed * In delivery * Automated stage updates + reminders 4. Sales & Follow-Up Engine * Automated sequences: * new enquiry * post-call * no response * Claude-generated follow-ups based on: * objections * buyer type * readiness 5. Proposal & Buyer Brief System * Turn call notes into: * structured buyer briefs * personalised proposals * Maintain consistency with product structure 6. Buyer Onboarding System * Automated onboarding after commitment: * welcome * next steps * timeline * document delivery 7. Delivery & Project Tracking System * Dashboard per buyer project: * feasibility * planning * build * launch * management * Task tracking + milestone updates 8. Client Communication System * Automated milestone updates * Clean, professional messaging * Consistent buyer experience 9. Reporting & Optimisation System * Weekly performance tracking: * leads * calls * conversions * objections * Claude-generated insights and improvements What We Care About * You understand **high-ticket sales systems** * You can think in **end-to-end workflows** * You build **simple, clean, scalable systems** * You understand **buyer psychology and conversion** Not a Fit If * You only build chatbots * You only write prompts * You don’t understand sales pipelines * You over-engineer simple systems Required Experience * Automation tools (Zapier / Make) * CRM systems (Airtable / Notion / similar) * AI workflow design (Claude or similar) * Building end-to-end business systems Budget * Initial build: £1,200 – £3,000 (based on experience) * Potential ongoing optimisation role Timeline * Phase 1 (Core system): 2–3 weeks * Phase 2 (Full integration + optimisation): 2–4 weeks How to Apply Please include: 1. Example of a full system you’ve built** (not just one part) 2. A short Loom video explaining how you would approach THIS project 3. The exact tools and structure you would use Important We are not looking for the most technical person. We are looking for someone who can: Turn this into a working, revenue-generating system
+more about "AI Systems Builder for Business Backend"
+Skills
+Notion
+claued
+zapier
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Thailand
+Proposals: 5 to 10
+Posted 12 hours ago
+AI Agent Specialist: Workshop Task & Time Tracker (Bolt.new / Lovable / Supabase)
+Hourly: $15-$35 - Intermediate - Est. Time: 3 to 6 months, Less than 30 hrs/week
+I am looking for a high-efficiency developer to build a custom internal tool for my 15-person workshop. This is an "AI-First" project—I expect the software to be built using AI agents (like Bolt.new, Lovable, or Replit Agent) to ensure speed and a modern tech stack (React/Next.js and Supabase). The goal is to create a web-based Task & Time Tracker where workers can clock into specific jobs, upload photos, and see instructions, while I manage the team and view weekly reports from a central dashboard. Key Requirements: Persistent Timer: Server-side tracking (timer doesn't stop if browser closes). Scalable Architecture: Must be built to link with a future "Order Entry" module. PWA: Must be installable on mobile home screens (no App Store). Admin Dashboard: Weekly hour tracking per employee and per project. I have a very detailed Master Brief ready to share with the right candidate. Please mention which AI builder you prefer in your proposal.
+more about "AI Agent Specialist: Workshop Task & Time Tracker (Bolt.new / Lovable / Supabase)"
+Skills
+Lovable
+Supabase
+Bolt.new
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.8 out of 5.
+ $30K+ spent 
+
+  United States
+Proposals: 50+
+Posted 3 hours ago
+Replit to app
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+Hello I have created an app in replit and have exported it to my private GitHub repo. I need help polishing the app up, and getting it to the ios and android stores. It's an AI dating app so the basic API integration with gpt is done but i need some help adding claude as well to help with the data and responses. The app is like 80 percent done. Nolan
+Skills
+iOS Development
+Hybrid App Development
+Android App Development
+Mobile App Design
+Flutter
+AI Mobile App Development
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Canada
+Proposals: 15 to 20
+Posted 3 hours ago
+🚀 AI Product Engineer (Remote, Global)
+Hourly: $3-$6 - Intermediate - Est. Time: More than 6 months, 30+ hrs/week
+jfk.finance | Germany (Remote) ================================================== ⚠️ IMPORTANT: PLEASE READ FIRST ================================================== Compensation: ~500 EUR/month to start (depending on scope & hours), plus a growth based model with clear upside as the product grows. This is not a classic senior engineering salary. We are looking for someone who wants to grow with the product, not someone who just executes tasks. If this number doesn't work for you, please don't apply. Previous applicants have repeatedly overlooked this point, which is why we are putting it right at the top. ================================================== WE ARE BUILDING SOMETHING AMBITIOUS ================================================== At JFK.finance (Berlin, Germany), we provide CFO as a Service for startups. We help founders build strong financial structures, gain clarity in decision making, and become investor ready, so they can focus on building great products. Now we're taking the next step: 👉 We are building boosta.jfk.finance (a Startup Finance OS) A system designed to: - structure and organize startup finances - actively support founders in decision making - prepare companies for fundraising - complement (not replace) the role of a CFO This is not just another SaaS tool. This is a foundational layer for how startups manage finance. ================================================== 🧠 WHAT WE ARE LOOKING FOR ================================================== Let's be precise: We are looking for a coder who has mastered AI tools, not a "prompt engineer" who hopes the AI will somehow produce working code. Concretely, that means: 👉 You are an engineer first, AI power user second: - You can write, read, and debug code, even without AI at your side - You have real technical understanding: architecture, data models, APIs, deployment - You use AI coding tools daily and productively (e.g. Claude Code, Codex, Cursor, or comparable tools). We don't care which tool, as long as you've truly mastered it. - You know when the AI is producing garbage and correct it, instead of blindly committing - You move 10x faster with AI leverage, but every line of code that goes to production, you have understood 👉 In short: Engineering thinking + AI leverage. Not one or the other. ================================================== ❌ THIS IS NOT FOR YOU IF ================================================== - You copy/paste AI generated code without understanding it - You need detailed step by step instructions for everything - You have never worked on a real product - You cannot explain systems you have built - You're a pure "prompt tinkerer" without a coding foundation - The ~500 EUR/month starting compensation doesn't fit your situation ================================================== ✅ THIS IS FOR YOU IF ================================================== - You have built real products (not just tutorials) - You can show working examples (GitHub, demos, live tools) - You have mastered at least one modern AI coding tool (Claude Code, Codex, etc.) and can also deliver without it - You enjoy freedom + responsibility - You want to shape something from scratch - You think like a builder, not just a coder - The starting compensation + growth upside is attractive to you ================================================== 🛠️ HOW WE WORK ================================================== - 100% remote: we work globally - Direct collaboration with founders and decision makers - Fast execution, high ownership - Focus on outcomes, not hours - AI is a core part of the workflow, not an add on ================================================== 💰 COMPENSATION (IN PLAIN TERMS, AGAIN) ================================================== - Starting compensation: ~500 EUR/month (depending on scope & hours) - Flexible setup (full time or part time) - Growth based model: clear upside as the product grows (more responsibility + more compensation) - You'll be part of building a next generation finance product for startups We're looking for someone who wants to grow with the product, not someone expecting a finished senior package. ================================================== 📩 HOW TO APPLY (IMPORTANT) ================================================== We don't care much about your CV. 👉 Instead send us: - Links to projects you built (GitHub, live apps, demos) - A short explanation: What did you build? What was your role? Which AI coding tools do you use, and how? (Optional but highly recommended) 👉 A short 2 to 3 minute Loom video explaining one of your projects, ideally including how you use AI tools in your workflow.
+more about "🚀 AI Product Engineer (Remote, Global)"
+Skills
+Artificial Intelligence
+Software Development
+Full Stack Development
+Vibe Coding
+Software Architecture & Design
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $400+ spent 
+
+  Germany
+Proposals: 10 to 15
+Posted 4 hours ago
+Senior Data Scientist / AI Engineer (f/m/d) – Agentic AI | 100% Remote | Finance & Insurance
+Hourly: $30-$60 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+About the Project We are looking for a Senior Data Scientist with strong hands-on AI engineering experience to design and implement features for agentic AI products in a Finance & Insurance environment. The project runs from June 1 to December 31, 2026, full-time, 100% remote. Project language is English. Nearshore candidates welcome. Submission deadline: May 4, 9:00 AM CET Your Responsibilities - Design and architect new features for (agentic) AI products from a technical perspective — focusing on clean, scalable, and modular implementation approaches - Implement new features into existing and potential new agentic AI products - Refactor code from existing codebases into reusable AI modules shared across multiple products - Develop and implement evaluation and testing processes for existing agentic AI products to ensure reliable and stable performance Must-Have Requirements - Minimum 3 years of hands-on Python programming experience - Solid practical experience with GenAI and agentic AI in Python (ideally using pydantic-ai as a framework) — at least 1 year, more is a strong plus - Proven experience building complex end-to-end (Gen)AI applications as part of a cross-functional team, in a Solution Engineer or AI Engineer role - Team player who can also work independently and take ownership proactively - Excellent written and spoken English Nice-to-Have - Strong theoretical knowledge of agentic AI concepts: models, tools, reasoning, memory, RAG, MCP protocol - Background in Data Science and Machine Learning - Experience setting up CI/CD pipelines (preferably GitHub Actions) - Experience working in Azure Cloud - Experience with Kubernetes — deployments, jobs, etc. How to Apply Please submit your profile with the following information: Attach your CV – available from [date] – hourly rate (remote) We look forward to hearing from you!
+more about "Senior Data Scientist / AI Engineer (f/m/d) – Agentic AI | 100% Remote | Finance & Insurance"
+Skills
+Python
+Kubernetes
+CI/CD
+Microsoft Azure
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $200+ spent 
+
+  Germany
+Proposals: 5 to 10
+Posted 10 hours ago
+Full-Stack Developer — Hybrid AI + Creator Monetization Platform
+Hourly - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are building a premium digital content platform for creators and subscribers. The platform includes a subscription model, a paid content system, a media storage vault, a live streaming feature, an internal marketplace, and an advanced analytics dashboard. This is a serious, funded project with a clear roadmap and a defined feature list that will be shared under NDA after an initial interview. We are looking for an experienced full-stack developer or small team to build the MVP from the ground up. More details about the platform concept, design mockups, and full feature specifications will be provided exclusively to candidates who pass the initial screening.
+more about "Full-Stack Developer — Hybrid AI + Creator Monetization Platform"
+Skills
+Web Development
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Puerto Rico
+Proposals: 20 to 50
+Posted 2 hours ago
+AI-Assisted Fitness App (Claude + Lovable) — Improve, Stabilize & Scale MVP
+Fixed-price - Intermediate - Est. Budget: $10
+Description: I’ve built an initial MVP of a fitness app using AI tools (Lovable + Claude code), and I’m now looking for an experienced developer to help refine and scale it. The current app works but needs: Codebase review and cleanup (AI-generated inconsistencies) Bug fixes and performance improvements Implementation of small features (e.g., calorie tracking) UI/UX refinements for smoother user experience API corrections and better structure Tech stack includes React Native I’m specifically looking for someone who: Has experience working with AI-generated code (Claude, GPT, etc.) Can quickly understand and improve existing MVPs Thinks beyond quick fixes and can help evolve this into a stable product This will start as a small test task, but I’m open to ongoing work if it’s a good fit. Please share: Relevant experience with AI-assisted development Examples of improving or scaling an existing app
+more about "AI-Assisted Fitness App (Claude + Lovable) — Improve, Stabilize & Scale MVP"
+Skills
+React Native
+Mobile App Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  New Zealand
+Proposals: 10 to 15
+Posted 1 hour ago
+Full Stack AI Developer | LLM, React, Node.js | AI SaaS & Chatbot Development
+Fixed-price - Expert - Est. Budget: $30
+We are looking for an experienced Full Stack AI Developer to build and scale an intelligent, AI-powered application. The ideal candidate has strong experience with LLMs (GPT-based systems), JavaScript-based full-stack development, and AI integrations. This is an opportunity to work on cutting-edge AI products with real-world impact. Key Responsibilities Develop and deploy full-stack AI applications using React and Node.js Integrate and optimize LLMs (e.g., GPT-4/5) for use cases like chatbots, automation, and content generation Build scalable APIs and backend services using Node.js Design clean, responsive, and user-friendly front-end interfaces Work with vector databases and embeddings (e.g., Pinecone, Weaviate, FAISS) Implement AI workflows using tools like LangChain / LlamaIndex Ensure performance, security, and scalability of applications Required Skills: Strong experience in Full Stack Development (React + Node.js) Proven experience working with AI/ML models, especially LLMs Familiarity with OpenAI APIs or similar AI platforms Experience with databases (SQL/NoSQL) Understanding of REST APIs and microservices architecture Knowledge of cloud platforms (AWS, GCP, or Azure) Nice to Have: Experience building AI SaaS products Strong prompt engineering skills Familiarity with Docker, Kubernetes Experience with real-time apps (WebSockets, streaming APIs) Let's connect to discuss this further!
+more about "Full Stack AI Developer | LLM, React, Node.js | AI SaaS & Chatbot Development"
+Skills
+AI Development
+AI App Development
+API Integration
+Web Application
+Fullstack developmnt
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $1K+ spent 
+
+  Canada
+Proposals: 20 to 50
+Posted 7 hours ago
+Help build a care management ai app
+Hourly: $15-$35 - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are seeking an experienced developer to create a care management application that integrates rostering, clock-in/out functionalities, participant support, compliance tracking, billing, and reporting into one streamlined platform. The ideal candidate will have a strong understanding of healthcare regulations and user-friendly design principles to ensure the app meets both compliance and usability standards. This project requires proficiency in mobile and web app development, as well as experience with database management and integration of payment systems.
+more about "Help build a care management ai app"
+Skills
+User Profile Creation
+Review or Feedback Collection
+Android
+Smartphone
+User Authentication
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Australia
+Proposals: 50+
+Posted yesterday
+AI team needed for long-term consulting projects. - vibe coders
+Hourly: $25-$47 - Expert - Est. Time: More than 6 months, 30+ hrs/week
+Hello Providers, We are working to set up specialized AI consulting services to serve the underserved segments in the US. At this time we are reaching out to freelancers to build this team where we can execute projects. Please reply with your profiles and availability. We are looking for 1. Great programmers but using vibe coding tools 2. Punctual, dependable and r
