@@ -144,11 +144,11 @@ app.use((req, res, next) => {
   if (process.env.NODE_ENV !== "development") {
     setTimeout(() => {
       checkTravelAlerts().catch(err => console.error("[Travel Alerts] Initial check error:", err));
-    }, 60000);
+    }, 5 * 60 * 1000);
     setInterval(() => {
       checkTravelAlerts().catch(err => console.error("[Travel Alerts] Periodic check error:", err));
-    }, 24 * 60 * 60 * 1000);
-    console.log("[Travel Alerts] Scheduled: runs daily in production.");
+    }, 3 * 24 * 60 * 60 * 1000);
+    console.log("[Travel Alerts] Scheduled: runs every 3 days in production.");
 
     setInterval(async () => {
       try {

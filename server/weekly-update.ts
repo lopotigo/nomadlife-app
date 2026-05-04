@@ -76,8 +76,10 @@ async function updateAllCities() {
   const allCities = await db.select().from(cities);
   let updated = 0;
   let skipped = 0;
+  const MAX_CITIES_PER_RUN = 10;
 
   for (const city of allCities) {
+    if (updated >= MAX_CITIES_PER_RUN) break;
     const lastUpdate = city.lastTavilyUpdate?.getTime() || 0;
     const now = Date.now();
 

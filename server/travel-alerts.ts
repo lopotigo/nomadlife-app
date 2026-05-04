@@ -38,9 +38,8 @@ export async function checkTravelAlerts() {
   console.log("[Travel Alerts] Starting alert check...");
 
   const userCountries = await getUserCountries();
-  const priorityCountries = userCountries.length > 0 ? userCountries.slice(0, 15) : [
-    "Italy", "Thailand", "Indonesia", "Portugal", "Spain", "Germany",
-    "Mexico", "Colombia", "Georgia", "Turkey", "Vietnam", "Japan"
+  const priorityCountries = userCountries.length > 0 ? userCountries.slice(0, 8) : [
+    "Italy", "Thailand", "Portugal", "Spain", "Colombia", "Georgia", "Vietnam", "Japan"
   ];
 
   let alertsCreated = 0;
