@@ -1,0 +1,269 @@
+Sort by
+Sort by: Best Matches
+
+Posted yesterday
+Someone to Create AI Websites for Our 100,000+ Clients -
+ 
+Verified
+Payment verified
+Rating is 4.9 out of 5.
+4.9
+$1M+
+spent
+
+Location United States
+Fixed price
+Entry Level
+Est. budget:
+$1,000.00
+We're a Tech Outsourcing Company with $1.2 Million USD Spend on Upwork and a 4.9+ Rating since 2011. We have 100,000+ clients. Our team is looking to outreach to them to consider a new website design for their company. We're looking to partner with someone that can create AI websites for clients based on their industry for preview and then creation, if they decide to purchase the website. Each 'preview' should take 15 minutes maximum to create with AI. We will provide the company name, their colors, location, a description of their business, etc.. and you will use AI to create the website and provide the URL for them to preview the website. You will be paid for the website preview and then a larger amount if they decide to move forward with the full website design. Please provide examples of 'website previews' and 'completed websites' with AI that we can expect from you. We can discuss costs and payments, if we like what we see. Thank you for the response.
+
+AI App Development
+
+Website
+
+Website Redesign
+
+Landing Page
+
+Style Guide
+
+Custom Web Design
++3
+Proposals: 50+
+Posted yesterday
+Upwork Bidder
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$100
+spent
+
+Location India
+Hourly
+Intermediate
+Est. time:
+More than 6 months, 30+ hrs/week
+Hello, i am starting a new agency and i need a guy to generate the leads for the project i have the team that can take the projects but i want someone to get me the project. 1. Web Apps with Cloud 2. AWS Cloud with AI These are the two catagory that i want to get leads from. I can also do the lead generation but i want a dedicated person for this
+
+Lead Generation
+
+Price & Quote Negotiation
+Proposals: 10 to 15
+Posted yesterday
+WhatsApp Business API Setup for Real Estate Offices
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Canada
+Fixed price
+Intermediate
+Est. budget:
+$500.00
+We are looking for an experienced specialist to build an AI-powered central command center for our two real estate brokerages. THE VISION ONE intelligent AI agent handles every inbound channel — voice calls, SMS, WhatsApp, Instagram DMs, Facebook Messenger — across all our phone numbers and accounts. The AI talks to clients naturally like a real team member, qualifies them, captures their info, and routes them to the right human agent. NOT a basic "press 1 for buyer, press 2 for seller" menu bot. A real conversational AI that feels human, in multiple languages, on every channel a client might reach us. OUR TWO BUSINESSES (both run by me) REMAX UTOPIA — Dominican Republic - Four offices: Puerto Plata, Cabarete, Rio San Juan, Las Terrenas - Two phone numbers: a local DR landline (Claro) and an international toll-free (Vonage) - Languages: English / Spanish / French - 12 agents (growing to 30) + 3 staff = up to 15 seats THE ROLLINS TEAM (REMAX Sudbury Inc.) — Ontario, Canada - One toll-free number (Vonage) - Languages: English and sometimes French (only the odd client doesnt speak English) - Operated by myself and my brother Carter — only 2 seats needed I will share the specific phone numbers, websites, and admin emails after we connect through Upwork. WHAT THE AI NEEDS TO HANDLE Every channel, all in one system: - Voice calls on all phone numbers - SMS on all phone numbers - WhatsApp on all phone numbers - Instagram DMs (one account per business) - Facebook Messenger (one account per business) - Others which can be plugged in. (X, telegram, etc) The AI conversational agent should: - Detect the client's language (EN/ES/FR) and respond accordingly - Greet warmly and conversationally - Qualify naturally — buyer / seller / investor / browsing - Ask the right questions for each: area, budget, timeline, property type, ownership, etc. - Capture name, email, intent, criteria - Send relevant resources during the conversation (specific listings, website forms, market info) - Recognize when to escalate to a human - Route to the right agent based on context (area, language, listing referenced) - Tag conversations for filtering - Send a structured handoff summary to Follow Up Boss CRM via the workspace's native integration CENTRAL COMMAND ARCHITECTURE — RESPOND.IO WORKSPACES + STRICT ROLE-BASED ACCESS Architecture I want built: - ONE Respond.io account on Pro tier with TWO separate Workspaces (one per business) - Workspace 1: RE/MAX Utopia — natively integrated with its own dedicated Follow Up Boss CRM account - Workspace 2: The Rollins Team — natively integrated with its own dedicated Follow Up Boss CRM account (separate from Utopia's) - Each workspace has its own WhatsApp Business Account, Instagram, Facebook Messenger, phone numbers, agents, lead routing, tagging, AI agent prompts, and CRM target Strict role-based access enforced per workspace: - I (broker/owner) have full access to both workspaces and switch between them with one tap - The Utopia office manager sees ONLY the Utopia workspace (zero visibility into Rollins Team) - My brother Carter sees ONLY the Rollins workspace and only conversations he is personally assigned to (zero visibility into Utopia) - Each Utopia agent sees ONLY their own assigned conversations within the Utopia workspace The two workspaces should feel completely isolated — accidental cross-contamination must be impossible. The only person who can see both is me. NON-NEGOTIABLES - Native iOS + Android mobile apps with push notifications (our agents are in the field, not at desks — no web-only platforms) - Multilingual support (EN/ES/FR for Utopia, EN/FR for Rollins) - Multi-agent setup: up to 15 seats for Utopia, only 2 seats for Rollins (myself + Carter) - Two completely separate Follow Up Boss CRM accounts, one per workspace, native integration PLATFORM PREFERENCE Primary: Respond.io Pro tier with Workspaces (mobile apps, omnichannel inbox, AI Agent included, 0% conversation markup, native FUB integration per workspace) Secondary: WATI (acceptable if you make a strong case AND can demonstrate equivalent multi-business workspace isolation with native FUB integration per business) Not opposed to other suggestions. For the voice/calls layer specifically, you'll likely need a separate phone system
+
+Lead Generation
+
+PHP
+
+Web Development
+
+WordPress
+
+API
+Proposals: 5 to 10
+Posted 8 hours ago
+Upwork Deal Generator / Client Acquisition Partner (Tech Projects, Hybrid + Commission)
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location United Arab Emirates
+Hourly: $3.00 - $25.00
+Intermediate
+Est. time:
+1 to 3 months, Not sure
+We’re building a system to acquire high-quality tech projects (AI, SaaS, internal tools) through platforms like Upwork. This is not a typical “send proposals” role. We’re looking for someone who can: – identify high-quality opportunities – position complex tech work clearly – start conversations that convert into real deals What you’ll do – Find and qualify relevant jobs (precision over volume) – Write and send proposals using our positioning – Engage with clients and move conversations forward – Hand over warm leads or close deals directly What we provide – Strong positioning (AI-driven product/system development) – Proven proposal frameworks – Technical backend + delivery team – Ability to execute complex projects reliably You’ll be supported — but expected to think and act independently. What we expect – You understand how Upwork actually works (timing, filtering, positioning) – You don’t spam — you select and think – You can communicate clearly and confidently – You care about closing deals, not just sending messages Compensation – $10–$20/hr (limited to ~5 hrs/week for coordination and setup) – 10% commission per closed deal The role is performance-driven. The fixed component supports quality — results drive earnings. Who this is for – Freelancers already active on Upwork who want to close bigger deals – Sales-oriented people who understand tech at a high level – People who prefer earning based on results, not hours
+
+Sales
+
+Lead Generation
+
+Marketing Strategy
+
+Outbound Sales
+
+B2B Marketing
+Proposals: Less than 5
+Posted yesterday
+Experienced AI Developer for Generative AI Features
+ 
+Verified
+Payment verified
+Rating is 4.6 out of 5.
+4.6
+$1K+
+spent
+
+Location Malaysia
+Fixed price
+Intermediate
+Est. budget:
+$1,000.00
+We are looking for an experienced AI developer to own and build out our AI and generative AI features. The focus will be on chatbot development and conversational AI, working closely with our product team from day one. What you'll be doing - Design and build chatbot and conversational AI features end-to-end - Integrate LLM APIs (OpenAI, Anthropic Claude, Gemini, or equivalent) into our web stack - Build generative AI workflows — smart content generation, recommendations, and intelligent search - Develop and maintain RAG pipelines and knowledge-base integrations - Work with the product team to scope, prototype, and ship features regularly - Document your work and join daily standups during working hours Must-have skills & experience - Proven track record building and shipping chatbots and conversational AI — portfolio links or live demos required - Hands-on experience with generative AI APIs (OpenAI, Anthropic, Gemini, or equivalent) - Strong back-end skills (Node.js, Python, or PHP) with solid REST API and webhook experience - Experience with prompt engineering, fine-tuning, or RAG architecture - Self-directed, proactive communicator who can work independently - Fluent in written and spoken English Nice to have - Experience with multi-tenant SaaS systems - Familiarity with vector databases (Pinecone, Weaviate, Supabase pgvector) - Prior work with LangChain, LlamaIndex, or similar frameworks Engagement terms 1) Rate - USD 1,000 / month 2) Commitment - Full-time (40 hrs/week) 3) Schedule - Mon–Fri, office hours 4) Contract type - Ongoing (monthly renewal) To apply — please include - A short intro on your AI/chatbot background (3–5 sentences) - Links to chatbot or generative AI projects you have shipped - Your timezone and confirmation you can commit to office hours - Your Upwork JSS and any relevant certifications
+
+Artificial Intelligence
+
+Artificial Neural Network
+
+Neural Network
+
+TensorFlow
+
+Machine Learning
+Proposals: 5 to 10
+Posted yesterday
+Innovation Operations Lead (Technical Program & AI Research Systems)
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$5K+
+spent
+
+Location United States
+Hourly: $40.00 - $80.00
+Intermediate
+Est. time:
+More than 6 months, Less than 30 hrs/week
+Short Overview: We are looking for a highly capable operations and program professional to drive execution across our technical, AI-enabled, and contractor-based projects in animal welfare science. This is not a standard admin role, generic project-manager position, or virtual assistant job. We need someone who can translate high-level strategy into reliable day-to-day action, coordinate complex and evolving work, supervise freelancers, and use modern AI tools as a genuine force multiplier — all while helping the Innovation Director step fully into a high-leverage strategic role. Ideal for someone who is: – highly organized and proactive – technically comfortable – able to use AI tools as a serious operational and analytical multiplier – strong at managing messy, partially defined work – able to create clarity and momentum without adding bureaucracy This role sits between scientific research and technical implementation. You will translate structured scientific frameworks into executable technical work, working closely with the Innovation Director to ensure ideas become real systems, tools, and outputs. About Us The Welfare Footprint Institute develops scientifically rigorous methods and tools to quantify animal welfare. Our core contribution is the Welfare Footprint Framework (WFF) — a structured methodology that translates living conditions and events into biological consequences, affective experiences, and cumulative welfare impacts. We are also building the supporting infrastructure: custom GPTs and AI workflows, the Welfare Footprint Atlas / Knowledge Graph, data visualization systems, and new research and decision-support products. Our work sits at the intersection of animal welfare science, structured reasoning, AI tools, and research operations. Why We’re Hiring The Innovation Director is currently spending too much time on execution-heavy work that, while strategically valuable, now needs to be owned by someone else. We need a strong professional who can take full ownership of the execution side of the innovation portfolio so the Director can focus on methodology, strategic innovation, high-level direction, and major scientific decisions. What the Role Actually Is A hybrid of technical program management, scientific translation, product operations, contractor leadership, and founder-side execution. A key part of this role is translating scientific frameworks and reasoning into clear technical requirements that developers and other contributors can execute against. You will not be a pure administrator, meeting scheduler, or traditional PM who simply tracks tasks. You will be the person who makes sure important, intellectually demanding work actually moves forward — reliably and without constant prompting. Core Responsibilities Drive execution of priority technical and innovation projects Day-to-day ownership of the Welfare Footprint Atlas / Knowledge Graph, AI tools and custom GPT workflows, data visualization projects, and other cross-functional initiatives. This includes turning strategy into concrete next steps, removing blockers, and ensuring steady progress. Translate scientific frameworks into technical requirements Work directly with the Innovation Director to understand the Welfare Footprint Framework and related models, then translate them into structured specifications, workflows, and implementation-ready requirements for technical contributors. Coordinate and direct technical contributors Work closely with developers, designers, and specialists. You are not expected to build production systems, but you must be comfortable working directly with structured data and technical representations. In particular, you should be able to read and reason about JSON schemas and structured data models, understand validation logic, follow data transformations, and detect inconsistencies between conceptual models and their technical implementations. Basic coding literacy (for example in Python or JavaScript) is expected — not to build systems yourself, but to inspect structures, test assumptions, verify implementation choices, and challenge technical contributors when needed. Recruit, onboard, and supervise freelancers/contractors Review applicants, run test tasks, onboard the right people, supervise deliverables, and maintain quality across part-time developers, researchers, designers, and video creators. Use AI tools as a core productivity lever Actively and skillfully apply modern AI tools for synthesis, drafting, coordination, screening, documentation, and workflow acceleration. We expect real fluency — not “I use ChatGPT.” Help build the Innovation function Bring structure to workflows, support future hiring, define roles, and, as the team grows, supervise additional contributors. Currently there is no fixed staff under the Innovation Director — only part-time contractors. Support grant and proposal execution Manage timelines, coordinate inputs, organize materials, and keep the process moving while the Innovation Director leads the scientific and strategic content. Absorb other high-leverage execution work Video/content collaborator coordination, turning ideas into work plans, and other execution tasks that should no longer sit with the Director. What Success Looks Like Within the first few months you will have: – noticeably reduced the Innovation Director’s day-to-day involvement in execution – improved follow-through and speed across technical and contractor projects – made hiring and freelancer management far more efficient created reliable structure without bureaucracy – reduced conceptual drift between scientific models and technical outputs The ultimate measure: important work advances reliably even when the Director is focused elsewhere. Ideal Profile & Qualifications Must-Have – Proven track record managing complex, multi-contributor projects – Strong scientific reasoning ability: you understand how to work with empirical data, evaluate assumptions, and reason through structured models (formal training not required, but capability is essential) – Strong technical comfort: JSON, structured data, specifications, and implementation logic should not feel alien, even if you are not a coder – Excellent written English and professional judgment – Real, daily fluency with modern AI tools for actual work leverage – Experience actively managing contractors or freelancers, including setting direction, reviewing work, and maintaining quality – Ability to operate independently in ambiguous, evolving environments Strongly Preferred – Background in technical program management, product operations, startup operations, or chief-of-staff / founder-support roles – Background in a scientific or quantitative field (e.g., biology, physics, economics, engineering, or similar), or demonstrated ability to engage deeply with scientific material – Experience working directly with founders or directors – Familiarity with tools like Notion, Linear, Jira, ClickUp, etc. Interest in scientific, mission-driven, or animal-welfare work Nice to Have – Grant/proposal coordination experience – Upwork or freelancer-platform experience – Prior role helping a small team scale from founder-led to more structured Working Style We Value You create clarity and momentum, not complexity. You know where information should live and how to keep systems light but reliable. You do not scatter important material across tools, chats, and documents in ways that create confusion or duplication. You are proactive, judgment-driven, and comfortable with partial information. Initial Scope Starts as a contract / fractional engagement (part-time or substantial hours per week) with clear possibility to grow into a longer-term, higher-commitment role if the fit is excellent. Interview Process Application Review Take-home Exercise Screening Interview Final Interview Trial Period Engagement Structure & Compensation This role will begin as a part-time contract engagement (approximately 15–20 hours per week) for an initial 8-week paid trial period. If successful, we expect to continue working together on a longer-term basis. Over time, there may be opportunities to expand scope and hours depending on organizational needs and candidate interest. We expect compensation to fall roughly in the range of $40–80/hour depending on experience, with flexibility for exceptional candidates. This role is designed to be sustainable as a part-time, high-impact position rather than a full-time role compressed into fewer hours.
+
+Digital Project Management
+
+Project Management
+
+Qualitative Research
+
+Scientific & Technical Services
+Proposals: 20 to 50
+Posted 2 days ago
+Developer
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$30K+
+spent
+
+Location United States
+Hourly: $40.00 - $60.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+IMPORTANT: If you email me, linkedin message me, or anyone on our team you will be instantly disqualified. DO NOT CONTACT ME OUTSIDE OF UPWORK! Job Description We’re looking for a thoughtful, detail-oriented full-stack developer to join our team working on Feedotter, a SaaS application with both a legacy backend and a modern frontend. This is ongoing work (20–30 hours/week) with the potential to grow into a full-time role. This role is not about rushing out code. It’s about writing solid, well-tested, well-reasoned code—and being able to clearly explain your decisions. ## What You’ll Be Doing - Adding small to medium features across the application - Debugging and fixing issues across both frontend and backend - Gradually learning the system and taking on more ownership over time - Collaborating with the team to clarify requirements when specs aren’t perfect - Writing clean, maintainable, and well-tested code ## Tech Stack ### Backend (Legacy): - PHP (Symfony framework) - Doctrine ORM & migrations - MySQL ### Frontend (Modern): -React -Next.js -MongoDB You don’t need to be world-class in everything, but you must be comfortable working across the stack. ##What We’re Looking For - Strong Engineering Habits - You test your work before submitting it - You reread and validate your code - You think through edge cases - You ask questions when something is unclear - AI-Assisted Development (Required) We expect developers to use tools like Cursor, Claude Code, etc. However: - You must fully understand the code you ship - You can explain why you implemented something a certain way - You don’t blindly copy/paste generated code Product Thinking - You can spot gaps in specs - You suggest better approaches when appropriate - You help us arrive at the right solution, not just the requested one Communication -Clear written communication -Proactive about blockers and questions -Comfortable explaining technical decisions ## What This Role Is NOT - Not a “generate code as fast as possible” role - Not a task-only execution role with zero thinking - Not a fit if you rely on AI without understanding the output ## Hours & Rate - 20–30 hours per week to start - Potential to grow into full-time - Target rate: ~$40–$60/hour depending on experience ## To Apply, Please include: - A brief description of a recent project where you worked across both frontend and backend - How you use AI tools in your workflow (be specific) - An example of a bug you debugged recently and how you approached it - Your experience with Symfony and/or Next.js If you’re someone who takes pride in your work, thinks critically, and wants to grow with a product over time, we’d love to talk.
+
+PHP
+
+React
+
+Next.js
+
+MySQL
+
+MongoDB
+Proposals: 50+
+Posted 1 hour ago
+🤖 Hyperagent AI Builder | AI Agent Builder | API Integration Expert | Automation Workflow Developer
+ 
+Verified
+Payment verified
+Rating is 4.8 out of 5.
+4.8
+$10K+
+spent
+
+Location United States
+Hourly
+Expert
+Est. time:
+1 to 3 months, Less than 30 hrs/week
+🤖 Claude AI Agent Builder | API Integration Expert | Automation Workflow Developer | OpenAI GPT Specialist About Us: We're a dynamic AI agency startup helping businesses automate their processes through custom AI agents. We're looking for an expert technical partner to join our project team. What We're Looking For: ✅ Proven expert in AI agent development ✅ Advanced mastery of Claude, Hyperagent, OpenClaw, ChatGPT, OpenAI APIs, Go High Level ✅ API expertise and complex integrations ✅ Deep knowledge of AI ecosystem (Make, Zapier, LangChain, etc.) ✅ Ability to deliver operational workflows within 48-72h max ✅ Portfolio of completed AI agents ✅ Excellent verbal English communication - must be comfortable presenting on camera ✅ Client-facing experience for technical handoffs and setup explanations Your Responsibilities: 🎯 Design and develop agentic AI solutions 🎯 Integrate agents with existing client systems 🎯 Create custom automated workflows 🎯 Conduct live client presentations to explain agent setup and functionality 🎯 Lead technical handoff sessions via video calls 🎯 Provide comprehensive documentation and training 🎯 Meet strict delivery deadlines (48-72h per project) Project Structure: 💰 Pay per project basis (1 client setup = 1 project) ⚡ Fast turnaround required - maximum 72 hours per workflow 📹 Camera-ready communication essential for client interactions Required Skills Keywords: AI Automation | Machine Learning | Chatbot Development | Workflow Automation | Python | JavaScript | API Development | AI Integration | Process Automation | Custom AI Solutions Submit your Upwork proposal including: Brief overview of your AI agent experience 2-3 relevant portfolio examples (loom video walkthroughs of agents/workflows you setup with test case) Your availability for 48-72h turnaround projects Confirmation of your English communication skills for client calls
+
+Business Process Automation
+
+API
+
+API Integration
+
+Automation
+
+API Development
+Proposals: 20 to 50
+Posted yesterday
+Urgent: Looking for Sr. Business Analyst for US-based company!
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$100K+
+spent
+
+Location United States
+Hourly
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+Important Notice to Applicants: Please note that we are only contacting and communicating with candidates through Upwork or our dedicated company HR email address. Any applications or direct contact made outside of these channels, including emails, social media messages, direct messages to our CEO, or messages sent to our general company email, will not be considered and will be automatically declined. About the Company: We are a private U.S.-based company operating across multiple departments that support legal, staffing, and client-service operations. Our teams collaborate in dynamic, fast-paced environments focused on innovation, integrity, and client success. In this role, you’ll work closely with leadership and cross-functional teams, making a real impact in operational, legal, and client-focused projects—all from the comfort of your home. Details about our company structure and associated teams will be introduced during the interview process Position Summary We are seeking a Senior Business Analyst to lead requirements gathering, process analysis, and stakeholder management across our Salesforce and Litify platform. The role serves as the primary liaison between business stakeholders - internal teams and law firm clients, and our technical team, ensuring that engineering effort is directed toward well-defined, high-impact work. This is an AI-forward role. The successful candidate will integrate AI tools such as Claude into daily workflows, artifacts, agents, or automations that improve team efficiency. We are seeking a collaborative, curious professional who actively explores emerging technologies and contributes new ideas to the team. Key Responsibilities: Discovery and Requirements Conduct stakeholder interviews with internal teams and law firm clients to elicit business requirements Produce clear, comprehensive requirements documentation that supports technical design and implementation Validate proposed work against existing solutions and prioritize requests based on business value User Stories and Backlog Management Author user stories in Jira, including background, objectives, scope, acceptance criteria, and open questions Coordinate with the technical team to ensure clean handoff between business requirements and technical design Maintain and groom the product backlog, ensuring priorities reflect current business needs User Acceptance Testing and Release Develop UAT tests and coordinate testing across business stakeholders Triage defects and feedback before escalation to engineering Author release notes and deliver end-user training and documentation Manage stakeholder communication throughout the development lifecycle AI and Process Automation: Leverage AI tools (Claude, ChatGPT, or equivalent) to support requirements drafting, transcript analysis, test case generation, and data analysis Stay current on emerging AI capabilities and recommend applications to internal stakeholders Technology Environment: CRM and Matter Management: Salesforce, Litify Marketing and Communications: HubSpot Integration and Middleware: Zapier, Make.com, Direct APIs Project Management: Jira AI Platforms: Claude (including Projects, Skills, and Agents) and other emerging tools Required Qualifications: 5-8 years of experience as a Business Analyst, preferably in CRM, SaaS, or legal technology environments Demonstrated hands-on experience with Salesforce; Litify or comparable legal CRM platform strongly preferred Working knowledge of integration and middleware tools such as Zapier or Make.com or similar Daily, practical experience using AI tools such as Claude or ChatGPT in a professional context Demonstrated experience building with AI, examples include prompt libraries, Claude Projects, custom agents, or LLM-powered automations Excellent written communication skills, with the ability to produce clear and authoritative documentation Availability during US Eastern Time business hours Preferred Qualifications Direct experience with legal technology platforms (Litify, Filevine, MyCase, or similar) or law firm operations Experience managing structured Jira workflows at scale, including epics, stories, and acceptance criteria Working understanding of REST APIs, webhooks, and common integration patterns Background in process improvement, operations research, or change management Familiarity with agentic AI concepts including MCP servers, tool use, and agent frameworks What We Look For: Proactive engagement with emerging technologies, particularly in AI and automation Strong analytical mindset with the ability to challenge assumptions and prioritize effectively Collaborative working style and comfort working transparently with cross-functional teams Service orientation focused on enabling team performance Comfort operating with ambiguity and making well-reasoned, clearly documented decisions. Application Instructions: Qualified candidates should submit the following: A representative work sample, such as a requirements document, user story, or process map (redacted as appropriate) A brief example demonstrating professional use of AI tools, such as a prompt, Claude Project, agent, or automation A short statement (under 150 words) describing the first workflow you would seek to improve or automate upon joining
+
+Tech & IT
+
+Business Analysis
+
+Requirement Analysis
+Proposals: 20 to 50
+Posted yesterday
+Business Development Representative (Remote)
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$100K+
+spent
+
+Location United States
+Fixed price
+Intermediate
+Est. budget:
+$500.00
+We are a top rated software development and technical consultancy and agency based in New York. We have grown tremendously in the past few years since our founding in 2019 and we're looking to scale even further in 2025 (and beyond!). We're looking to add a few sales/marketing professionals to our team and we'd like to hear from you! This is a full-time opportunity with working hours in US Eastern Time (9am to 6pm ET). *Assist Fulcrum scale its inbound and outbound sales and marketing efforts using various channels. Experience in: *Upwork search and outreach as part of an agency *LinkedIn Sales Navigator *Various social media platforms to drive engagement and reach *Crafting and improving email campaigns *Participating in onsite / in-person conference, exhibits is a huge plus *Proven experience using AI tools (e.g., ChatGPT, Clay, Apollo, or similar) If you're interested, we'd like to get to know you. Please send the following: 1. A written paragraph (or more) of a pitch to anyone you'd like to convince to try your preferred sport (or hobby) 2. Video introduction, Go to this URL (link removed) and record a short 1 minute introduction about you, what you are currently working on, and why you think you are a good fit for this opportunity at Fulcrum We look forward to the possibility of having you on board as a key contributor to Fulcrum Solutions. We anticipate the chance to discuss your potential fit within our thriving organization.
+
+Sales
+
+Business Development
+
+Price & Quote Negotiation
+
+Lead Generation
+
+Relationship Management
++1
+Proposals: Less than 5
+Jobs Per Page:   
+10
+
+Pagination
