@@ -1,0 +1,269 @@
+Sort by
+Sort by: Best Matches
+
+Posted 2 days ago
+Need AI Automation Engineer to Scale Our System
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$6K+
+spent
+
+Location Denmark
+Fixed price
+Intermediate
+Est. budget:
+$20.00
+We are looking for a skilled AI Automation Engineer to help us optimize and scale our existing system. This is a small initial task to evaluate skills, with potential for long-term collaboration. Requirements: Experience with AI automation tools and workflows Ability to streamline and scale existing systems Knowledge of APIs, integrations, and automation platforms Strong problem-solving skills Task Details: Review our current Suggest and implement small automation improvements Ensure smooth and efficient system performance Opportunity: This is a starter project. If the work is satisfactory, we are open to long-term collaboration on bigger projects.
+
+AI Agent Development
+
+AI App Development
+
+AI Speech-to-Text
+
+AI Text-to-Speech
+
+OpenAI API
++15
+Proposals: 20 to 50
+Posted yesterday
+AI developer
+ 
+Verified
+Payment verified
+Rating is 4.1 out of 5.
+4.1
+$10K+
+spent
+
+Location Malta
+Hourly: $3.00 - $4.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+We are looking for a highly skilled AI Developer to build and scale intelligent finance tools that automate accounting, auditing, and financial workflows. You’ll work on cutting-edge solutions involving AI, OCR, and data processing to transform how financial data is handled and analyzed. This is not a generic AI role — we need someone who understands how to apply AI in real business environments, especially within finance, accounting, and compliance.
+
+Artificial Intelligence
+Proposals: 15 to 20
+Posted 2 days ago
+AI-Powered Construction Estimation & Learning Platform (SaaS / MVP + Scaling)
+ 
+Verified
+Payment verified
+Rating is 4.6 out of 5.
+4.6
+$20K+
+spent
+
+Location Germany
+Fixed price
+Expert
+Est. budget:
+$123,456.00
+ob Description We are looking for an experienced developer (or small team) to build a custom AI-powered estimation and quotation platform for a construction business (landscaping, paving, civil works). This is not a simple calculator — the goal is to build a scalable, learning system that improves over time based on real project data. 🔧 Core Features (MVP) The system should: Generate structured cost estimations and quotations (LV format) Work with: m² / linear meters (lfm) manual input PDF measurements text descriptions Break down tasks into detailed line items Calculate: labor time machine usage Generate: customer offers (PDF) internal calculation worker instructions 🤖 AI Functionality (Important) The system must include AI-based learning, not just static logic. It should: Compare planned vs actual project data Learn from: time deviations cost differences material usage Suggest: price adjustments time adjustments missing positions Example: If driveway projects consistently take longer → suggest higher pricing. ⚠️ Important: AI should suggest, not automatically change values (user approval required). 🔗 API & Integrations The tool must be able to: Export offers via API to: CRM systems ERP systems accounting software Support: REST API Webhooks JSON / CSV / PDF export Be built in a modular and extensible way 🧱 System Requirements Clean architecture (modular, scalable) Database for: projects positions materials historical data Role system: office (estimation) workers (instructions) admin 📊 Long-Term Vision This project is meant to become a central business platform, including future features like: mobile app for workers time tracking material ordering project management AI-based suggestions for pricing and planning ⚙️ Tech Stack (suggested, flexible) We are open, but prefer: Backend: Python (FastAPI) or Node.js Database: PostgreSQL / Supabase Frontend: React / Next.js AI: OpenAI API or similar Cloud: AWS / Vercel / Supabase 📅 Project Scope We want to start with an MVP, then scale. 👉 Phase 1: Basic estimation engine LV output (PDF) simple AI suggestions database structure 👉 Phase 2: learning system API integrations UI improvements 💰 Budget Open — depending on experience and proposal. We are looking for a long-term collaboration, not just a one-time project. ✅ Who we are looking for Experience with SaaS platforms Experience with AI integration Strong backend architecture skills Ability to think in systems, not just code 📩 To apply, please include: Similar projects you built Suggested architecture Your approach to the AI learning system Estimated timeline for MVP Edit: Current System Landscape We are currently using multiple tools to manage our business operations. These systems are working individually, but not well connected, which creates inefficiencies and duplicate data. 1. HubSpot (Ticket System / CRM) All customer emails come into HubSpot Requests are assigned and processed internally Customer information is stored here Used as central communication/ticket system 2. Accounting Software Used for: creating offers (quotes) creating invoices tracking payments Bank accounts are connected Financial tracking is done here 3. Craftboxx (Team & Scheduling Software) Used for: scheduling teams assigning jobs to workers Office team creates jobs and assigns them to crews Each crew consists of 2 workers Workers use a mobile app to: view assigned jobs track working hours enter used materials 4. Cloud Phone System Used for incoming calls and inquiries Customer requests often start here Not currently connected to other systems ⚠️ Current Problem We have fragmented data across multiple systems: Customer data exists in multiple places (duplicate data) Information is not synchronized To get full project information, we must check: HubSpot Accounting software Craftboxx Phone system 👉 This leads to: wasted time errors missing information inefficient workflows 🎯 Goal of the New System The new AI-based system should act as a central platform that connects everything. Key goals: Single source of truth for customer data Avoid duplicate data across systems Centralize: customer info projects offers communication execution data 🔗 Integration Requirements The new system should: Connect to HubSpot (API) Connect to accounting software Connect to Craftboxx (if API available) Connect to cloud phone system Sync or import: customer data project data communication data job data 🤖 Advanced Vision Long-term, we want: A central AI-driven platform That understands: customers projects costs team performance And can: suggest better pricing improve planning reduce errors automate workflows 🚀 Important for Developers This is not just a tool. 👉 It is a system integration + AI platform project We are looking for someone who understands: APIs and system integration Data synchronization Scalable architecture AI-based systems 💡 Final Note Our goal is to move from: ❌ Multiple disconnected tools ➡️ to ✅ One connected intelligent system
+
+Machine Learning
+
+Artificial Intelligence
+Proposals: 50+
+Posted yesterday
+AI Automation Builder (Part-time, Hourly)
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$200+
+spent
+
+Location ESP
+Hourly: $20.00 - $40.00
+Intermediate
+Est. time:
+More than 6 months, 30+ hrs/week
+About Altitude Altitude is on a booming trajectory. We're building something new: AI agent teams that run full sales operations for B2B companies. Not a SaaS platform, not a chatbot. Actual AI agents with roles, personalities, and tasks, working together like a real sales team. Prospecting, outreach, pipeline management, content, all running 24/7. We're a small, fast-moving company based remotely, working with clients across Europe. Our founder builds alongside the agents, and we ship fast. The stack is Claude code, Discord, ElevenLabs, Instantly, Apollo, and Supabase and more. We're looking for a builder to join us and help scale what we've started. What you'll do Build AI agent workflows using Claude Code and Python. Integrate APIs (CRMs, email platforms, enrichment tools, voice/TTS). Turn structured methodologies into automated multi-step agent pipelines. Work alongside existing AI agents (yes, really) and a founder who builds too. You're a fit if You've built with LLMs (Claude, GPT, etc.) beyond just prompting You can take a workflow description and architect it into working code. You're self-directed. This isn't micromanaged. You get a task, you ship it. Bonus: experience with sales/marketing automation tools Setup Remote, async. Work on your schedule. Start at 10-15 hrs/week, scale with projects Hourly rate, paid weekly Trial project first so we both know it's a fit To apply Send me: One project where you built something with an LLM API Your hourly rate Your weekly availability
+
+API
+
+Lead Generation
+Proposals: 50+
+Posted 2 days ago
+AI Development Team for Transmedia Branding Platform (Multi-System Build)
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location United States
+Fixed price
+Intermediate
+Est. budget:
+$100,000.00
+Looking for an AI-focused development team (or highly capable individuals) to build a transmedia branding platform composed of multiple integrated systems. This is not a small tool or single-use app. This is a full platform build designed to unify creativity, branding, and business infrastructure into one system. The platform consists of 7 interconnected systems: AI-assisted idea intake (multimodal: text, voice, image, etc.) Narrative organization system (structured creative database) Narrative creation system (output and product development) Marketplace (monetization layer) Website and brand-building system CRM, analytics, and data tracking Community system (interaction and growth) Details of the full system will be shared after NDA. Phase 1 Focus: The first working version will prioritize: Idea intake (imagination layer) Narrative organization Creation/output system Core CRM and data tracking The remaining systems will be developed in parallel or layered in shortly after. The goal is a unified platform from the start, not disconnected tools. Platform Direction: Web application first Mobile integration after Desktop layer later System should support: Single-user workflows initially Collaboration capability built into the foundation (expandable later) AI Philosophy: Strong preference for open-source solutions AI-assisted development is expected (efficient use, not over-reliance) Minimal API dependence unless there is a clear advantage in speed, cost, or quality System will rely on agent-based workflows for internal logic and automation Development Approach: We are building this fast and iteratively: Functional first Refine and expand after Priority order: Quality (must be usable long-term) Speed (rapid iteration) Simplicity in UX/UI Hiring Structure: Open to: A small, high-skill team Individual developers who can collaborate or help assemble a team Existing teams/agencies if there is a strong advantage This is not a one-off project. There will be multiple AI systems built after this, so long-term collaboration is preferred. Requirements: AI Research Must be up to date with modern AI tools, frameworks, and workflows. AI-Assisted Development Looking for developers who: Use AI to accelerate output intelligently Can multitask and move quickly Catch and resolve issues efficiently Build clean, scalable systems This is not vibe coding. This is AI-enhanced engineering. Open Source Awareness Strong understanding of: Open-source tools System ownership Avoiding dependency risks Additional Advantages (Not Required): Experience with narrative systems, storytelling, or creative tools Ability to translate abstract concepts into technical systems Based in Texas or open to relocation (not required, but helpful) Hiring is global. Application Requirements: When applying, include: Examples of AI systems you have built (not just used) Your preferred AI development stack How you would approach building a modular, multi-system platform Whether you are applying as an individual or team Final Notes: This is a large-scale build executed in phases. We are looking for people who can move fast, think structurally, and build systems that last. If that aligns, apply.
+
+AI App Development
+
+AI Agent Development
+
+AI Builder
+
+Computer Engineering
+Proposals: 50+
+Posted 2 days ago
+Full-stack developer needed for AI SaaS Platform (MVP → Scale)
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location Germany
+Hourly: $34.00 - $42.00
+Expert
+Est. time:
+More than 6 months, 30+ hrs/week
+We’re building a B2B SaaS platform with AI features (analytics + automation). MVP is live, now need to scale, clean architecture, and add new modules. Scope: ▫️ Refactor backend (Node.js/NestJS) ▫️ Build new APIs + improve existing ones ▫️ Develop React/Next.js frontend (dashboard, real-time data) ▫️ Integrate AI features (OpenAI or similar) ▫️ Optimize DB (PostgreSQL/MongoDB) ▫️ Prepare system for 10k+ users Requirements: - Strong JS/TS (full-stack) - Experience with scalable systems - API design (REST / GraphQL) - AWS basics - Clean code, no overengineering Nice to have: - Microservices experience - AI integrations - Real-time features Start: ASAP Details: after NDA + docs Attach Github profile
+
+OpenAI API
+
+Web Application
+
+TypeScript
+
+Node.js
+
+API
+
+JavaScript
+
+API Integration
++3
+Proposals: 50+
+
+Featured
+Posted 6 hours ago
+AI Systems Engineer – Build & Scale Internal Business OS (APIs, Automation, Claude Code)
+ 
+Verified
+Payment verified
+Rating is 4.4 out of 5.
+4.4
+$10K+
+spent
+
+Location New Zealand
+Hourly: $40.00 - $80.00
+Expert
+Est. time:
+3 to 6 months, Less than 30 hrs/week
+We are building an internal AI-powered operating system for a fast-scaling digital agency The system connects: Airtable (database) Notion (documentation / ops) Discord & Telegram (notifications / team comms) External APIs (sales data, CRM, analytics) We already have a partially built system with working integrations, but it is messy, slow to debug, and not production-ready. We need someone to take ownership, clean it up, and scale it properly. 🔧 What You’ll Do Audit the current system and identify weak points Clean and restructure existing architecture Debug API/data flow issues across multiple platforms Build reliable pipelines for: Sales tracking Performance dashboards Automated alerts (Telegram/Discord) Improve speed, reliability, and scalability This is not a simple build — this is fixing and scaling a live system. 🧠 What We’re Looking For Strong experience with API integrations and automation Experience building internal tools or business systems Ability to debug messy systems quickly Strong understanding of system architecture and data flow Comfortable working with tools like Airtable, Notion, webhooks, etc. We are not looking for a basic developer — we need someone who can think in systems and take ownership. ⚡ How We Work We move fast and expect clear communication You will be given access to the current system and context Minimal hand-holding — we expect you to figure things out and propose solutions 🎯 Trial Task We will start with a paid trial: Review the system Fix 1–2 key issues Implement a small improvement If it goes well → long-term role 📩 To Apply Please include: Examples of similar systems you’ve built (VERY important) Your experience with APIs + automation tools Answer this: If you inherited a messy system with multiple integrations (Airtable, Notion, Telegram), what are the first 3 steps you would take to stabilize it?
+
+Python
+
+API
+
+Airtable
+
+Automation
+Proposals: 50+
+Posted yesterday
+Full Stack AI Developer | LLM, React, Node.js | AI SaaS & Chatbot Development
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+$1K+
+spent
+
+Location Canada
+Fixed price
+Expert
+Est. budget:
+$30.00
+We are looking for an experienced Full Stack AI Developer to build and scale an intelligent, AI-powered application. The ideal candidate has strong experience with LLMs (GPT-based systems), JavaScript-based full-stack development, and AI integrations. This is an opportunity to work on cutting-edge AI products with real-world impact. Key Responsibilities Develop and deploy full-stack AI applications using React and Node.js Integrate and optimize LLMs (e.g., GPT-4/5) for use cases like chatbots, automation, and content generation Build scalable APIs and backend services using Node.js Design clean, responsive, and user-friendly front-end interfaces Work with vector databases and embeddings (e.g., Pinecone, Weaviate, FAISS) Implement AI workflows using tools like LangChain / LlamaIndex Ensure performance, security, and scalability of applications Required Skills: Strong experience in Full Stack Development (React + Node.js) Proven experience working with AI/ML models, especially LLMs Familiarity with OpenAI APIs or similar AI platforms Experience with databases (SQL/NoSQL) Understanding of REST APIs and microservices architecture Knowledge of cloud platforms (AWS, GCP, or Azure) Nice to Have: Experience building AI SaaS products Strong prompt engineering skills Familiarity with Docker, Kubernetes Experience with real-time apps (WebSockets, streaming APIs) Let's connect to discuss this further!
+
+AI Development
+
+AI App Development
+
+API Integration
+
+Web Application
+Proposals: 50+
+Posted yesterday
+AI-Assisted Fitness App (Claude + Lovable) — Improve, Stabilize & Scale MVP
+ 
+Verified
+Payment verified
+Rating is 0 out of 5.
+0
+$0
+spent
+
+Location NZL
+Fixed price
+Intermediate
+Est. budget:
+$10.00
+Description: I’ve built an initial MVP of a fitness app using AI tools (Lovable + Claude code), and I’m now looking for an experienced developer to help refine and scale it. The current app works but needs: Codebase review and cleanup (AI-generated inconsistencies) Bug fixes and performance improvements Implementation of small features (e.g., calorie tracking) UI/UX refinements for smoother user experience API corrections and better structure Tech stack includes React Native I’m specifically looking for someone who: Has experience working with AI-generated code (Claude, GPT, etc.) Can quickly understand and improve existing MVPs Thinks beyond quick fixes and can help evolve this into a stable product This will start as a small test task, but I’m open to ongoing work if it’s a good fit. Please share: Relevant experience with AI-assisted development Examples of improving or scaling an existing app
+
+React Native
+
+Mobile App Development
+Proposals: 15 to 20
+Posted 2 days ago
+Build a High-Converting Image Ad Creative Workflow for Agency (AI + Testing + Scale)
+ 
+Verified
+Payment verified
+Rating is 5.0 out of 5.
+5.0
+ 
+Location United States
+Hourly: $20.00 - $40.00
+Intermediate
+Est. time:
+1 to 3 months, Less than 30 hrs/week
+Job Description: I’m looking for someone who can help me design and build a scalable system for image ad creatives using AI. This is not a graphic design role. This is for someone who understands how to combine AI + workflows + creative production to build a system that consistently produces high-converting ad creatives at scale. Context (Important): We are an ad agency working across multiple niches and client offers. This system needs to work across different industries, avatars, and messaging angles. The goal is to dial in a creative workflow that allows us to: - Quickly understand a new client/offer - Generate strong angles and concepts - Produce high-converting image ads - Test and iterate efficiently - Scale what works across accounts The Goal: Build a repeatable, scalable image creative engine that our team can use daily to: - Produce better ad creatives faster - Test more hooks, angles, and messaging - Generate variations of winning ads - Improve performance across client campaigns This needs to be practical, usable, and built for real agency execution. I’m Looking For Someone Who Can: - Design the full workflow from idea → concept → design → iteration - Recommend the best tech stack to make this work at scale - Build systems that adapt across different niches and offers - Balance automation with creative quality (no generic AI output) - Structure everything into clear SOPs for a team to follow Scope: 1. AI-Powered Concept & Angle System - Framework to break down any client offer quickly - Generate angles, hooks, and concepts at scale - Build a reusable “concept bank” across niches 2. Ad Creative Frameworks - Layout structures for high-performing image ads - Headline + visual pairing systems 3. Creative Production Workflow - System for turning concepts into finished creatives - Clear design and messaging guidelines - Efficient batching and production process 4. Testing & Iteration System - Process for iterating and improving creatives 5. SOPs + Templates - Creative briefs - Concept frameworks - Prompt libraries - Design templates - Iteration checklists Important: - This is not about making a few ads. - This is about building a creative system that works across clients, niches, and campaigns. How to Apply: Please include: - Have you built anything like this before? - What did you build and what were the results? - What tech stack would you recommend for an agency like this and why? - How would you structure this workflow to work across multiple niches and offers? - Examples of ad creatives or systems you’ve worked on Goal: - Create a system that doesn’t just “make images” — it consistently produces high-performing ad creatives across different clients at scale. If this works, this can turn into ongoing work building and optimizing the system.
+
+AI Image Generation
+
+AI Implementation
+
+AI Image Generator
+
+Automation
+
+Artificial Intelligence
++1
+Proposals: 20 to 50
+Jobs Per Page:   
+10
+
+Pagination
+Current page 1 of 382 1
+go to page 2
+go to page 3
+go to page 4
+...
+Current page 1 of 382
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices California Consumer Privacy Act (CCPA) Opt-Out
+Accessibility
