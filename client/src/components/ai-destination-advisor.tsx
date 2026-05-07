@@ -293,7 +293,7 @@ export function AiDestinationAdvisor({ currentCity, currentCountry, currentLat, 
                 </button>
               </div>
 
-              <div className="overflow-y-auto flex-1 overscroll-contain">
+              <div className="overflow-y-auto flex-1 overscroll-contain" style={{ paddingBottom: step === "results" ? "80px" : 0 }}>
 
                 {/* STEP 1: FORM */}
                 {step === "form" && (
@@ -468,17 +468,6 @@ export function AiDestinationAdvisor({ currentCity, currentCountry, currentLat, 
                           </motion.div>
                         ))}
 
-                        {destinations.length > 0 && (
-                          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                            <Button
-                              onClick={buildQuickTrip}
-                              className="w-full h-12 text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-2xl shadow-lg"
-                            >
-                              <Route className="w-4 h-4 mr-2" />
-                              Pianifica viaggio completo con queste tappe
-                            </Button>
-                          </motion.div>
-                        )}
                       </>
                     )}
                   </div>
@@ -582,6 +571,24 @@ export function AiDestinationAdvisor({ currentCity, currentCountry, currentLat, 
                   </div>
                 )}
               </div>
+
+              {/* ── Sticky footer: Pianifica button (results step only) ── */}
+              {step === "results" && !loading && destinations.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex-shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900"
+                >
+                  <Button
+                    onClick={buildQuickTrip}
+                    data-testid="button-build-trip"
+                    className="w-full h-12 text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-2xl shadow-lg"
+                  >
+                    <Route className="w-4 h-4 mr-2" />
+                    Pianifica viaggio completo
+                  </Button>
+                </motion.div>
+              )}
             </motion.div>
           </>
         )}
