@@ -6,7 +6,8 @@ import {
   Filter, X, MessageCircle, Calendar, Send, Image,
   Video, Link as LinkIcon, Share2, Trash2, Camera, CalendarPlus, Plane, FileImage, Hotel, ChevronDown,
   Star, Copy, ExternalLink, Route, Bed, MapPinned, Navigation, Bookmark, Eye,
-  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim, Bot, Sparkles, ChevronUp, User2
+  Pencil, Wifi, Zap, BookOpen, Coffee, BaggageClaim, Bot, Sparkles, ChevronUp, User2,
+  Clock, Home
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -34,6 +35,7 @@ import { FeatureDiscoveryRow } from "@/components/feature-discovery-card";
 import { FirstPostNudge } from "@/components/first-post-nudge";
 import { BottomNav } from "@/components/bottom-nav";
 import { QuickCheckIn } from "@/components/quick-checkin";
+import { useOverpass, type OsmPlace } from "@/hooks/use-overpass";
 import { MapErrorBoundary } from "@/components/map-error-boundary";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
@@ -294,6 +296,24 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
       onMapClick(e.latlng.lat, e.latlng.lng);
     },
   });
+  return null;
+}
+
+function MapBoundsTracker({ onBoundsChange }: { onBoundsChange: (s: number, w: number, n: number, e: number, z: number) => void }) {
+  const map = useMapEvents({
+    moveend: () => {
+      const b = map.getBounds();
+      onBoundsChange(b.getSouth(), b.getWest(), b.getNorth(), b.getEast(), map.getZoom());
+    },
+    zoomend: () => {
+      const b = map.getBounds();
+      onBoundsChange(b.getSouth(), b.getWest(), b.getNorth(), b.getEast(), map.getZoom());
+    },
+  });
+  useEffect(() => {
+    const b = map.getBounds();
+    onBoundsChange(b.getSouth(), b.getWest(), b.getNorth(), b.getEast(), map.getZoom());
+  }, []);
   return null;
 }
 
@@ -1206,6 +1226,7 @@ export default function UnifiedMap() {
   const [showNewEvent, setShowNewEvent] = useState(false);
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showAddSpot, setShowAddSpot] = useState(false);
+  const { osmPlaces, osmLoading, queryBounds } = useOverpass();
   const [spotLocations, setSpotLocations] = useState<(Location & { user: User })[]>([]);
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [shareModal, setShareModal] = useState<{ open: boolean; type: "post" | "profile" | "trip" | "invite" | "event"; id: string; title: string } | null>(null);
@@ -1676,6 +1697,7 @@ export default function UnifiedMap() {
             />
             <MapClickHandler onMapClick={handleMapClick} />
             <MapCenterTracker onCityChange={setMapCenterCity} />
+            <MapBoundsTracker onBoundsChange={queryBounds} />
             <FlyToUserLocation location={userLocation} active={!highlightedTripId} trigger={flyTrigger} />
             
             {userLocation && !isNaN(userLocation[0]) && !isNaN(userLocation[1]) && (
@@ -2215,6 +2237,76 @@ export default function UnifiedMap() {
               </MarkerClusterGroup>
             )}
             {countryFilter && <ZoomToCountry lat={countryFilter.lat} lng={countryFilter.lng} />}
+
+            {filters.showSpots && osmPlaces.map((place) => (
+              <Marker
+                key={`osm-${place.id}`}
+                position={[place.lat, place.lng]}
+                eventHandlers={{ click: (e) => { e.originalEvent?.stopPropagation(); } }}
+                icon={L.divIcon({
+                  html: `<div style="width:30px;height:30px;border-radius:50%;background:${place.category === 'cafe' ? '#f59e0b' : place.category === 'coworking' ? '#10b981' : place.category === 'library' ? '#6366f1' : place.category === 'hostel' ? '#3b82f6' : '#8b5cf6'};color:white;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);border:2px solid rgba(255,255,255,0.7);opacity:0.88;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      ${place.category === 'cafe' ? '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>' : place.category === 'coworking' ? '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>' : place.category === 'library' ? '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>' : place.category === 'hostel' ? '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>' : '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 22v-4h6v4"/>'}
+                    </svg>
+                  </div>`,
+                  className: "",
+                  iconSize: L.point(30, 30),
+                  iconAnchor: L.point(15, 15),
+                })}
+              >
+                <Tooltip direction="top" offset={[0, -8]} opacity={0.95} className="nomad-tooltip">
+                  <div className="flex items-center gap-2 px-1 py-0.5">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: place.category === 'cafe' ? '#f59e0b' : place.category === 'coworking' ? '#10b981' : place.category === 'library' ? '#6366f1' : place.category === 'hostel' ? '#3b82f6' : '#8b5cf6' }}>
+                      {place.category === 'cafe' ? <Coffee className="w-3 h-3 text-white" /> : place.category === 'coworking' ? <Wifi className="w-3 h-3 text-white" /> : place.category === 'library' ? <BookOpen className="w-3 h-3 text-white" /> : place.category === 'hostel' ? <Home className="w-3 h-3 text-white" /> : <BaggageClaim className="w-3 h-3 text-white" />}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold leading-tight">{place.name}</p>
+                      <p className="text-[10px] text-gray-500">{place.category === 'cafe' ? 'Café · OpenStreetMap' : place.category === 'coworking' ? 'Coworking · OSM' : place.category === 'library' ? 'Biblioteca · OSM' : place.category === 'hostel' ? 'Ostello · OSM' : 'Dep. Bagagli · OSM'}</p>
+                    </div>
+                  </div>
+                </Tooltip>
+                <Popup className="custom-popup" maxWidth={260} minWidth={200} autoPanPadding={[20, 20]} autoPan={true}>
+                  <div className="popup-animate-in w-[200px]">
+                    <div className="flex items-center gap-2 p-2 pb-1">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: place.category === 'cafe' ? '#f59e0b' : place.category === 'coworking' ? '#10b981' : place.category === 'library' ? '#6366f1' : place.category === 'hostel' ? '#3b82f6' : '#8b5cf6' }}>
+                        {place.category === 'cafe' ? <Coffee className="w-4 h-4 text-white" /> : place.category === 'coworking' ? <Wifi className="w-4 h-4 text-white" /> : place.category === 'library' ? <BookOpen className="w-4 h-4 text-white" /> : place.category === 'hostel' ? <Home className="w-4 h-4 text-white" /> : <BaggageClaim className="w-4 h-4 text-white" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm leading-tight truncate">{place.name}</p>
+                        <p className="text-[10px] text-gray-500">{place.category === 'cafe' ? 'Café' : place.category === 'coworking' ? 'Coworking' : place.category === 'library' ? 'Biblioteca' : place.category === 'hostel' ? 'Ostello / Guest House' : 'Deposito Bagagli'}</p>
+                      </div>
+                    </div>
+                    {(place.tags.website || place.tags['contact:website']) && (
+                      <div className="px-2 pb-1">
+                        <a href={place.tags.website || place.tags['contact:website']} target="_blank" rel="noopener noreferrer" className="text-[11px] text-blue-500 underline truncate block">Sito web</a>
+                      </div>
+                    )}
+                    {place.tags.opening_hours && (
+                      <div className="px-2 pb-1 flex items-center gap-1 text-[11px] text-gray-500">
+                        <Clock className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{place.tags.opening_hours}</span>
+                      </div>
+                    )}
+                    {place.tags.internet_access === 'wlan' || place.tags['internet_access:fee'] === 'no' ? (
+                      <div className="px-2 pb-1 flex items-center gap-1 text-[11px] text-green-600">
+                        <Wifi className="w-3 h-3" /><span>WiFi disponibile</span>
+                      </div>
+                    ) : null}
+                    <div className="px-2 pb-2 pt-1">
+                      <a
+                        href={`https://www.openstreetmap.org/node/${place.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-gray-400 hover:text-gray-600"
+                      >
+                        Dati: © OpenStreetMap
+                      </a>
+                    </div>
+                    <PopupAutoClose />
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
           </MapErrorBoundary>
 
