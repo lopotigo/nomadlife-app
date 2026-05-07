@@ -770,6 +770,50 @@ Sitemap: https://nomad-life.app/sitemap.xml
     }
   });
 
+  app.get("/api/locations/:id/ratings", async (req, res) => {
+    try {
+      const { db: dbInstance } = await import("./db");
+      const { locationRatings } = await import("@shared/schema");
+      const { eq: eqOp, avg, count: countFn, sql: sqlFn } = await import("drizzle-orm");
+      const result = await dbInstance.select({
+        avgRating: sqlFn<number>`round(avg(${locationRatings.rating})::numeric, 1)`,
+        count: countFn(),
+      }).from(locationRatings).where(eqOp(locationRatings.locationId, req.params.id));
+      res.send({ avgRating: parseFloat(String(result[0]?.avgRating || 0)), count: Number(result[0]?.count || 0) });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
+  app.post("/api/locations/:id/ratings", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send({ error: "Non autenticato" });
+    try {
+      const { rating, wifiRating, review } = req.body;
+      if (!rating || rating < 1 || rating > 5) return res.status(400).send({ error: "Rating 1-5 richiesto" });
+      const { db: dbInstance } = await import("./db");
+      const { locationRatings } = await import("@shared/schema");
+      const { eq: eqOp, and: andOp, avg, count: countFn, sql: sqlFn } = await import("drizzle-orm");
+      const userId = (req.user as any).id;
+      await dbInstance.insert(locationRatings).values({
+        locationId: req.params.id,
+        userId,
+        rating,
+        wifiRating: wifiRating || null,
+        review: review || null,
+      }).onConflictDoUpdate({
+        target: [locationRatings.userId, locationRatings.locationId],
+        set: { rating, wifiRating: wifiRating || null, review: review || null },
+      });
+      const result = await dbInstance.select({
+        avgRating: sqlFn<number>`round(avg(${locationRatings.rating})::numeric, 1)`,
+        count: countFn(),
+      }).from(locationRatings).where(eqOp(locationRatings.locationId, req.params.id));
+      res.send({ avgRating: parseFloat(String(result[0]?.avgRating || rating)), count: Number(result[0]?.count || 1) });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   app.post("/api/locations", async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).send({ error: "Non autenticato" });
     try {

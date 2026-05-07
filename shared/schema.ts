@@ -877,6 +877,26 @@ export const insertLocationSchema = createInsertSchema(locations).omit({
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
 export type Location = typeof locations.$inferSelect;
 
+// Location Ratings - Social ratings for user-contributed spots
+export const locationRatings = pgTable("location_ratings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  locationId: varchar("location_id").notNull().references(() => locations.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // 1-5 overall
+  wifiRating: integer("wifi_rating"), // 1-5
+  review: text("review"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex("location_ratings_user_location_idx").on(table.userId, table.locationId),
+]);
+
+export const insertLocationRatingSchema = createInsertSchema(locationRatings).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertLocationRating = z.infer<typeof insertLocationRatingSchema>;
+export type LocationRating = typeof locationRatings.$inferSelect;
+
 // Password Reset Tokens
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

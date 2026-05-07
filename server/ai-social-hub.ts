@@ -450,4 +450,141 @@ Return JSON: { "connections": [{ "userId": "...", "reason": "short reason for co
       res.status(500).json({ error: error.message });
     }
   });
+
+  // ========== AI DESTINATION ADVISOR ==========
+  app.post("/api/ai/destination-advisor", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { currentCity, currentCountry, budget, durationWeeks, priorities } = req.body;
+      if (!budget || !priorities) return res.status(400).json({ error: "budget and priorities required" });
+
+      const userId = getUserId(req);
+      const [userPrefs, userInterestsList] = await Promise.all([
+        db.select().from(schema.userAiPreferences).where(eq(schema.userAiPreferences.userId, userId)).limit(1),
+        db.select().from(schema.userInterests).where(eq(schema.userInterests.userId, userId)).orderBy(desc(schema.userInterests.confidence)).limit(10),
+      ]);
+
+      const prefs = userPrefs[0];
+      const interestTags = userInterestsList.map(i => i.tag).join(", ");
+
+      const prompt = `You are NomadBot, an expert digital nomad travel advisor. A nomad needs destination suggestions.
+
+CURRENT SITUATION:
+- Currently in: ${currentCity || "Unknown"}, ${currentCountry || "Unknown"}
+- Monthly budget: €${budget}
+- Stay duration: ${durationWeeks} weeks
+- Priorities: ${(priorities as string[]).join(", ")}
+- Travel style: ${prefs?.travelStyle || "not specified"}
+- Preferred climate: ${prefs?.preferredClimate || "not specified"}
+- User interests: ${interestTags || "general nomad"}
+
+Generate exactly 5 destination suggestions optimized for this nomad profile.
+For each destination consider: cost of living, internet quality, visa situation for EU/Italian citizens, nomad community size, safety, and seasonal conditions for the current month (May).
+
+Return JSON exactly in this format:
+{
+  "destinations": [
+    {
+      "city": "City Name",
+      "country": "Country Name",
+      "countryCode": "IT",
+      "lat": 0.0,
+      "lng": 0.0,
+      "iataCode": "FCO",
+      "monthlyCostMin": 800,
+      "monthlyCostMax": 1200,
+      "internetMbps": 50,
+      "visaInfo": "Visa-free for EU",
+      "visaDifficulty": "easy",
+      "nomadScore": 82,
+      "climate": "25°C ☀️",
+      "highlights": ["Fast wifi", "Low cost", "Beach"],
+      "pros": ["Affordable coworking", "Large nomad community"],
+      "bestFor": "Perfect for budget-conscious nomads who love sun and active community"
+    }
+  ]
+}
+
+visaDifficulty must be one of: "easy", "medium", "hard"
+nomadScore is 0-100 based on all factors combined
+monthlyCostMin/Max should be realistic all-inclusive monthly estimates for the given budget level
+iataCode is the main airport IATA code for the city`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a travel advisor for digital nomads. Always return valid JSON only, no markdown." },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000,
+      });
+
+      const content = response.choices[0]?.message?.content || "{}";
+      let parsed: any;
+      try { parsed = JSON.parse(content); } catch { parsed = { destinations: [] }; }
+
+      res.json({ destinations: parsed.destinations || [] });
+    } catch (error: any) {
+      console.error("[AI Destination Advisor] Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ========== AI QUICK TRIP BUILDER ==========
+  app.post("/api/ai/quick-trip-builder", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { currentCity, currentCountry, currentLat, currentLng, budget, totalDays, style } = req.body;
+
+      const prompt = `You are NomadBot, a digital nomad trip planning expert. Build a complete multi-stop trip itinerary.
+
+STARTING POINT: ${currentCity || "Current location"}, ${currentCountry || ""}
+TOTAL DAYS: ${totalDays || 30}
+MONTHLY BUDGET: €${budget || 1500}
+TRAVEL STYLE: ${style || "balanced"} (budget=cheapest, social=community-focused, balanced=best overall)
+START DATE: today (${new Date().toLocaleDateString("it-IT")})
+
+Create a realistic trip with 3-5 stops. Each stop should be reachable from the previous one.
+Consider: transport connections, visa requirements for EU citizens, seasonal suitability (May/June).
+
+Return JSON exactly:
+{
+  "title": "Trip title (creative, evocative)",
+  "totalDays": 30,
+  "stops": [
+    {
+      "city": "City Name",
+      "country": "Country Name",
+      "lat": 0.0,
+      "lng": 0.0,
+      "durationDays": 10,
+      "transportMode": "plane",
+      "estimatedMonthlyCost": 1200,
+      "highlights": "2-sentence description of why this stop is great for nomads"
+    }
+  ]
+}
+
+transportMode: "plane", "train", "bus", or "car"
+Make the trip feel like an adventure. Budget the days so they add up to totalDays.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a digital nomad trip planner. Return valid JSON only." },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500,
+      });
+
+      const content = response.choices[0]?.message?.content || "{}";
+      let parsed: any;
+      try { parsed = JSON.parse(content); } catch { parsed = { title: "My Nomad Adventure", totalDays: totalDays, stops: [] }; }
+
+      res.json({ trip: parsed });
+    } catch (error: any) {
+      console.error("[AI Quick Trip Builder] Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 }

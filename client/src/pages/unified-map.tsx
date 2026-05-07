@@ -36,6 +36,7 @@ import { FirstPostNudge } from "@/components/first-post-nudge";
 import { BottomNav } from "@/components/bottom-nav";
 import { QuickCheckIn } from "@/components/quick-checkin";
 import { useOverpass, type OsmPlace } from "@/hooks/use-overpass";
+import { AiDestinationAdvisor, SpotRatingWidget } from "@/components/ai-destination-advisor";
 import { MapErrorBoundary } from "@/components/map-error-boundary";
 import { CurvedRouteLine, createStopMarkerIcon } from "@/components/map-route-line";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
@@ -2118,7 +2119,10 @@ export default function UnifiedMap() {
                     {spot.notes && (
                       <p className="text-xs text-gray-500 mb-2 italic">"{spot.notes}"</p>
                     )}
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <div className="border-t border-gray-100 mt-1">
+                      <SpotRatingWidget locationId={spot.id} />
+                    </div>
+                    <div className="flex items-center justify-between pt-1 px-2 pb-2">
                       <span className="text-[10px] text-gray-400 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {spot.latitude.toFixed(4)}, {spot.longitude.toFixed(4)}
@@ -2445,6 +2449,17 @@ export default function UnifiedMap() {
             </div>
           </div>
           
+          {/* ── AI Destination Advisor FAB ── */}
+          <div className="absolute bottom-[88px] left-4 z-[1002]">
+            <AiDestinationAdvisor
+              currentCity={mapCenterCity.split(",")[0]?.trim()}
+              currentCountry={mapCenterCity.split(",")[1]?.trim()}
+              currentLat={userLocation?.[0]}
+              currentLng={userLocation?.[1]}
+              onTripSaved={() => fetchData()}
+            />
+          </div>
+
           <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
             <Button
               variant="outline"
