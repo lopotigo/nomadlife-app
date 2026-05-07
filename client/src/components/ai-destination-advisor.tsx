@@ -130,12 +130,15 @@ export function AiDestinationAdvisor({ currentCity, currentCountry, currentLat, 
           priorities,
         }),
       });
-      if (!res.ok) throw new Error("Errore nella ricerca");
+      if (!res.ok) {
+        // Stay on results step even on error — don't go back to form
+        toast({ title: "Errore AI", description: "Puoi comunque pianificare un viaggio manualmente.", variant: "destructive" });
+        return;
+      }
       const data = await res.json();
       setDestinations(data.destinations || []);
     } catch {
-      toast({ title: "Errore", description: "Impossibile caricare suggerimenti. Riprova.", variant: "destructive" });
-      setStep("form");
+      toast({ title: "Errore di rete", description: "Controlla la connessione e riprova.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -572,22 +575,22 @@ export function AiDestinationAdvisor({ currentCity, currentCountry, currentLat, 
                 )}
               </div>
 
-              {/* ── Sticky footer: Pianifica button (results step only) ── */}
-              {step === "results" && !loading && destinations.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex-shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900"
-                >
+              {/* ── Sticky footer: always visible in results step ── */}
+              {step === "results" && (
+                <div className="flex-shrink-0 px-4 pb-5 pt-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
                   <Button
                     onClick={buildQuickTrip}
+                    disabled={loading}
                     data-testid="button-build-trip"
-                    className="w-full h-12 text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-2xl shadow-lg"
+                    className="w-full h-12 text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-2xl shadow-lg disabled:opacity-50"
                   >
-                    <Route className="w-4 h-4 mr-2" />
-                    Pianifica viaggio completo
+                    {loading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Caricamento destinazioni...</>
+                    ) : (
+                      <><Route className="w-4 h-4 mr-2" /> Pianifica viaggio completo</>
+                    )}
                   </Button>
-                </motion.div>
+                </div>
               )}
             </motion.div>
           </>
