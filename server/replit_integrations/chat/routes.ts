@@ -470,9 +470,13 @@ async function executeToolCall(
           if (!tavilyResponse.ok) {
             const errText = await tavilyResponse.text();
             console.error("Tavily API error:", errText);
-            return JSON.stringify({ error: "Errore nella ricerca web. Riprova." });
+            return JSON.stringify({ error: "Ricerca web temporaneamente non disponibile." });
           }
           const tavilyData = await tavilyResponse.json();
+          if (tavilyData.detail?.error) {
+            console.error("Tavily API limit/error:", tavilyData.detail.error);
+            return JSON.stringify({ error: "Limite ricerca web raggiunto. Riprova più tardi.", detail: tavilyData.detail.error });
+          }
           const resultsFormatted = (tavilyData.results || []).slice(0, 5).map((r: any) => ({
             title: r.title,
             url: r.url,
