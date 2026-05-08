@@ -452,36 +452,67 @@ async function executeToolCall(
           console.error("Cache lookup error (continuing to Tavily):", cacheErr);
         }
 
-        if (!process.env.TAVILY_API_KEY) {
-          return JSON.stringify({ error: "Ricerca web non disponibile. Chiave API Tavily non configurata." });
-        }
+        const tryDuckDuckGo = async (q: string) => {
+          try {
+            const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`;
+            const ddgRes = await fetch(ddgUrl, { headers: { "Accept-Language": "it,en" } });
+            if (!ddgRes.ok) return null;
+            const ddgData = await ddgRes.json();
+            const results: any[] = [];
+            if (ddgData.AbstractText) results.push({ title: ddgData.Heading || q, url: ddgData.AbstractURL || "", content: ddgData.AbstractText.substring(0, 400) });
+            for (const r of (ddgData.RelatedTopics || []).slice(0, 4)) {
+              if (r.Text && r.FirstURL) results.push({ title: r.Text.substring(0, 60), url: r.FirstURL, content: r.Text.substring(0, 300) });
+            }
+            if (results.length === 0) return null;
+            return { answer: ddgData.AbstractText || null, results, source: "duckduckgo" };
+          } catch { return null; }
+        };
+
         try {
-          const tavilyResponse = await fetch("https://api.tavily.com/search", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              api_key: process.env.TAVILY_API_KEY,
-              query: query,
-              search_depth: "advanced",
-              max_results: 5,
-              include_answer: true,
-            }),
-          });
-          if (!tavilyResponse.ok) {
-            const errText = await tavilyResponse.text();
-            console.error("Tavily API error:", errText);
-            return JSON.stringify({ error: "Ricerca web temporaneamente non disponibile." });
+          let tavilyOk = false;
+          let resultsFormatted: any[] = [];
+          let answerText: string | null = null;
+
+          if (process.env.TAVILY_API_KEY) {
+            try {
+              const tavilyResponse = await fetch("https://api.tavily.com/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  api_key: process.env.TAVILY_API_KEY,
+                  query: query,
+                  search_depth: "basic",
+                  max_results: 3,
+                  include_answer: true,
+                }),
+              });
+              if (tavilyResponse.ok) {
+                const tavilyData = await tavilyResponse.json();
+                if (!tavilyData.detail?.error && (tavilyData.results?.length > 0 || tavilyData.answer)) {
+                  resultsFormatted = (tavilyData.results || []).slice(0, 3).map((r: any) => ({
+                    title: r.title, url: r.url, content: r.content?.substring(0, 300),
+                  }));
+                  answerText = tavilyData.answer || null;
+                  tavilyOk = true;
+                } else if (tavilyData.detail?.error) {
+                  console.warn("[Tavily] Limit reached, falling back to DuckDuckGo:", tavilyData.detail.error);
+                }
+              }
+            } catch (tavilyErr) {
+              console.warn("[Tavily] Request failed, falling back to DuckDuckGo:", tavilyErr);
+            }
           }
-          const tavilyData = await tavilyResponse.json();
-          if (tavilyData.detail?.error) {
-            console.error("Tavily API limit/error:", tavilyData.detail.error);
-            return JSON.stringify({ error: "Limite ricerca web raggiunto. Riprova più tardi.", detail: tavilyData.detail.error });
+
+          if (!tavilyOk) {
+            const ddg = await tryDuckDuckGo(query);
+            if (ddg) {
+              resultsFormatted = ddg.results;
+              answerText = ddg.answer;
+              console.log(`[DuckDuckGo fallback] "${query}" → ${ddg.results.length} results`);
+            } else {
+              return JSON.stringify({ error: "Ricerca web temporaneamente non disponibile. Riprova tra poco." });
+            }
           }
-          const resultsFormatted = (tavilyData.results || []).slice(0, 5).map((r: any) => ({
-            title: r.title,
-            url: r.url,
-            content: r.content?.substring(0, 300),
-          }));
 
           const locationMatch = query.match(/(?:a |in |di |to |about )([A-Z][a-zA-Zàèéìòùç\s'-]+)/i);
           const locationName = locationMatch ? locationMatch[1].trim() : null;
@@ -490,9 +521,9 @@ async function executeToolCall(
             await db.insert(knowledgeCache).values({
               query: query,
               queryNormalized: normalizedQuery,
-              answer: tavilyData.answer || null,
+              answer: answerText || null,
               results: JSON.stringify(resultsFormatted),
-              source: "tavily",
+              source: tavilyOk ? "tavily" : "duckduckgo",
               category: "location",
               locationName: locationName,
             });
@@ -513,9 +544,9 @@ async function executeToolCall(
               } else {
                 await db.insert(learnedLocations).values({
                   name: locationName,
-                  description: tavilyData.answer?.substring(0, 500) || null,
+                  description: answerText?.substring(0, 500) || null,
                   nomadInfo: resultsFormatted.map((r: any) => r.content).join(" | ").substring(0, 1000) || null,
-                  sourceType: "tavily",
+                  sourceType: tavilyOk ? "tavily" : "duckduckgo",
                 });
                 console.log(`[Learned Location NEW] "${locationName}" added to database`);
               }
@@ -525,13 +556,13 @@ async function executeToolCall(
           }
 
           return JSON.stringify({
-            answer: tavilyData.answer || null,
+            answer: answerText || null,
             results: resultsFormatted,
             query: query,
             fromCache: false,
           });
         } catch (err: any) {
-          console.error("Tavily search error:", err);
+          console.error("Web search error:", err);
           return JSON.stringify({ error: "Errore nella ricerca web: " + err.message });
         }
       }
