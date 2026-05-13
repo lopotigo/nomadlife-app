@@ -1492,6 +1492,57 @@ Sitemap: https://nomad-life.app/sitemap.xml
     }
   });
 
+  // City info: cost of living + quality scores + nomads going there
+  app.get("/api/city-info", requireAuth, async (req, res) => {
+    try {
+      const dest = (req.query.dest as string || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      const CITY_DATA: Record<string, any> = {
+        lisbona: { cost: { housing: 900, food: 300, coworking: 150, transport: 50, total: 1400 }, scores: { wifi: 8.5, safety: 7.8, lifestyle: 9.1, affordability: 7.2, community: 8.9 }, visa: "90 giorni Schengen (passaporto UE: illimitato)", timezone: "GMT+1", weather: "☀️ 18–26°C", internet: "Fibra diffusa, 100–1000 Mbps" },
+        bali: { cost: { housing: 400, food: 180, coworking: 80, transport: 60, total: 720 }, scores: { wifi: 7.2, safety: 7.5, lifestyle: 9.4, affordability: 9.2, community: 9.0 }, visa: "30 giorni on arrival, estendibile a 60", timezone: "GMT+8", weather: "☀️ 28–32°C (stagione secca Apr–Oct)", internet: "Buono nei coworking, variabile altrove" },
+        bangkok: { cost: { housing: 500, food: 150, coworking: 100, transport: 40, total: 790 }, scores: { wifi: 8.0, safety: 7.0, lifestyle: 8.8, affordability: 9.0, community: 8.5 }, visa: "30 giorni on arrival, estendibile", timezone: "GMT+7", weather: "☀️ 28–35°C (evitare Apr–Jun)", internet: "Eccellente in centro, AIS/True Move" },
+        berlino: { cost: { housing: 1200, food: 400, coworking: 200, transport: 90, total: 1890 }, scores: { wifi: 7.5, safety: 8.2, lifestyle: 8.5, affordability: 5.8, community: 9.2 }, visa: "Schengen 90 giorni (UE illimitato)", timezone: "GMT+2", weather: "☁️ 18–25°C d'estate", internet: "Buono in città, fibra nei coworking" },
+        medellin: { cost: { housing: 350, food: 180, coworking: 70, transport: 30, total: 630 }, scores: { wifi: 7.8, safety: 6.5, lifestyle: 8.9, affordability: 9.5, community: 8.7 }, visa: "90 giorni turista, rinnovabile", timezone: "GMT-5", weather: "☀️ 22°C tutto l'anno (città eterna primavera)", internet: "Ottimo nei coworking, EPM fibra" },
+        "chiang mai": { cost: { housing: 350, food: 130, coworking: 60, transport: 40, total: 580 }, scores: { wifi: 8.2, safety: 8.5, lifestyle: 9.0, affordability: 9.6, community: 9.1 }, visa: "30 giorni on arrival, estendibile", timezone: "GMT+7", weather: "☀️ 20–35°C (evitare Mar–Apr)", internet: "Eccellente, molti coworking dedicati ai nomadi" },
+        dubai: { cost: { housing: 1500, food: 400, coworking: 250, transport: 100, total: 2250 }, scores: { wifi: 9.2, safety: 9.5, lifestyle: 8.0, affordability: 4.5, community: 7.8 }, visa: "30–90 giorni turista, remote work visa disponibile", timezone: "GMT+4", weather: "☀️ 25–45°C", internet: "Velocissimo, alcune restrizioni VoIP" },
+        tallin: { cost: { housing: 800, food: 300, coworking: 150, transport: 50, total: 1300 }, scores: { wifi: 9.0, safety: 9.0, lifestyle: 7.5, affordability: 7.5, community: 7.2 }, visa: "Digital Nomad Visa disponibile (UE Schengen)", timezone: "GMT+3", weather: "🌧️ Freddo, ottimale May–Sep", internet: "Tra i migliori d'Europa" },
+      };
+
+      const cityKey = Object.keys(CITY_DATA).find(k =>
+        dest.includes(k) || k.includes(dest) || dest.replace(/\s/g,"").includes(k.replace(/\s/g,""))
+      );
+      const cityData = cityKey ? CITY_DATA[cityKey] : null;
+
+      const plannedTrips = await storage.searchTripsByDestination(req.query.dest as string);
+      const nomadsGoing = plannedTrips
+        .filter(t => t.status === "planned" || t.status === "in_progress")
+        .slice(0, 5)
+        .map(t => ({
+          userId: t.userId,
+          userName: t.user?.name || t.user?.username || "Nomade",
+          avatarUrl: t.user?.avatarUrl,
+          location: t.user?.location,
+          startDate: t.startDate,
+          endDate: t.endDate,
+          tripTitle: t.title,
+        }));
+
+      res.json({
+        destination: req.query.dest,
+        found: !!cityData,
+        cost: cityData?.cost || null,
+        scores: cityData?.scores || null,
+        visa: cityData?.visa || null,
+        timezone: cityData?.timezone || null,
+        weather: cityData?.weather || null,
+        internet: cityData?.internet || null,
+        nomadsGoing,
+      });
+    } catch (error: any) {
+      res.status(500).send({ error: error.message });
+    }
+  });
+
   // Live trips from followed users (in_progress status)
   app.get("/api/trips/live", requireAuth, async (req, res) => {
     try {
