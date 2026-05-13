@@ -12,6 +12,8 @@ import { OnboardingProvider } from "@/lib/onboarding";
 import { WelcomeTutorial } from "@/components/welcome-tutorial";
 import { AiChatbot } from "@/components/ai-chatbot";
 
+import AiHome from "@/pages/ai-home";
+import CityBriefing from "@/pages/city-briefing";
 import MapFeed from "@/pages/map-feed";
 import Profile from "@/pages/profile";
 import UserProfile from "@/pages/user-profile";
@@ -71,7 +73,9 @@ function Router() {
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/privacy" component={PrivacyPolicy} />
       <Route path="/terms" component={Terms} />
-      <Route path="/">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
+      <Route path="/">{() => <ProtectedRoute component={AiHome} />}</Route>
+      <Route path="/map">{() => <ProtectedRoute component={UnifiedMap} />}</Route>
+      <Route path="/city">{() => <ProtectedRoute component={CityBriefing} />}</Route>
       <Route path="/diary">{() => <ProtectedRoute component={DiaryPage} />}</Route>
       <Route path="/feed">{() => <ProtectedRoute component={Home} />}</Route>
       <Route path="/map-feed">{() => <ProtectedRoute component={MapFeed} />}</Route>

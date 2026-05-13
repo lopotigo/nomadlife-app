@@ -5,7 +5,7 @@ import {
   Compass, BookOpen, Plus, MessageCircle,
   Briefcase, ShoppingBag, BookMarked, Calendar,
   Users, Bookmark, ShieldCheck, X, MoreHorizontal,
-  Star, User2, PenLine, Camera, Plane, MapPin
+  Star, User2, PenLine, Camera, Plane, MapPin, Bot
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ export interface BottomNavActions {
 }
 
 interface BottomNavProps extends BottomNavActions {
-  activePage?: "mappa" | "diary" | "chat";
+  activePage?: "ai" | "mappa" | "diary" | "chat";
 }
 
 const FAB_ACTIONS = [
@@ -83,7 +83,8 @@ export function BottomNav({
   });
 
   const current = activePage || (
-    location === "/" ? "mappa" :
+    location === "/" ? "ai" :
+    location === "/map" ? "mappa" :
     location === "/diary" ? "diary" :
     location === "/chat" ? "chat" : undefined
   );
@@ -240,20 +241,20 @@ export function BottomNav({
       <div className="absolute bottom-0 left-0 right-0 z-[1100] h-[72px] bg-card/95 backdrop-blur-md border-t border-border/50 flex items-center justify-around px-2">
         <Link
           href="/"
+          className={`flex flex-col items-center gap-0.5 px-3 py-2 transition-colors ${current === "ai" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          data-testid="nav-ai"
+        >
+          <Bot className="w-5 h-5" />
+          <span className="text-[10px] font-medium">AI</span>
+        </Link>
+
+        <Link
+          href="/map"
           className={`flex flex-col items-center gap-0.5 px-3 py-2 transition-colors ${current === "mappa" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
           data-testid="nav-mappa"
         >
           <Compass className="w-5 h-5" />
           <span className="text-[10px] font-medium">Mappa</span>
-        </Link>
-
-        <Link
-          href="/diary"
-          className={`flex flex-col items-center gap-0.5 px-3 py-2 transition-colors ${current === "diary" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-          data-testid="nav-diary"
-        >
-          <BookOpen className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Diario</span>
         </Link>
 
         {/* Central FAB */}
