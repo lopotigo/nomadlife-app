@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Federico Poletti — CV</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Georgia', serif; font-size: 11px; color: #1a1a1a; background: #fff; max-width: 800px; margin: 0 auto; padding: 40px 48px; line-height: 1.5; }
+
+  .header { border-bottom: 2px solid #1a1a1a; padding-bottom: 16px; margin-bottom: 20px; }
+  .name { font-size: 26px; font-weight: bold; letter-spacing: -0.5px; font-family: 'Arial', sans-serif; }
+  .title { font-size: 13px; color: #444; margin-top: 3px; font-family: 'Arial', sans-serif; }
+  .contacts { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+  .contacts a, .contacts span { font-size: 10.5px; color: #1a1a1a; text-decoration: none; font-family: 'Arial', sans-serif; }
+  .contacts a { color: #0066cc; }
+
+  .section { margin-bottom: 20px; }
+  .section-title { font-size: 10px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; color: #666; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 12px; font-family: 'Arial', sans-serif; }
+
+  .summary { font-size: 11.5px; line-height: 1.65; color: #222; }
+
+  .job { margin-bottom: 16px; }
+  .job-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .job-title { font-size: 12.5px; font-weight: bold; font-family: 'Arial', sans-serif; }
+  .job-date { font-size: 10px; color: #666; font-family: 'Arial', sans-serif; }
+  .job-company { font-size: 11px; color: #444; margin-top: 1px; font-family: 'Arial', sans-serif; }
+  .job-desc { margin-top: 6px; }
+  .job-desc li { margin-left: 14px; margin-bottom: 3px; font-size: 11px; }
+
+  .project { margin-bottom: 14px; padding: 10px 12px; border-left: 3px solid #1a1a1a; background: #fafafa; }
+  .project-title { font-size: 12.5px; font-weight: bold; font-family: 'Arial', sans-serif; }
+  .project-url { font-size: 10px; color: #0066cc; font-family: 'Arial', sans-serif; }
+  .project-desc { margin-top: 6px; font-size: 11px; line-height: 1.6; }
+  .project-stack { margin-top: 6px; font-size: 10px; color: #555; font-family: 'Arial', sans-serif; }
+  .project-stack span { background: #eee; padding: 1px 6px; border-radius: 3px; margin-right: 4px; display: inline-block; margin-top: 2px; }
+
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; }
+  .skill-row { font-size: 11px; }
+  .skill-label { font-weight: bold; font-family: 'Arial', sans-serif; font-size: 10.5px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+
+  @media print {
+    body { padding: 24px 32px; }
+    .project { break-inside: avoid; }
+    .job { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="name">Federico Poletti</div>
+  <div class="title">Full-Stack Developer · TypeScript · React · Node.js · AI Integration</div>
+  <div class="contacts">
+    <a href="mailto:federicopoletti83@gmail.com">federicopoletti83@gmail.com</a>
+    <span>·</span>
+    <a href="https://nomad-life.app" target="_blank">nomad-life.app</a>
+    <span>·</span>
+    <span>Sardinia, Italy (EU timezone — GMT+2)</span>
+    <span>·</span>
+    <span>Remote · Available immediately</span>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section">
+  <div class="section-title">Profile</div>
+  <div class="summary">
+    Self-taught full-stack developer who built a complete production-grade social platform solo in under a year.
+    I work best with autonomy — I take a problem on Monday and ship something real by end of week.
+    Strong in AI integration (OpenAI function calling, streaming, voice input, image analysis), modern React architecture,
+    and API-driven product development. Comfortable across the full stack from database schema design to mobile-first UI.
+    Fluent in Italian and English.
+  </div>
+</div>
+
+<!-- FEATURED PROJECT -->
+<div class="section">
+  <div class="section-title">Featured Project</div>
+
+  <div class="project">
+    <div style="display:flex; justify-content:space-between; align-items:baseline;">
+      <div class="project-title">NomadLife — Digital Nomad Social Platform</div>
+      <div class="project-url">nomad-life.app</div>
+    </div>
+    <div class="project-desc">
+      Built solo from zero to production. A full-stack PWA serving as a social hub for digital nomads — designed
+      mobile-first with a full AI assistant at its core.<br><br>
+
+      <strong>AI features (production, not demos):</strong> NomadBot is a database-connected agent with OpenAI function
+      calling — it books coworking spaces, searches flights and hotels via Travelpayouts affiliates, analyzes trip costs
+      with real data, reads uploaded photos (Vision API), streams responses in real-time, accepts voice input (Web Speech API),
+      and generates AI travel itineraries. Context-aware: different prompts and quick actions per page.<br><br>
+
+      <strong>Platform features:</strong> Multi-format social feed · Interactive Leaflet map with crowdsourced work spots
+      · Real-time community chat (channels + private DMs + groups) · Travel diary with trip stop management · Local
+      marketplace with GPS-based listings · Booking system (hotels, hostels, coworking) · Events calendar · Blog with
+      city guides · Affiliate integrations (Aviasales, Hotellook, Kiwi.com, Airalo, NordVPN) · PWA with service worker
+      and push notifications · Dark/light mode · i18n (Italian, English, Spanish) · Google reCAPTCHA v3 · SendGrid email.
+    </div>
+    <div class="project-stack">
+      <span>TypeScript</span><span>React 18</span><span>Node.js</span><span>Express</span><span>PostgreSQL</span>
+      <span>Drizzle ORM</span><span>OpenAI API</span><span>Tailwind CSS v4</span><span>Framer Motion</span>
+      <span>Leaflet</span><span>Vite</span><span>shadcn/ui</span><span>TanStack Query</span><span>Passport.js</span>
+      <span>WebSockets</span><span>PWA</span><span>Wouter</span>
+    </div>
+  </div>
+</div>
+
+<!-- EXPERIENCE -->
+<div class="section">
+  <div class="section-title">Experience</div>
+
+  <div class="job">
+    <div class="job-header">
+      <div class="job-title">Solo Full-Stack Developer</div>
+      <div class="job-date">2025 – Present</div>
+    </div>
+    <div class="job-company">NomadLife (Independent Project) · Remote, Sardinia</div>
+    <div class="job-desc">
+      <ul>
+        <li>Designed and implemented the entire system architecture — database schema, REST API, frontend, AI layer — independently</li>
+        <li>Shipped 50+ features across 6+ months including AI chatbot with tools, real-time map, social feed, booking engine, marketplace, and PWA infrastructure</li>
+        <li>Integrated OpenAI function calling for agentic tasks: booking, flight search, trip cost analysis, image analysis, itinerary generation</li>
+        <li>Built a multi-channel real-time chat system (community channels + private DMs + user groups) with Passport.js session auth</li>
+        <li>Implemented three-tier location privacy, nomad proximity alerts (50km radius), and crowdsourcing for map data</li>
+        <li>Set up affiliate revenue stack: Travelpayouts (7 providers), dynamic affiliate links, SEO sitemap, Open Graph, JSON-LD</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="job">
+    <div class="job-header">
+      <div class="job-title">Property Host & Operations Manager</div>
+      <div class="job-date">2020 – Present</div>
+    </div>
+    <div class="job-company">Vacation Rental · Booking.com · Sardinia, Italy</div>
+    <div class="job-desc">
+      <ul>
+        <li>Managed guest experience, pricing, and logistics end-to-end for a short-term rental property</li>
+        <li>Applied data-driven pricing and occupancy optimization — consistent 5-star ratings</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div class="section">
+  <div class="section-title">Technical Skills</div>
+  <div class="skills-grid">
+    <div class="skill-row"><span class="skill-label">Languages:</span> TypeScript, JavaScript, SQL, HTML, CSS</div>
+    <div class="skill-row"><span class="skill-label">AI / LLM:</span> OpenAI API, function calling, streaming, Vision, embeddings</div>
+    <div class="skill-row"><span class="skill-label">Frontend:</span> React 18, Tailwind CSS, Framer Motion, shadcn/ui, Vite</div>
+    <div class="skill-row"><span class="skill-label">Backend:</span> Node.js, Express, REST API, Passport.js, bcryptjs</div>
+    <div class="skill-row"><span class="skill-label">Database:</span> PostgreSQL (Neon), Drizzle ORM, drizzle-zod</div>
+    <div class="skill-row"><span class="skill-label">Tooling:</span> Replit, Git/GitHub, ESLint, Zod, TanStack Query</div>
+    <div class="skill-row"><span class="skill-label">APIs:</span> OpenAI, Travelpayouts, SendGrid, Tavily, reCAPTCHA, Leaflet/Overpass</div>
+    <div class="skill-row"><span class="skill-label">Other:</span> PWA, Service Workers, Web Push, Web Speech API, i18n</div>
+  </div>
+</div>
+
+<!-- EDUCATION -->
+<div class="section">
+  <div class="section-title">Education & Learning</div>
+  <div class="two-col">
+    <div class="job">
+      <div class="job-title" style="font-size:11.5px;">Self-directed Full-Stack Development</div>
+      <div class="job-company">2024 – Present · Online resources, building in production</div>
+    </div>
+    <div class="job">
+      <div class="job-title" style="font-size:11.5px;">Istituto Tecnico Economico</div>
+      <div class="job-company">Sardinia, Italy · Economics & Administration</div>
+    </div>
+  </div>
+</div>
+
+<!-- LANGUAGES -->
+<div class="section">
+  <div class="section-title">Languages</div>
+  <div class="skills-grid">
+    <div class="skill-row"><span class="skill-label">Italian:</span> Native</div>
+    <div class="skill-row"><span class="skill-label">English:</span> Professional working proficiency</div>
+  </div>
+</div>
+
+<div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #888; font-family: Arial, sans-serif; text-align: center;">
+  federicopoletti83@gmail.com · nomad-life.app · Sardinia, Italy · Available remotely · May 2026
+</div>
+
+</body>
+</html>
