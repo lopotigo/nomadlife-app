@@ -1,0 +1,87 @@
+
+Jobs
+Login
+ Back to all jobs
+Founding AI Engineer (Contract-to-Hire)
+Posted 08-May-2026 (EST)Remote, FL, USAContract
+Email Me Similar Jobs
+Email Me This Job
+Tiger Tracks is hiring our first AI Engineer. We're one of the fastest-growing performance marketing agencies in the country, ranked #123 on the 2025 Inc. 5000 and founded by former Google leaders.
+
+This is not a traditional engineering role. We're looking for a top-tier AI-native builder who can rapidly ship production-ready tools using platforms like Lovable, Cursor, Replit, or Bolt. Someone who can turn ideas into working products in 24 to 48 hours, not weeks.
+
+You'll work directly with our co-founder Cliff Simmons (ex-Google) to build proprietary AI tools used internally and deployed across client accounts.
+
+This is a contract-to-hire role with a path to becoming Head of AI.
+
+WHAT YOU'LL BUILD
+
+Landing page conversion analyzers with auto-fix capability
+Creative analyzers for video ads
+Vertical media buying co-pilots for Meta, Google, and TikTok APIs
+Automated BD audit tool for prospect ad accounts
+20+ more ideas waiting for someone who can ship them
+We don't care which LLM sits underneath (Anthropic, Gemini, OpenAI, whatever ships best). The value is in the vertical specialization on top.
+
+WHO YOU ARE
+
+Technical background:
+
+4+ years of full-stack development experience, including at least 1 year shipping LLM-powered features in production
+Strong backend (Python, Node) and frontend (React) skills
+Proven track record integrating complex external APIs AI-native builder:
+Top 1% with Lovable, Replit, Cursor, or Bolt. You can ship a complex tool (multiple data sources, APIs, server hosting, LLM integration) in under a day. You've done this multiple times. - Public GitHub or portfolio with shipped projects we can play with
+Comfortable moving from idea to working prototype in 24-48 hours
+Mindset:
+
+Thrive in greenfield environments
+Shipping mindset: rapid prototyping over architecture debates
+Genuinely excited about MarTech, AdTech, or performance marketing
+STRUCTURE
+
+Hourly contract, billed bi-weekly net-14
+Monthly renewal based on output and mutual fit
+Path to FTE and Head of AI for the right person
+Remote, US timezones
+WHAT WE'RE NOT LOOKING FOR
+
+Engineers whose AI experience is mostly demos and tutorials
+Generalists who'd rather think about architecture than ship code
+Anyone who needs a PM, a designer, and a 6-week sprint to deliver a v1
+Big-tech engineers looking for a calmer second act. This will be more intense, not less.
+HOW TO APPLY
+
+Send a short note, your GitHub or portfolio link, and one project you're proud of (with the live link if possible) to careers@tigertracks.ai. Tell us what you'd build first if we handed you Lovable, an OpenAI API key, and a Meta Ads account on day one.
+
+Apply Now
+with our quick 3 minute Application!
+* Fields Are Required
+What is your full name?
+
+
+How can we contact you?
+
+
+
+What is your preferred method of communication?
+
+ 
+Please indicate if you agree to isolved Applicant Tracking's Applicant Communication Policy. 
+ I agree to isolved Applicant Tracking's Privacy Policy and Terms of Service.*
+Apply for this Position
+Sign Up For Job Alerts!
+Name
+Email
+Location (city, state or zip code)
+
+Accept Terms of Service I agree to the terms of service and privacy policy.
+powered by Refer.io
+
+Share This Job
+Facebook
+LinkedIn
+X
+
+.
+Maintained by isolved People Cloud - © 2026 Refresh
+Search the FAQ here
