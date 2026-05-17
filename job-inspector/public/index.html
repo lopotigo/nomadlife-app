@@ -223,7 +223,7 @@ async function scanJobs() {
   }, 8000);
 
   try {
-    const res = await fetch('/api/jobs');
+    const res = await fetch('/api/inspector/jobs');
     clearInterval(stepInterval);
 
     if (!res.ok) throw new Error('Server error');

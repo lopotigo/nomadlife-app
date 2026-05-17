@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import path from "path";
 import session from "express-session";
 import passport from "passport";
 import connectPgSimple from "connect-pg-simple";
@@ -105,6 +106,11 @@ export function log(message: string, source = "express") {
 
   console.log(`${formattedTime} [${source}] ${message}`);
 }
+
+// Job Inspector — served at /inspector
+app.get("/inspector", (_req, res) => {
+  res.sendFile(path.join(process.cwd(), "job-inspector/public/index.html"));
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

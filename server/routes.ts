@@ -3368,5 +3368,73 @@ Return ONLY the JSON array, no markdown.`;
     res.sendFile(filePath);
   });
 
+  // Job Inspector API — completely separate from NomadLife
+  app.get("/api/inspector/jobs", async (_req, res) => {
+    try {
+      const FEDERICO_PROFILE = `
+Name: Federico Poletti
+Stack: TypeScript, React 18, Node.js, Express, PostgreSQL, Drizzle ORM, OpenAI API, Tailwind CSS
+Experience: 1 year self-taught (built NomadLife solo - a full production PWA with AI, real-time chat, map, booking, marketplace)
+Preferred location: Remote only, EU timezone compatible (Italy)
+Job types: Full-time, Part-time, Contract, Freelance
+Rate: €25-35/hr or €2000-5000/month
+NOT interested in: On-site only, requires 5+ years experience, pure mobile native, blockchain/crypto
+`;
+
+      async function fetchRemotive() {
+        const r = await fetch("https://remotive.com/api/remote-jobs?category=software-dev&limit=25");
+        const d: any = await r.json();
+        return (d.jobs || []).map((j: any) => ({
+          id: `remotive-${j.id}`, title: j.title, company: j.company_name,
+          url: j.url, description: (j.description || "").replace(/<[^>]*>/g, "").slice(0, 500),
+          tags: j.tags || [], source: "Remotive", salary: j.salary || "",
+          location: j.candidate_required_location || "Remote",
+        }));
+      }
+
+      async function fetchJobicy() {
+        const r = await fetch("https://jobicy.com/api/v2/remote-jobs?tag=react,nodejs,typescript&count=20");
+        const d: any = await r.json();
+        return (d.jobs || []).map((j: any) => ({
+          id: `jobicy-${j.id}`, title: j.jobTitle, company: j.companyName,
+          url: j.url, description: (j.jobDescription || "").replace(/<[^>]*>/g, "").slice(0, 500),
+          tags: j.jobIndustry || [], source: "Jobicy",
+          salary: j.annualSalaryMin ? `$${j.annualSalaryMin}-${j.annualSalaryMax}` : "",
+          location: j.jobGeo || "Remote",
+        }));
+      }
+
+      const [r, j] = await Promise.all([fetchRemotive(), fetchJobicy()]);
+      const allJobs = [...r, ...j];
+
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
+
+      const scored = await Promise.all(allJobs.map(async (job: any) => {
+        try {
+          const prompt = `Score this job from 0-100 for Federico Poletti.\nPROFILE:${FEDERICO_PROFILE}\nJOB:\nTitle: ${job.title}\nCompany: ${job.company}\nLocation: ${job.location}\nTags: ${Array.isArray(job.tags) ? job.tags.join(", ") : job.tags}\nSalary: ${job.salary}\nDescription: ${job.description}\n\nScore (0-35 stack match, 0-25 remote/EU, 0-20 experience match, 0-10 compensation, 0-10 sector fit).\nRespond ONLY with JSON: {"score":85,"reasons":["reason1","reason2"],"dealbreakers":[]}`;
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 150,
+            response_format: { type: "json_object" },
+          });
+          const result = JSON.parse(response.choices[0].message.content || "{}");
+          return { ...job, score: result.score || 0, reasons: result.reasons || [], dealbreakers: result.dealbreakers || [] };
+        } catch {
+          return { ...job, score: 0, reasons: [], dealbreakers: ["Scoring error"] };
+        }
+      }));
+
+      const sorted = scored.sort((a: any, b: any) => b.score - a.score);
+      res.json({ jobs: sorted, total: sorted.length, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return httpServer;
 }
