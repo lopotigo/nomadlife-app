@@ -1,0 +1,150 @@
+ 
+
+Per le aziende 
+Prova Premium per 0 ฿
+Ricerca offerte di lavoro
+Lavoro
+ Ultime 24 ore
+ A distanza
+2
+ 40 km
+ Livello di esperienza
+ Azienda
+ Tutti i filtri
+
+Reimposta
+Ingegnere Full Stack qui: Olbia, Sardegna, Italia
+21 risultati
+Imposta avviso di offerte di lavoro per Ingegnere Full Stack qui: Olbia, Sardegna, Italia
+
+Logo di Ai Kosmo | the guest agent who sells
+Backend / AI Integrations Engineer – Remote Europe
+Ai Kosmo | the guest agent who sells
+Italia (Da remoto)
+
+Valutazione attiva delle candidature
+Visualizzato
+Candidatura semplice
+
+ Logo di Joinrs
+Junior Developer & Data Scientist - Posizioni Entry-Level in Ambito Tech
+Joinrs
+Italia (Da remoto)
+1 giorno fa
+
+ Logo di Joinrs
+Full-Stack Developer | BIP
+Joinrs
+Italia (Da remoto)
+1 giorno fa
+Invia una delle prime candidature
+
+ Logo di Always Friday
+Senior AI Engineer
+Always Friday
+Italia (Da remoto)
+55 €K/anno - 65 €K/anno
+1 giorno fa
+
+ Logo di Jimdo
+Expert Engineer - Full-Stack
+Jimdo
+Italia (Da remoto)
+17 ore fa Entro le ultime 24 ore
+
+ Logo di Bitrock
+Senior Full Stack Engineer - Freelance
+Bitrock
+Italia (Da remoto)
+2 ore fa Entro le ultime 24 ore
+Candidatura semplice
+
+ Logo di agap2 Italia
+Ingegnere Full Stack
+agap2 Italia
+Italia (Da remoto)
+
+Solitamente le candidature vengono esaminate entro 1 settimana
+23 ore fa Entro le ultime 24 ore
+Candidatura semplice
+
+ 1
+Logo di Ai Kosmo | the guest agent who sells
+Ai Kosmo | the guest agent who sells
+Condividi
+Mostra altre opzioni
+Backend / AI Integrations Engineer – Remote Europe
+Italia · 1 giorno fa · Più di 100 candidati
+Promossa da recruiter · Valutazione attiva delle candidature
+ 
+ Da remoto
+
+ A tempo pieno
+
+  0 di 10 competenze corrispondenti
+
+Candidatura semplice
+ 
+Salva
+Salva Backend / AI Integrations Engineer – Remote Europe presso Ai Kosmo | the guest agent who sells
+Vedi un confronto con più di 100 altri candidati
+
+Accedi a informazioni esclusive sui candidati, scopri le offerte di lavoro per cui hai le maggiori probabilità di ricevere un riscontro, e tanto altro.
+
+Prova Premium per 0 ฿
+Informazioni sull’offerta di lavoro
+AI Kosmo builds AI-powered digital concierges for hotels. We're a remote-first team of 12 (currently 4 devs + founder & CTO), based across Europe, meeting quarterly in Northern Italy.
+We are expanding the team working on hotel integrations, room availability, booking engine connectors, and AI-assisted setup workflows. This area is already active in production and is growing quickly as we onboard more hotels and connect more external systems.
+
+The Role
+You will work on the systems that let Kosmo interact with hotel infrastructure and external services.
+Your first projects:
+ Room availability integrations: Maintain and extend integrations with hotel booking engines, including availability checks, booking links, validators, URL generators, API connectors, and provider-specific behavior.
+External system integrations: Build and maintain tools that connect Kosmo with PMSs, booking platforms, restaurant/spa availability systems, ticketing flows, destination APIs, and other third-party services.
+AI-assisted hotel setup: Create workflows that inspect a hotel website, detect the booking engine, extract the parameters needed to configure room availability, and validate the result.
+Reliability and debugging: Improve testing, monitoring, error handling, and debugging for integrations used in production conversations.
+
+You’ll work with real hotel systems, incomplete documentation, hotel-specific configuration, LLM workflows, and production issues where correctness matters.
+
+Tech Stack
+Backend: Bun, TypeScript, Hono, Supabase, Redis
+AI / Workflows: LLM agents, tool calling, structured extraction, workflow orchestration
+Patterns: Functional style, ts-pattern, neverthrow, Zod
+Frontend context: Next.js, React, Tailwind, shadcn/ui, when needed
+
+Requirements
+Strong TypeScript backend experience
+Experience integrating with external APIs, especially inconsistent or poorly documented ones
+Comfortable inspecting network behavior, API responses, and browser-based flows to understand how external systems work
+Comfortable debugging production issues end-to-end
+Able to keep code simple and maintainable
+Strong attention to edge cases, data validation, and error handling
+Interest in LLM agents, tool-calling systems, and AI-assisted automation
+Comfortable working in a small team where you take ownership of production systems
+Excited to work with AI coding tools like Codex, Claude Code, Opencode, Cursor, etc.
+Based in Europe
+Fluent English
+
+Nice To Have
+Experience with hotel tech, booking engines, PMSs, travel platforms, or e-commerce availability systems
+Experience turning browser-based booking flows into reliable backend integrations
+Experience with browser automation, scraping, structured extraction, or data normalization
+Experience building agentic workflows or LLM-powered internal tools
+Italian or German helpful
+
+What We Offer
+
+Fully remote, full-time position
+Quarterly team meetups in Northern Italy, usually 4 days
+Small team with direct access to CTO and CEO
+Ownership of a core product area with production impact
+Opportunity to shape how we automate hotel onboarding and integrations
+Start: ASAP
+Informazioni sull’azienda
+Logo dell’azienda Ai Kosmo | the guest agent who sells
+Ai Kosmo | the guest agent who sells
+2869 follower
+
+Segui
+Tecnologia, informazione e mezzi di comunicazione  2-10 dipendenti  10 su LinkedIn
+AI KOSMO fornisce un agente AI per gli hotel, addestrato come venditore per convertire le conversazioni con gli ospiti in prenotazioni dirette. Si tratta di un concierge digitale attivo 24 ore su 24, 7 giorni su 7, creato appositamente per il settore dell'ospitalità, che risponde istanta
