@@ -1,0 +1,81 @@
+
+Share this job: 
+Get a rok.co short link
+
+HighLevel is hiring a
+Remote Staff Engineer Platform Engineering
+About HighLevel: HighLevel is an AI-powered business operating system that gives agencies, entrepreneurs and SMBs the infrastructure to build, automate and scale. Today, HighLevel supports SMBs across 150+ countries, fueling community-driven growth rooted in real customer outcomes.To date, businesses operating on HighLevel have generated over $7 billion in ecosystem value, demonstrating the impact of shared infrastructure at scale. By centralizing conversations, automation and intelligence into one system, we help businesses move faster, reduce complexity and execute efficiently.Behind the platform, HighLevel powers more than 4 billion API hits and 2.5 billion message events daily. With 250 terabytes of distributed data, 250+ microservices and over 1 million domain names supported, our architecture is built for performance, resilience and long-term scalability.
+
+Our PeopleWith over 2,000 team members across 10+ countries, HighLevel operates as a global, remote-first organization built for speed and ownership. We value initiative, clarity and execution, creating space for ambitious people to build systems that support millions of businesses worldwide. Here, innovation thrives, ideas are celebrated and people come first, no matter where they call home.
+
+Our ImpactEvery month, HighLevel enables more than 1.5 billion messages, 200 million leads and 20 million conversations for the more than 1 million businesses we support. Behind those numbers are real people building independence, expanding opportunity and creating measurable impact. We’re proud to be a part of that.Learn more about us on our YouTube Channel or Blog Posts
+
+About the Role:As a Staff Engineer on the Platform Engineering team, you will play a pivotal role in shaping the foundation of HighLevel’s platform. You’ll design and develop shared frameworks, libraries, and core services that power products at scale. This role is ideal for engineers who thrive in ambiguity, enjoy solving large-scale engineering challenges, and are passionate about building systems that enable massive impact across teams.
+
+The Staff Engineer is expected to be a deeply technical engineering leader who thrives in ambiguity, takes extreme ownership, and has proven experience designing and building highly scalable, complex distributed systems at scale. You will also help drive engineering excellence through effective adoption of AI-powered development workflows and systems that improve software development lifecycle (SDLC) efficiency, developer productivity, quality, and delivery velocity.
+
+Responsibilities:
+
+Architect, develop, and maintain reusable frameworks, SDKs, and core platform services using Node.js and GoLang
+
+Build scalable, cloud-native solutions leveraging Google Cloud Platform (GCP)
+
+Design and optimize systems that efficiently handle large-scale data and high-throughput workloads
+
+Contribute to high-performance service architectures capable of handling massive scale with strong reliability and observability standards
+
+Lead technical design reviews, establish engineering best practices, and mentor senior engineers across teams
+
+Drive architectural decisions for scalability, performance, security, and maintainability
+
+Partner cross-functionally with product, infrastructure, and engineering teams to deliver reliable platform capabilities
+
+Improve developer productivity by building internal tooling, shared libraries, and scalable engineering foundations
+
+Lead initiatives that leverage AI effectively across engineering workflows, including code generation, testing, developer tooling, incident analysis, and SDLC automation
+
+Build and evolve systems, platforms, and engineering processes that improve SDLC efficiency, release velocity, reliability, and developer experience
+
+Take ownership of critical platform initiatives from architecture through production operations
+
+Requirements:
+
+9+ years of software engineering experience with demonstrated success building distributed systems or large-scale backend services
+
+Hands-on experience designing, optimizing, and scaling large-scale backend systems and data-intensive applications
+
+Strong understanding of distributed systems, microservices, APIs, CI/CD pipelines, and observability frameworks
+
+Experience leveraging AI-assisted engineering workflows and building systems/processes that improve SDLC effectiveness and engineering productivity
+
+Proven ability to lead technically, navigate ambiguity, and deliver impactful engineering outcomes
+
+Experience operating systems at high scale with a strong focus on performance, reliability, and resiliency
+
+Strong problem-solving skills with the ability to simplify complex technical challenges
+
+Nice to Have:
+
+Experience building internal platforms, frameworks, or developer tooling used across multiple teams
+
+Strong expertise in Node.js/GoLang and cloud infrastructure, preferably GCP
+
+Familiarity with Kubernetes, service mesh technologies, and infrastructure automation
+
+Experience in high-traffic SaaS environments with a focus on scalability and resilience
+
+Exposure to event-driven architectures, streaming systems, or large-scale data platforms
+
+Experience evaluating or implementing AI-enabled developer platforms, coding assistants, or SDLC automation systems
+
+EEO Statement:
+
+The company is an Equal Opportunity Employer. As an employer subject to affirmative action regulations, we invite you to voluntarily provide the following demographic information. This information is used solely for compliance with government recordkeeping, reporting, and other legal requirements. Providing this information is voluntary and refusal to do so will not affect your application status. This data will be kept separate from your application and will not be used in the hiring decision.
+
+We encourage you to review our Privacy Policy before submitting your application
+
+Location
+India
+
+Related jobs
+
