@@ -3404,8 +3404,49 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
         }));
       }
 
-      const [r, j] = await Promise.all([fetchRemotive(), fetchJobicy()]);
-      const allJobs = [...r, ...j];
+      async function fetchRemoteOK() {
+        try {
+          const r = await fetch("https://remoteok.com/api", { headers: { "User-Agent": "Mozilla/5.0 (compatible; JobInspector/1.0)" } });
+          const d: any = await r.json();
+          return (d || [])
+            .filter((j: any) => j.id && j.position)
+            .filter((j: any) => {
+              const tags = (j.tags || []).join(" ").toLowerCase();
+              const pos = (j.position || "").toLowerCase();
+              return tags.includes("react") || tags.includes("node") || tags.includes("typescript") ||
+                     tags.includes("javascript") || tags.includes("fullstack") || pos.includes("ai") || pos.includes("full stack");
+            })
+            .slice(0, 20)
+            .map((j: any) => ({
+              id: `remoteok-${j.id}`, title: j.position, company: j.company || "Unknown",
+              url: j.url || `https://remoteok.com/remote-jobs/${j.id}`,
+              description: (j.description || "").replace(/<[^>]*>/g, "").slice(0, 500),
+              tags: j.tags || [], source: "RemoteOK", salary: j.salary || "", location: "Remote Worldwide",
+            }));
+        } catch { return []; }
+      }
+
+      async function fetchRemotiveAI() {
+        try {
+          const r = await fetch("https://remotive.com/api/remote-jobs?category=ai&limit=20");
+          const d: any = await r.json();
+          return (d.jobs || []).map((j: any) => ({
+            id: `remotive-ai-${j.id}`, title: j.title, company: j.company_name,
+            url: j.url, description: (j.description || "").replace(/<[^>]*>/g, "").slice(0, 500),
+            tags: j.tags || [], source: "Remotive AI", salary: j.salary || "",
+            location: j.candidate_required_location || "Remote",
+          }));
+        } catch { return []; }
+      }
+
+      const [r, j, rok, rai] = await Promise.all([fetchRemotive(), fetchJobicy(), fetchRemoteOK(), fetchRemotiveAI()]);
+      const seen = new Set<string>();
+      const allJobs = [...r, ...j, ...rok, ...rai].filter((job: any) => {
+        const key = `${job.title}-${job.company}`.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
       const { OpenAI } = await import("openai");
       const openai = new OpenAI({

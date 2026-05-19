@@ -68,6 +68,60 @@ async function fetchJobicyJobs() {
   }
 }
 
+async function fetchRemoteOKJobs() {
+  try {
+    const res = await fetch('https://remoteok.com/api', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; JobInspector/1.0)' }
+    });
+    const data = await res.json();
+    return (data || [])
+      .filter(j => j.id && j.position)
+      .filter(j => {
+        const tags = (j.tags || []).join(' ').toLowerCase();
+        const pos = (j.position || '').toLowerCase();
+        return tags.includes('react') || tags.includes('node') || tags.includes('typescript') ||
+               tags.includes('javascript') || tags.includes('fullstack') || tags.includes('full-stack') ||
+               pos.includes('react') || pos.includes('node') || pos.includes('full stack') || pos.includes('ai');
+      })
+      .slice(0, 20)
+      .map(j => ({
+        id: `remoteok-${j.id}`,
+        title: j.position,
+        company: j.company || 'Unknown',
+        url: j.url || `https://remoteok.com/remote-jobs/${j.id}`,
+        description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500) || '',
+        tags: j.tags || [],
+        source: 'RemoteOK',
+        salary: j.salary || '',
+        location: 'Remote Worldwide',
+      }));
+  } catch (e) {
+    console.error('RemoteOK error:', e.message);
+    return [];
+  }
+}
+
+async function fetchRemotiveAIJobs() {
+  try {
+    const res = await fetch('https://remotive.com/api/remote-jobs?category=ai&limit=20');
+    const data = await res.json();
+    return (data.jobs || []).map(j => ({
+      id: `remotive-ai-${j.id}`,
+      title: j.title,
+      company: j.company_name,
+      url: j.url,
+      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500),
+      tags: j.tags || [],
+      source: 'Remotive AI',
+      salary: j.salary || '',
+      location: j.candidate_required_location || 'Remote',
+    }));
+  } catch (e) {
+    console.error('Remotive AI error:', e.message);
+    return [];
+  }
+}
+
 async function scoreJob(job) {
   try {
     const prompt = `You are a job matching AI. Score this job from 0-100 for Federico Poletti.
@@ -110,12 +164,20 @@ Respond with ONLY valid JSON:
 app.get('/api/jobs', async (req, res) => {
   try {
     console.log('Fetching jobs from sources...');
-    const [remotiveJobs, jobicyJobs] = await Promise.all([
+    const [remotiveJobs, jobicyJobs, remoteOKJobs, remotiveAIJobs] = await Promise.all([
       fetchRemotiveJobs(),
       fetchJobicyJobs(),
+      fetchRemoteOKJobs(),
+      fetchRemotiveAIJobs(),
     ]);
 
-    const allJobs = [...remotiveJobs, ...jobicyJobs];
+    const seen = new Set();
+    const allJobs = [...remotiveJobs, ...jobicyJobs, ...remoteOKJobs, ...remotiveAIJobs].filter(j => {
+      const key = `${j.title}-${j.company}`.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     console.log(`Found ${allJobs.length} jobs. Scoring...`);
 
     const scored = await Promise.all(
