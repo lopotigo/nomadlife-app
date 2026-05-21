@@ -1,0 +1,54 @@
+Informazioni sull’offerta di lavoro
+CHI SIAMO
+AGAP2 è un gruppo europeo di consulenza ingegneristica e operativa facente parte del Gruppo MoOngy.
+
+Presente in 14 paesi europei con oltre 7.500 dipendenti, abbiamo aperto nel 2018 la prima sede italiana a Milano e, vista la continua crescita, stiamo rafforzando e ampliando il nostro team con persone che condividano gli stessi valori della nostra società: AMBIZIONE, SORRISO, DINAMISMO, VOGLIA DI METTERSI IN GIOCO, il tutto in una realtà in continua evoluzione, nella quale le relazioni umane sono sempre al primo posto.
+
+ Web Developer
+📍 Full Remote
+📍 Prima fase onsite a Napoli (primi 15 giorni), successivamente attività da remoto
+⏰ Full Time
+
+Chi cerchiamo
+Per un progetto innovativo e ad alto contenuto tecnologico siamo alla ricerca di un Web developer Junior, Middle o Senior da inserire all’interno di un team dinamico e orientato alla qualità del software e all’innovazione continua.
+La figura lavorerà allo sviluppo e alla manutenzione di piattaforme scalabili, contribuendo attivamente all’evoluzione architetturale dei prodotti e collaborando con team cross-funzionali.
+
+Attività principali
+Progettazione, sviluppo e manutenzione di applicazioni software utilizzando PHP, Laravel, JavaScript e Vue3
+Sviluppo di soluzioni robuste, scalabili e ad alte prestazioni
+Applicazione di moderni pattern di sviluppo e principi di clean architecture
+Collaborazione con il team tecnico per garantire qualità del codice, manutenibilità e riduzione del debito tecnico
+Partecipazione alle decisioni architetturali e tecniche del progetto
+Collaborazione con stakeholder e team cross-funzionali per trasformare requisiti di business in soluzioni tecniche efficaci
+Promozione delle best practice relative a testing, code quality e performance
+Contributo all’integrazione di funzionalità basate su AI/LLM e strumenti di automazione
+Supporto a integrazioni con protocolli e architetture come MCP (Model Context Protocol) o similari
+
+Requisiti richiesti
+Laurea in Informatica, Ingegneria o esperienza equivalente
+Esperienza da 2 a 5+ anni nello sviluppo software
+Ottima conoscenza di:
+PHP
+Laravel
+JavaScript
+Vue3
+Esperienza nello sviluppo di applicazioni web moderne
+Buona conoscenza dei principi di progettazione software e sviluppo scalabile
+Attitudine al problem solving e orientamento al risultato
+Buone capacità comunicative e di lavoro in team
+
+Plus graditi
+Esperienza in contesti startup o team agili
+Background in ambito tech o edTech
+Familiarità con strumenti e servizi AI/ML o applicazioni basate su LLM
+Conoscenza di MCP o framework simili per integrazioni AI
+Esperienza nel mentoring o coordinamento tecnico
+
+Cosa offriamo
+Progetto tecnologicamente innovativo
+Ambiente dinamico e collaborativo
+Possibilità di lavorare su soluzioni AI-oriented
+Modalità di lavoro prevalentemente da remoto
+Team orientato alla crescita tecnica e professionale
+
+The world needs you!
