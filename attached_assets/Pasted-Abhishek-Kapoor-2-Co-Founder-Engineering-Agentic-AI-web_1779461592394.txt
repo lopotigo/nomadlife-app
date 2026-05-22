@@ -1,0 +1,518 @@
+Abhishek Kapoor
+
+· 2°
+Co-Founder | Engineering Agentic AI & web3 Systems
+Monaco di Baviera, Baviera, Germania
+·
+Informazioni di contatto
+
+Stealth AI Startup
+
+Technical University Munich
+10.186 follower
+
+Dina è un collegamento in comune
+
+
+Segui
+
+Invia messaggio
+
+Altro
+
+Informazioni sulle vendite
+Segnali chiave
+
+
+Ha da poco iniziato a lavorare presso Stealth AI Startup
+Persone che possono presentarti
+
+
+Dina Ramadan, che è fra i tuoi collegamenti
+Prova Sales Navigator per 0 €
+Prova gratuita di 1 mese con assistenza 24/7. Ti invieremo un promemoria 7 giorni prima della fine del periodo di prova.
+Informazioni
+As an experienced and results-driven Software Engineer and Architect with a focus towards Platform, I have extensive industry experience specialising in Distributed Systems, Web3, AI & MLOps, Blockchain, Rust and Python Programming, Cloud Computing, Kubernetes, Computer Networks, Security Engineering, and Quantitative Analysis, Building Low-Latency and High-Frequency Trading Technical architectures. 
+
+I bring both leadership experience and a hands-on approach to problem-solving, driven by high motivation, self-direction, and an entrepreneurial mindset.
+
+I thrive on collaborating with engineers, researchers, and entrepreneurs to tackle complex and impactful challenges. Current mission is to develop innovative and dependable solutions that foster the growth and success of the Web3 and Artificial Intelligence ecosystems.
+
+I earned my Master’s degree from the Technical University of Munich (TUM), Germany. Additionally, I have a passion for travel and have been exploring the world.… altro
+Attività
+10.186 follower
+
+
+Segui
+
+Post
+
+Comments
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Christian Posta
+Christian Posta
+  • 3°+
+Field CTO @ Solo.io | AI Agent IAM, AAuth, MCP, A2A | Cloud Networking | Author | International Speaker
+6 mesi • 
+🚫 API keys and Personal Access Tokens (PATs) for AI agents are a BAD idea. They are usually 𝘭𝘰𝘯𝘨 𝘭𝘪𝘷𝘦𝘥 (> 1 day) 🔑 credentials that are 𝘣𝘳𝘰𝘢𝘥𝘭𝘺 𝘴𝘤𝘰𝘱𝘦𝘥 and can be used in unexpected ways. 
+
+⚠️ Get exposed in logs? 
+⚠️ Shared across developer teams? 
+⚠️ Ex-employee takes with them. 
+
+They create a 𝐡𝐮𝐠𝐞 𝐩𝐫𝐨𝐛𝐥𝐞𝐦 𝐟𝐨𝐫 𝐬𝐞𝐜𝐮𝐫𝐢𝐭𝐲, 𝐚𝐮𝐝𝐢𝐭 𝐚𝐧𝐝 𝐜𝐨𝐦𝐩𝐥𝐢𝐚𝐧𝐜𝐞. I recently wrote an in-depth blog about the challenges of API keys / PATs for AI agents (see comments 👇 👇 👇 ), but someone asked:
+
+"𝘉𝘶𝘵 𝘵𝘩𝘦 𝘓𝘓𝘔 𝘱𝘳𝘰𝘷𝘪𝘥𝘦𝘳𝘴 𝘢𝘭𝘭 𝘪𝘴𝘴𝘶𝘦 𝘈𝘗𝘐 𝘬𝘦𝘺𝘴, 𝘴𝘰 𝘩𝘰𝘸 𝘥𝘰 𝘺𝘰𝘶 𝘥𝘦𝘢𝘭 𝘸𝘪𝘵𝘩 𝘵𝘩𝘢𝘵?"
+
+✅ Great question. 
+
+It's true, API keys may be unavoidable BUT in an enterprise environment, they should be shielded from clients. They should be locked down and tucked away in the infrastructure using something like an egress LLM/AI gateway. They can then be governed, revoked, stored, etc. in a consistent approved way. 
+
+🏰  In this pattern, the internal enterprise relies on existing user/machine identity/security mechanisms (SSO, service accounts, etc) and any policy to communicate with LLMs gets handled at the gateway (Allow/Deny). If the calls are allowed, then the AI gateway can inject the upstream LLM API keys. Clients/callers do not see these. 
+
+💡 I consistently see folks experimenting with AI technology (Agentic IDEs, public agents, custom agents) and willy nilly handing out API keys and PATs for usage. These start as POCs, but then they take this to production. 
+
+👉 𝐃𝐨𝐧'𝐭 𝐝𝐨 𝐭𝐡𝐢𝐬. 𝘛𝘩𝘦𝘳𝘦 𝘢𝘳𝘦 𝘣𝘦𝘵𝘵𝘦𝘳 𝘸𝘢𝘺𝘴.
+
+If you have scenarios you'd like to discuss, 𝐩𝐥𝐞𝐚𝐬𝐞 𝐫𝐞𝐚𝐜𝐡 𝐨𝐮𝐭 / 𝐜𝐨𝐧𝐧𝐞𝐜𝐭 / 𝐟𝐨𝐥𝐥𝐨𝐰. I would love to hear alternative thoughts, specific use cases, etc and help figure out an acceptable way to solve those problems. If we are serious about AI adoption, it's time to clean up our sloppy security practices. … altro
+
+Mostra traduzione
+Visualizza immagine
+
+
+
+461 reazioni461
+35 commenti35 commenti
+•
+50 diffusioni post50 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Manuel Gutmann
+Manuel Gutmann
+  • 3°+
+Co-Founder & CEO at Zubs | Powering High-Retention Subscriptions for Shopify Brands
+9 mesi • 
+I’ve founded and operated companies in both Sweden and Germany.
+In Germany, the process is utterly painful, complex, and slow.
+
+🇪🇺 Now the EU has the chance to fix this — with one single pan-European legal entity so startups can scale easily across all member states.
+
+But the EU Parliament’s current proposal? 27 different entities — one for each country. Exactly what we don’t need 🤯
+
+Please help out!
+
+📝 2 min: Provide feedback https://lnkd.in/gfTT-8zJ
+📊 5-10 min: Respond to survey https://lnkd.in/gPtJ76X2 (super helpful guidance by EU Inc: https://lnkd.in/gcCZVNGH)
+
+Let’s push for:
+ 1️⃣ One EU-wide standard
+ 2️⃣ Access for everyone — no restrictive definitions
+
+If we want Europe to compete globally, now’s the time to act.… altro
+
+Mostra traduzione
+
+
+
+221 reazioni221
+2 commenti2 commenti
+•
+9 diffusioni post9 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza azienda: Aachen Blockchain Club e.V.
+Aachen Blockchain Club e.V.
+535 follower
+9 mesi • Modificato • 
+🎉 Ethereum Turns 10 – and We Celebrated with Purpose! 🦄
+
+This week, we had the pleasure of co-hosting a Watch Party for Ethereum’s 10-Year Anniversary, an evening that was not only a celebration but also an active networking session for Web3 enthusiasts, builders, and curious newcomers.
+
+📺 We joined the global community in watching the official livestream, featuring key voices from Ethereum’s journey, including co-founders, developers, and ecosystem leaders reflecting on:
+
+🔹 The evolution from whitepaper to global infrastructure
+🔹 Milestones like the Merge, DeFi, and Layer 2 innovation
+🔹 Visions for Ethereum’s next decade: scalability, social impact, and beyond
+
+🤝 Beyond the screen, the event transformed into a vibrant local networking hub. Attendees exchanged ideas, shared personal Ethereum stories, discussed current projects, and explored future collaborations. 
+
+🙏 Special thanks to the Ethereum Foundation and ETHGlobal for supporting this event, and digitalHUB Aachen e.V. for the amazing space. 
+
+📅 If you’d like to join us for future events, we’d love to have you!
+👉 Subscribe to our event calendar here: https://lnkd.in/edC43MfE
+
+#Ethereum10 #ETHAnniversary #Web3Networking #ETHGlobal #EthereumFoundation #BlockchainCommunity #DecentralizedFuture #EthereumBuilders #WatchParty… altro
+
+Mostra traduzione
+
+
+
+🎉 Ethereum Turns 10 – and We Celebrated with Purpose! 🦄
+
+
+
+44 reazioni44
+5 commenti5 commenti
+•
+6 diffusioni post6 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza azienda: CERN Computing
+CERN Computing
+10.125 follower
+10 mesi • Modificato • 
+🚀 New opportunities at CERN IT Department! 
+
+We're #hiring across multiple teams to help shape the future of computing at CERN — from #AI and #CloudTechnologies to #Linux infrastructure and #DigitalTwins. Explore the latest #job openings below and join us at the forefront of innovation:
+
+ 🔹Training Programme Associate at #NGT
+Help build Next Generation Triggers continuous training initiative, designed to equip scientists and engineers with critical skills in DAQ tech, software engineering, and machine learning.
+ 📍 https://lnkd.in/eKNz2VjB
+
+🔹 Digital Twin Computing Engineer 
+ Join the IT Frontier Technologies & Initiatives group and contribute to the ODISSEE project — testing next-gen computing platforms and digital twin technologies in collaboration with European HPC centers.
+ 📍 https://lnkd.in/dsf8NhN9
+
+🔹 Cloud Systems Engineer
+ Become part of the CERN OpenStack team and help drive the evolution of our private cloud infrastructure, integrating new technologies like software-defined networking and load balancing.
+ 📍 https://lnkd.in/dWSeyN6k
+
+🔹 Linux Engineer
+ Join the Linux Team at CERN and support critical computing services used by the global research community, from software mirrors to PXE infrastructure — all built on open-source principles.
+ 📍 https://lnkd.in/dgS65y8s
+
+🔹 DevOps Engineer
+ Help design and maintain the advanced software stack that powers CERN’s telecom and network infrastructure. Work at the intersection of automation, CI/CD, and full-stack development.
+ 📍 https://lnkd.in/devGUSt8
+
+👉 Know someone who'd be a great fit? Tag them below or share this post!
+
+Maria Girone Felice Pantaleo Luis Fernández Álvarez… altro
+
+Mostra traduzione
+Visualizza immagine
+
+
+
+106 reazioni106
+1 commento1 commento
+•
+19 diffusioni post19 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Jose Castro Leon
+Jose Castro Leon
+  • 3°+
+Cloud Technical Leader at CERN Cloud Infrastructure
+11 mesi • 
+The #CERN Cloud Team is hiring! Do you want to work with us and contribute to the evolution of our #OpenStack private cloud, dealing with 15K+ Virtual Machines and 10K+ Physical Servers used by the whole laboratory? 
+
+Apply here: https://lnkd.in/d46wd2ay… altro
+
+Mostra traduzione
+
+Cloud Systems Engineer (IT-CD-CLI-2025-108-GRAE)Cloud Systems Engineer (IT-CD-CLI-2025-108-GRAE)
+jobs.smartrecruiters.com
+
+
+
+82 reazioni82
+3 commenti3 commenti
+•
+20 diffusioni post20 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Dan van der Ster
+Dan van der Ster
+  • 3°+
+CTO at CLYSO and Ceph Executive Council member
+1 anno • 
+Dream job for a recent grad interested in data storage for AI and HPC
+
+Mostra traduzione
+
+Roberto Valverde
+• 3° +
+IT Storage Engineer en CERN
+1 anno • 
+We are hiring! Join us at the CERN Ceph Team!
+https://lnkd.in/dsdVSUEM
+
+Mostra traduzione
+
+AI/HPC Computing Performance Engineer (IT-SD-GSS-2024-185-GRAE)AI/HPC Computing Performance Engineer (IT-SD-GSS-2024-185-GRAE)
+jobs.smartrecruiters.com
+
+
+41 reazioni41
+7 diffusioni post7 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Felix Haas
+Felix Haas
+  • 3°+
+Bits & Pretzels | Investor | Unternehmer
+1 anno • 
+Technical University of Munich is #1 in the EU! Big congrats dear Alma Mater! 👏 🚀 💪 ❤️ 
+
+Mostra traduzione
+Visualizza immagine
+
+
+
+409 reazioni409
+16 commenti16 commenti
+•
+6 diffusioni post6 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Ronald Jan Schuurs
+Ronald Jan Schuurs
+  • 3°+
+Partner at Antler | Making Founders Go Further, Faster - Inception Stage Investor
+Visita il mio sito web
+1 anno • 
+🔥 Attention Angel Investors! 🔥
+
+Are you ready to take our combined investing game to the next level? Join an exclusive community of forward-thinking investors at the Angel Investor Meetup, hosted by Antler on October 31st at 5 PM, right here in the vibrant startup hub of Amsterdam!
+
+Here’s why you don’t want to miss this event: 
+✨ Exclusive access: Meet and network with seasoned and emerging angel investors. 
+💡 Investing insights: Exchange valuable strategies and get the inside scoop on early-stage investment trends. 
+💼 Deal flow opportunities: Dive into fresh deals and discover your next big success story.
+
+This is more than just a meetup – it's your chance to amplify your investment impact and help shape the next generation of startups.
+
+📅 Date: October 31, 2024
+🕔 Time: 5:00 PM
+📍 Location: Antler Office, Edge Technologies Olympic, Amsterdam
+🔗 Register here: https://lnkd.in/ef2Cec9c
+
+Seats are limited – act fast to secure your spot and be part of this powerful network of investors. Let’s ignite new opportunities and build the future of innovation together! 💥
+
+#AngelInvesting #InvestorCommunity #Startups #DealFlow #Networking #Antler #InnovationLeadership… altro
+
+Mostra traduzione
+
+Antler Angel Investors EventAntler Angel Investors Event
+docs.google.com
+
+
+
+36 reazioni36
+2 commenti2 commenti
+•
+2 diffusioni post2 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Dan van der Ster
+Dan van der Ster
+  • 3°+
+CTO at CLYSO and Ceph Executive Council member
+1 anno • 
+The music industry is learning that "HDDs on a shelf" isn't a good archival strategy.
+
+https://lnkd.in/gw7kSV4h
+
+They're finding that one in five HDDs from the 90's is unreadable. And even if you can read the data, do you have a computer and software that can load the Pro Tools session from 3 decades ago?
+
+They're facing these problems now. What about 50 years from now? Or in 1000 years!
+
+This is a familiar story to me, one that the particle physics and other scientific communities started addressing in recent years. "Data Preservation" as they call it. Scientists, like musicians, know and trust tape; and are learning none of the newer storage media can compete in archival quality.
+
+This isn't a simple problem. My first group leader at CERN explained it to me 15 years ago: data preservation can be a future role for public libraries, librarians, who will curate, manage, test, and exercise all the old data to ensure it remains usable for current and future generations. My colleagues at CERN developed the Zenodo and REANA services for this exact problem.
+
+Scientific data is a public asset. Music in the public domain is the same!
+
+In the end, data can't just sit on a shelf: it's a living thing that needs care and upkeep.
+
+So it's really not a big stretch to extend this story out to Ceph, our so-called Linux of Storage. Humanity needs open, "living" storage tech to serve as a stable foundation for these future digital libraries. Ceph is a unified storage platform, serves open standards, and is integrated into all the open cloud and cloud native stacks. Proprietary solutions are totally inappropriate.
+
+If you need help or advice building your storage infra, get in touch. I'd love to hear your ideas and plans.
+… altro
+
+Mostra traduzione
+
+Inside Iron Mountain: It’s Time to Talk About Hard Drives - MixonlineInside Iron Mountain: It’s Time to Talk About Hard Drives - Mixonline
+mixonline.com
+
+
+43 reazioni43
+1 commento1 commento
+•
+4 diffusioni post4 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+Abhishek Kapoor ha diffuso questo post
+
+
+Visualizza il profilo di Rubén Domínguez Ibar
+Rubén Domínguez Ibar
+  • 3°+
+founder The AI Corner | scout a16z speedrun
+Vai al mio blog
+1 anno • Modificato • 
+𝗔𝘃𝗼𝗶𝗱 𝗧𝗵𝗲𝘀𝗲 𝗦𝘁𝗮𝗿𝘁𝘂𝗽 𝗜𝗱𝗲𝗮𝘀
+
+Y Combinator warns that some startup ideas may seem promising but end up wasting time and resources—these are "Tarpit Ideas." Unlike bad ideas, which you can usually spot early, Tarpit Ideas often reveal their downsides when it’s too late to avoid significant losses.
+
+Many founders fall into this trap because these ideas initially seem appealing.
+
+This guide will help you identify and avoid them before they drain your resources. 
+
+Check out the details in the attached document 👇
+
+Join 90,000+ founders and VCs who receive these insights in my weekly newsletter: https://lnkd.in/dtifw4mC… altro
+
+Mostra traduzione
+
+
+Y-Combinator: Avoid These Startup Ideas — Tarpit Ideas In the search for startup ideas, it often happens that founders come across some seemingly obvious and simple ideas. These are ideas that seem great at first, but end up being a major drain on your time and resources. Y-combinator called these ideas as "Tarpit Idea". Tarpit ideas are deceptive in appearance and present themselves with a disconcerting ease as obvious, until one wonders why no one has solved them before. But what’s the difference between bad and tarpit ideas? The only difference between a bad idea and a Tarpish idea “is that you would know when to stop pursuing a bad idea. A Tarpit Idea is identified a little bit too late — when money is already spent on developing it. Looks scary, right?” Subscribed to Venture Curator Newsletter https://theventurecrew.substack.com/
+Most founders fall under the Tarpish Ideas trap — assuming it to be a good idea. In this writeup, we’ll be discussing the common “tar pit” ideas that founders often pivot into and away from, and provide some tips on how to avoid them. What’s The ‘Tarpit Idea’? A Tarpit, in nature, is where petroleum seeps through the Earth. It’s a hotbed for finding fossilized remains like dinosaurs. Because animals mistake the tar pits for freshwater ponds. They step in, get stuck due to the sticky tar, and unfortunately perish. The interesting thing is — “Scent attracts more animals, creating a domino effect.” Interestingly, this mirrors a phenomenon in the startup world where some ideas lure entrepreneurs in, but the challenges and failures cascade, trapping them in a cycle much like the unsuspecting animals in a tar pit. How Is This Related To The Startup World? Tarpits in the startup world lure founders with seemingly brilliant and unexplored ideas. The absence of famous companies tackling these issues makes them more attractive. It’s like discovering a pristine freshwater pool that appears wide open for success. However, beneath the surface lies a hidden danger. Many startup founders unknowingly fall into the tarpit trap, where the graveyard of failed attempts is not immediately apparent. Recognizing this trap is crucial because awareness significantly increases the probability of your startup’s success. In essence, avoiding the allure of deceptive ideas can be the key to steering your entrepreneurial journey toward triumph rather than failure. Interesting Fact — Most Tarpit Ideas Are Consumer Ideas! Why Consumer Ideas Are Tarpit Ideas? Subscribed to Venture Curator Newsletter https://theventurecrew.substack.com/
+People often lean towards consumer ideas because we’re all consumers! From the products marketed to us throughout our lives, our problems and interests naturally revolve around things we use or think our friends would. Most startup stories we hear are about consumer successes like Steve Jobs or Mark Zuckerberg, creating a default association between startups and consumer-focused ventures. Unlike the consumer realm, it’s rare to find someone head over heels for enterprise solutions like Cisco or Oracle. Essentially, our familiarity and exposure make consumer ideas the default go-to when diving into the startup world. The most interesting thing is that — most consumer-based idea seems to be so simple but it’s really difficult to build a good startup. There is a reason why there is no solution for a simple idea….. Why It’s Difficult To Build A Consumer Startup? It’s tough for two reasons - First, many underestimate the high bar set by successful consumer products. They often don’t realize how good those products are and how many others have tried and failed. Second, timing is crucial in the consumer space. Sometimes, founders do understand when the timing is in their favour or working against them. Additionally, existing big players have an edge, creating an almost unfair advantage. For instance, imagine someone with an idea for an un-launched consumer social network. They might believe it’s groundbreaking without knowing the real standards. Let’s take Google as an example to understand the high bar — it wasn’t just about launching; it was about creating something so exceptional that users couldn’t resist. 1. Google: Subscribed to Venture Curator Newsletter https://theventurecrew.substack.com/
+In its early days, there was no advertising or growth hacking — just a website. They relied on incredible word of mouth. Users had to manually discover it, often through internet forums like Slashdot. Without spending on user acquisition, branding, or marketing, Google attracted millions of users daily. The product’s quality was so high that people not only wanted it but evangelized it. The founders initially weren’t keen on running a startup; they even tried to sell the technology. However, the demand was so intense that they got pulled into the startup world. This highlights a key aspect of successful consumer ideas — creating something people are obsessed with and of exceptional quality, so much so that users pull the founders into the journey. The same case with the facebook… 2. Facebook Facebook’s journey mirrors Google’s success. Within 48 hours of its Harvard release, 75% of the campus was using it. Investors like Peter Thiel and Reed Hoffman witnessed users spending an average of two hours daily on the site. The striking part? No money was spent on marketing or growth hacking. The truth about these iconic consumer companies is often overlooked. They started with excited users who pulled the product themselves. Users were passionate, even demanding the product at their universities. The lesson here is clear: successful consumer companies have in common genuinely enthusiastic users. They didn’t rely on aggressive marketing tactics but rather created products that people became obsessed with early on. This sets a high bar for what defines a compelling consumer idea. Subscribed to Venture Curator Newsletter https://theventurecrew.substack.com/
+Why Timing is So Important? If you look closely into the data… Making a consumer or mobile company in the mid-2000s and early 2010s was easier due to specific circumstances. During the 2000s, many people had broadband and computers, and the lack of competition for attention made launching something cool quite successful. For instance, Facebook gained traction without battling numerous social networks. In the smartphone era, having an app store and the novelty of mobile apps meant even basic creations could attract users. Back in college, everyone had a computer screen, and with limited TVs, people were more engaged with computers. The absence of major web incumbents and the dominance of TV in entertainment created a sweet spot for web-based startups. Similarly, the early smartphone era allowed for simpler apps to thrive, unlike today’s highly competitive app landscape. “The key takeaway is — Success often depends on being in the right place at the right time.” So — How To Identify Tarpit Ideas? ● Ideas that have survivor bias: user problems that may look solvable from a posterior, results-oriented perspective. For example, discovery problems help people find new restaurants to try and new places to go. ● Ideas that are second-order on widely adopted innovations. Innovations that have step function improvements bring many low-hanging second-order opportunities. For example, in today’s environment, a “social network for X” might be a Tarpit Idea. ● Ideas that are more difficult for startups to scale. Subscribed to Venture Curator Newsletter https://theventurecrew.substack.com/
+Y Combinator - Tarpit Ideas
+·
+7 pagine
+
+
+
+
+
+427 reazioni427
+22 commenti22 commenti
+•
+71 diffusioni post71 diffusioni post
+
+Consiglia
+
+
+Commenta
+
+
+Diffondi il post
+
+Invia
+
+
+
+Mostra tutto
+Esperienza
+Logo Stealth AI Startup
+Co-Founder
+Stealth AI Startup · A tempo pieno
+apr 2026 - Presente · 2 mesi
+Monaco di Baviera, Baviera, Germania · In sede
+Logo Lit Protocol
+Staff Software Engineer 
+Lit Protocol · A tempo pieno
+feb 2025 - mar 2026 · 1 anno 2 mesi
