@@ -1,0 +1,766 @@
+Browse jobs that match your experience to a client's hiring preferences. Ordered by most relevant.
+Posted 3 hours ago
+•
+Proposals: 50+
+Senior AI Backend Engineer (Python / LLM / Conversational Systems) — MVP Build
+Hourly: $30-$50 - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+We’re building an AI-first conversational product in the dating / relationship space. The product analyzes conversations, screenshots, and profile data to help users identify emotional pressure, manipulation patterns, scams, inconsistencies, and other hidden signals. Current platform: - Telegram-based MVP - AI-first conversational UX - structured case memory - multimodal analysis (text + screenshots) - OpenAI integration We are looking for a strong backend engineer to take ownership of the MVP architecture and help simplify/rebuild parts of the system properly. What you’ll work on: - conversational AI architecture - LLM orchestration - memory/state systems - Telegram bot backend - multimodal pipelines - structured analysis flows - prompt architecture - lightweight agentic workflows - production-ready backend architecture - database + scalability decisions Current stack: - Python - aiogram - SQLite/Postgres - OpenAI APIs - Telegram Bot API We care more about product thinking and architectural quality than specific frameworks. Please send: - relevant AI/LLM projects - GitHub or portfolio - short explanation of how you’d approach an AI conversational system like this
+more about "Senior AI Backend Engineer (Python / LLM / Conversational Systems) — MVP Build"
+Skills
+Python
+Artificial Intelligence
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Portugal
+Posted 1 hour ago
+•
+Proposals: 50+
+Custom SaaS Platform Development with AI Features
+Fixed-price - Expert - Est. Budget: $15,000
+We are looking for a strong full stack development team or senior developers for a custom platform development project with additional AI-powered features. The main focus of the project is the platform itself: • custom web application • admin dashboard • user roles and permissions • business workflows • integrations with third-party services • scalable backend architecture • modern frontend experience AI functionality will be added as an additional layer to improve automation and user experience. This may include: • AI-assisted workflows • document processing • smart suggestions • AI-generated summaries • chatbot or assistant functionality • semantic search / knowledge retrieval This is primarily a platform development project, not an AI-only product. Possible stack: • React / Next.js • Node.js or Laravel • PostgreSQL • cloud infrastructure • OpenAI / Claude APIs for AI features We are looking for developers who: • have experience building complex custom platforms • understand scalable architecture • can work independently and suggest practical solutions • have at least some real experience integrating AI features into products Please share: • relevant platform projects • experience with AI integrations • preferred stack • availability • hourly rate
+more about "Custom SaaS Platform Development with AI Features"
+Skills
+SaaS
+PHP
+React
+Node.js
+Claude
+ChatGPT API
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $2K+ spent 
+
+  SVN
+Posted 1 hour ago
+•
+Proposals: 50+
+Senior Full-Stack Architect - Multi-Tenant B2B SaaS (Next.js + Node + Postgres + Stripe)
+Hourly: $60-$100 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+We purchased a vertical SaaS company (field service ops, ~80 customer accounts) and rebuilding the customer-facing portal from scratch. The current portal is a WordPress + custom PHP frankenstein that drifts from the operational database nightly. We need a senior architect who has shipped multi-tenant Next.js / Node platforms before, not someone learning on our budget. What you would own: Greenfield Next.js 15 + Node (or NestJS) + Postgres backend, multi-tenant from day one Tenant isolation enforced at the database layer (row-level security + repository pattern), not just in code JWT auth with short-lived access + rotating refresh, RBAC + ABAC for document-level permissions Stripe billing with metered usage and seat licensing on the same plane Real-time updates (Socket.IO or similar) namespaced per tenant S3 for file uploads with presigned URLs BullMQ for background work (email, push, OCR, scheduled syncs) Deployment on AWS (we are already AWS-native, ECS Fargate + RDS) This is not a CRUD app. It needs to be designed so that adding tenant #100 is a config change, not a code change. What we want in your proposal: The hardest multi-tenant isolation bug you have shipped a fix for Why row-level security alongside repository scope, vs one or the other Your milestone preference: paid spike first, or full scope upfront
+more about "Senior Full-Stack Architect - Multi-Tenant B2B SaaS (Next.js + Node + Postgres + Stripe)"
+Skills
+Next.js
+Redis
+NestJS
+Node.js
+PostgreSQL
+Multi-Tenant SaaS
+JWT, Stripe
+BullMQ
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.3 out of 5.
+ $4K+ spent 
+
+  United States
+Posted 9 hours ago
+•
+Proposals: 50+
+Senior Full-Stack + AI Engineer to Build a Voice-Based Accessibility Assistant
+Hourly: $25-$47 - Expert - Est. Time: More than 6 months, 30+ hrs/week
+We run a phone-based service that helps people who can't use the internet — including elderly and low-vision users — get everyday things done by voice. They call in, talk to a voice assistant, and our system completes tasks on their behalf (shopping, lookups, account tasks). in a safe and compliant way. We're looking for one strong developer (or a small team) to build out the next version and stay on to maintain and grow the whole technical stack. Our priority is to do this the right way: integrating with official APIs and partner integrations wherever they exist, and acting only on a user's own accounts with their explicit authorization. Any automation must respect the terms of service of every third-party platform involved — we will not take on work that requires circumventing another service's protections. Important: We are not technical. You'll have real ownership and autonomy — we need someone who can make sound architecture decisions, explain trade-offs in plain language, and be a reliable long-term technical partner. We already have a working v1 and a written design document, which we'll share with shortlisted candidates. What you'll do: Build a voice-driven assistant that completes tasks for users by phone, with the user confirming key steps (e.g. choosing between options, approving a purchase) Integrate with official APIs and merchant/partner services as the primary path Where a user authorizes us to act on their own account, automate those actions reliably and within each service's terms Implement clean human-in-the-loop pauses over a voice call (asking the caller to pick an option, confirm an action, or provide a code), including resuming a session after the caller responds Manage per-user login/session state securely Make it easy to add new integrations and tasks without rewriting code Ongoing: maintain, debug, and evolve the full stack as we grow Current tech stack (open to evolving): TypeScript / Node (Fastify) for the task service Python / FastAPI for the main voice app (Retell voice agent) PostgreSQL AI/LLM orchestration (Anthropic / Claude) for understanding requests and driving task flows Cloud browser infrastructure for authorized, automated actions Must-have skills: Strong TypeScript/Node and Python/FastAPI AI/LLM integration and agent orchestration (e.g. Claude API, Stagehand, agent frameworks) Third-party API integration experience Browser automation for user-authorized workflows (Playwright/Puppeteer/CDP) PostgreSQL, REST API design, cloud deployment Clear, proactive communication with non-technical stakeholders Nice to have: Voice/telephony experience. Accessibility-focused product experience Secure credential / authentication handling (OAuth, token management) To apply, please answer these: Describe an AI-agent or automation system you've shipped to production. What broke most often, and how did you handle it? Which AI-agent frameworks and API-integration tools have you worked with? What did you learn about their limits? How do you approach integrating with third-party services responsibly and within their terms of service? When do you reach for an official API vs. other approaches? We're non-technical. How do you keep a non-technical client informed and make good architecture decisions on their behalf? Would you be open to a small paid trial task before a longer engagement? Please begin your reply with the word "milkrun" so we know you read the whole post.
+more about "Senior Full-Stack + AI Engineer to Build a Voice-Based Accessibility Assistant"
+Skills
+TypeScript
+Node.js
+AI Agent Development
+Browser Automation
+FastAPI
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.7 out of 5.
+ $10K+ spent 
+
+  United States
+Posted 1 hour ago
+•
+Proposals: 50+
+Full Stack Developer Needed to Build AI Job Application SaaS Web App
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+I am looking for a full-stack developer to build version one of an AI-powered job application web app. The app will help users create tailored CVs, cover letters, job application answers and career documents by entering their background, uploading/pasting a job description, and receiving structured AI-generated outputs. This is not a basic website. I need a working SaaS-style web app with user accounts, dashboard, AI integration, saved documents, exports, payments and an admin panel. What I need built 1. User accounts Users should be able to: * sign up; * log in; * reset password; * manage their profile; * save their career information. Preferred: Supabase Auth, Firebase Auth, or similar. 2. User dashboard Each user needs a clean dashboard showing: * saved CVs; * saved cover letters; * saved application answers; * previous job applications; * progress/status of applications; * option to create a new document. 3. Career profile form The user should be able to enter and save: * work history; * education; * skills; * achievements; * preferred job titles; * target industry; * location/country; * tone preference; * existing CV text, if available. This saved profile should be reused when generating future documents. 4. Job description input The app needs a section where users can: * paste a job description; * upload a job advert, if practical; * enter the company name; * enter the role title; * select country/jurisdiction, for example UK, US, Canada, Australia. 5. AI document generation The app should use OpenAI API, or equivalent, to generate: * tailored CV bullet points; * tailored cover letters; * answers to job application questions; * LinkedIn summary/profile text; * interview preparation notes, if included in version one. The AI should use both: * the user’s saved career profile; and * the specific job description. The outputs should feel tailored, structured and professional, not generic. 6. Editing and regeneration Users should be able to: * edit the generated text; * regenerate sections; * ask for a different tone; * shorten or expand the output; * save final versions. 7. Document export Users should be able to export documents as: * PDF; and ideally * Word document. At minimum, version one should allow clean PDF export. 8. Payments The app should include Stripe integration for either: * one-off purchase; or * monthly subscription; or * free trial with paid upgrade. I am open to the developer advising the simplest version one structure. 9. Admin panel I need an admin area where I can: * view users; * see number of documents generated; * manage payments/subscriptions; * view basic usage data; * manually manage accounts if necessary; * update prompt templates if practical. 10. Database The app needs a proper database structure for: * users; * career profiles; * job descriptions; * generated CVs; * generated cover letters; * generated answers; * payment status; * usage limits; * country/tone settings. Preferred back end: Supabase, Firebase or similar. 11. Basic design The design should be clean, modern and simple. It does not need to be highly complex at version one, but it should look credible enough for real paying users. 12. Deployment The developer should deploy the app and explain: * where it is hosted; * how I access the admin panel; * how the database works; * how OpenAI/Stripe keys are managed; * how I can make basic edits after handover. Preferred hosting: Vercel, Netlify, Firebase, Supabase, or similar. Preferred tech stack I am open to recommendations, but my preferred stack is: * React or Next.js * Supabase or Firebase * OpenAI API * Stripe * PDF/Word export * Vercel or similar hosting What I need from you in your response Please answer the following: 1. Have you built a SaaS-style web app before? 2. Have you built anything with OpenAI API? 3. Have you built dashboards/user portals before? 4. Have you integrated Stripe payments before? 5. Have you created PDF or Word document export before? 6. Can you show live examples or screenshots of similar work? 7. How would you structure version one of this app? 8. What would your estimated cost and timeline be? 9. Would you be willing to start with a small paid test task? Important Please do not send a generic proposal. I am only interested in developers who can explain clearly how they would build this specific product.
+more about "Full Stack Developer Needed to Build AI Job Application SaaS Web App"
+Skills
+MERN Stack
+React
+Next.js
+Node.js
+NestJS
+ExpressJS
+React Native
+TypeScript
+JavaScript
+MongoDB
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Kingdom
+Posted 7 hours ago
+•
+Proposals: 20 to 50
+⁠ Build AI Customer Support Chatbot with RAG Pipeline (LangChain + Node.js)
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+We need an AI-powered customer support chatbot integrated into our web app. The bot should answer questions from our product documentation using RAG (retrieval-augmented generation), escalate to human agents when needed, and maintain conversation context across sessions. Scope of Work: - RAG pipeline: ingest and chunk product docs (PDF + web), embed with OpenAI, store in vector DB (Pinecone or Qdrant) - LangChain-based agent with memory and tool-calling - GPT-4o as primary LLM, with fallback handling - Web widget UI (React) with chat history - REST API backend in Node.js / FastAPI - Basic analytics: query volume, escalation rate, top unanswered questions - Deployment on AWS (ECS or Lambda) What We're Looking For: - Experience building RAG-based chatbots in production, not demos - Ability to own frontend, API, and LLM layer independently - Clean, documented code with proper error handling - Responsive communication and milestone-based delivery Budget: Fixed price, scoped per milestone Timeline: 3–4 weeks
+more about "⁠ Build AI Customer Support Chatbot with RAG Pipeline (LangChain + Node.js)"
+Skills
+Automation
+AI Agent Development
+AI Chatbot
+Zapier
+Chatbot
+API Integration
+Chatbot Prompt
+Twilio
+Make.com
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  India
+Posted 13 hours ago
+•
+Proposals: 50+
+Senior AI / Full-Stack Engineer for Healthcare Intake Automation MVP
+Hourly - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+AI / Full-Stack Engineer for Healthcare Intake Automation Startup We are building an AI-powered intake automation platform focused initially on ABA therapy / behavioral healthcare providers. The goal is to automate and streamline workflows such as: * intake document collection * insurance verification * referral processing * scheduling coordination * AI document summarization * workflow automation between systems We are looking for a strong senior engineer or small team who can help us rapidly prototype and build an MVP. What We Need We are NOT looking for a generic developer. We want someone who: * moves fast * has startup mentality * can architect practical solutions * understands AI workflow automation * can build clean scalable systems * preferably has healthcare SaaS or HIPAA experience Tech Stack (Flexible) Open to recommendations, but experience with the following is highly preferred: * Python * React / Next.js * OpenAI or Anthropic APIs * OCR / document extraction * API integrations * Automation tools (n8n, Zapier, Make) * Cloud infrastructure (AWS/GCP) * PostgreSQL Initial MVP Scope Phase 1 may include: * secure intake portal * document upload & extraction * AI-powered document summaries * automated missing-document follow-up * intake coordinator dashboard * insurance verification workflow integrations * CRM / EMR integrations (lightweight initially) Nice to Have * HIPAA-compliant architecture experience * Healthcare workflow experience * EMR/EHR integration experience * Experience building AI agents or workflow automations * Experience with Twilio/email/SMS automations Important We care more about: * speed * practical execution * communication * product thinking
+more about "Senior AI / Full-Stack Engineer for Healthcare Intake Automation MVP"
+Skills
+Python
+API
+Node.js
+React
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $20K+ spent 
+
+  USA
+Posted 15 hours ago
+•
+Proposals: 50+
+Founder healthcare tech
+Hourly: $15-$35 - Intermediate - Est. Time: More than 6 months, 30+ hrs/week
+A founder - possible CTO looking to Join Us to Build HealthOS — The Operating System for Human Health We’re building HealthOS, a next-generation health platform designed to transform how people understand, manage, and optimise their health using data, intelligence, and seamless digital systems. This is not an incremental product. This is foundational infrastructure for the future of health. We are now looking for a founding technical builder to join at the earliest stage and help shape everything — product, architecture, and long-term vision. Role: Founding Engineer / Technical Co-Builder (Path to CTO) This is a rare early-stage opportunity to take a role in building HealthOS from the ground up. You will work directly with the founding team to design, build, and scale the first version of the platform, with a clear pathway to becoming Chief Technology Officer (CTO) upon delivery of agreed milestones and company growth objectives. You won’t just join the company — you’ll help define and lead its technical future. Location Remote-first (UK / Europe preferred) London collaboration opportunities (optional in-person sessions) Flexible, async-friendly working culture What You’ll Be Doing Architecting and building core HealthOS systems (frontend, backend, APIs, infrastructure) Designing scalable, secure, and privacy-conscious health data systems Collaborating closely on product direction and UX design Integrating AI-driven health intelligence and personalization systems Setting engineering standards, stack choices, and long-term technical strategy Moving fast from concept → prototype → production systems Ideal Candidate Profile We’re looking for builders, not just engineers. You may be: A full-stack or systems engineer with strong product intuition Comfortable in early-stage, ambiguous environments Passionate about health, longevity, bio-data, or human performance Experienced in one or more of: Full-stack development (React, Node, Python, etc.) Cloud infrastructure (AWS/GCP/Azure) Scalable API/system design Data pipelines or AI/ML integration Bonus Experience: Healthtech, biotech, wellness, or data-heavy startups Early-stage startup founding or senior engineering experience Wearables, biometrics, or AI assistant systems Knowledge of privacy/security in healthcare systems What We Offer This is a founding-level opportunity, designed for someone who wants to grow. Real decision making in product, architecture, and company direction Leadership Path Clear pathway to becoming Chief Technology Officer (CTO) CTO role to be formalised upon achievement of agreed technical and product milestones Opportunity to build and lead the entire engineering function Environment Zero bureaucracy, high-trust, builder-first culture Full autonomy and decision-making power in technical direction Early-stage speed with long-term ambition Why HealthOS Health is becoming the most important data problem of our generation. HealthOS aims to become the foundational layer where: Personal health data is unified AI generates continuous health insights Preventative care becomes the default model Individuals regain control over their health journey You’ll be building something designed to impact millions of lives globally. How to Apply No long cover letters needed. Just tell us: What you’ve built What excites you about HealthOS Why you want to take on a founding/CTO-level challenge We’re looking for builders who want to create something category-defining.
+more about "Founder healthcare tech"
+Skills
+Web Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Kingdom
+Posted 9 hours ago
+•
+Proposals: 50+
+Backend Developer – Horse Racing XML Ingestion & PostgreSQL Setup (Supabase)
+Fixed-price - Expert - Est. Budget: $2,000
+We are seeking an experienced backend developer to handle Phase 1 of a horse racing data platform. This phase involves auditing our third-party XML racing feeds, designing a hosted PostgreSQL database, and automating the data ingestion pipeline. The ideal candidate will have strong experience handling complex, nested XML/JSON data and setting up structured database schemas. Project Scope & Deliverables: 1. XML Audit: Review our horse racing XML provider's feeds/documentation and map out available core fields (Meetings, Races, Runners, Results). 2. Database Design: Build a relational PostgreSQL database hosted on Supabase or Neon. 3. Custom Field Placeholders: Add specific placeholder columns (URLs, Booleans, and text fields) that we will use later for a separate AI voice-to-text integration. 4. Automation Pipeline: Build a robust script or use Make.com to automatically fetch, parse, and upsert (insert/update) the XML data on a schedule without creating duplicate entries. Required Skills: - Strong proficiency in PostgreSQL and database architecture. - Experience with managed databases (Supabase preferred). - Expert at parsing complex, nested XML and JSON feeds. - Experience with Make.com (Integromat) or Node.js/Python for creating scheduled API/data ingestion pipelines. - Clean documentation skills so we can easily connect a Glide frontend and an OpenAI pipeline in Phase 2. Application Requirement: Please briefly describe your experience dealing with complex XML feeds or sports data in your proposal. As mentioned, this could lead to further work in Phase 2 as further developments are made to the database and voice/AI data feeds are integrated into the database/Glide app. Example XML files are attached.
+more about "Backend Developer – Horse Racing XML Ingestion & PostgreSQL Setup (Supabase)"
+Skills
+PostgreSQL
+XML
+Supabase
+JSON
+Make.com
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $1K+ spent 
+
+  Australia
+Posted 11 hours ago
+•
+Proposals: 20 to 50
+Senior Real-Time / WebSocket Engineer: Live Video + Voice AI App (Gemini Live, React/Node/TS)
+Hourly: $20-$75 - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+We're an early-stage startup with a working product in field testing, building a real-time AI assistant for skilled tradespeople: a mobile web app (React PWA) where a user points their phone camera at equipment, talks, and gets spoken, code-referenced guidance back in real time. The backend (Node/Fastify) proxies Google's Gemini Live API over a WebSocket, streaming live video and audio both ways. The product works, but it isn't reliable yet. Sessions drop on weak or intermittent connections, sometimes responses are slow, and there's no recovery. When the socket closes, the session is dead. Our users are often on poor cell signal at job sites, so this is the problem that matters most. We're looking for someone who has genuinely built and debugged real-time streaming systems in production — not someone who's only done request/response APIs. The work (in priority order): - Session reliability: bidirectional heartbeat, client reconnection with session resumption (so the user doesn't lose context), graceful handling of upstream disconnects. - Graceful degradation on weak connections: detect poor bandwidth and fall back to a lighter mode instead of hanging. - Re-enabling and hardening a lower-bandwidth photo-based interaction path - Later milestones: rate limiting / cost controls, server-side usage logging for an admin view, Stripe webhook, error tracking. Our stack: React 19 + TypeScript + Vite (PWA), Node + Fastify on Railway, Supabase (Postgres + pgvector), Gemini Live + Gemini REST (live video + audio streaming), PostHog. You should be strong in TypeScript and Node, comfortable in React, and — most importantly — experienced with real-time WebSocket/streaming systems and LLM API integration. Experience with multimodal/vision LLM APIs is a plus. How we'll start: A small paid first task (fixed price, ~4–6 hours, $250) on the actual reliability problem, so we both see how we work together before committing to the larger roadmap. If it goes well, there's steady ongoing work. To apply, please answer briefly (applications that skip these are ignored): 1) Describe one real-time / streaming system you've built and shipped. What was the hardest reliability problem and how did you solve it? 2) We proxy Gemini Live over a WebSocket and sessions intermittently drop with "CLOSED." What are the first three causes you'd investigate? 3) How would you keep a real-time app usable for a user on weak or intermittent cell signal?
+more about "Senior Real-Time / WebSocket Engineer: Live Video + Voice AI App (Gemini Live, React/Node/TS)"
+Skills
+TypeScript
+React
+Websockets
+Multimodal Large Language Model
+Node.js
+VLM
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted 6 hours ago
+•
+Proposals: 20 to 50
+AI, Shopify, Full Stack Developer
+Hourly: $15-$35 - Intermediate - Est. Time: More than 6 months, 30+ hrs/week
+Join our team as an AI, Shopify, or Full Stack Developer. We are seeking individuals with a strong passion for innovation and problem-solving. As an AI Developer, you will work on cutting-edge projects, integrating AI solutions into our systems. Shopify Developers will focus on enhancing our e-commerce platform, ensuring seamless user experiences. Full Stack Developers will handle both front-end and back-end development, creating dynamic web applications. If you are eager to contribute to exciting projects and grow with our team, we want to hear from you!
+more about "AI, Shopify, Full Stack Developer"
+Skills
+JavaScript
+CSS
+HTML5
+HTML
+Web Development
+API Integration
+Shopify
+Node.js
+Web Design
+API
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $80 spent 
+
+  Romania
+Posted 4 hours ago
+•
+Proposals: 20 to 50
+Fractional CTO
+Hourly: $25-$100 - Expert - Est. Time: More than 6 months, 30+ hrs/week
+Title: Fractional CTO. Senior Full-Stack + DevOps Engineer for On-Demand Support — Must Be Claude/Agentic-Fluent (Long-Term) About us We're a fintech operating an equity pooling business. Our internal platform handles deal flow, equity pool management, campaign automation, and financial reporting. The codebase is Next.js (App Router) / TypeScript / React, Prisma ORM, PostgreSQL, with integrations across Lemlist, and a growing set of internal agentic workflows. The role Our CTO is moving on. The founder (me) can now ship features and fix most bugs directly with Claude Code, so we're not hiring a full-time developer. We need a senior engineer on on-demand retainer who can: - Unblock me on DevOps issues (deploys, env config, build failures, DB migrations, infra) — this will be the bulk of the work - Review and harden code I've written or generated before it ships, if necessary - Take on the harder full-stack tickets I can't crack myself - Pair with me on architectural decisions, especially around agentic features and AI integrations - Be reachable async with reasonable turnaround (hours, not days, when it matters) Required - 7+ years building production full-stack applications - Deep Next.js (App Router), TypeScript, React, Prisma, PostgreSQL - Strong DevOps: Vercel (or equivalent), AWS, Neon, env management, CI/CD, observability/debugging in production, multi-cloud environments, Docker, Kubernetics, Agentic SDLC - Genuine fluency with Claude and Claude Code — not "I've used ChatGPT." You've shipped things using these tools and have an opinion on when to use which model and how to structure prompts/context for complex codebases. You've built agents as well as code - Working knowledge of agentic systems and MCP (Model Context Protocol) — we use and build with MCP servers - Excellent written English; comfortable working async - Reasonable time-zone overlap with Israel (UTC+2/+3)
+more about "Fractional CTO"
+Skills
+Next.js
+TypeScript
+React
+PostgreSQL
+Vercel
+Docker
+Prisma
+Kubernetics
+AWS CodeBuild
+Claude
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Israel
+Posted yesterday
+•
+Proposals: 20 to 50
+Empowering Intelligent Solutions
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+We are building a premium AI-native SaaS platform for Saudi Arabia. This is NOT a simple website project. We need a senior full-stack engineer experienced in: Next.js TypeScript Prisma PostgreSQL AI systems OpenAI API Multi-agent orchestration SaaS architecture Payment integrations Stripe Moyasar / HyperPay / Saudi gateways Dashboard systems Arabic RTL support Production-grade architecture Project Scope:Build an MVP for RaseelX Agentic Intelligence Network. The platform includes: AI request analysis AI agents orchestration Executive reports Subscription system Saudi VAT invoicing Payment gateways Admin dashboard User dashboard Reports system File uploads Requirements: Strong architecture thinking Clean scalable code Experience with SaaS platforms Experience with AI products Ability to work independently Strong communication Weekly progress reporting Preferred: Experience with enterprise SaaS Experience with AI workflows Experience with Arabic SaaS products …………., 3. Explain your proposed architecture 4. Explain how you would structure the AI orchestration backend 5. Confirm estimated timeline 6. Confirm estimated weekly availability 7. Confirm if you can wo
+more about "Empowering Intelligent Solutions"
+Skills
+Front-End Development
+ExpressJS
+React
+AWS Glue
+AWS Cloud9
+Google APIs
+Python
+AI Agent Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Saudi Arabia
+Posted 1 hour ago
+•
+Proposals: 20 to 50
+Custom AI with LLM API Integration
+Hourly: $20-$50 - Expert - Est. Time: Less than 1 week, Less than 30 hrs/week
+I need a developer to build a simple AI-powered our business specific AI using the OpenAI API (GPT-4o) or Anthropic API. The chatbot should have a clean web-based UI, maintain conversation history, and respond to user queries using prompt-engineered system instructions tailored to a specific use case (to be discussed on a call). Deliverables - Working chatbot integrated with OpenAI GPT-4o or Claude API - Simple React.js or Next.js frontend with chat UI - Python FastAPI or Node.js backend to handle API calls securely - Prompt engineering with a custom system prompt - Clean, documented code delivered via GitHub Required skills Experience with OpenAI API or Anthropic Claude API Python or JavaScript full stack development Prompt engineering & LLM integration React.js or Next.js frontend basics
+more about "Custom AI with LLM API Integration"
+Skills
+OpenAI API
+Algorithm Development
+LLM Integration
+Model Training Prompt Engineering
+Full Stack Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Pakistan
+Posted 37 minutes ago
+•
+Proposals: 20 to 50
+AI Chatbot Setup Needed – Small Task
+Fixed-price - Expert - Est. Budget: $50
+ooking for an AI developer to build a simple chatbot workflow for lead qualification and basic automation. Requirements: •⁠ ⁠OpenAI API integration •⁠ ⁠Basic conversational flow •⁠ ⁠Save leads to Google Sheets or CRM •⁠ ⁠Clean and scalable setup Preferred Skills: •⁠ ⁠AI Chatbots •⁠ ⁠Automation •⁠ ⁠Node.js / React •⁠ ⁠API Integration Potential for long-term work if the first task goes well. Please share: •⁠ ⁠Similar AI/chatbot projects •⁠ ⁠Tech stack you prefer •⁠ ⁠Estimated delivery time
+more about "AI Chatbot Setup Needed – Small Task"
+Skills
+ML Automation
+AI Chatbot
+Node.js
+React
+API Integration
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $300+ spent 
+
+  SAU
+
+Featured
+Posted yesterday
+•
+Proposals: 15 to 20
+Senior Full-Stack Engineer — Consumer AI / PLG SaaS (Next.js + tRPC + Postgres)
+Hourly: $15-$100 - Intermediate - Est. Time: 3 to 6 months, 30+ hrs/week
+We are a consumer AI music platform — voice conversion, music generation, stem separation. We have millions of users, real subscription revenue, and a clear 2026 roadmap. We're expanding our engineering bench and looking for a senior IC who owns product-led growth surfaces end-to-end: pricing experiments, free→paid conversion, lifecycle, billing, and the platform health that lets all of it ship safely. You'll also partner with a junior engineer joining us fresh out of bootcamp — ramping and growing them is a real, named part of this role, not an afterthought. What you'll own (first 90 days) Leading our consumer billing migration from Paddle to Stripe — the highest-stakes project on the roadmap. You'll own the design, customer migration plan, the new subscription state machine built on Stripe primitives, Stripe Tax for EU/UK compliance, and the cutover with zero billing interruption for existing subscribers. First 90 days is design, dry-run, and migration kickoff; full cutover runs through Q3. - Pricing & paywall experimentation (PostHog flags, conversion measurement, cohort lift) - Free-tier → paid conversion improvements identified in our roadmap (free-tier feature gating, in-product upgrade prompts, daily-credit model) - Hardening the subscription state machine end-to-end — webhooks, plan changes, refunds, retention discounts, idempotency, reconciliation - Authorization & rate-limiting across our tRPC API + Cloudflare R2 storage layer - Standing up CI, automated tests on auth/billing critical paths, and a staging deploy gate (we're currently shipping straight from main) - Onboarding and ramping our junior engineer — structured pair programming, code review as teaching, scoping starter tasks intentionally, and progressing them toward independent ownership of P1 work by month 3 and P0 work by month 6 - Partnering with founders on architecture and infrastructure decisions at multi-million-user scale - Tech stack (exact versions so you can self-qualify) - Next.js 13 (Pages Router) on Vercel, React 18, TypeScript tRPC v10 + React Query - Prisma + PostgreSQL (Supabase) - Cloudflare R2 (S3 SDK) for asset storage - Redis (ioredis) for rate-limiting and counters - Paddle (current consumer billing — being migrated off) + Stripe (developer API billing today, full consumer billing post-migration, including Stripe Tax) - NextAuth (Google + email magic link) - Modal.com Python backend for inference (we own this — you integrate cleanly) - Sentry, PostHog, Customer.io, Tinybird, GTM - Turborepo monorepo, yarn Must-haves - 5+ years shipping production Next.js + TypeScript apps Hands-on tRPC, GraphQL, or comparable typed RPC layer - Production experience with Prisma + Postgres incl. non-trivial migrations - Deep production Stripe experience — subscriptions, webhooks, proration, customer portal, refunds, Stripe Tax. Paddle experience is a plus (we're migrating off it). - Bonus weighted heavily: prior experience leading a billing-provider migration (Paddle→Stripe, Chargebee→Stripe, - RevenueCat→Stripe, or comparable) with zero customer billing interruption. This is the highest-signal credential for the most important project on the roadmap. - Comfortable owning auth, billing, and webhook plumbing without supervision - Senior enough to push back on founders with real reasoning - Demonstrated experience mentoring junior or early-career engineers (bootcamp grads, interns, or first-job hires) — you can talk specifically about what worked and what didn't The PLG bias (this is the differentiator) - You've measured free→paid conversion in a consumer/prosumer SaaS — and can talk about what moved the number - Comfortable with feature-flagged experimentation (PostHog, GrowthBook, Statsig) = Familiar with cohort/retention analysis and funnel instrumentation - Bonus: lifecycle email orchestration (Customer.io, Iterable, Braze) - Bonus: SEO-driven landing-page systems with programmatic routes Working with our junior engineer - This is the other half of the role. Expect ~20–30% of your time going to ramping, reviewing, and unblocking. We're looking for someone who: - Treats mentorship as a craft, not a sidebar — deliberate pair programming, code review framed as teaching, starter tasks scoped to grow specific muscles (not just "here's the codebase, good luck") - Has done it before — bootcamp grads, interns, or first-year engineers — and can describe a specific person they helped level up and how - Sees it as compounding leverage — the goal is for our junior to ship P1 work independently by month 3 and own a P0 by month 6. - A senior who scales is worth more than a senior who only ships - Can give hard feedback kindly and accurately — accuracy matters more than kindness, but both matter - If mentoring junior engineers isn't something you actually enjoy, this isn't the right role. Nice-to-have - AI/ML inference integration experience (Modal, Replicate, OpenAI, comparable) - Audio/media handling (FFmpeg, WebAudio, wavesurfer.js) How to apply We get a lot of applications. To get past our filter: - Start your cover letter with the word "Vocoder" so we know you read this. - One PLG win: name a consumer/prosumer SaaS where you shipped a conversion improvement. What the metric was, what you changed, what the lift was. One paragraph. - Link to GitHub or a real code sample (not a portfolio site — actual code). - One sentence: have you worked with Modal.com or a comparable serverless-GPU platform? No agencies. We respond within 48 hours to applications that follow these instructions.
+more about "Senior Full-Stack Engineer — Consumer AI / PLG SaaS (Next.js + tRPC + Postgres)"
+Skills
+React
+Node.js
+PostgreSQL
+Supabase
+JavaScript
+Python
+API
+Stripe
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  USA
+Posted 4 hours ago
+•
+Proposals: 20 to 50
+Full-Stack Next.js + Claude API Developer — Long-Term, AI Content Tooling
+Hourly - Expert - Est. Time: More than 6 months, 30+ hrs/week
+Hiring one long-term builder to develop internal AI tooling for our Instagram media company. Main project: an AI content engine that drafts Instagram posts across multiple theme pages. YOU SHOULD APPLY IF: You use Claude Code or Cursor every day and can demo your workflow You've shipped 2+ Next.js apps to production on Vercel (live URLs required) You're comfortable with TypeScript, Tailwind, Supabase, and Claude/OpenAI APIs You can overlap 4+ hours/day with Israel time (GMT+3) You communicate in clear written English WHAT WE'RE BUILDING: AOS Brain — Next.js app that takes a topic + a page's 'voice file' and outputs Instagram captions using Claude API Affiliate dashboard for our coaching program (already exists, needs optimization) Make.com + Apify automation pipelines for content collection and posting RATE & HOURS: 25–40 hours/week. Weekly payment. This is a long-term role, not a one-off project. APPLICATION REQUIREMENTS (applications missing these will be ignored): 2-minute Loom video — introduce yourself and walk through one project you built using Claude Code or Cursor. Two live Vercel URLs of apps you've personally built. Your GitHub profile. One paragraph on your approach to AOS Brain (described above). Please start your application with the word 'BUILDER' so I know you actually read this post. No agencies, no teams — just you.
+more about "Full-Stack Next.js + Claude API Developer — Long-Term, AI Content Tooling"
+Skills
+Claude
+Artificial Intelligence
+Next.js
+TypeScript
+Tailwind UI
+Supabase
+Claude/OpenAI APIs
+AI content tooling
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $4K+ spent 
+
+  Israel
+Posted 6 hours ago
+•
+Proposals: 20 to 50
+Platform Developer Needed
+Fixed-price - Intermediate - Est. Budget: $300
+Platform Developer Needed (i18n + Cronjob Fix) We're looking for an experienced developer to help fix and improve our SaaS platform. We're looking for someone available for ongoing tasks, not just a one-off fix — we have a continuous backlog of improvements. Tech Stack Frontend: React, TypeScript, Tailwind Backend: Python, FastAPI Database & Auth: Supabase Hosting: Render & Vercel Task 1: Internationalization (i18n) We have no existing i18n setup. The platform needs to support Danish and English, with the ability to expand to additional languages later. The preferred approach is a translation server setup where developers prefix text with t(), and translations can be managed externally without code changes. Language should be controlled at the tenant level (via tenant settings), with each user able to override their own language preference, defaulting to the tenant language. The AI brief feature must also respect the selected language — the tenant/user language should be passed to the AI so output matches the chosen language. Task 2: Cronjob / Notification Fix Scheduled emails and SMS notifications are not sending. The scheduler on Render is configured correctly, but fails to activate as expected. The issue is tied to our NotificationManager service. Affected notification types include scheduled emails and SMS messages. We need the root cause identified and fixed so notifications are sent reliably at the configured interval (every minute). What we're looking for Someone comfortable working across a modern Python/React stack, who can take ownership of tasks with limited hand-holding. We prioritize ongoing collaboration over one-time fixes.
+more about "Platform Developer Needed"
+Skills
+TypeScript
+Vercel
+Tailwind CSS
+Web Application
+Python
+React Native
+render
+FastAPI
+Supabase
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Denmark
+Posted 4 hours ago
+•
+Proposals: 50+
+AI-Powered Building Inspection Report Web App (Dropbox + PDF Automation)
+Fixed-price - Intermediate - Est. Budget: $1,200
+We are looking for a reliable developer (English speaking) to build a simple internal web app for creating commercial roof/gutter inspection reports. This does not need to be a complicated multi-user SaaS platform. It will be used by one internal user. The most important thing is that it works properly, is simple to use, and does not break down. We currently take inspection photos on site, upload them, write short descriptions, create a conclusion, and then produce a PDF report. We want to make this process faster using a simple web app and AI-generated text. Required Workflow 1. Engineer takes photos on site using an iPhone. 2. Photos are uploaded into a Dropbox folder. 3. The web app pulls/imports the photos from Dropbox. 4. Each photo appears in the web app with: * photo preview * file name * dropdown category * editable AI-generated description 5. User selects a category for each photo, such as: * Gutter Blockage * Outlet Clear * Outlet Blocked * Vegetation Growth * Ponding Water * Roof Defect * General Roof Photo * External Elevation 6. AI creates a short professional description for each photo based on the selected category. 7. AI creates a final report conclusion based on the photo descriptions. 8. User can edit all descriptions and the conclusion before export. 9. The app generates a professional PDF report using our template. PDF Report The PDF template needs to be created as part of this project. We already have: * a design/style in mind * example report layouts * a web app UI plan * branding/logo references The PDF must: * look professional * include our logo/header * use a consistent layout * place photos neatly * avoid stretched/distorted images * include short descriptions beside or under each photo * include a final conclusion section * be exportable/downloadable as a finished report We only need one report template to begin with. Web App Requirements The web app should be simple and practical. Needed features: * simple login/admin access * create/select a site/report * import photos from Dropbox * display photos in a clean list * dropdown category per photo * AI-generated editable description per photo * AI-generated editable conclusion * preview PDF * generate/download PDF * save report progress This is not a public-facing app. It is an internal business tool. Important Priorities The priority is: 1. Reliability 2. Simple workflow 3. Easy to use 4. Clean PDF output 5. Low running costs 6. Easy maintenance The UI does not need to be perfect or fancy. It just needs to be clean enough, easy to understand, and reliable. Please do not overcomplicate the project with unnecessary features. Preferred Setup We are open to your recommendation, but likely setup could be: * React/Next.js front end * Python or Node.js backend * Dropbox API * OpenAI or Claude API * PDF generation library * simple database/storage for saved reports * hosted on a reliable low-cost platform All accounts, hosting, APIs, Dropbox, and domain will be set up under our ownership. Developer access can be provided. What We Need From You Please explain in your proposal: 1. How you would build this 2. What tech stack you would use 3. How Dropbox integration would work 4. How AI descriptions would be generated 5. How the PDF template would be created 6. How easy it would be to edit the PDF template later 7. Expected running costs per month 8. How long the first working version would take 9. How you would make sure the system is stable and easy to maintain Budget Fixed price: $1,200 (milestone payments) Timeframe: within 4 weeks We want a working first version, not an overcomplicated platform. There may be future improvements after the first version is complete. Attachments I will provide: * example web app UI image * PDF/report design references * logo/branding * example photo categories * example inspection wording I have attached an image of the style I would like the web app to be built, this may give you a better idea of what we are after.
+more about "AI-Powered Building Inspection Report Web App (Dropbox + PDF Automation)"
+Skills
+Python
+React
+OpenAI API
+Dropbox API
+JavaScript
+AI App Development
+Full-Stack Development
+API
+PDF
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Kingdom
+Posted 10 hours ago
+•
+Proposals: 20 to 50
+Senior Engineer (5y+) with AI Video (VEO3) Experience + Claude Code
+Hourly: $25-$50 - Expert - Est. Time: More than 6 months, 30+ hrs/week
+We are looking for a Senior Full Stack Engineer who can build high-quality web applications and work efficiently using modern AI coding tools like Cursor and Claude Code. This role is for individual freelancers only — no agencies. You must be able to work with a schedule that overlaps with Pacific Standard Time (PST). Responsibilities: -- Build and maintain full stack web applications with clean, reliable, and scalable code. -- Use AI coding tools like Cursor and Claude Code to speed up development and improve code quality. -- Collaborate with our team during PST working hours and communicate progress clearly. -- Participate in a live technical session where you demonstrate how you use Cursor and Claude Code in real time. Requirements: -- Proven experience as a Senior Full Stack Engineer working on production web applications. -- Strong experience with modern frontend and backend development. -- Must be comfortable using Cursor, Claude Code, and other AI-assisted development tools. -- Must be an individual freelancer, able to overlap with PST hours, and available for a live coding/tool demonstration.
+more about "Senior Engineer (5y+) with AI Video (VEO3) Experience + Claude Code"
+Skills
+Python
+JavaScript
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.9 out of 5.
+ $100K+ spent 
+
+  United States
+Posted 2 hours ago
+•
+Proposals: 50+
+Full-Stack AI Developer Needed for Industrial AI Search Platform
+Fixed-price - Intermediate - Est. Budget: $7,500
+I’m looking for a full-stack developer to build the MVP of an AI-ready B2B industrial platform. The project is called Fairnoise and the vision is to create a modern industrial directory where companies have structured “microsites” optimized not only for SEO, but especially for AI search engines and LLM visibility (ChatGPT, Gemini, Perplexity and future AI systems). The platform is NOT intended to be a marketplace or social network in this first phase. This first MVP is focused on: - exhibitor/company database - AI-assisted search - semantic company pages - scalable architecture - AI-readable industrial data The platform should include: PUBLIC WEBSITE - Home page - About page - Exhibitors directory - Contact page EXHIBITOR MICROSITES Each company should have a dedicated dynamic page generated from the database. Example: fairnoise.com/exhibitors/company-name Each microsite should contain: - company description - products - technologies - industries served - applications/processes - technical keywords - FAQ section - contact information - external links - CTA/contact form IMPORTANT: The core value of the platform is not only the AI assistant, but the AI-ready structure of each exhibitor/company page. Each company microsite must be built with a strong semantic structure optimized for: - SEO - AEO (Answer Engine Optimization) - GEO (Generative Engine Optimization) - LLM readability The goal is to make company information easily understandable and retrievable by AI systems such as ChatGPT, Gemini, Perplexity and future AI search engines. This semantic optimization layer is one of the main business services of the platform. Each exhibitor page should therefore include: - semantic content hierarchy - structured technical data - schema.org markup - optimized headings and metadata - industry/product/application categorization - AI-readable structured information - scalable semantic architecture AI SEARCH ASSISTANT The platform should include a central AI assistant connected to the exhibitor database. Example user searches: - “Looking for companies specialized in CNC machining for aerospace” - “Looking for industrial automation suppliers for packaging” - “Looking for manufacturers of titanium components” The AI assistant should: - understand user requests - retrieve relevant exhibitors using semantic search - explain why companies match the request - link users to company pages - prioritize internal exhibitors from the Fairnoise database ADMIN PANEL Internal admin panel only (clients will not initially have direct access). Functions: - create/edit company profiles - upload images/logos - manage technologies/products/keywords - manage FAQ - publish/unpublish pages - manage leads/contact requests SEARCH & AI FEATURES - semantic/vector search - embeddings-based retrieval - OpenAI integration - scalable AI-ready architecture ANALYTICS Basic analytics for each exhibitor: - page visits - contact requests - outbound clicks - AI search appearances Preferred stack: - Next.js - React - Supabase/PostgreSQL - OpenAI API - Vector search / embeddings - Vercel deployment Looking for someone with experience in: - AI SaaS products - OpenAI integrations - semantic search / embeddings - scalable modern web apps - AI-ready architecture Please send: - estimated timeline - estimated budget - similar projects or portfolio - technical suggestions/improvements Long-term occasional support may be required after MVP delivery.
+more about "Full-Stack AI Developer Needed for Industrial AI Search Platform"
+Skills
+Next.js
+OpenAI API
+React
+Supabase
+AI Chatbot Development
+Semantic Search
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Italy
+Posted 3 hours ago
+•
+Proposals: 20 to 50
+Build AI CV Screening SaaS
+Fixed-price - Intermediate - Est. Budget: $1,500
+I'm building RecrutAI — an AI-powered candidate screening SaaS for UK recruitment agencies. The full technical specification, database schema, API routes, system prompt, and UI components are already written and provided to you on day one. Your job is to build the application around them. WHAT'S ALREADY DONE (you receive all of this): - Complete system prompt (500 lines) for the AI screening engine - Full React/TypeScript screening UI component (3-step workflow) - Backend API route code (Node.js/TypeScript) - Complete developer handoff document with DB schema, routes, security requirements, GDPR rules, Stripe setup, and delivery checklist - Quality testing protocol WHAT YOU BUILD: 1. Next.js 14 (App Router) project with TypeScript and Tailwind CSS 2. Supabase auth — signup, login, password reset, session management 3. Database schema (provided) — profiles, roles, screenings tables with RLS policies 4. /api/screen/parse-jd — JD parsing endpoint 5. /api/screen/screen-cvs — bulk CV upload, text extraction (pdf-parse + mammoth), batched Claude API calls, ranked results 6. PDF export — professional shortlist report via @react-pdf/renderer 7. Saved roles dashboard 8. Stripe Checkout — Starter £199/month and Agency £399/month plans, 14-day trial flow, webhook handling 9. Sentry error tracking integrated from day one 10. Deployed on Vercel — auto-deploy on push to main TECH STACK (non-negotiable): - Frontend: Next.js 14, TypeScript, Tailwind CSS → Vercel - Database: Supabase (PostgreSQL + Auth) - AI: Anthropic Claude API (claude-sonnet-4-20250514) - Payments: Stripe - Error tracking: Sentry - PDF: pdf-parse, mammoth, @react-pdf/renderer NON-FUNCTIONAL REQUIREMENTS: - All Claude API calls must have retry logic (max 2 retries) - CVs processed in batches of 5 — never all simultaneously - Mobile responsive — tested on iOS Safari and Android Chrome - GDPR notice before CV upload - Rate limiting on screening endpoints - All env vars documented and handed over PAYMENT STRUCTURE: - 30% upfront on project start - 40% on staging demo (all core features working) - 30% on final delivery (deployed to Vercel, all env vars set, one walkthrough call) SCREENING QUESTION (must answer to be considered): What database would you use for authentication in this project and why?
+more about "Build AI CV Screening SaaS"
+Skills
+Supabase
+Anthropic API
+Next.js 14
+Stripe
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Kingdom
+Posted 4 hours ago
+•
+Proposals: 10 to 15
+Freelance Developer for AI Automation
+Hourly: $15-$35 - Intermediate - Est. Time: More than 6 months, 30+ hrs/week
+At AIVIO, we help businesses automate their operations using AI, intelligent workflows, and connected systems. As we continue growing, we’re looking for a freelance AI Automation Developer to collaborate on various client projects. What we offer ✅ 100% remote work ✅ Freelance collaboration paid per project ✅ Real and interesting projects ✅ Long-term collaboration opportunities ✅ Flexible and fast-moving team 📍 Based in Georgia or international 🌍 English required 🇫🇷 Basic written French is a plus Your role You will focus only on the technical and development side. ❌ No sales ❌ No client management ❌ No prospecting ✅ Development ✅ Automation ✅ AI & API integrations Types of projects You may work on projects such as: * AI WhatsApp agents * Automated CRM systems * Lead generation automation * AI assistants for businesses * Email automation systems * Advanced AI workflows * API-connected business systems Main responsibilities AI & Automation * Build workflows using n8n, Make, or Zapier * Develop AI agents * Integrate OpenAI, Claude, Gemini, and other AI models * Connect SaaS tools through APIs * Automate business processes * Build lightweight backend systems Technical tasks * Webhook management * REST APIs * Node.js or Python scripts * CRM and external tool integrations * Workflow maintenance and optimization Requirements Required skills * JavaScript / TypeScript * Node.js * APIs & Webhooks * n8n or Make * Good English communication * Reliability and respect of deadlines Nice to have * Python * OpenAI API * LangChain * Supabase * PostgreSQL * Docker * AI or SaaS automation experience Ideal profile We are looking for someone who is: * responsive, * autonomous, * organized, * reliable, * able to work fast and efficiently. Important: * reply within 24h maximum, * provide regular updates, * maintain good project follow-up, * respect client deadlines. Hiring process 1. Portfolio / project submission 2. First video call 3. Small test project or pilot mission 4. Start of collaboration 🚀 How to apply Please send: * your CV, * your GitHub or portfolio, * 2–3 projects or automations you already built, * examples of workflows if available, * your tech stack, * your current availability.
+more about "Freelance Developer for AI Automation"
+Skills
+HTML5
+JavaScript
+CSS 3
+Graphic Design
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Georgia
+Posted 7 hours ago
+•
+Proposals: 15 to 20
+Pre-Launch RLS & Edge-Function Audit — Tightly Scoped, ~12-16 hrs (Supabase)
+Fixed-price - Expert - Est. Budget: $500
+Pre-Launch Security Review (Postgres RLS + Supabase Edge Functions) Deliverable: One-page summary. Full audit brief (phase-1-sow.md) sent on engagement. The ask: A paid code review of a React + TypeScript + Supabase SaaS app, focused on tenant data isolation and authorization, before public launch. • Effort: 12–16 hours (Tier-A scope only — see below) • Access: Write access to a snapshot audit repo on GitHub (PR workflow against main). You stand up a local Supabase test lab on your own machine via Docker + the Supabase CLI; runbook provided. • No production access: no prod DB, no live Stripe, no real user data, no Supabase dashboard. Local lab + dummy seed only. What the app is A single-tenant-per-user SaaS that helps high-school athletes track their college recruiting process. . Every athlete's data is row-scoped to their user_id. No team/org concept. The entire security model rests on Postgres Row-Level Security (RLS). Stack • Frontend: React 18, Vite, TypeScript, Tailwind, shadcn/ui • Backend: Supabase (Postgres + Auth + Edge Functions in Deno) • Payments: Stripe (embedded checkout, webhooks) • Hosting: Lovable • ~50 user-scoped tables, ~60 edge functions, ~15 admin-only edge functions In-scope work (Tier-A only) 1. RLS policy correctness — every user-scoped table has owner-only SELECT/INSERT/UPDATE/DELETE policies; no USING (true) leaks; no policies referencing auth.users directly. Confirm the 17 RLS/contract isolation suites in tests/security/ stay green (20 after founder's Phase 0). 2. SECURITY DEFINER functions — verify each is (a) necessary, (b) has SET search_path = public, (c) doesn't widen access beyond the caller's row. Includes the get_public_athlete_profile() RPC backing /p/slug. 3. Tier-A edge-function IDOR sweep (~10 functions, list in brief): payments-webhook, create-checkout, create-portal-session, all admin-*, redeem-beta-code, AI-quota-gated functions. Cross-user access, wrong-tier access, missing auth, client-supplied IDs not re-checked against auth.uid(), service-role key misuse. 4. Stripe webhook (sandbox only) — raw-body signature verification before JSON parse, replay/idempotency, customer-ID-to-user binding, tier flip respects status + current_period_end. Tested with a locally-generated fake whsec_... — no Stripe sandbox keys are provided. 5. requireAdmin() consistency — every admin edge function uses the shared _shared/require-admin.ts helper (ESLint already blocks raw has_role calls). Confirm no escapes. Two intentional design choices (don't "fix" — flag if surprising) • Append-only tables. agreements and ai_usage_events have no UPDATE/DELETE policies by design — that absence is the compliance control. • Multi-sport scaffolding is dormant. Schema is pre-wired for women's soccer; UI always sends 'mens'; women's data not populated. Audit the filter contract (cross-sport-filter-isolation.test.ts), not the absent UI. What's already done (validate, don't redo) • Static RLS review (Phase 0.5 baseline, locked 2026-05-09) • Supabase Linter clean (12 warnings, 0 errors) • Local-Supabase RLS isolation test suite — 17 suites green (16 owner-scoped + 1 cross-sport-filter contract); 20 after Phase 0 • Stripe webhook signature test; admin edge-function auth tests • Aikido scan passed (2026-05-20) — paid surface crawl + SCA + secrets scan + light auth probing. Not authenticated DAST. Report in repo; not in scope to re-investigate • Authed-fuzz harness (2026-05-21) — in-house Deno edge-function fuzzer (anon-401, malformed-JWT-401, method-405, body-400). 14/14 passing • Hardening log of all auth/RLS decisions to date Stop-and-flag rule If an in-scope finding requires a schema migration, RLS rewrite, or shared-helper refactor to fix, document it in the PR description as a Phase 2 candidate (severity + estimated effort) and don't merge silently. The SOW caps inline-fix scope. Deliverables 6. PRs against the snapshot audit repo (founder ports merged fixes into the Lovable workspace by hand) 7. 1-page written report classifying every finding as exactly one of: • confirmed-clean (probed, no issue) • inline-fix-applied (PR merged this engagement) • material-scoped-for-follow-up (Phase 2, with severity Critical/High/Medium/Low + estimated effort) 8. Re-run of bun run test:security showing green after fixes 9. Time log per section Out of scope • IDOR sweep of the remaining ~40 non-Tier-A edge functions (Phase 2) • Authenticated DAST against the production domain (Phase 2) • Any schema migration, RLS rewrite, or shared-helper refactor (stop-and-flag) • Frontend XSS / CSP hardening, performance, UI/UX, SEO, copy • Live-domain verification (CDN headers, geo gate, live webhook TLS) — documented in report, founder verifies post-handoff • Broader storage-bucket audit (signed-URL TTLs, MIME/size). The profile-photos tenant-isolation test is the only storage coverage in Phase 1. Logistics • Project fee: $500-600 (please quote your hourly + estimated hours) • Timeline: Flexible — targeting completion within 1 week of kickoff • NDA + IP assignment: Mutual NDA + work-for-hire / IP assignment signed before any access is granted • Communication: Async-first. 1 business day response SLA both ways. Mid-engagement check-in at ~50% budget burn (contractor-initiated). Right fit if you have • Production Postgres RLS experience (non-negotiable) • Supabase or equivalent (Auth + Edge Functions in Deno) • Multi-tenant / row-level multi-tenant SaaS background • Comfortable reviewing TypeScript + SQL migrations • Comfortable standing up a local Supabase stack (Docker + CLI) Not the right fit if your background is primarily React/Next.js frontend with no hands-on Postgres RLS work — this review is ~80% database/auth, ~20% TypeScript. Reply with a yes/no and your estimated rate; I'll send the full audit brief, NDA, and snapshot repo access (post-NDA and agreement).
+more about "Pre-Launch RLS & Edge-Function Audit — Tightly Scoped, ~12-16 hrs (Supabase)"
+Skills
+PostgreSQL
+Node.js
+Web Application Security
+RLS
+OWASP
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 50+
+AI-Powered SaaS Web App Developer
+Hourly - Intermediate - Est. Time: 3 to 6 months, Less than 30 hrs/week
+AI-Powered Resume Optimization SaaS Web App Developer Needed We are looking for an experienced Full Stack Developer or small development team to build a modern AI-powered Resume/CV Optimization SaaS platform. This is NOT a simple website project. The platform includes: - AI resume analysis - ATS scoring - Resume builder - PDF/DOCX processing - Subscription payments - Dashboard systems - AI-generated recommendations We are looking for someone with real SaaS and AI integration experience. -------------------------------------------------- PROJECT OVERVIEW The platform will help users: - Upload their resume/CV - Analyze ATS compatibility - Improve resume content using AI - Create professional resumes using templates - Download resumes in PDF/DOCX format - Purchase premium career services The goal is to create a clean, modern, scalable web application with real-time AI-powered feedback and a professional user experience. -------------------------------------------------- CORE FEATURES REQUIRED 1. AI ATS RESUME ANALYZER Users should be able to: - Upload resume files (PDF, DOCX, TXT) - Paste a Job Description - Receive ATS score instantly - Get keyword matching analysis - See missing skills and recommendations - Receive AI-powered improvement suggestions - View resume formatting feedback System should include: - Resume text extraction - Keyword comparison engine - ATS scoring logic - AI-generated recommendations -------------------------------------------------- 2. AI RESUME BUILDER Users should be able to: - Create resumes by filling forms - Select from multiple resume templates - See live resume preview - Receive AI suggestions while typing - Improve ATS score in real time - Download resume in PDF/DOCX format Resume sections include: - Personal details - Summary - Skills - Experience - Education - Certifications - Projects -------------------------------------------------- 3. USER AUTHENTICATION SYSTEM Required: - Email/password signup - Google login - User dashboard - Saved resumes/history -------------------------------------------------- 4. SUBSCRIPTION & PAYMENT SYSTEM Need subscription/payment integration for: - Resume downloads - Premium AI optimization - LinkedIn optimization services - Mock interview services Payment gateway integration experience is preferred. -------------------------------------------------- 5. ADMIN DASHBOARD Admin should be able to: - Manage users - View subscriptions/payments - Monitor analytics - Manage templates - Manage pricing/plans -------------------------------------------------- PREFERRED TECH STACK Frontend: - Next.js / React - Tailwind CSS Backend: - Node.js - Express.js (optional) Database: - PostgreSQL or Supabase AI Integration: - OpenAI API / Claude API Hosting: - Vercel / AWS / scalable deployment preferred -------------------------------------------------- IMPORTANT REQUIREMENTS The developer MUST have experience with: - AI API integrations - SaaS applications - Dashboard systems - File upload systems - PDF/DOCX processing - Secure authentication systems - Subscription/payment systems - Production-ready scalable architecture Experience with HRTech / Resume systems is a plus. -------------------------------------------------- DELIVERABLES We expect: - Full source code - GitHub repository access - Clean and maintainable code - Responsive UI - Proper documentation - Deployment assistance - Scalable architecture -------------------------------------------------- TO APPLY, PLEASE INCLUDE 1. Portfolio or live projects 2. Similar SaaS or AI projects you have built 3. Your recommended architecture 4. Your preferred tech stack 5. Estimated timeline 6. Estimated budget 7. Whether you work alone or with a team 8. Whether you provide long-term support -------------------------------------------------- PROJECT SCOPE We are open to building: - MVP first OR - Full scalable version in phases Long-term collaboration is possible for the right developer/team. Please apply only if you have real experience with AI-powered SaaS development.
+more about "AI-Powered SaaS Web App Developer"
+Skills
+Next.js
+React
+Tailwind CSS
+Node.js
+ExpressJS
+PostgreSQL
+OpenAI API
+Vercel
+SaaS
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Arab Emirates
+Posted 11 hours ago
+•
+Proposals: 50+
+Senior Full-Stack Developer - Migrate Lovable Prototype to Scalable Multi-Tenant SaaS Architecture
+Hourly - Expert - Est. Time: Less than 1 month, 30+ hrs/week
+## PROJECT OVERVIEW I have built a working business intelligence SaaS platform called **PillarIQ** (pillariq.ai) using Lovable (an AI-assisted rapid prototyping tool). The product is live, being used daily across two business locations, and is ready to grow into a multi-tenant SaaS product that can serve 150+ customers. The Lovable environment has served its purpose, but it is not the right vehicle for scale. I am looking for an experienced full-stack developer to take the existing Lovable-exported codebase and migrate it into a proper, production-grade, multi-tenant architecture. This is a scoped proof-of-concept engagement first - I want your honest assessment and a firm price to take the prototype to a working concept that is architected to scale. **You are not building from scratch.** The product is built, the logic is working, the integrations are running. Your job is to architect it properly so I can grow without building myself into a corner. --- ## WHAT PILLARIQ IS PillarIQ is a KPI and operations intelligence dashboard for home service franchise businesses, starting with pool service companies (ASP - America's Swimming Pool Company). It aggregates data from multiple third-party platforms into a single "pane of glass" for owner-operators and their teams. **It currently serves two locations:** - Panama City Beach, FL (\~600 accounts, \~$2.5-3M revenue) - Murfreesboro, TN (\~40-50 accounts, \~$700K revenue) **The product currently includes the following modules:** 1. **Dashboard** - Customizable widget-based landing page with KPI tiles 2. **Service KPIs** - Jobs completed, revenue, service markup, route income per technician, pools-per-tech (volume-weighted), lead time tracking 3. **Commission Report** - Per-technician commission tracking with configurable thresholds, rates, and split job types 4. **Maintenance KPIs** - Maintenance agreement tracking (via BoldSign), chemical consumption by tech, monthly activation/deactivation trends 5. **Renovation & Construction** - Renovation revenue tracking 6. **Lead Pipeline** - Full call-to-conversion funnel using CallCap + Pool Brain + QuickBooks matching. Tracks total calls, new leads, existing customers, bookings, conversion rate, and customer lifetime value 7. **Negative Calls** - Auto-archive workflow for negative-sentiment calls; note logging; active/archived tabs; widget count 8. **Win-Back Report** - Dormant customer reactivation using QBO/Pool Brain cross-reference with configurable lapse threshold 9. **Quotes Follow-Up** - Quote category management (Maintenance/Service/Renovation) with BoldSign resend logic and contact info display 10. **A/R (Accounts Receivable)** - Outstanding balance tracking with write-off workflow 11. **MFRC Report** - Financial ratio and profitability scoring using QBO COA mapping 12. **Level 10 Meetings** - EOS-style meeting module with department sections, AI summarization, and inclusion in daily briefing emails 13. **Daily Briefing Email** - AI-generated, per-location morning report (11 sections, configurable delivery schedule, custom AI instructions per location) 14. **Settings** - Chart of Accounts mapping, Commission settings, Briefing configuration, Budget targets, Maintenance goals --- ## CURRENT TECH STACK | Layer | Current Tool | | --- | --- | | Frontend | React + TypeScript (Lovable-generated) | | Backend / DB | Supabase (PostgreSQL + Edge Functions + RLS + cron) | | Auth | Phone number-based login (Lovable implementation) | | Deployment | Lovable hosting → pillariq.ai (Porkbun DNS) | | AI / LLM | Lovable AI Gateway (used for meeting summarize edge function) | **Third-Party API Integrations (all currently working):** - **Pool Brain** - Pool service CRM; API key authentication; endpoints: customer list, job list, route stops, technician list, quote details, customer detail, invoice list - **QuickBooks Online** - Financial data; OAuth 2.0; used for P&L, COA mapping, invoice matching, customer records - **CallCap** - Inbound call tracking + AI sentiment analysis; API key auth; 24-hour rolling data window (hourly snapshot cron job to build historical data) - **BoldSign** - E-signature for maintenance agreements; API key auth; webhook for status sync; current rate limiting (429) handling implemented - **Voxie** - SMS outreach (outbound only, no inbound API integration currently) **Supabase Edge Functions (currently deployed):** - `daily-briefing` (AI-generated morning email with cron scheduler) - `lead-pipeline` (CallCap + Pool Brain + QBO conversion logic) - `commission-report` - `winback-report` (QBO lapsed customers vs. active Pool Brain customers) - `boldsign-resend` - `boldsign-reconcile` (15-min cron fallback for webhook sync) - `qbo-accounts-list` - `pool-brain-techs` - `meeting-summarize` (currently uses Lovable AI Gateway - needs migration) **Known DB Tables:**`qbo_account_mappings`, `commission_settings`, `commission_split_job_types`, `user_tech_mappings`, `call_archive_status`, `boldsign_submissions`, `boldsign_webhook_log`, `briefing_schedule`, `briefing_instructions`, `meetings`, `meeting_sections`, `email_send_log`, `monthly_budgets`, `maintenance_signup_goals` --- ## THE PROBLEM WITH LOVABLE AT SCALE The current Lovable environment has real limitations that block growth: 1. **No true multi-tenancy** - The app currently uses a `company` column (`"pcb"` vs `"boro"`) to separate data. This is a workaround, not a real tenant isolation architecture. It will break at 10+ clients. 2. **No subdomain routing** - Every client would need to be at the same URL or cloned into separate projects (not viable at 150 locations) 3. **No billing layer** - There is no Stripe or subscription management 4. **No admin/God view** - There is no central panel to manage tenants, onboard new clients, or monitor usage 5. **Lovable AI Gateway dependency** - The `meeting-summarize` edge function currently calls the Lovable AI Gateway, which is not portable 6. **Edge function timeout issues** - The 150-second Supabase idle timeout has already been hit on complex functions; proper async architecture is needed 7. **No CI/CD pipeline** - No GitHub-based deployment workflow 8. **Lovable-specific hosting** - The codebase is currently tied to Lovable's deployment environment --- ## WHAT I NEED BUILT (TARGET ARCHITECTURE) The goal of this engagement is a **working concept** - meaning: the existing application fully migrated to a scalable foundation, with the multi-tenant infrastructure in place so the first paying external client can be onboarded cleanly. **Core deliverables:** 1. **Export + Own the Codebase** - Export the Lovable project to a clean GitHub repository - Set up Vercel deployment with proper environment variable management - Establish a CI/CD pipeline (GitHub → Vercel) 2. **Proper Multi-Tenant Architecture** - Refactor Supabase schema from `company` column pattern to a true `tenant_id` / `organization_id` structure - Implement row-level security (RLS) policies that fully isolate tenant data - All existing data for PCB and Murfreesboro must be migrated cleanly with zero loss 3. **Auth System Overhaul** - Replace phone-only login with organization-aware authentication - Role-based access: Super Admin (me / God view), Tenant Admin (franchise owner), Manager, Technician - Recommend Supabase Auth with org support or Clerk - include your recommendation and why in your bid 4. **Subdomain Routing** - Each tenant should be accessible at their own subdomain (e.g., `pcb.pillariq.ai`, `murfreesboro.pillariq.ai`) - New tenants auto-provisioned with subdomain on onboarding 5. **Admin / God View Panel** - Central dashboard for me to manage all tenants - View: tenant list, active users, API credential status, last login, subscription status - Actions: create new tenant, suspend tenant, reset credentials, view usage 6. **Tenant Onboarding Flow** - Self-serve or admin-triggered flow - Inputs: franchise name, logo upload, brand color, Pool Brain API key, QuickBooks OAuth connection, CallCap API key, BoldSign API key - Auto-provisions: Supabase schema/RLS policies, subdomain, default dashboard layout, invite email 7. **Stripe Billing Integration** - Per-tenant subscription pricing - Stripe Customer Portal for tenant self-management - Billing tied to tenant status (active/suspended) 8. **AI Layer Migration** - Replace Lovable AI Gateway in `meeting-summarize` with a direct Anthropic API call (or OpenAI, your recommendation) - Ensure API key is managed securely as an environment variable 9. **All Existing Functionality Must Remain Intact** - Every module listed above must continue working through the migration - No features removed; no regressions accepted --- ## WHAT I AM NOT ASKING FOR IN THIS ENGAGEMENT - Do not rebuild the UI from scratch - the visual design and component structure should be preserved - Do not redesign the database logic or KPI calculations - those are working and should be migrated as-is - Do not replace Supabase unless you have a compelling architectural reason --- ## IDEAL CANDIDATE You should be able to clearly demonstrate: - Strong experience with **React + TypeScript** and component-level refactoring - Deep **Supabase** experience: RLS policies, Edge Functions, database migrations, multi-tenancy patterns - Experience with **Vercel** deployment and subdomain routing - Experience implementing **Stripe** subscription billing - Familiarity with **Next.js** if you recommend it as the frontend framework (include rationale) - Experience with **Clerk or Supabase Auth** at an organizational/tenant level - **Production SaaS experience** - you have done this migration pattern before, not just read about it Bonus: Experience with **QuickBooks Online API**, **BoldSign API**, or similar home services software. --- ## HOW TO BID ON THIS PROJECT Please include the following in your proposal. Bids missing these items will not be considered: 1. **Your recommended stack** - Frontend framework, auth provider, any changes from what I described and why 2. **Your migration approach** - How you would export from Lovable, restructure the codebase, and protect existing data 3. **Milestone breakdown** - How you would phase this work and what each milestone delivers 4. **Your fixed-price bid** - I am looking for a firm price to reach a working concept as described. Hourly estimates are fine as supporting math, but give me a project price. 5. **Timeline** - Realistic delivery estimate 6. **Relevant work samples** - Links to prior SaaS products you have built or migrated, especially anything involving multi-tenancy or Supabase 7. **One honest concern** - What is the riskiest or most time-consuming part of this project in your view? --- ## PROJECT DETAILS - **Project type:** Fixed-price preferred - **Engagement length:** One-time migration project (potential for ongoing retainer after delivery) - **Communication:** Available via Upwork messages and Loom video walkthroughs of the existing app - **Access:** I will provide read access to the current Lovable project, the Supabase project, and all relevant API documentation at the start of the engagement - **Domain:** pillariq.ai (Porkbun DNS) --- *PillarIQ is owned by a separate LLC, independent of my franchise operations. The goal is to commercialize this platform to other home service franchisees beginning in 2027. You are helping build the foundation that makes that possible.* ---
+more about "Senior Full-Stack Developer - Migrate Lovable Prototype to Scalable Multi-Tenant SaaS Architecture"
+Skills
+React
+TypeScript
+Node.js
+PostgreSQL
+Next.js
+Vercel
+Supabase
+RESTful APIs
+Multi-tenant
+Web Application Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $100 spent 
+
+  USA
+Posted yesterday
+•
+Proposals: 10 to 15
+Paid Architecture Review — Custom Legal CMS (React + MySQL, Phase 1 Build to Follow)
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+Hi Muhammad, I came across your profile and wanted to reach out about a project I'm building for my law firm. We're building a custom case management system called Twizzle — a web application with a 32-table MySQL database, React frontend (components already built), role-based auth, phase-driven task automation, and a dual practice area architecture covering both personal injury and Social Security Disability cases. The database is already live on DigitalOcean Managed MySQL. Significant architecture and design work has already been done. The schema is written, the UI components exist, and the business logic is fully documented. What's needed is a developer to wire it all together — building the backend API and connecting the existing React frontend to live data. Before discussing a full build engagement, I'd like to start with a paid architecture review. I'll share a briefing document and a full package of files (schema, UI components, integration map, field mappings). I'd ask you to review everything and come back within 48–72 hours with: 1. Your recommended tech stack (backend framework, auth, hosting) 2. Any concerns or issues you see in the schema or existing code 3. How you'd sequence the Phase 1 build 4. A realistic timeline 5. Your hourly rate for the full Phase 1 engagement This review is a paid engagement — happy to discuss a fair rate for your time. If this sounds like a good fit, let me know and I'll send over the briefing document to start.
+more about "Paid Architecture Review — Custom Legal CMS (React + MySQL, Phase 1 Build to Follow)"
+Skills
+Full-Stack Development
+AI Development
+React
+SaaS
+MERN Stack
+Next.js
+Web Application
+Node.js
+SaaS Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 50+
+Full-Stack Developer — AI Document Processing Web App (OCR + Translation + Data Extraction)
+Hourly - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+I'm building an MVP web app that processes uploaded documents — PDFs and photos — and automatically digitizes, translates, and organizes them into a clean, shareable report accessible via URL. The core pipeline: User uploads files grouped as logical units (multiple pages can belong to one document) OCR extracts text from every page including handwriting Translation detects source language and converts to English, preserving the original alongside AI extracts structured data per document: dates, numeric values, categories, line items Everything is sorted chronologically and displayed on a server-rendered report page at a shareable URL Owner vs. read-only view controlled by a share token system No PDF generation. The output is a live web page. Tech stack I have existing Supabase infrastructure so that is the one hard requirement. Everything else — frontend framework, OCR provider, translation API, AI extraction model — is open to your recommendation. I have a suggested starting point (Next.js, Google Document AI, DeepL, Claude or Gemini for extraction) but I want to hear what you would use and why. Deliverables Six milestones: Upload UI + OCR pipeline — file upload with multi-page grouping, OCR integration, raw text stored in Supabase Translation + extraction — translation integration, AI extraction producing structured rows in Supabase per document event Report page — shareable URL rendering a chronological timeline, summary stats, and source document viewer, SSR, no auth wall for recipients Share system — token generation, owner vs. read-only permissions, toggle for what recipients can see Chat / search — a chat interface (floating button, bottom right) that lets users ask natural language questions against their documents. Works both on the dashboard (across all records) and on individual report pages. Examples: "when was the last oil change on this car", "which car has the most recent service", "find all records mentioning suspension work". Answers should cite the source document. This is a RAG implementation — the document text is embedded and stored in Supabase (pgvector), queries retrieve relevant chunks, an LLM generates the answer. Polish + handoff — edge cases, async processing for large document batches, mobile upload UX, error states, full code handoff with documentation Who I'm looking for: Full-stack, owns the entire build end to end. Real production experience integrating OCR and/or AI APIs — not just tutorials Supabase fluency including pgvector for embeddings. Knows how to handle async processing — documents can be 80+ pages, nothing can run synchronously. Has built RAG pipelines before. Clean code, proper error handling. To apply, answer all four of these — proposals that skip any of them won't be reviewed: One example of a project where you integrated an OCR or AI API — what you built, what the challenge was, what the result was. Your recommended tech stack for this project with a brief justification for any choice that differs from my suggested starting point — including what embedding model and vector search approach you would use for the chat feature. The riskiest part of this build in your opinion and how you would approach it
+more about "Full-Stack Developer — AI Document Processing Web App (OCR + Translation + Data Extraction)"
+Skills
+Web Application
+AI App Development
+AI Model Integration
+Artificial Intelligence
+OCR Algorithm
+API
+Machine Learning
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $5K+ spent 
+
+  CAN
+Posted yesterday
+•
+Proposals: 20 to 50
+Senior React Native / Animation Engineer for Premium Emotional Wellness App
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+We are building a premium emotional wellness app called Next Chapter: Stay Steady — a cinematic, emotionally intelligent mobile experience designed for moments of emotional overwhelm, especially after breakups, divorce, and major life transitions. This is not a generic productivity app or CRUD dashboard. The app experience is built around: emotional pacing cinematic transitions immersive mobile interactions layered animations timing/sequencing systems grounded, luxury UI We already have: the full product architecture flows and logic major screens and interactions working prototype systems partially reconstructed Base44/React Native implementation We now need a strong frontend/mobile engineer to help stabilize, restore, and ship the app properly without losing the emotional feel. What We Need Help With React Native / Expo stabilization Restoring and preserving animation systems Fixing sequencing/timer-based flows Debugging state-driven UI transitions Preserving cinematic pacing during rebuilds Converting prototype logic into stable production architecture Mobile-first polish and interaction refinement App Store-ready production quality Important This project is heavily animation and interaction driven. We are NOT looking for: generic dashboard developers backend-heavy engineers people who want to redesign or simplify the app developers who remove animations to “clean things up” We ARE looking for someone who understands: emotional UX mobile interaction design motion systems sequencing timing immersive frontend experiences Tech Stack React Native Expo JavaScript / TypeScript Existing monolithic HTML/CSS/JS prototype Base44 reconstruction Local state + timer systems Complex CSS animation logic being ported to RN Bonus: Framer Motion React Native Reanimated GSAP-style interaction thinking Consumer wellness app experience Current Situation We currently have: a partially reconstructed app inside Base44 working navigation and logic major flows functioning animation systems partially missing due to reconstruction issues The next step is NOT a rewrite. The next step is: surgical stabilization restoring animation sequencing preserving the original emotional experience modularizing carefully without flattening the feel To Apply Please include: Links to your best mobile UI work Examples of animation-heavy apps Experience with React Native animation systems Whether you’ve worked with cinematic or emotionally driven products before Your approach to stabilizing a large monolithic prototype without rewriting it from scratch Important Question (Please Answer) How would you preserve and stabilize a cinematic animation-heavy React Native app with sequencing/timer-based flows that was partially reconstructed from a monolithic HTML/CSS/JS prototype? We care more about preserving the emotional experience than moving fast.
+more about "Senior React Native / Animation Engineer for Premium Emotional Wellness App"
+Skills
+React Native
+Mobile App Development
+iOS Development
+Android
+JavaScript
+TypeScript
+Expo.io
+Redux
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $2K+ spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 20 to 50
+Enterprise SaaS Platform - FastAPI + React | 20-Module Procurement System | Agency Only
+Hourly - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+Aiura Tec is contracting a senior agency to execute the build of an enterprise-grade, multi-tenant SaaS platform for the construction procurement industry. The platform covers the full procurement lifecycle: BOQ upload, AI-assisted classification, vendor management, bidding, awards, contracts, cost control, and reporting. This is pure execution work. All specifications are complete and finalized: PRD, ERD (87 tables), API spec (~300 endpoints), UI/UX (51 screens), and system architecture. You build, test, and deploy. We will not pay for separate discovery, design, or architecture phases. QUICK SCOPE SIGNAL - 20 modules across 11 sprints - Stack (locked, non-negotiable): FastAPI (Python 3.12), React 18 + TypeScript, PostgreSQL 16 + pgvector, Celery 5, Docker Compose (15 services) - Multi-tenant with Row-Level Security on every tenant table - Quality bar: 80% test coverage, OWASP-tested, API P95 under 200ms - Engagement: Fixed-price, milestone-based, private GitHub repository, NDA required before any spec is shared FILTER CRITERIA (you must meet ALL) - Registered agency, 3+ years in business - Minimum 2 full-time developers available for project duration - In-house QA function (not outsourced, not the same engineer who built the feature) - Live URLs demonstrating FastAPI AND React in production - No subcontracting. The team in your proposal is the team that codes. The full scope, engagement model, payment structure, milestone breakdown, and application requirements are in the attached document. Read it before submitting a proposal. Generic proposals or proposals that do not address the attached scope will be rejected without review. Aiura Tec.
+more about "Enterprise SaaS Platform - FastAPI + React | 20-Module Procurement System | Agency Only"
+Skills
+AI Agent Development
+Python
+AI Model Integration
+SQL
+React
+TypeScript
+PostgreSQL
+Redis
+Docker
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $400+ spent 
+
+  SAU
+Federico P.
+Federico P.
+
+Full-Stack Developer specializing in React Node.js TypeScript and AI I
+
+Complete your profile
+65%
+
+Identity verification
+Increase your profile visibility in search results and win more work with an IDV Badge.
+Get an IDV Badge
+Promote with ads
+
+Availability badge
+Off
+Boost your profile
+Off
+Connects: 20
+
+Preferences
+
+Proposals
+
+Project Catalog
+
+Direct Contracts  
+Withdrawals  
+Help Center  
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices California Consumer Privacy Act (CCPA) Opt-Out
+Accessibility
+Desktop App
+Cookie Policy
+Enterprise Solutions
+Release notes
+Follow Us
+Visit Upwork on Facebook
+
+Read Upwork company news on LinkedIn
+
+Follow @Upwork on Twitter
+
+Watch Upwork videos on YouTube
+
