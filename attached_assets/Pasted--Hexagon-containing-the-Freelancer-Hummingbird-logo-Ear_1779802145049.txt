@@ -1,0 +1,513 @@
+
+Hexagon containing the Freelancer Hummingbird logo
+Earn more by claiming your free membership trial
+Filters
+
+Project type
+Clear
+
+Hourly Rate
+
+Fixed Price
+Fixed price
+
+Clear
+min
+$
+
+USD
+max
+$
+
+USD
+Hourly rate
+
+Clear
+min
+$
+
+USD
+max
+$
+
+USD
+Skills
+Clear
+
+
+
+JavaScript
+
+HTML
+
+Analytics
+
+Node.js
+
+PostgreSQL
+
+Web Development
+
+API
+
+Full Stack Development
+
+Backend Development
+
+Frontend Development
+View all (18)
+Listing type
+Clear
+
+Featured
+
+Sealed
+
+NDA
+
+Urgent
+
+Recruiter
+
+IP Agreement
+Project location
+Clear
+
+
+Client's country
+Clear
+
+
+Languages
+Clear
+
+
+
+Italiano
+
+English
+Top results
+1-20 of 1K results
+
+Receive alerts for this search
+
+Sort by
+
+Latest
+
+Urgent: WooCommerce Configuration, Design & API Integration (5-Day Turnaround)
+Budget ₹1,500 – 12,500 INR
+₹6,792 INR
+average bid
+Project Overview: I am migrating my established traditional apparel e-commerce brand, Yamini, from OpenCart to WooCommerce. The foundational work is already complete (hosting, theme, and data migration). I am looking for an experienced WordPress/WooCommerce developer to handle the front-end design configuration, backend… more
+
+PHP
+SEO
+eCommerce
+HTML
+WooCommerce
+5 more
+
+0.0
+
+0
+1 minute ago
+Global Chess Platform Development
+Budget ₹12,500 – 37,500 INR
+₹23,921 INR
+average bid
+A chess game platform (website and mobile, both android and ios with audio and video enablement. This platform should be available globally and quality needs to be of top notch. Basics---- The website and mobile application (both android and iOS) would be available globally Players should be able to play from website as well as from… more
+
+Mobile App Development
+Android
+Software Development
+Game Development
+UI / User Interface
+5 more
+
+0.0
+
+0
+6 minutes ago
+iOS & Android Social Network App
+Budget $15 – 25 USD per hour
+RECRUITER
+122 bids
+$37 USD per hour
+average bid
+I’m building a mobile-first social networking platform that must run smoothly on both Android and iPhone. The actual content is complete but need someone do just put it in code. Core features I need implemented: • User profiles with avatar, bio and basic editing • Real-time or near-real-time messaging between members • Scrollable news… more
+
+Mobile App Development
+iPhone
+Android
+Social Networking
+PhoneGap
+5 more
+
+5.0
+
+14
+13 minutes ago
+School Management System Website Build
+Budget ₹1,500 – 12,500 INR
+59 bids
+₹9,406 INR
+average bid
+I need a full-stack web solution that lets our staff and students manage personal and contact details in one secure place. The core module right now is Student Information Management, and it must allow both administrators and individual students to create, view, and edit their own records with proper role-based permissions. Key… more
+
+Node.js
+Web Development
+Full Stack Development
+
+0.0
+
+0
+26 minutes ago
+Design Screens of Mobile app
+Budget ₹600 – 601 INR
+12 bids
+₹3,784 INR
+average bid
+We have Mobile app live on Appstore and we are planing to redesign all screens of app. This is our app https://apps.apple.com/us/app/zinkly/id6737820483 You can download and check all screens user side and Musician side after getting registered on app by your side. Currently app having 25-30 screens with Splash… more
+
+Graphic Design
+Mobile App Development
+iPhone
+Android
+UX / User Experience
+3 more
+
+5.0
+
+80
+28 minutes ago
+WordPress Digital Publishing Assistant
+Budget €250 – 750 EUR
+RECRUITER
+81 bids
+€450 EUR
+average bid
+Freelance WordPress & Digital Publishing Assistant Needed We are looking for a reliable freelancer to help digitize and publish our print archive online using WordPress. Scope of Work You will assist with the following tasks: 1. Design & PDF Preparation * Open approximately 5 Adobe InDesign packages * Export and deliver… more
+
+Website Design
+SEO
+WordPress
+Freelance
+Adobe InDesign
+2 more
+
+5.0
+
+49
+29 minutes ago
+Custom WordPress Website Build
+Budget ₹1,500 – 12,500 INR
+63 bids
+₹8,871 INR
+average bid
+I’m ready to get a fresh WordPress site online and I’m looking for someone who can guide me from the very first step—choosing the right theme—all the way through launch. I don’t have a theme picked out yet, so I’ll count on your recommendations (free or premium) that match the look, feel, and functionality my brand needs. Once we… more
+
+PHP
+SEO
+WordPress
+HTML
+Web Development
+3 more
+
+0.0
+
+0
+36 minutes ago
+Build My Online Product Store
+Budget ₹12,500 – 37,500 INR
+68 bids
+₹21,351 INR
+average bid
+I need an e-commerce website built from the ground up to sell a range of physical products. The storefront should feel clean, modern and mobile-friendly while giving shoppers the smooth, trustworthy experience they expect from a professional online retailer. Core features I want implemented: • Product reviews so customers can share… more
+
+Website Design
+Shopping Cart Integration
+eCommerce
+HTML
+Shopify
+3 more
+
+0.0
+
+0
+41 minutes ago
+Tour Booking Website Development
+Budget ₹600 – 1,500 INR
+41 bids
+₹6,030 INR
+average bid
+I run an India-based tour and travel company and need a full-featured website that lets visitors create an account, browse my tour packages, and complete their booking entirely online. Once a guest selects a trip they should be able to pay by Credit/Debit Card, PayPal, or direct Bank Transfer. Two user roles will drive the platform: • Tourists –… more
+
+PHP
+Website Design
+Graphic Design
+WordPress
+HTML
+3 more
+
+0.0
+
+0
+43 minutes ago
+Programming Course Trainers Needed
+Budget ₹1,500 – 12,500 INR
+3 bids
+₹5,834 INR
+average bid
+I’m putting together a roster of trainers who can confidently teach intermediate-level programming courses in Python, Java and JavaScript. The learners already know the basics; they need guidance into topics such as object-oriented design, asynchronous programming, testing, performance tuning and real-world project structure… more
+
+Java
+JavaScript
+Python
+Software Architecture
+Software Development
+3 more
+
+0.0
+
+0
+44 minutes ago
+Shopify Wellness Site Redesign
+Budget $30 – 250 AUD
+197 bids
+$167 AUD
+average bid
+I need a seasoned Shopify designer-developer to give our wellness beverage store a complete visual and structural refresh. The current build works, but the product pages feel flat and uninspiring, so that is where I want the most dramatic leap forward—bolder imagery, richer descriptions, and an overall layout that immediately… more
+
+Website Design
+Graphic Design
+Branding
+Shopify Templates
+Shopify
+3 more
+
+5.0
+
+2
+45 minutes ago
+AI Solutions Architect Interview Preparation
+Budget £250 – 750 GBP
+35 bids
+£468 GBP
+average bid
+I have an interview in 2 weeks for an AI Solutions Architect role at a large enterprise insurance company undergoing AI transformation. I’m looking for a mentor/coach who can help me rapidly prepare for the interview and become practically competent in the core technologies and architectural thinking required for the role. My… more
+
+Enterprise Architecture
+Business Requirement Documentation
+Data Governance
+BigQuery
+Power Automate
+3 more
+
+5.0
+
+1
+52 minutes ago
+Client-Facing Software Engineer Needed
+Budget $2 – 8 USD per hour
+70 bids
+$8 USD per hour
+average bid
+We are looking for a Software Engineer for a client-facing role. The candidate will handle client interviews, join daily standup meetings, communicate project updates clearly, and coordinate with development teams. Strong software engineering experience and excellent English communication skills are required. The ideal candidate should… more
+
+JavaScript
+Python
+Project Management
+Software Architecture
+Mathematics
+5 more
+
+5.0
+
+4
+55 minutes ago
+Luxury Floral Studio Website Revamp
+Budget $5,000 – 10,000 USD
+RECRUITER
+158 bids
+$6,287 USD
+average bid
+I'm seeking an experienced web designer to upgrade our current company website to reflect our luxury brand. We specialize in custom floral arrangements and event setups, and it's crucial that our website conveys the high-end nature of our services. Key Requirements: - High-end, sophisticated design - User-friendly navigation -… more
+
+Website Design
+Graphic Design
+SEO
+User Interface / IA
+HTML
+4 more
+
+0.0
+
+0
+57 minutes ago
+Personal Portfolio Website Build
+Budget $250 – 750 USD
+303 bids
+$418 USD
+average bid
+I want a clean, modern portfolio site that lets me present my work clearly and professionally. The main goal is to position the site as my online showcase, so the layout and visual hierarchy have to put projects front-and-center while keeping navigation intuitive and lightweight. A fast-loading, fully responsive design is essential. I’m… more
+
+PHP
+JavaScript
+WordPress
+CSS
+CMS
+3 more
+
+0.0
+
+0
+57 minutes ago
+Bulk WhatsApp & SMS Solution for My Betting site.
+Budget $15 – 25 USD per hour
+46 bids
+$25 USD per hour
+average bid
+I run an established online betting platform and need a reliable way to broadcast promotional offers to my customer base through both WhatsApp and traditional SMS. The core goal is simple: reach thousands of opted-in users quickly, track delivery and engagement, and stay fully compliant with each channel’s policies. Here is what I… more
+
+PHP
+Cloud Computing
+Software Architecture
+Google Analytics
+MySQL
+5 more
+
+0.0
+
+0
+1 hour ago
+Build WooCommerce Jersey Shop
+Budget $750 – 1,500 USD
+284 bids
+$990 USD
+average bid
+I’m launching an online store dedicated to authentic football jerseys and need a developer who can turn WordPress + WooCommerce into a slick, conversion-focused shopping experience. The core of the brief is a modern, mobile-first design that loads fast and feels intuitive on any device. WooCommerce is already my chosen engine, so your… more
+
+PHP
+Website Design
+SEO
+WordPress
+CSS
+5 more
+
+0.0
+
+0
+1 hour ago
+Ecommerce Website Redesign for Medical Brand
+Budget ₹12,500 – 37,500 INR
+43 bids
+₹23,309 INR
+average bid
+Website Redesign Expert Needed for International Medical & Therapy Ecommerce Brand We are looking for an experienced website designer/developer to redesign our ecommerce website, SnapShopHub.com, to better appeal to customers in the USA, UK, Europe, and other international markets. Our business sells medical, physiotherapy… more
+
+Graphic Design
+SEO
+Branding
+eCommerce
+HTML
+4 more
+
+5.0
+
+1
+1 hour ago
+iOS & Android E-Commerce App
+Budget ₹1,500 – 12,500 INR
+62 bids
+₹11,722 INR
+average bid
+I already run the online store https://naysan.store and now I want a fully-featured mobile experience on both iOS and Android. The goal is not just to wrap the site in a WebView, but to build a smooth, app-native storefront that lets customers browse products, add them to cart, check out securely, track orders, and receive timely updates… more
+
+Mobile App Development
+iPhone
+Android
+HTML
+iOS Development
+3 more
+
+5.0
+
+3
+1 hour ago
+Need IT Converter Website Approved by Google AdSense
+Budget $25 – 45 USD
+41 bids
+$38 USD
+average bid
+I have created the below website. https://www.itconverter.org It was created using an AI program Manus 1.6 Max. I have applied to get the project approved by Google AdSense. But every time I applied again and updated the website with Manus, Google AdSense rejected it. Please help me to get the project approved by Google AdSense.
+
+Google Adsense
+HTML
+Digital Marketing
+Website Development
+Manus
+
+5.0
+
+2
+1 hour ago
+
+
+1
+2
+3
+4
+5
+
+
+Messages
+
+
+Chats
+Requests
+Archived
+Freelancer logo
+
+US (International) / English
+
+Help & Support
+
+Accessibility
+Freelancer
+
+Categories
+Projects
+Contests
+Freelancers
+Enterprise
+Innovation Challenges
+AI Development
+Membership
+Preferred Freelancer Program
+Project Management
+Local Jobs
+Photo Anywhere
+Showcase
+API for Developers
+Get Verified
+About
+
+About us
+How it Works
+Security
+Investor
+Sitemap
+Stories
+News
+Team
+Awards
+Press Releases
+Careers
+Terms
+
+Privacy Policy
+Terms and Conditions
+Copyright Policy
+Code of Conduct
+Fees and Charges
