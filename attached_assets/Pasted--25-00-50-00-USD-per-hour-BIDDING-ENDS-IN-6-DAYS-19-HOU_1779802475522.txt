@@ -1,0 +1,162 @@
+$25.00 – 50.00 USD per hour
+
+ BIDDING ENDS IN 6 DAYS, 19 HOURS
+
+ I need a programmer to create a full-featured website focused on content sharing. The site’s core is a modern blog where I can regularly publish articles, showcase photo galleries, and embed or host multimedia such as videos and podcasts.  Key requirements  • Clean, responsive front-end that looks great on desktop and mobile  • Intuitive CMS/dashboard so I can add new posts, images, and media without touching code  • Logical content categories and tags for easy navigation and SEO  • Fast page loads and solid security practices (HTTPS, backups, spam protection)  • Basic analytics integration so I can track readership and engagement  Preferred stack is flexible; common choices like WordPress, Laravel, or a headless CMS with React are welcome—just outline why your approach fits best.  Deliverables  1. Live, fully configured website on my hosting or a recommended provider  2. Administrator credentials and step-by-step guide for posting articles, uploading photos, and adding videos/podcasts  3. One brief hand-off session to walk me through the workflow and answer initial questions  If you have previous blog or content-rich site examples, please share links so I can see your style and code quality.
+Skills Required
+
+PHP
+Website Design
+Graphic Design
+SEO
+CMS
+HTML
+Web Hosting
+Laravel
+Web Development
+Website Optimization
+Project ID: 40469908
+
+RECRUITER
+
+ Report Project
+
+You must be a Preferred Freelancer
+Only Preferred Freelancers can bid on this project. Apply to become a Preferred Freelancer today.
+Complete your profile
+
+Please complete these 3 steps before bidding on the project
+
+1
+Update your skills
+2
+Verify your email
+3
+Update your profile
+
+Enter an hourly rate for your profile to bid on this project. This will not affect your bid on a particular project, it is just to give employers an idea of the rate you typically work at.
+
+User Avatar
+
+First Name
+
+Last Name
+
+Professional Headline
+
+Summary
+
+Language
+Italiano
+
+English
+
+
+Hourly Rate
+$
+
+USD per hour
+To comply with legal and regulatory obligations, we are required to collect the additional information below from you. All your personal information remains private. Please see our privacy policy for more details.
+
+Address (Only your city and country will be shown publicly)
+
+
+Save
+Clarification Board
+No spam, self-promotion or advertisement is permitted.
+User Avatar
+Users who are Verified by Freelancer can leave a question. Get Verified.
+
+View 3 more questions
+User Avatar
+Nikita G.
+@mahig47
+verified-v2.svg
+preferred-freelancer-v3.svg
+·
+4h
+ 1. Will multiple authors or editors need access to publish and manage content on the platform?   2. Do you want the podcast and video content hosted directly on the website or embedded from external platforms… more
+User Avatar
+Mateo M.
+@flapjakc
+verified-v2.svg
+preferred-freelancer-v3.svg
+·
+9m
+ What's the blog about -- travel, lifestyle, professional topics, something else -- and do you have an existing visual identity like a logo or colour palette, or does the design direction need to be established from scratch?
+About the Client
+
+
+Ayent
+Flag of SWITZERLAND
+Switzerland
+
+
+0.0
+
+0
+
+Member since May 26, 2026
+Client Engagement
+
+Contacted 0 freelancers
+
+Invited 0 freelancers to bid
+
+ Completed 0 projects
+Client Verification
+
+ Identity verified
+
+ Payment verified
+
+ Deposit made
+
+ Email verified
+
+ Profile completed
+
+ Phone verified
+monthly-level-three.svg
+Plus Member
+
+Insights
+18 bids left out of 100 
+Messages
+
+
+Chats
+Requests
+Archived
+Freelancer logo
+
+US (International) / English
+
+Help & Support
+
+Accessibility
+Freelancer
+
+Categories
+Projects
+Contests
+Freelancers
+Enterprise
+Innovation Challenges
+AI Development
+Membership
+Preferred Freelancer Program
+Project Management
+Local Jobs
+Photo Anywhere
+Showcase
+API for Developers
+Get Verified
+About
+
+About us
+How it Works
+Security
+Investor
+Sitemap
+Stories
