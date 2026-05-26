@@ -1,0 +1,525 @@
+
+
+Document with a magnifying glass on top
+Search for projects with your skills or check out your bookmarks
+Rectangle that resembles an ID card
+Place bids and write a short proposal on projects you are interested in
+A trophy with a star in the middle
+Get awarded and start working on your dream project today
+Hexagon containing the Freelancer Hummingbird logo
+Earn more by claiming your free membership trial
+Filters
+
+Project type
+Clear
+
+Hourly Rate
+
+Fixed Price
+Fixed price
+
+Clear
+min
+$
+
+USD
+max
+$
+
+USD
+Hourly rate
+
+Clear
+min
+$
+
+USD
+max
+$
+
+USD
+Skills
+Clear
+
+
+
+JavaScript
+
+HTML
+
+Analytics
+
+Node.js
+
+PostgreSQL
+
+Web Development
+
+API
+
+Full Stack Development
+
+Backend Development
+
+Frontend Development
+View all (18)
+Listing type
+Clear
+
+Featured
+
+Sealed
+
+NDA
+
+Urgent
+
+Recruiter
+
+IP Agreement
+Project location
+Clear
+
+
+Client's country
+Clear
+
+
+Languages
+Clear
+
+
+
+Italiano
+
+English
+Top results
+1-20 of 402 results
+
+Receive alerts for this search
+
+Sort by
+
+Latest
+
+Urgent: WooCommerce Configuration, Design & API Integration (5-Day Turnaround)
+Budget ₹1,500 – 12,500 INR
+18 bids
+₹7,531 INR
+average bid
+Project Overview: I am migrating my established traditional apparel e-commerce brand, Yamini, from OpenCart to WooCommerce. The foundational work is already complete (hosting, theme, and data migration). I am looking for an experienced WordPress/WooCommerce developer to handle the front-end design configuration, backend… more
+
+PHP
+SEO
+eCommerce
+HTML
+WooCommerce
+5 more
+
+0.0
+
+0
+4 minutes ago
+Custom WordPress Website Build
+Budget ₹1,500 – 12,500 INR
+63 bids
+₹8,871 INR
+average bid
+I’m ready to get a fresh WordPress site online and I’m looking for someone who can guide me from the very first step—choosing the right theme—all the way through launch. I don’t have a theme picked out yet, so I’ll count on your recommendations (free or premium) that match the look, feel, and functionality my brand needs. Once we… more
+
+PHP
+SEO
+WordPress
+HTML
+Web Development
+3 more
+
+0.0
+
+0
+39 minutes ago
+Tour Booking Website Development
+Budget ₹600 – 1,500 INR
+43 bids
+₹7,052 INR
+average bid
+I run an India-based tour and travel company and need a full-featured website that lets visitors create an account, browse my tour packages, and complete their booking entirely online. Once a guest selects a trip they should be able to pay by Credit/Debit Card, PayPal, or direct Bank Transfer. Two user roles will drive the platform: • Tourists –… more
+
+PHP
+Website Design
+Graphic Design
+WordPress
+HTML
+3 more
+
+0.0
+
+0
+46 minutes ago
+AI Solutions Architect Interview Preparation
+Budget £250 – 750 GBP
+35 bids
+£468 GBP
+average bid
+I have an interview in 2 weeks for an AI Solutions Architect role at a large enterprise insurance company undergoing AI transformation. I’m looking for a mentor/coach who can help me rapidly prepare for the interview and become practically competent in the core technologies and architectural thinking required for the role. My… more
+
+Enterprise Architecture
+Business Requirement Documentation
+Data Governance
+BigQuery
+Power Automate
+3 more
+
+5.0
+
+1
+55 minutes ago
+Smart Hardware API & Cloud Integration
+Budget $1,500 – 3,000 USD
+159 bids
+$2,081 USD
+average bid
+I'm looking for an experienced developer to create APIs for IoT device communication and integrate these with Google Cloud for remote access, monitoring, reporting, and system integration tailored to our requirements. Key Requirements: - Design APIs for IoT devices - Integrate with Google Cloud - Enable remote access and… more
+
+PHP
+Mobile App Development
+Android
+Cloud Computing
+Software Development
+2 more
+
+0.0
+
+0
+2 hours ago
+Expert Full-Stack Challenge: Multi-Network Reward Site & Python Telegram Bot Real-Time Sync
+Budget $30 – 250 USD
+43 bids
+$136 USD
+average bid
+ATTENTION: DO NOT ASK TO WORK OUTSIDE FREELANCER. OFF-PLATFORM REQUESTS WILL BE IMMEDIATELY BLOCKED & REPORTED TO PROTECT MY ACCOUNT SAFETY.] The Challenge: We are looking for a true elite, expert Full-Stack Developer who is confident in their skills and wants to take on a highly technical, multi-layered… more
+
+PHP
+JavaScript
+Python
+Web Security
+Software Architecture
+5 more
+
+5.0
+
+1
+2 hours ago
+Advanced E-Commerce Website & Mobile App
+Budget ₹12,500 – 37,500 INR
+78 bids
+₹114,905 INR
+average bid
+E-Commerce Website Highlights Modern & User-Friendly Design Fully Responsive Website Fast Loading Speed Secure Payment Gateway Integration Multi-Vendor Support Product Categories & Filters Advanced Product Search Wishlist & Add to Cart Coupon & Discount System Order Tracking System Inventory Management GST &… more
+
+PHP
+Mobile App Development
+iPhone
+Android
+Cloud Computing
+3 more
+
+0.0
+
+0
+2 hours ago
+AI-Based Plant Disease Detection and Recommendation System
+Budget ₹1,500 – 12,500 INR
+34 bids
+₹11,502 INR
+average bid
+I need a web-based solution that lets farmers upload a clear photo of a leaf or crop (JPEG or PNG only). As soon as the image lands on the server, an AI model should analyse it and immediately show, on the same page, the disease name, a short description, likely causes, treatment methods, prevention tips, suggested fertilisers or… more
+
+Python
+Machine Learning (ML)
+Data Science
+Image Processing
+Web Development
+5 more
+
+0.0
+
+0
+2 hours ago
+Long-Term iOS Game Publisher
+Budget $15 – 25 USD per hour
+52 bids
+$21 USD per hour
+average bid
+I have a steady pipeline of adventure-style iOS games ready for release and I’m looking for someone who can handle every step of getting them live on the App Store. All titles include multiplayer mode and rich, branching storylines, so familiarity with Game Center integration, in-app purchases, TestFlight, and Apple’s review guidelines is… more
+
+Mobile App Development
+iPhone
+Game Design
+Objective C
+iPad
+5 more
+
+0.0
+
+0
+3 hours ago
+On-Site SEO Specialist, Ahmedabad, Gujarat
+Budget ₹12,500 – 37,500 INR
+55 bids
+₹13,909 INR
+average bid
+Our team has already launched a B2B web and mobile marketplace that lets polymer-commodity buyers and sellers handle price discovery, bulk ordering, ERP and WhatsApp integration, account management, and more. With the product live, we are now ready to scale organic traffic and qualified sign-ups. The first milestone is… more
+
+Internet Marketing
+SEO
+Link Building
+Google Analytics
+Analytics
+5 more
+
+0.0
+
+0
+3 hours ago
+Basic Gaming Top-Up Website
+Budget ₹600 – 1,500 INR
+30 bids
+₹2,130 INR
+average bid
+I’m launching a small-scale Mobile Legends: Bang Bang top-up service and need an MVP that fits a tight ₹3 000–5 000 budget. The site only has to cover the essentials for now, but it must be stable so I can layer on new features later. Core build • A clean, gaming-themed layout that renders perfectly on mobile and desktop and loads fast… more
+
+PHP
+JavaScript
+Website Design
+WordPress
+HTML
+3 more
+
+0.0
+
+0
+3 hours ago
+LabelGrid API Music Distribution
+Budget $30 – 250 USD
+81 bids
+$160 USD
+average bid
+I’m ready to let artists on my site push their releases to every major DSP by plugging LabelGrid directly into our existing platform. What I need now is a developer who can: • Connect my site to LabelGrid’s REST API, handling authentication and token refresh. • Map the release form fields we already collect (audio files, artwork… more
+
+PHP
+JavaScript
+Mobile App Development
+Software Architecture
+Web Development
+3 more
+
+0.0
+
+0
+3 hours ago
+Principal AI Engineer for GenAI Systems
+Budget ₹1,250 – 2,500 INR per hour
+32 bids
+₹1,789 INR per hour
+average bid
+Role Summary We are seeking a Principal AI Engineer with deep expertise in Generative AI, and Agentic AI systems to lead the design and delivery of scalable, production-grade AI systems. This role requires hands-on technical leadership, architectural ownership, and mentorship in highly ambiguous environments. Primary (Required)… more
+
+Python
+Machine Learning (ML)
+Generative AI
+AI Model Development
+AI Model Integration
+5 more
+
+0.0
+
+0
+4 hours ago
+Automatic TikTok Reels Integration
+Budget $750 – 1,500 AUD
+RECRUITER
+161 bids
+$1,036 AUD
+average bid
+My ecommerce app is built entirely in Flutter and I publish fresh product-focused TikTok reels every day. I want those reels to appear in the app automatically—no manual uploads, no copy-pasting links—so customers can watch, then tap straight through to buy or start a chat enquiry.  Here is what I’m looking for: • A clean integration that pulls… more
+
+PHP
+JavaScript
+Mobile App Development
+Laravel
+API
+3 more
+
+5.0
+
+32
+4 hours ago
+Laravel/PHP Developer for Celebrity Booking Site Improvements
+Budget $8 – 15 USD per hour
+316 bids
+$14 USD per hour
+average bid
+I need an experienced Laravel/PHP developer to make corrections and feature updates to my celebrity booking/membership website: Current issues and updates needed: * Add admin dashboard controls to edit: * Platinum Elite Card Fee * Membership Tier Fee * Donation Fee * Processing Fee * Fix calculation integration:… more
+
+PHP
+Website Design
+MySQL
+HTML
+Laravel
+3 more
+
+0.0
+
+0
+4 hours ago
+University Attendance Management Mobile App
+Budget $20 – 80 NZD
+75 bids
+$56 NZD
+average bid
+Mobile Attendance Check-In App for University I’m looking to build a mobile application that streamlines student attendance across our university. The app must run on both iOS and Android and support the following check-in methods: QR code scanning Manual check-in fallback Project requirements: A clean, intuitive UI that makes it… more
+
+PHP
+Mobile App Development
+iPhone
+Android
+Testing / QA
+5 more
+
+0.0
+
+0
+4 hours ago
+Build Versatile Blog Website
+Budget $25 – 50 USD per hour
+RECRUITER
+150 bids
+$41 USD per hour
+average bid
+I need a programmer to create a full-featured website focused on content sharing. The site’s core is a modern blog where I can regularly publish articles, showcase photo galleries, and embed or host multimedia such as videos and podcasts. Key requirements • Clean, responsive front-end that looks great on desktop and mobile • Intuitive… more
+
+PHP
+Website Design
+Graphic Design
+SEO
+CMS
+5 more
+
+0.0
+
+0
+5 hours ago
+Apple Wallet Company ID Integration
+Budget $10 – 30 USD
+24 bids
+$36 USD
+average bid
+I already have the finished artwork and layout for our company ID; what I now need is the technical piece that turns that design into a working Apple Wallet pass (.pkpass). You’ll use the assets I provide (logo, employee photo placeholder, colors, etc.) and build a pass that staff can add to their iPhone with one tap. The design is… more
+
+Graphic Design
+Mobile App Development
+iPhone
+User Interface / IA
+JSON
+3 more
+
+0.0
+
+0
+5 hours ago
+Modern Car Rental Website Build
+Budget ₹600 – 1,500 INR
+68 bids
+₹5,348 INR
+average bid
+I’m ready to launch a sleek online presence for my corporate transportation company and need a developer who can transform the attached requirements into a fast, SEO-friendly website. The overall look should feel contemporary, with a gold-and-black primary colour palette and plenty of white space so our vehicle images really stand out… more
+
+PHP
+Website Design
+Graphic Design
+SEO
+CSS
+3 more
+
+0.0
+
+0
+5 hours ago
+Unity or Unreal Developer required for a project
+Budget ₹150,000 – 250,000 INR
+29 bids
+₹223,679 INR
+average bid
+We’re looking for an experienced Unity or Unreal Engine developer/team to build a VR-based hospitality training experience for Meta Quest 2 and Meta Quest 3. Project Scope You’ll be responsible for developing interactive training simulations across 6 pre-built environments. The environments are already completed — the focus is on… more
+
+JavaScript
+Mobile App Development
+Game Design
+3D Modelling
+3D Animation
+5 more
+
+0.0
+
+0
+5 hours ago
+
+
+1
+2
+3
+4
+5
+
+
+Messages
+
+
+Chats
+Requests
+Archived
+Freelancer logo
+
+US (International) / English
+
+Help & Support
+
+Accessibility
+Freelancer
+
+Categories
+Projects
+Contests
+Freelancers
+Enterprise
+Innovation Challenges
+AI Development
+Membership
+Preferred Freelancer Program
+Project Management
+Local Jobs
+Photo Anywhere
+Showcase
+API for Developers
+Get Verified
+About
+
+About us
+How it Works
+Security
+Investor
+Sitemap
+Stories
+News
+Team
+Awards
+Press Releases
+Careers
+Terms
+
+Privacy Policy
+Terms and Conditions
+Copyright Policy
+Code of Conduct
+Fees and Charges
