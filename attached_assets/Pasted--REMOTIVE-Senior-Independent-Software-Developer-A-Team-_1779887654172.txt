@@ -1,0 +1,132 @@
+
+REMOTIVE
+Senior Independent Software Developer
+A.Team
+📍 Americas, Europe, Israel
+💰 $90 - $150 /hour
+🕐
+〜 Media
+go
+wordpress
+chat
+apple
+🎯 Match tecnico: 70
+✨ Opportunità: ?/15
+Strong technical stack match with TypeScript, React, and Node.js, although Go and WordPress are not in Federico's stack
+Job location preference aligns as A.Team is open to candidates in Europe
+Federico has only 1 year of experience compared to the senior level expected in the job description
+Senior level position may require more experience than Federico has
+70
+SCORE
+Candidati →
+REMOTIVE
+Senior Full-stack React Developer
+Lemon.io
+📍 Americas, Europe, Asia, Oceania
+🕐
+〜 Media
+.Net
+android
+AWS
+azure
+🎯 Match tecnico: 65
+✨ Opportunità: ?/15
+Strong match on stack with TypeScript, Node.js, and React components; however, does not have the seniority level required for 'Senior Developer'.
+Remote work eligibility is noted, but the Americas timezone may conflict with Federico's preferred EU timezone;
+Only 1 year of experience, while the job likely suggests a much higher level of experience;
+Potential overqualification for a senior position.
+65
+SCORE
+Candidati →
+REMOTIVE
+Senior Independent AI Engineer / Architect
+A.Team
+📍 Americas, Europe, Israel
+💰 $120 - $170 /hour
+🕐
+〜 Media
+go
+UI/UX
+wordpress
+chat
+🎯 Match tecnico: 60
+✨ Opportunità: ?/15
+Stack match is decent but lacks experience in AI engineering specifically, which is critical for the role.
+Only 1 year of self-taught experience may not meet the expectations of a 'Senior' title role.
+Preferred location aligns with remote option but conflicts with specific company locations for best projects.
+Job requires a senior level of experience and responsibility not supported by Federico's skill set.
+60
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 30
+✨ Opportunità: ?/15
+Federico has relevant experience with TypeScript and React, but lacks proficiency in PHP, Laravel, and AWS which are essential for the job.
+The job is located in Brazil and might not be fully remote or EU timezone compatible, which is a preferred requirement for Federico.
+On-site only requirement, if applicable.
+30
+SCORE
+Candidati →
+REMOTIVE
+Paid Media Specialist
+Noventra Group Europe
+📍 Worldwide
+💰 $65k - $85k
+🕐
+〜 Media
+ecommerce
+research
+advertising
+retail
+🎯 Match tecnico: 30
+✨ Opportunità: ?/15
+The job is focused on paid media and advertising, which does not align with Federico's skill set in software development and web technologies.
+Federico has experience primarily in development, not in paid media or advertising, which may hinder his effectiveness in this role.
+Not aligned with Federico's skill set and career interests.
+30
+SCORE
+Candidati →
+REMOTIVE
+Tech Lead Full-Stack Rails Engineer
+Mitre Media
+📍 USA, Canada, USA timezones
+💰 $170k - $200k
+🕐
+〜 Media
+api
+CSS
+docker
+elasticsearch
+🎯 Match tecnico: 30
+✨ Opportunità: ?/15
+Stack mismatch: The job requires Ruby on Rails expertise, which is not in Federico's skill set.
+Location and timezone mismatch: The job is based in the USA and Canada, while Federico prefers remote work with EU timezone compatibility.
+On-site only requirements
+The position requires 5+ years of experience.
+30
+SCORE
+Candidati →
+REMOTIVE
+Business Transformation Lead
+Expion Health
+📍 USA
+💰 $175k - $225k
+🕐
+〜 Media
+api
+AI/ML
+automation
+healthcare
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+The job requires a Business Transformation Lead, which is a much higher-level position than software development roles that Federico is q
