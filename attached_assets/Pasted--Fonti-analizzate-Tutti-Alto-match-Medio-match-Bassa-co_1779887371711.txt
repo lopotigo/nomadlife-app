@@ -1,0 +1,358 @@
+
+Fonti analizzate
+Tutti
+🟢 Alto match
+🟡 Medio match
+⚡ Bassa concorrenza
+🆕 Freschi
+Ordina:
+Punteggio
+Opportunità
+Più recenti
+REMOTIVE
+Senior Independent Software Developer
+A.Team
+📍 Americas, Europe, Israel
+💰 $90 - $150 /hour
+🕐
+〜 Media
+go
+wordpress
+chat
+apple
+🎯 Match tecnico: 60
+✨ Opportunità: ?/15
+Stack match is moderate as the job specifies additional skills like Go and Wordpress which are not part of Federico's stack.
+Remote work is allowed, but the preferred time zones might not align perfectly with Americas clients.
+Experience level is significantly lower than the 'Senior' title, making it less suitable for Federico's one-year self-taught experience.
+Senior level requirement (5+ years experience) that Federico does not meet.
+60
+SCORE
+Candidati →
+REMOTIVE
+Senior Full-stack React Developer
+Lemon.io
+📍 Americas, Europe, Asia, Oceania
+🕐
+〜 Media
+.Net
+android
+AWS
+azure
+🎯 Match tecnico: 60
+✨ Opportunità: ?/15
+Strong alignment with JavaScript, Node.js, and React, but lack of experience with many technologies listed like .Net, Java, or Python.
+One year of experience does not meet the 'Senior' designation typically expected for this role.
+Remote compatibility is acceptable for the EU timezone, but the job location is very broad.
+Senior designation requirement vs. Federico's 1 year of self-taught experience.
+60
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 50
+✨ Opportunità: ?/15
+Stack match with TypeScript and React, but lacks experience in AWS, PHP, and backend frameworks like Laravel.
+Remote work is not an option as the position is based in Brazil, which is outside of preferred EU timezone.
+Only 1 year of self-taught experience may not be sufficient for a Staff Product Engineer role which typically requires more experience.
+On-site requirement
+5+ years of experience required
+50
+SCORE
+Candidati →
+REMOTIVE
+Senior Independent AI Engineer / Architect
+A.Team
+📍 Americas, Europe, Israel
+💰 $120 - $170 /hour
+🕐
+〜 Media
+go
+UI/UX
+wordpress
+chat
+🎯 Match tecnico: 45
+✨ Opportunità: ?/15
+Stack match is low due to lack of specific experience in required technologies like Go and UI/UX design.
+Position requires senior-level experience which exceeds Federico's 1 year of self-taught experience.
+Job title indicates a senior level which requires extensive experience that Federico does not have.
+45
+SCORE
+Candidati →
+REMOTIVE
+Business Transformation Lead
+Expion Health
+📍 USA
+💰 $175k - $225k
+🕐
+〜 Media
+api
+AI/ML
+automation
+healthcare
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Stack does not match the job requirements as this role focuses on business transformation rather than the technical stack Federico has expertise in.
+The job focuses on pharmacy economics and business strategy, whereas Federico is more skilled in web development and related technologies.
+35
+SCORE
+Candidati →
+REMOTIVE
+Senior DevOps Engineer
+Lemon.io
+📍 Americas, Europe, Asia, Oceania
+🕐
+〜 Media
+.Net
+android
+AWS
+azure
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Strong knowledge in Node.js and TypeScript, which aligns with some of the stack requirements.
+Experience with remote work and EU timezone is a plus.
+Position is for a Senior DevOps Engineer, which typically requires more extensive experience than the 1 year Federico has.
+The job description mentions a focus on DevOps skills which may not directly align with Federico's profile as a full-stack developer.
+35
+SCORE
+Candidati →
+REMOTIVE
+Tech Lead Full-Stack Rails Engineer
+Mitre Media
+📍 USA, Canada, USA timezones
+💰 $170k - $200k
+🕐
+〜 Media
+api
+CSS
+docker
+elasticsearch
+🎯 Match tecnico: 30
+✨ Opportunità: ?/15
+Stack match is low as the job requires Ruby on Rails, which is not in Federico's stack.
+Job is located in the USA and requires availability in USA timezones, which does not fit Federico's preferred EU timezone compatible remote work.
+On-site only
+Requires 5+ years experience
+30
+SCORE
+Candidati →
+REMOTIVE
+Paid Media Specialist
+Noventra Group Europe
+📍 Worldwide
+💰 $65k - $85k
+🕐
+〜 Media
+ecommerce
+research
+advertising
+retail
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+The job is unrelated to Federico's stack (TypeScript, React, Node.js, etc.) as it focuses on paid media and advertising.
+Federico's experience is primarily in development, specifically building a PWA, which does not align with the marketing and advertising focus of the role.
+Job does not fit Federico's technical profile.
+Role requires skills in paid media, which are not within Federico's expertise.
+25
+SCORE
+Candidati →
+REMOTIVE
+Office Assistant
+Coalition Technologies
+📍 Worldwide
+💰 $31,2k- $52k
+🕐
+〜 Media
+CSS
+excel
+frontend
+git
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+The job is for an office assistant role, which does not align with Federico's technical skill set in TypeScript, React, and other technologies.
+The job requires primarily skills in HTML, CSS, and various content management systems (CMS), which are not Federico's focus or expertise.
+The role is not a match for Federico's development skills and interests.
+25
+SCORE
+Candidati →
+REMOTIVE
+Director of Revenue Systems and AI Automation (Offshore)
+Caul Group
+📍 LATAM
+💰 $60k–$72k
+🕐
+〜 Media
+api
+AI/ML
+automation
+documentation
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+Stack has limited overlap with the job requirements since the job focuses on systems architecture and CRM which Federico's stack does not specifically address.
+Location preference is not met as the job is exclusive to Latin America and Federico is based in Italy.
+Job requires presence in Latin America.
+Role demands a broader expertise in systems and automation that goes beyond the current stack Federico is familiar with.
+25
+SCORE
+Candidati →
+REMOTIVE
+iOS Developer
+nooro
+📍 USA
+💰 $60k-$130k (depending on experience)
+🕐
+〜 Media
+api
+backend
+git
+ios
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+Stack mismatch: Federico's skills are primarily in web development using TypeScript, React, and Node.js, while the job requires iOS development skills with Swift and core data.
+Remote work preference: The job is located in the USA, which does not align with Federico's requirement for EU timezone compatibility, despite it being remote.
+On-site only
+Requires 5+ years of experience
+25
+SCORE
+Candidati →
+REMOTIVE
+Freelance Writer
+IAPWE
+📍 Worldwide
+💰 $50-$75 /hour
+🕐
+〜 Media
+REST
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+No relevant skills in content writing or the specified topics.
+The job requires writing skills, which are not aligned with Federico's tech stack.
+Job does not match Federico's expertise in software development.
+Not in the preferred field of tech-related roles.
+25
+SCORE
+Candidati →
+REMOTIVE
+Mid/Senior AI Cinematic Video Editor
+EverAI
+📍 Worldwide
+🕐
+〜 Media
+excel
+video
+AI/ML
+customer acquisition
+🎯 Match tecnico: 15
+✨ Opportunità: ?/15
+The job requires expertise in video editing and AI cinematics, which does not align with Federico's experience in web development and software engineering.
+There is no mention of TypeScript, React, or backend technology relevant to his skill set.
+The sector focus on video production and graphic design does not match Federico's background in web development.
+Job focus on video editing and production is outside Federico's skill set.
+15
+SCORE
+Candidati →
+REMOTIVE
+Inside Sales Contractor
+Credit Wellness, LLC
+📍 Worldwide
+💰 OTE $25k - $35k
+🕐
+〜 Media
+CRM
+google sheets
+financial services
+Inside Sales
+🎯 Match tecnico: 15
+✨ Opportunità: ?/15
+No stack match as the job requires sales skills, not technical skills.
+Role is in inside sales, which is not aligned with Federico's technical background.
+Job role is unrelated to Federico's skills in TypeScript, React, Node.js, etc.
+15
+SCORE
+Candidati →
+REMOTEOK
+Maintenance
+Pacific Cyber Technology Pvt Ltd
+📍 Remote Worldwide
+🕐
+〜 Media
+operations
+mobile
+hardware
+manager
+🎯 Match tecnico: 15
+✨ Opportunità: ?/15
+The job is focused on operations and mobile hardware, which does not align with Federico's software development stack.
+The position entails responsibilities in manufacturing and management, which are outside of Federico's experience and interests.
+Not in Federico's tech stack or area of expertise (TypeScript, React, Node.js, etc.).
+The role is not directly related to software development, which is Federico's focus.
+15
+SCORE
+Candidati →
+REMOTIVE
+Copywriter
+Coalition Technologies
+📍 Worldwide
+💰 $20k -$35k
+🕐
+〜 Media
+accounting
+excel
+research
+data analysis
+🎯 Match tecnico: 10
+✨ Opportunità: ?/15
+The job is for a copywriter, while Federico's skills are in software development and engineering.
+The required skills for the position focus on writing and content creation, which do not align with Federico's technical stack.
+The position is not aligned with Federico's desired career path in software development.
+10
+SCORE
+Candidati →
+REMOTEOK
+Microbiology Specialist
+Crossing Hurdles
+📍 Remote Worldwide
+🕐
+〜 Media
+analyst
+technical
+customer support
+marketing
+🎯 Match tecnico: 10
+✨ Opportunità: ?/15
+The job is not aligned with Federico's stack and skills.
+The job requires expertise in microbiology, which does not match Federico's development background.
+Job requires specific knowledge in biology, which is outside of Federico's expertise.
+10
+SCORE
+Candidati →
+REMOTEOK
+Maintenance
+Road Ranger
+📍 Remote Worldwide
+🕐
+〜 Media
+customer support
+ops
+medical
+part time
+🎯 Match tecnico: 5
+✨ Opportunità: ?/15
+No match for stack as the job is primarily in customer support and operations, which does not align with Federico's tech stack.
+Job is not remote in the sense that it requires physical presence in a specific location in the US.
+Experience required is not relevant as there is no tech-related work.
+On-site requirement
+Non-tech role
+5
+SCORE
+Candidati →
+Ultimo aggiornamento: 27/05/2026, 15:08:55

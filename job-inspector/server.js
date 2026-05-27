@@ -37,6 +37,51 @@ function daysSincePosted(dateStr) {
   return isNaN(diff) ? null : diff;
 }
 
+function calcOpportunityScore(job) {
+  let score = 0;
+  const days = daysSincePosted(job.postedAt);
+  const title = (job.title || '').toLowerCase();
+  const desc = (job.description || '').toLowerCase();
+  const company = (job.company || '').toLowerCase();
+
+  // Freshness (max 6)
+  if (days !== null) {
+    if (days <= 1) score += 6;
+    else if (days <= 3) score += 5;
+    else if (days <= 7) score += 3;
+    else if (days <= 14) score += 1;
+  }
+
+  // Salary clarity (max 3)
+  if (job.salary && job.salary.trim() !== '') score += 3;
+
+  // Startup/small team signals (max 3)
+  const startupSignals = ['startup', 'early stage', 'seed', 'series a', 'small team', 'founding', 'stealth'];
+  if (startupSignals.some(s => desc.includes(s) || company.includes(s))) score += 3;
+
+  // AI/SaaS sector (max 2)
+  const aiSaasSignals = ['ai', 'saas', 'openai', 'llm', 'gpt', 'machine learning', 'nlp'];
+  if (aiSaasSignals.some(s => desc.includes(s) || title.includes(s))) score += 2;
+
+  // NOT a senior-gated role (max 1)
+  const seniorGate = ['5+ years', '5 years', 'senior only', '7+ years', '10+ years'];
+  if (!seniorGate.some(s => desc.includes(s))) score += 1;
+
+  return Math.min(score, 15);
+}
+
+function calcCompetitionLevel(job) {
+  const days = daysSincePosted(job.postedAt);
+  const desc = (job.description || '').toLowerCase();
+  const startupSignals = ['startup', 'early stage', 'seed', 'series a', 'small team', 'founding'];
+  const isStartup = startupSignals.some(s => desc.includes(s));
+
+  if (days !== null && days <= 3) return 'low';
+  if (isStartup || (days !== null && days <= 7)) return 'low';
+  if (days !== null && days <= 14) return 'medium';
+  return 'high';
+}
+
 async function fetchRemotiveJobs() {
   try {
     const res = await fetch('https://remotive.com/api/remote-jobs?category=software-dev&limit=30');
@@ -141,72 +186,67 @@ async function fetchRemotiveAIJobs() {
   }
 }
 
+function isIrrelevantJob(job) {
+  const title = (job.title || '').toLowerCase();
+  const irrelevant = ['copywriter', 'sales', 'microbiology', 'office assistant', 'maintenance', 'paid media',
+    'video editor', 'inside sales', 'business transformation', 'marketing specialist', 'content writer',
+    'graphic design', 'devops', 'ios developer', 'android developer', 'ruby on rails', 'php developer'];
+  return irrelevant.some(k => title.includes(k));
+}
+
 async function scoreJob(job) {
   try {
     const daysOld = daysSincePosted(job.postedAt);
-    const freshnessNote = daysOld !== null
-      ? `Posted ${daysOld} day(s) ago — ${daysOld <= 3 ? 'VERY FRESH, low competition' : daysOld <= 7 ? 'fresh, moderate competition' : daysOld <= 14 ? 'some competition' : 'older posting, high competition'}`
-      : 'Posting date unknown';
+    const opportunityScore = calcOpportunityScore(job);
+    const competitionLevel = calcCompetitionLevel(job);
 
-    const prompt = `You are a strategic job matching AI helping Federico Poletti land remote work. Score this job 0-100 and provide actionable insights.
+    const prompt = `You are a strategic job matching AI for Federico Poletti. Score this job 0-85 (tech match only, opportunity added separately).
 
 FEDERICO'S PROFILE:
 ${FEDERICO_PROFILE}
 
-JOB POSTING:
+JOB:
 Title: ${job.title}
 Company: ${job.company}
-Company size: ${job.companySize || 'unknown'}
 Location: ${job.location}
 Tags: ${Array.isArray(job.tags) ? job.tags.join(', ') : job.tags}
 Salary: ${job.salary || 'not specified'}
-Freshness: ${freshnessNote}
 Description: ${job.description}
 
-SCORING CRITERIA (total 100):
-1. Tech stack match (0-30): TypeScript, React, Node.js, PostgreSQL, OpenAI API, Tailwind = full points. Adjacent techs = partial.
-2. Experience gate (0-20): Does it EXPLICITLY require 3+ years? If yes, penalize heavily. If junior/1yr ok or no gate = full points.
-3. Remote + EU compatible (0-20): Must be truly remote. EU/CET timezone compatible = full points. US-only hours = deduct.
-4. Strategic opportunity (0-15): Award points for: fresh posting (≤3 days = +8), startup stage = +4, salary clearly stated = +3, AI/SaaS sector = +3, small company (more direct access) = +3. Max 15.
-5. Portfolio fit (0-15): Does NomadLife (PWA, AI chatbot, maps, booking, marketplace, real-time) directly showcase relevant skills for this role?
+SCORING (total 85):
+1. Tech stack match (0-35): TypeScript/React/Node.js/PostgreSQL/OpenAI = full. Adjacent = partial. Unrelated = 0.
+2. Experience gate (0-25): Junior/no gate/1yr ok = 25. "3+ years" = max 15. "5+ years strict" = max 8. "Senior only" = max 5.
+3. Remote + EU compatible (0-15): Truly remote EU-friendly = 15. US timezones only = 5. On-site = 0.
+4. Portfolio fit (0-10): Does NomadLife (PWA, AI chatbot, maps, booking, real-time chat) showcase skills for this role?
 
-IMPORTANT RULES:
-- If job requires on-site or relocation: score max 20
-- If job has "5+ years required" or "senior only" with strict gate: score max 40
-- If job is blockchain/crypto/Web3: score max 15
-- Startup or small team = big opportunity bonus for Federico
+RULES:
+- On-site/relocation required: max 15 total
+- Blockchain/crypto/Web3: max 10 total
+- Non-tech role (sales, design, writing): max 5 total
 
 Respond ONLY with valid JSON:
-{
-  "score": 85,
-  "matchScore": 72,
-  "opportunityScore": 13,
-  "reasons": ["React + Node.js exact match", "EU remote confirmed", "Fresh posting — low competition"],
-  "dealbreakers": [],
-  "pitchAngle": "Lead with NomadLife as proof of solo full-stack AI delivery — mention the real-time chat and OpenAI integration directly.",
-  "freshnessDays": ${daysOld !== null ? daysOld : 'null'},
-  "competitionLevel": "low"
-}
-
-competitionLevel must be: "low" (≤3 days old or startup) | "medium" | "high" (>14 days or enterprise)`;
+{"score": 72, "reasons": ["React + Node.js match", "EU remote OK", "No experience gate mentioned"], "dealbreakers": [], "pitchAngle": "Lead with NomadLife's AI chatbot and real-time features as direct proof."}`;
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 350,
+      max_tokens: 250,
       response_format: { type: 'json_object' },
     });
 
     const result = JSON.parse(response.choices[0].message.content);
+    const matchScore = result.score || 0;
+    const totalScore = Math.min(matchScore + opportunityScore, 100);
+
     return {
-      score: result.score || 0,
-      matchScore: result.matchScore || 0,
-      opportunityScore: result.opportunityScore || 0,
+      score: totalScore,
+      matchScore,
+      opportunityScore,
       reasons: result.reasons || [],
       dealbreakers: result.dealbreakers || [],
       pitchAngle: result.pitchAngle || '',
-      freshnessDays: result.freshnessDays,
-      competitionLevel: result.competitionLevel || 'medium',
+      freshnessDays: daysOld,
+      competitionLevel,
     };
   } catch (e) {
     console.error('Scoring error:', e.message);
@@ -229,9 +269,10 @@ app.get('/api/inspector/jobs', async (req, res) => {
       const key = `${j.title}-${j.company}`.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
+      if (isIrrelevantJob(j)) return false;
       return true;
     });
-    console.log(`Found ${allJobs.length} jobs. Scoring...`);
+    console.log(`Found ${allJobs.length} jobs after pre-filter. Scoring...`);
 
     const scored = await Promise.all(
       allJobs.map(async (job) => {
