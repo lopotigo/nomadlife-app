@@ -247,8 +247,8 @@ function renderJobs() {
           </div>
 
           <div class="score-breakdown">
-            <span class="score-pill match">🎯 Match tecnico: ${job.matchScore || '—'}</span>
-            <span class="score-pill opportunity">✨ Opportunità: ${job.opportunityScore || '—'}/15</span>
+            <span class="score-pill match">🎯 Match tecnico: ${job.matchScore != null && job.matchScore !== 0 ? job.matchScore : job.score}</span>
+            <span class="score-pill opportunity">✨ Opportunità: ${job.opportunityScore != null ? job.opportunityScore : '?'}/15</span>
           </div>
 
           <div class="job-reasons">
