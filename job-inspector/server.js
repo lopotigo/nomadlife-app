@@ -16,15 +16,26 @@ const openai = new OpenAI({
 
 const FEDERICO_PROFILE = `
 Name: Federico Poletti
-Stack: TypeScript, React 18, Node.js, Express, PostgreSQL, Drizzle ORM, OpenAI API, Tailwind CSS
-Experience: 1 year self-taught (built NomadLife solo - a full production PWA with AI, real-time chat, map, booking, marketplace)
-Preferred location: Remote only, EU timezone compatible (Italy)
+Age: 48, based in Sardinia, Italy (CET timezone)
+Stack: TypeScript, React 18, Node.js, Express, PostgreSQL, Drizzle ORM, OpenAI API, Tailwind CSS, Framer Motion, Leaflet, WebSockets
+Experience: 1 year self-taught (built NomadLife solo - a full production PWA with AI chatbot, real-time chat, map, booking, marketplace, PWA, SEO, SendGrid, Stripe-ready)
+Background: PhD Political Science — strong analytical, writing, research skills
+Preferred: Remote only, EU timezone compatible (Italy/CET)
 Job types: Full-time, Part-time, Contract, Freelance
 Rate: €25-35/hr or €2000-5000/month
-NOT interested in: On-site only, requires 5+ years experience, pure mobile native (Swift/Kotlin), blockchain/crypto
-Portfolio: nomad-life.app
-Languages: Italian (native), English (professional)
+Portfolio: nomad-life.app — full production app, not a tutorial project
+Languages: Italian (native), English (professional), basic French/Spanish
+NOT interested in: On-site only, requires 5+ years experience strict gate, pure mobile native (Swift/Kotlin), blockchain/crypto
+Strengths: AI integration (OpenAI), full-stack solo execution, product thinking, quick learner
 `;
+
+function daysSincePosted(dateStr) {
+  if (!dateStr) return null;
+  const posted = new Date(dateStr);
+  const now = new Date();
+  const diff = Math.floor((now - posted) / (1000 * 60 * 60 * 24));
+  return isNaN(diff) ? null : diff;
+}
 
 async function fetchRemotiveJobs() {
   try {
@@ -35,11 +46,13 @@ async function fetchRemotiveJobs() {
       title: j.title,
       company: j.company_name,
       url: j.url,
-      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500),
+      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 600),
       tags: j.tags || [],
       source: 'Remotive',
       salary: j.salary || '',
       location: j.candidate_required_location || 'Remote',
+      postedAt: j.publication_date || null,
+      companySize: j.company_num_employees || '',
     }));
   } catch (e) {
     console.error('Remotive error:', e.message);
@@ -56,11 +69,13 @@ async function fetchJobicyJobs() {
       title: j.jobTitle,
       company: j.companyName,
       url: j.url,
-      description: j.jobDescription?.replace(/<[^>]*>/g, '').slice(0, 500),
+      description: j.jobDescription?.replace(/<[^>]*>/g, '').slice(0, 600),
       tags: j.jobIndustry || [],
       source: 'Jobicy',
       salary: j.annualSalaryMin ? `$${j.annualSalaryMin}-${j.annualSalaryMax}` : '',
       location: j.jobGeo || 'Remote',
+      postedAt: j.pubDate || null,
+      companySize: '',
     }));
   } catch (e) {
     console.error('Jobicy error:', e.message);
@@ -89,11 +104,13 @@ async function fetchRemoteOKJobs() {
         title: j.position,
         company: j.company || 'Unknown',
         url: j.url || `https://remoteok.com/remote-jobs/${j.id}`,
-        description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500) || '',
+        description: j.description?.replace(/<[^>]*>/g, '').slice(0, 600) || '',
         tags: j.tags || [],
         source: 'RemoteOK',
         salary: j.salary || '',
         location: 'Remote Worldwide',
+        postedAt: j.date ? new Date(j.date * 1000).toISOString() : null,
+        companySize: '',
       }));
   } catch (e) {
     console.error('RemoteOK error:', e.message);
@@ -110,11 +127,13 @@ async function fetchRemotiveAIJobs() {
       title: j.title,
       company: j.company_name,
       url: j.url,
-      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 500),
+      description: j.description?.replace(/<[^>]*>/g, '').slice(0, 600),
       tags: j.tags || [],
       source: 'Remotive AI',
       salary: j.salary || '',
       location: j.candidate_required_location || 'Remote',
+      postedAt: j.publication_date || null,
+      companySize: j.company_num_employees || '',
     }));
   } catch (e) {
     console.error('Remotive AI error:', e.message);
@@ -124,7 +143,12 @@ async function fetchRemotiveAIJobs() {
 
 async function scoreJob(job) {
   try {
-    const prompt = `You are a job matching AI. Score this job from 0-100 for Federico Poletti.
+    const daysOld = daysSincePosted(job.postedAt);
+    const freshnessNote = daysOld !== null
+      ? `Posted ${daysOld} day(s) ago — ${daysOld <= 3 ? 'VERY FRESH, low competition' : daysOld <= 7 ? 'fresh, moderate competition' : daysOld <= 14 ? 'some competition' : 'older posting, high competition'}`
+      : 'Posting date unknown';
+
+    const prompt = `You are a strategic job matching AI helping Federico Poletti land remote work. Score this job 0-100 and provide actionable insights.
 
 FEDERICO'S PROFILE:
 ${FEDERICO_PROFILE}
@@ -132,36 +156,65 @@ ${FEDERICO_PROFILE}
 JOB POSTING:
 Title: ${job.title}
 Company: ${job.company}
+Company size: ${job.companySize || 'unknown'}
 Location: ${job.location}
 Tags: ${Array.isArray(job.tags) ? job.tags.join(', ') : job.tags}
-Salary: ${job.salary}
+Salary: ${job.salary || 'not specified'}
+Freshness: ${freshnessNote}
 Description: ${job.description}
 
-Score criteria:
-- Tech stack match (0-35): Does it use TypeScript, React, Node.js, PostgreSQL, or OpenAI?
-- Remote/EU compatible (0-25): Is it truly remote and EU-friendly?
-- Experience match (0-20): Does it accept junior/1yr experience?
-- Compensation match (0-10): Is salary/rate in range?
-- Sector fit (0-10): Is it SaaS, AI, startup, or web product?
+SCORING CRITERIA (total 100):
+1. Tech stack match (0-30): TypeScript, React, Node.js, PostgreSQL, OpenAI API, Tailwind = full points. Adjacent techs = partial.
+2. Experience gate (0-20): Does it EXPLICITLY require 3+ years? If yes, penalize heavily. If junior/1yr ok or no gate = full points.
+3. Remote + EU compatible (0-20): Must be truly remote. EU/CET timezone compatible = full points. US-only hours = deduct.
+4. Strategic opportunity (0-15): Award points for: fresh posting (≤3 days = +8), startup stage = +4, salary clearly stated = +3, AI/SaaS sector = +3, small company (more direct access) = +3. Max 15.
+5. Portfolio fit (0-15): Does NomadLife (PWA, AI chatbot, maps, booking, marketplace, real-time) directly showcase relevant skills for this role?
 
-Respond with ONLY valid JSON:
-{"score": 85, "reasons": ["React + Node.js stack match", "EU remote accepted", "AI features mentioned"], "dealbreakers": []}`;
+IMPORTANT RULES:
+- If job requires on-site or relocation: score max 20
+- If job has "5+ years required" or "senior only" with strict gate: score max 40
+- If job is blockchain/crypto/Web3: score max 15
+- Startup or small team = big opportunity bonus for Federico
+
+Respond ONLY with valid JSON:
+{
+  "score": 85,
+  "matchScore": 72,
+  "opportunityScore": 13,
+  "reasons": ["React + Node.js exact match", "EU remote confirmed", "Fresh posting — low competition"],
+  "dealbreakers": [],
+  "pitchAngle": "Lead with NomadLife as proof of solo full-stack AI delivery — mention the real-time chat and OpenAI integration directly.",
+  "freshnessDays": ${daysOld !== null ? daysOld : 'null'},
+  "competitionLevel": "low"
+}
+
+competitionLevel must be: "low" (≤3 days old or startup) | "medium" | "high" (>14 days or enterprise)`;
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 200,
+      max_tokens: 350,
       response_format: { type: 'json_object' },
     });
 
     const result = JSON.parse(response.choices[0].message.content);
-    return { score: result.score || 0, reasons: result.reasons || [], dealbreakers: result.dealbreakers || [] };
+    return {
+      score: result.score || 0,
+      matchScore: result.matchScore || 0,
+      opportunityScore: result.opportunityScore || 0,
+      reasons: result.reasons || [],
+      dealbreakers: result.dealbreakers || [],
+      pitchAngle: result.pitchAngle || '',
+      freshnessDays: result.freshnessDays,
+      competitionLevel: result.competitionLevel || 'medium',
+    };
   } catch (e) {
-    return { score: 0, reasons: [], dealbreakers: ['Scoring error'] };
+    console.error('Scoring error:', e.message);
+    return { score: 0, matchScore: 0, opportunityScore: 0, reasons: [], dealbreakers: ['Scoring error'], pitchAngle: '', freshnessDays: null, competitionLevel: 'medium' };
   }
 }
 
-app.get('/api/jobs', async (req, res) => {
+app.get('/api/inspector/jobs', async (req, res) => {
   try {
     console.log('Fetching jobs from sources...');
     const [remotiveJobs, jobicyJobs, remoteOKJobs, remotiveAIJobs] = await Promise.all([

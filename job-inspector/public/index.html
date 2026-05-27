@@ -16,15 +16,19 @@
     .scan-btn:hover { opacity: 0.9; }
     .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .stats-bar { display: flex; gap: 24px; padding: 16px 32px; background: #13131a; border-bottom: 1px solid #2d2d4e; }
+    .stats-bar { display: flex; gap: 24px; padding: 16px 32px; background: #13131a; border-bottom: 1px solid #2d2d4e; flex-wrap: wrap; }
     .stat { display: flex; flex-direction: column; gap: 2px; }
     .stat-value { font-size: 20px; font-weight: 700; color: #6366f1; }
     .stat-label { font-size: 12px; color: #64748b; }
 
-    .filters { display: flex; gap: 10px; padding: 16px 32px; background: #0f0f13; flex-wrap: wrap; }
+    .filters { display: flex; gap: 10px; padding: 16px 32px; background: #0f0f13; flex-wrap: wrap; align-items: center; }
     .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #2d2d4e; background: transparent; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
     .filter-btn:hover:not(.active) { border-color: #6366f1; color: #6366f1; }
+    .filter-sep { width: 1px; height: 24px; background: #2d2d4e; margin: 0 4px; }
+    .sort-label { font-size: 12px; color: #64748b; margin-left: 8px; }
+    .sort-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #2d2d4e; background: transparent; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .sort-btn.active { background: #0f172a; border-color: #8b5cf6; color: #a78bfa; }
 
     .container { padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
 
@@ -48,23 +52,40 @@
     .job-card.score-low { border-left: 3px solid #ef4444; }
 
     .job-main { display: flex; flex-direction: column; gap: 8px; }
-    .job-header { display: flex; align-items: flex-start; gap: 12px; }
+    .job-header { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
     .job-source { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6366f1; background: #1e1e3f; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
     .job-title { font-size: 16px; font-weight: 700; color: #f1f5f9; line-height: 1.3; }
     .job-company { font-size: 14px; color: #94a3b8; }
-    .job-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+    .job-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
     .job-tag { font-size: 12px; color: #64748b; background: #0f0f1a; padding: 3px 8px; border-radius: 4px; border: 1px solid #2d2d4e; }
     .job-salary { font-size: 12px; color: #10b981; font-weight: 600; }
     .job-location { font-size: 12px; color: #64748b; }
 
-    .job-reasons { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .competition-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+    .competition-badge.low { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .competition-badge.medium { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .competition-badge.high { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+
+    .freshness-badge { font-size: 11px; color: #64748b; }
+    .freshness-badge.fresh { color: #10b981; font-weight: 600; }
+
+    .score-breakdown { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .score-pill { font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .score-pill.match { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+    .score-pill.opportunity { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+
+    .job-reasons { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
     .reason { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; }
     .reason::before { content: '✓'; color: #10b981; font-weight: 700; }
     .dealbreaker { font-size: 12px; color: #ef4444; display: flex; align-items: center; gap: 6px; }
     .dealbreaker::before { content: '✗'; font-weight: 700; }
 
-    .job-right { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 100px; }
-    .score-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; border: 3px solid; }
+    .pitch-box { margin-top: 10px; background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px; padding: 8px 12px; }
+    .pitch-label { font-size: 10px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .pitch-text { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+
+    .job-right { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 100px; }
+    .score-circle { width: 68px; height: 68px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; border: 3px solid; }
     .score-circle.high { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.08); }
     .score-circle.mid { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.08); }
     .score-circle.low { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.08); }
@@ -90,7 +111,7 @@
   <div class="header-icon">🔍</div>
   <div>
     <h1>Job Inspector</h1>
-    <p>Trova e classifica le offerte più adatte al tuo profilo con AI</p>
+    <p>Match tecnico + analisi opportunità strategica con AI</p>
   </div>
   <button class="scan-btn" id="scanBtn" onclick="scanJobs()">
     <span id="scanIcon">⚡</span>
@@ -101,7 +122,8 @@
 <div class="stats-bar" id="statsBar" style="display:none">
   <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Offerte trovate</div></div>
   <div class="stat"><div class="stat-value" id="statHigh">0</div><div class="stat-label">Match alto (≥70)</div></div>
-  <div class="stat"><div class="stat-value" id="statMid">0</div><div class="stat-label">Match medio (40-69)</div></div>
+  <div class="stat"><div class="stat-value" id="statFresh">0</div><div class="stat-label">Freschi (≤3 giorni)</div></div>
+  <div class="stat"><div class="stat-value" id="statLowComp">0</div><div class="stat-label">Bassa concorrenza</div></div>
   <div class="stat"><div class="stat-value" id="statSources">0</div><div class="stat-label">Fonti analizzate</div></div>
 </div>
 
@@ -109,14 +131,20 @@
   <button class="filter-btn active" onclick="setFilter('all', this)">Tutti</button>
   <button class="filter-btn" onclick="setFilter('high', this)">🟢 Alto match</button>
   <button class="filter-btn" onclick="setFilter('mid', this)">🟡 Medio match</button>
-  <button class="filter-btn" onclick="setFilter('low', this)">🔴 Basso match</button>
+  <button class="filter-btn" onclick="setFilter('low-comp', this)">⚡ Bassa concorrenza</button>
+  <button class="filter-btn" onclick="setFilter('fresh', this)">🆕 Freschi</button>
+  <div class="filter-sep"></div>
+  <span class="sort-label">Ordina:</span>
+  <button class="sort-btn active" id="sortScore" onclick="setSort('score', this)">Punteggio</button>
+  <button class="sort-btn" id="sortOpp" onclick="setSort('opportunity', this)">Opportunità</button>
+  <button class="sort-btn" id="sortFresh" onclick="setSort('fresh', this)">Più recenti</button>
 </div>
 
 <div class="container">
   <div class="empty" id="emptyState">
     <div class="empty-icon">🎯</div>
     <h2>Pronto per la ricerca</h2>
-    <p>Clicca "Scan offerte" per cercare e classificare le opportunità<br>più adatte al tuo profilo su più piattaforme.</p>
+    <p>Clicca "Scan offerte" per cercare e classificare le opportunità più adatte al tuo profilo.<br>Ora con analisi strategica: concorrenza, freschezza del job e angolo di pitch.</p>
   </div>
   <div class="loading" id="loadingState" style="display:none">
     <div class="spinner"></div>
@@ -130,10 +158,18 @@
 <script>
 let allJobs = [];
 let currentFilter = 'all';
+let currentSort = 'score';
 
 function setFilter(filter, btn) {
   currentFilter = filter;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderJobs();
+}
+
+function setSort(sort, btn) {
+  currentSort = sort;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderJobs();
 }
@@ -144,12 +180,39 @@ function getScoreClass(score) {
   return 'low';
 }
 
+function freshnessLabel(days) {
+  if (days === null || days === undefined) return '';
+  if (days === 0) return 'oggi';
+  if (days === 1) return 'ieri';
+  return `${days}g fa`;
+}
+
+function competitionLabel(level) {
+  if (level === 'low') return '⚡ Bassa concorrenza';
+  if (level === 'medium') return '〜 Media';
+  return '🔴 Alta concorrenza';
+}
+
 function renderJobs() {
   const grid = document.getElementById('jobsGrid');
-  let jobs = allJobs;
-  if (currentFilter === 'high') jobs = allJobs.filter(j => j.score >= 70);
-  else if (currentFilter === 'mid') jobs = allJobs.filter(j => j.score >= 40 && j.score < 70);
-  else if (currentFilter === 'low') jobs = allJobs.filter(j => j.score < 40);
+  let jobs = [...allJobs];
+
+  if (currentFilter === 'high') jobs = jobs.filter(j => j.score >= 70);
+  else if (currentFilter === 'mid') jobs = jobs.filter(j => j.score >= 40 && j.score < 70);
+  else if (currentFilter === 'low-comp') jobs = jobs.filter(j => j.competitionLevel === 'low');
+  else if (currentFilter === 'fresh') jobs = jobs.filter(j => j.freshnessDays !== null && j.freshnessDays <= 3);
+
+  if (currentSort === 'opportunity') {
+    jobs.sort((a, b) => (b.opportunityScore || 0) - (a.opportunityScore || 0));
+  } else if (currentSort === 'fresh') {
+    jobs.sort((a, b) => {
+      const da = a.freshnessDays !== null ? a.freshnessDays : 9999;
+      const db = b.freshnessDays !== null ? b.freshnessDays : 9999;
+      return da - db;
+    });
+  } else {
+    jobs.sort((a, b) => b.score - a.score);
+  }
 
   if (jobs.length === 0) {
     grid.innerHTML = '<div class="empty"><div class="empty-icon">😕</div><h2>Nessuna offerta in questa categoria</h2></div>';
@@ -161,12 +224,16 @@ function renderJobs() {
     const tags = Array.isArray(job.tags) ? job.tags.slice(0, 4) : [];
     const reasons = (job.reasons || []).slice(0, 3);
     const dealbreakers = (job.dealbreakers || []).slice(0, 2);
+    const compLevel = job.competitionLevel || 'medium';
+    const days = job.freshnessDays;
+    const isFresh = days !== null && days <= 3;
+
     return `
       <div class="job-card score-${sc}">
         <div class="job-main">
           <div class="job-header">
             <span class="job-source">${job.source}</span>
-            <div>
+            <div style="flex:1">
               <div class="job-title">${job.title}</div>
               <div class="job-company">${job.company}</div>
             </div>
@@ -174,12 +241,26 @@ function renderJobs() {
           <div class="job-meta">
             <span class="job-location">📍 ${job.location}</span>
             ${job.salary ? `<span class="job-salary">💰 ${job.salary}</span>` : ''}
+            ${days !== null ? `<span class="freshness-badge ${isFresh ? 'fresh' : ''}">🕐 ${freshnessLabel(days)}</span>` : ''}
+            <span class="competition-badge ${compLevel}">${competitionLabel(compLevel)}</span>
             ${tags.map(t => `<span class="job-tag">${t}</span>`).join('')}
           </div>
+
+          <div class="score-breakdown">
+            <span class="score-pill match">🎯 Match tecnico: ${job.matchScore || '—'}</span>
+            <span class="score-pill opportunity">✨ Opportunità: ${job.opportunityScore || '—'}/15</span>
+          </div>
+
           <div class="job-reasons">
             ${reasons.map(r => `<div class="reason">${r}</div>`).join('')}
             ${dealbreakers.map(d => `<div class="dealbreaker">${d}</div>`).join('')}
           </div>
+
+          ${job.pitchAngle ? `
+          <div class="pitch-box">
+            <div class="pitch-label">💬 Angolo di pitch</div>
+            <div class="pitch-text">${job.pitchAngle}</div>
+          </div>` : ''}
         </div>
         <div class="job-right">
           <div class="score-circle ${sc}">
@@ -210,9 +291,10 @@ async function scanJobs() {
 
   const steps = [
     'Recupero offerte da Remotive...',
-    'Recupero offerte da Jobicy...',
-    'Analisi AI in corso (potrebbe richiedere 30-60 secondi)...',
-    'Classificazione per compatibilità...',
+    'Recupero offerte da Jobicy e RemoteOK...',
+    'Analisi AI: stack match + opportunità strategica...',
+    'Calcolo concorrenza e freschezza...',
+    'Classificazione finale...',
   ];
   let stepIdx = 0;
   const stepInterval = setInterval(() => {
@@ -231,12 +313,14 @@ async function scanJobs() {
     allJobs = data.jobs || [];
 
     const high = allJobs.filter(j => j.score >= 70).length;
-    const mid = allJobs.filter(j => j.score >= 40 && j.score < 70).length;
+    const fresh = allJobs.filter(j => j.freshnessDays !== null && j.freshnessDays <= 3).length;
+    const lowComp = allJobs.filter(j => j.competitionLevel === 'low').length;
     const sources = [...new Set(allJobs.map(j => j.source))].length;
 
     document.getElementById('statTotal').textContent = allJobs.length;
     document.getElementById('statHigh').textContent = high;
-    document.getElementById('statMid').textContent = mid;
+    document.getElementById('statFresh').textContent = fresh;
+    document.getElementById('statLowComp').textContent = lowComp;
     document.getElementById('statSources').textContent = sources;
 
     document.getElementById('statsBar').style.display = 'flex';
@@ -245,7 +329,9 @@ async function scanJobs() {
     document.getElementById('timestamp').textContent = `Ultimo aggiornamento: ${new Date(data.timestamp).toLocaleString('it-IT')}`;
 
     currentFilter = 'all';
+    currentSort = 'score';
     document.querySelectorAll('.filter-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+    document.querySelectorAll('.sort-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
     renderJobs();
   } catch (e) {
     clearInterval(stepInterval);
