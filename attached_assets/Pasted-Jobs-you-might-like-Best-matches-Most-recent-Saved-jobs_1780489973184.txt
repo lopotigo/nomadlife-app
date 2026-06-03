@@ -1,0 +1,787 @@
+Jobs you might like
+
+
+Best matches
+
+Most recent
+
+Saved jobs
+
+Invites
+Browse jobs that match your experience to a client's hiring preferences. Ordered by most relevant.
+Posted 31 minutes ago
+•
+Proposals: 50+
+Codex / AI Frontend Builder for Workflow Dashboard MVPs
+Hourly: $15-$35 - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+We are building AI automation dashboards and client-facing workflow demos for B2B/export companies. I already define the business workflow, product direction, and feature requirements. I need an execution-focused frontend builder who can use Codex, Cursor, Claude Code, or similar AI coding tools to build and improve React/Next.js dashboard MVPs. You will build: - AI Sales Lead Review Room - Inquiry Response Dashboard - Cold Email Approval Room - Content Production Dashboard - SEO/GEO Review Dashboard - Client workflow control panels Your tasks: - Improve Codex-generated projects - Build dashboard UI - Add lead cards, detail views, approval buttons, activity logs - Work with mock data - Fix frontend bugs - Deploy to Vercel - Prepare frontend structure for future n8n/webhook connection Required: - React / Next.js - Codex, Cursor, Claude Code, Replit, or Lovable - Dashboard UI experience - Ability to follow clear instructions - Ability to deploy working demos You do not need to design the business strategy. I provide the workflow and product logic. Start your proposal with: “I can build workflow dashboards from your direction.”
+more about "Codex / AI Frontend Builder for Workflow Dashboard MVPs"
+Skills
+OpenAI Codex
+OpenAI Codex Prompt
+ChatGPT
+Claude code
+Claude
+Gemini
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.1 out of 5.
+ $6K+ spent 
+
+  China
+Posted 2 hours ago
+•
+Proposals: 50+
+Frontend Developer Needed - AI-Focused Project
+Hourly: $25-$40 - Expert - Est. Time: Less than 1 month, 30+ hrs/week
+I'm working on an AI-focused product and need a frontend developer who actually gets what modern AI interfaces look like and feel like  not just someone who can center a div. The work involves building clean, responsive UI that integrates with AI backends - think chat interfaces, streaming responses, dynamic data rendering, that kind of thing. React is the main stack. If you've worked on LLM-powered products before, that's a real plus. One thing upfront: I'll send a small paid test task. It's just how I filter for people who deliver, not just pitch well. If that's a problem, this probably isn't the right fit. Looking for someone reliable, communicative, and who doesn't disappear after saying "sure, I can do that." Drop a short note about what you've built, not a copy-paste cover letter.
+more about "Frontend Developer Needed - AI-Focused Project"
+Skills
+React
+Next.js
+JavaScript
+AI App Development
+LLM Prompt Engineering
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted 2 hours ago
+•
+Proposals: 50+
+Full-Stack Developer — AI SaaS Platform (Claude API + Document Generation)
+Hourly: $15-$35 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+I need someone to help build a web platform for Australian electrical contractors that generates professional proposals using AI. The contractor fills in a form, the platform preferably uses the Claude AI API to write the proposal, and outputs it as a Word and PDF document ready to send to a client. The full design brief is already done. You receive a detailed brief, 8 fully written example proposals showing the exact output quality we want, and all the AI rules and guidelines on day one. What needs to be built (Phase 1): - Contractor login and profile - Rate card feature (saves their standard pricing) - Smart multi-step form for two job types - Claude API integration to generate the proposals - Word and PDF document output - Dashboard showing all proposals, their status, and download links - Ability to use a previous proposal as a starting point for a new one - Works on mobile and desktop Who I am looking for: - Someone who has built and launched real web applications - Someone who has built something using an AI API such as ChatGPT or Claude - Someone who has generated Word or PDF documents automatically through code - Clear communicator who can explain progress in plain English To apply: - Share links to things you have built and launched - Show me an example where you have used AI to generate content - Show me an example where you have generated a Word or PDF document through code - Tell me what you would charge for Phase 1 and how long you would need
+more about "Full-Stack Developer — AI SaaS Platform (Claude API + Document Generation)"
+Skills
+AI Bot
+AI Agent Development
+AI Development
+AI Model Integration
+AI App Development
+API Development
+API
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Australia
+
+Featured
+Posted 1 hour ago
+•
+Proposals: Fewer than 5
+Full-Stack Developer Wanted - Build AI Products, UX, Landing Pages, Auth & Payments
+Hourly: $25-$47 - Expert - Est. Time: More than 6 months, 30+ hrs/week
+I am a full stack developer. Looking for an equally strong full-stack developer to work directly with me across several fast-moving software projects. Current projects include: * AI agency intelligence software * AI image gen SaaS * Internal tools and MVPs Tasks you would be overseeing: * Build frontend and backend features on an existing codebase * Turn rough product ideas into working functionality * Improve onboarding, UX, auth, payments and integrations * Ship quickly and iterate based on feedback * Help think through product decisions, not just write code You are: * Strong with React / Next.js * Comfortable with backend APIs, databases and integrations * Product-minded and able to think through UX * AI-native and already using AI tools heavily in development * Fast, reliable and easy to communicate with (English ability is important, so we can jump on calls to discuss) Bonus: * AI / LLM experience * SaaS products * Stripe, Supabase, Postgres * Analytics, CRM or workflow software Comp: * Hourly or monthly (tell me your rate) * Starts with a paid test project * Strong fit → long-term work To apply: * 2–3 products you’ve built * Your Github profile * Strongest frontend example * Strongest backend/API example * Your rate * Timezone * Weekly availability
+more about "Full-Stack Developer Wanted - Build AI Products, UX, Landing Pages, Auth & Payments"
+Skills
+JavaScript
+Web Design
+Web Development
+React
+Prototyping
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $10K+ spent 
+
+  United Kingdom
+Posted yesterday
+•
+Proposals: 50+
+25+ hr/week contractor (AI SaaS FastAPI/Python/JS) – Technical & Project Lead
+Hourly: $15-$30 - Entry level - Est. Time: More than 6 months, Less than 30 hrs/week
+We are a software firm seeking a Senior AI Full-Stack Engineer to take ownership of ongoing AI projects and assist management with project planning. In this role, you will manage existing codebases, design LLM workflows and RAG pipelines, and build backend APIs using Python and FastAPI integrated with JavaScript frontends. Beyond development, you will help scope new projects, estimate timelines, and break down technical requirements into actionable sprints. I place great importance on prompt responsiveness within the EST time zone.
+more about "25+ hr/week contractor (AI SaaS FastAPI/Python/JS) – Technical & Project Lead"
+Skills
+AI App Development
+Full-Stack Development
+JavaScript
+Data Scraping
+Python
+React
+Node.js
+PostgreSQL
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 50+
+Fractional CTO for AI CRM Project
+Hourly: $25-$100 - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+Seeking a Fractional CTO to support with the development of a talent management industry CRM SAAS business which has been developed using AI. The platform has a handful of active users, but unfortunately recently had a data breach due to an RLS update error and an active waitlist. Otherwise the platform is working well, but needs new features and UX improvements. Looking to have conversations with someone who can support with: - initial project review, strategic recommendations, security recommendations - ongoing support at agreed stage in production lifecycle (open to reccos on how to structure this) The project is React 18 + TypeScript app built on Vite, with shadcn/ui (Radix primitives) + Tailwind for the UI and TanStack React Query for data fetching/caching. The entire backend is Supabase — Postgres, Auth (with MFA), storage, and edge functions.
+more about "Fractional CTO for AI CRM Project"
+Skills
+React
+TypeScript
+Customer Relationship Management
+Supabase
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $2K+ spent 
+
+  United Kingdom
+Posted yesterday
+•
+Proposals: 50+
+React / Next.js Dashboard Developer for Logistics Operations Platform
+Hourly: $25-$70 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+We need a React/Next.js developer to build dashboard screens for a confidential logistics and fulfillment operations platform. The dashboard will support order/stop visibility, dispatch workflow, status review, exception handling, search/filtering, and reporting. Experience with Amazon-related fulfillment, Monday.com-style workflows, logistics dashboards, or internal operations tools is helpful. Exact client/vendor details will only be shared after screening and an NDA. Here's a full list of suggested skills: React, Next.js, TypeScript, REST APIs, dashboard development, Material UI or Tailwind, data tables, filters, role-based views, logistics or operations software
+more about "React / Next.js Dashboard Developer for Logistics Operations Platform"
+Skills
+React
+Next.js
+TypeScript
+Material UI
+REST API
+Dashboard
+Tailwind UI
+Data Table
+Filters
+Role-Based Views
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 20 to 50
+Freelance Full-Stack Developer - Health-Tech App (Remote)
+Hourly - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are building a health-tech app for athletes and fitness enthusiasts. The front-end is already built (HTML/JS, deployed on Netlify). We are now developing Version 2 and need a backend developer to build the infrastructure. Scope of work: • Garmin Health API integration — OAuth 2.0 authentication, automated pull of HRV, sleep score, sleep duration, body battery into the app • User authentication system — sign up, login, password reset (Firebase Auth or Supabase preferred) • Cloud database — store user profiles and session logs with sync across devices (Firestore or Supabase) • REST API or serverless functions to connect front-end to Garmin and database • Push notification support Tech stack preference: • Backend: Node.js or Python (FastAPI) • Database: Firebase / Supabase / PostgreSQL • Hosting: Netlify Functions, Vercel, or similar serverless • Front-end is vanilla JS — no framework required You should have: • Experience with third-party health/fitness API integrations (Garmin, Fitbit, Strava, or similar) • Solid understanding of OAuth 2.0 and REST APIs • Experience with Firebase or Supabase • Portfolio of at least 2 completed full-stack projects • Good English communication — you will work directly with the founder Engagement: • Freelance / project-based • Estimated scope: 6–10 weeks • Remote — open to candidates globally • Budget: negotiable based on experience and proposal To apply, send: 1. Brief introduction and relevant experience 2. 2 examples of previous API integration work 3. Your estimated timeline and budget for the scope above Please do not apply if you do not have direct experience with health data APIs or OAuth integrations.
+more about "Freelance Full-Stack Developer - Health-Tech App (Remote)"
+Skills
+Node.js
+Full-Stack Development
+React
+JavaScript
+REST API Integration
+OAuth 2.0
+Firebase
+Database Design
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Kingdom
+Posted yesterday
+•
+Proposals: 50+
+Finish TypeScript/Node Legal Automation Platform
+Hourly: $45-$115 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+We run a high-volume Texas traffic-defense practice with an existing automation platform (Node/Express + React, ~172 TS files). Core code is built and partially in production, but key workflows were left built-but-not-running. We need someone to finish and extend this codebase — not rebuild it. If your instinct is to scrap and start over, this isn't the role. Already working in production: Client intake flow + Stripe payments + account creation Letter-of-rep drafting into Outlook via Microsoft Graph Twilio SMS What you'll finish: Offer-relay loop — a scheduled job that scans Outlook for court offer emails, matches them to the right matter, and auto-drafts court + client responses. Already written, currently commented out. Needs enabling, debugging, validating. OCR module (Tesseract + 3rd-party API) to auto-create calendar events from scanned court docs. Needs finishing. Infrastructure security (first deliverable) — rotate all production credentials and lock down prior-developer access. Documentation + clean handoff. Required: Strong TypeScript, Node/Express, React Proven experience taking over and extending unfamiliar codebases (address this in your proposal) Microsoft Graph API + cron jobs Stripe + Twilio OCR experience AWS / secrets management Nice to have: Clio API; legal/medical/regulated-system work. To apply, include: (1) how you approach inheriting and finishing someone else's code, (2) 2–3 relevant samples or repos, (3) availability + rate. Proposals that speak directly to "extend, don't rebuild" get prioritized.
+more about "Finish TypeScript/Node Legal Automation Platform"
+Skills
+Node.js
+API
+ExpressJS
+TypeScript
+microsoft graph api
+Stripe
+Twilio
+OCR Software
+AWS Application
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 50+
+Senior Full-Stack Developer & AI Architect
+Hourly: $15-$35 - Intermediate - Est. Time: More than 6 months, 30+ hrs/week
+Quotient Health is a concierge longevity and preventative health platform focused on foundational diagnostics, performance optimization, and proactive healthcare. We combine advanced testing, physician-guided care, fitness and recovery data, biomarker tracking, and personalized coaching into a premium member experience. We are building an integrated technology platform designed to become the central operating system for our members’ health and longevity journey.
+more about "Senior Full-Stack Developer & AI Architect"
+Skills
+AI Agent Development
+React
+Python
+NodeJS Framework
+AWS, GCP, or Azure
+Claude Code, Cursor
+Prompt Engineering Worlflows
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $400+ spent 
+
+  United States
+Posted 9 hours ago
+•
+Proposals: 50+
+Full Stack Developer to improve fintech APP with Next.JS, React Native and Supabase.
+Hourly: $15-$25 - Expert - Est. Time: 3 to 6 months, Less than 30 hrs/week
+We are developing a fintech mobile app focused on personal finance, savings goals, and social interaction. The platform includes mobile app development with React Native, web dashboard development using React and Next.js, and a backend powered by Node.js, Supabase, and AWS infrastructure. Main features include income and expense tracking, savings goals, group challenges, quizzes, streak mechanics, push notifications, AI-powered goal image generation, social sharing, and reward systems with badges and coins. The platform also contains admin and analytics dashboards, authentication flows, real-time updates, cloud storage, and CI/CD pipelines for fast and reliable deployments. We are looking for a senior full stack developer with strong experience in fintech mobile app development, scalable architecture, gamification systems, and modern full-stack technologies, with a strong focus on performance, security, and user experience. Required Skills: React, Next.js, React Native, Tailwind CSS Node.js, TypeScript, Supabase, AWS, AI App Development Skills Keyword list which need to add in job post : React, Next.js, React Native, Tailwind CSS Node.js, TypeScript, Supabase, AWS, AI App Development
+more about "Full Stack Developer to improve fintech APP with Next.JS, React Native and Supabase."
+Skills
+AWS Amplify
+Tailwind CSS
+TypeScript
+Node.js
+JavaScript
+React
+React Native
+Supabase
+iOS Development
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.8 out of 5.
+ $70K+ spent 
+
+  United Kingdom
+Posted yesterday
+•
+Proposals: 20 to 50
+Expert Full-Stack + AI Engineer
+Hourly: $10-$47 - Expert - Est. Time: Less than 1 month, not_sure
+We are seeking an expert-level Full-Stack Software Engineer with deep experience in AI/LLM applications to help build and scale modern AI-powered products. The ideal candidate combines strong frontend and backend engineering skills with practical experience integrating, deploying, and optimizing AI systems in production environments. This role requires someone who can independently design, build, test, and deploy features from concept to production while maintaining high standards for code quality, performance, security, and user experience. Responsibilities Design and develop scalable full-stack web applications. Build modern frontend interfaces using React, Next.js, TypeScript, and related technologies. Develop robust backend services, APIs, and database architectures. Integrate and deploy AI/LLM capabilities using modern AI platforms and frameworks. Build AI workflows, agents, RAG systems, and automation pipelines. Optimize application performance, reliability, and security. Design cloud-native architectures and deployment pipelines. Collaborate on product strategy, technical architecture, and feature planning. Write clean, maintainable, and well-documented code. Conduct testing, debugging, and code reviews. Required Skills Full-Stack Engineering React Next.js TypeScript Node.js Python REST APIs GraphQL PostgreSQL MongoDB Redis AI & Machine Learning OpenAI APIs Anthropic APIs LLM integration RAG (Retrieval-Augmented Generation) AI agents Prompt engineering Vector databases LangChain or equivalent frameworks AI workflow automation Cloud & DevOps AWS, GCP, or Azure Docker Kubernetes CI/CD pipelines GitHub Actions Infrastructure as Code Preferred Experience Building production AI applications. Developing AI-powered SaaS products. Experience with n8n, Zapier, or workflow orchestration tools. Experience with authentication, payments, and user management systems. Mobile development experience is a plus. Startup or fast-paced product development experience. Deliverables The selected engineer should be capable of: Taking product requirements and turning them into production-ready features. Building complete frontend and backend systems. Implementing AI functionality that delivers measurable business value. Deploying and maintaining applications in cloud environments. Providing technical recommendations and architectural guidance. What We Value Strong communication skills. Ownership mentality. Attention to detail. Ability to work independently. Problem-solving ability. Product-oriented thinking. Commitment to high-quality engineering practices. Seniority Level Expert / Senior (5+ years preferred) Applicants should provide: Relevant portfolio projects GitHub profile Examples of AI-powered applications built and deployed Brief description of their role in each project This description will attract engineers capable of building products such as AI SaaS platforms, AI agents, workflow automation systems, healthcare AI applications, and modern web products.
+more about "Expert Full-Stack + AI Engineer"
+Skills
+TypeScript
+PostgreSQL
+LangChain
+Python
+React
+Node.js
+Artificial Intelligence
+JavaScript
+API
+Vector Database
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Ethiopia
+Posted yesterday
+•
+Proposals: 15 to 20
+Freelance Software Dev – SaaS MVP (Web Management + Mobile App) – Italian Speaker Preferred
+Hourly - Intermediate - Est. Time: 3 to 6 months, Hours to be determined
+About Us & What We Are Building We are a Product Manager with 7 years of Big Tech experience and an experienced Nutritionist, and we are launching a new software ecosystem in the HealthTech / Management SaaS (nutrition) space, codenamed Project Double A. The project consists of a web management platform (professional side) and a native mobile application (client/patient side). We are looking for an independent, precise, and highly analytical Freelance Developer to take charge of the technical development of an MVP (Phase P0). Applications from agencies, software houses, or intermediaries will not be considered. You will work directly with the PM. We are not starting from scratch, and there won't be changing requirements every week: We have already designed the relational database schema for the MVP (22 tables in total) and defined the software's logical specifications. The Tech Stack (Open to Developer Evaluation) The baseline idea involves using advanced No-Code/Low-Code tools to maximize speed to market (Bubble.io, FlutterFlow), paired with Supabase, Stripe integrations, and AI APIs. If you believe a different combination of tools would guarantee better performance or optimized timelines for this MVP, we are open to evaluating your reasoned technical proposal. MVP Scope (Key Features to Develop) • Multi-tenant Architecture & GDPR Compliance • Logic Workflows & AI Modules (transcription, generation, and asynchronous database writes). • Structured Meal Plan Management • Calculation Engine for food item substitution/exclusion. • User Diary, Notifications, and In-App Chat Your Requirements • Proven experience in autonomous development (as a solo freelance developer) and deployment of complex applications (SaaS / Web App + Mobile App). • Excellent proficiency in managing external relational databases and complex relationships, and API call optimization to keep the front-end lightweight. • Experience integrating webhooks and external APIs (Stripe Billing for web SaaS plans, OpenAI/Anthropic or similar for text processing and transcriptions). What We Offer & Working Terms • Contract: The collaboration will be governed by a direct contract including a Non-Disclosure Agreement (NDA), full Intellectual Property Transfer (IP Transfer), and a 36-month non-compete clause. • Compensation: Milestone-based payments preferred, to be defined during the interview phase. • Location: 100% Remote. How to Apply If you are a freelancer and have the skills to make Project Double A take off, please send your application including: 1. A brief summary of your specific experience with Full-Stack No-Code/Low-Code development. 2. Your take on the tech stack: Do you endorse the Bubble + FlutterFlow + Supabase/Xano combination, or do you suggest variations for a solo-developed MVP with these features? Briefly explain why. 3. Links to your portfolio or case studies of complex applications/SaaS you have personally developed. 4. Your initial availability (weekly hours or potential start date). Shortlisted candidates will receive the NDA, after which I will share the complete database schema for a final time and cost estimate.
+more about "Freelance Software Dev – SaaS MVP (Web Management + Mobile App) – Italian Speaker Preferred"
+Skills
+Web Application
+SaaS
+API
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Italy
+Posted 11 hours ago
+•
+Proposals: 20 to 50
+**Payment Integration Developer — Soar Payments into Next.js Platform**
+Hourly - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+**Payment Integration Developer — Soar Payments into Next.js Platform** **Project Overview** We're integrating Soar Payments as the primary payment processor into VIV Privé, a luxury AI concierge platform built on Next.js 14. We recently received approval from Soar Payments and need a clean, production-ready integration completed quickly. **Tech Stack** - Next.js 14 (App Router) - Supabase (PostgreSQL + Auth via Clerk) - Vercel deployment - Existing Stripe test-mode code to reference/replace - Resend (email confirmations) - Twilio (SMS notifications) **Scope of Work** - Integrate Soar Payments API into the booking/checkout flow - Replace current Stripe test-mode implementation - Ensure payment confirmation triggers existing email (Resend) and SMS (Twilio) flows - Handle webhooks for payment success, failure, and refund events - Test end-to-end in staging before production push - Clean, documented code — no patch scripts **Requirements** - Proven experience with payment gateway integrations (not just Stripe) - Comfortable working in Next.js 14 App Router architecture - Able to read existing codebase and integrate without breaking current flows - Available for a quick async debrief before starting - Delivers production-ready code with TypeScript (npx tsc --noEmit must pass) **Nice to Have** - Experience with Soar Payments or similar high-risk/luxury merchant processors - Familiarity with Supabase RLS and webhook security **Budget** Fixed price — please submit your proposal with a quote and estimated timeline. **Timeline** Looking to start immediately. Expect 3–5 days for a clean integration. To apply, include: (1) a relevant payment integration you've completed, (2) your approach to webhook security, and (3) your fixed-price quote.
+more about "**Payment Integration Developer — Soar Payments into Next.js Platform**"
+Skills
+Next.js
+Vercel
+Twilio API
+superbase
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 20 to 50
+Transportation Workflow Automation System — React/Next.js + Supabase + WhatsApp API + LLM
+Hourly - Expert - Est. Time: Less than 1 month, Hours to be determined
+We are a travel and hospitality planning company based in US/Israel looking to build an internal operations system to automate our transportation workflow. We have a detailed proposal document outlining the full scope. Here is a summary: The system has 3 modules: Module 1 — Transportation Order Management Replace our current manual Excel-based process with a structured dashboard where team members can create transportation orders per client, select vehicles based on PAX and luggage, auto-calculate costs from a pricing database, and route orders for internal approval before sending to driver coordinators via WhatsApp. Module 2 — Driver Instructions Generation Upload a Travefy-exported itinerary PDF, use an LLM (OpenAI) to auto-generate day-wise driver instructions per trip segment, auto-generate Google Maps and Waze links, route through a human review gate, and share with driver coordinators via a mobile-friendly no-login web link. Module 3 — Driver Notifications & Automation Automated WhatsApp messages to drivers the evening before each trip, pre-trip reminders 30 minutes before pickup, unassigned driver alerts to coordinators, and a mobile Driver View page. All driver-facing content must be in Hebrew with RTL support. Tech stack expected: Next.js, Supabase, OpenAI API, WhatsApp Business API (via BSP), Google Maps API. Important notes: All infrastructure costs (Supabase, Vercel, OpenAI, WhatsApp API) are borne by us directly Admin dashboard in English, all driver-facing content in Hebrew/RTL Human approval required at every stage before anything is sent externally We have a full detailed proposal document which we will share with shortlisted candidates What we're looking for: Proven experience with Next.js, Supabase, and third-party API integrations Experience with LLM/OpenAI API integration WhatsApp Business API experience is a strong plus Strong communication in English Please include in your proposal your estimated hours per module and your hourly rate so we can evaluate fairly
+more about "Transportation Workflow Automation System — React/Next.js + Supabase + WhatsApp API + LLM"
+Skills
+Next.js
+React
+OpenAI API
+Node.js
+Supabase
+whatsapp business API
+REST API
+RTL support
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted 5 hours ago
+•
+Proposals: 50+
+Full Stack Node.js & React Developer Needed
+Hourly: $15-$35 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are seeking a skilled Full Stack Developer to enhance our AI-powered web application. The ideal candidate will have experience with Node.js for backend development and React for frontend, along with a strong understanding of AI technologies. Responsibilities include developing new features, optimizing performance, and ensuring seamless integration of AI components. The role requires collaboration with our team to deliver high-quality solutions.
+more about "Full Stack Node.js & React Developer Needed"
+Skills
+Node.js
+MongoDB
+React
+AngularJS
+
+Verified
+ 
+Payment verified
+ 
+Rating is 5.0 out of 5.
+ $10K+ spent 
+
+  United States
+Posted 7 hours ago
+•
+Proposals: 50+
+Full Stack Developer for SaaS Platform (Next.js / PostgreSQL)
+Hourly: $25-$50 - Intermediate - Est. Time: 3 to 6 months, 30+ hrs/week
+I'm building a B2B SaaS platform for inventory management and need a full-stack developer to join the project. The core product is working with early customers — this is feature development and iteration, not greenfield. What you'll work on: - Building new features end-to-end: database through API to React UI - Real-time inventory dashboards with filtering and bulk operations - Role-based access control (admin, manager, viewer) - CSV import/export workflows with validation - Third-party API integrations (shipping carriers, accounting) Stack: Next.js 14 (App Router), TypeScript, PostgreSQL with Prisma, Tailwind CSS, deployed on AWS. Start your proposal with the word "mango" so I know you read this. Details: - $25–50/hr depending on experience - 30+ hrs/week, 3–6 months with strong potential to extend - Remote, async-friendly, but 4+ hours daily overlap with CET timezone preferred - Weekly 30-min sync + async communication in Slack/Linear You should have: - 2+ years of professional web development experience - Comfortable with TypeScript and relational databases - Experience shipping features in a production SaaS product - Good written communication (we're remote and async) Please include links to 1–2 production projects you've worked on and mention which feature from the list above you'd tackle first and how.
+more about "Full Stack Developer for SaaS Platform (Next.js / PostgreSQL)"
+Skills
+Next.js
+TypeScript
+PostgreSQL
+Tailwind CSS
+Node.js
+GraphQL
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $80 spent 
+
+  Serbia
+Posted yesterday
+•
+Proposals: 50+
+Senior React Refactoring Engineer Needed for Production React + Capacitor App
+Hourly - Expert - Est. Time: More than 6 months, 30+ hrs/week
+We have a fully working React + Capacitor fitness app in active beta. The main frontend currently lives in a large App.js file and needs to be carefully refactored into a cleaner feature/module structure. This is not a feature development project. No new features, no rewrites, no logic changes. The goal is to preserve existing behavior while improving the code structure. We are looking for a senior React developer with strong experience refactoring large production codebases. You should be comfortable with React hooks, state flow, component extraction, debugging hidden dependencies, and working in small, reviewable steps. Experience with Capacitor, Android WebView behavior, Supabase, and mobile runtime issues is strongly preferred. The right person will work incrementally, keep builds passing, avoid risky assumptions, and verify behavior after each extraction. Please apply only if you have done careful refactoring work on large existing React applications.
+more about "Senior React Refactoring Engineer Needed for Production React + Capacitor App"
+Skills
+React refactoring
+component extraction
+hooks/state
+Capacitor
+Supabase
+Android testing
+Git discipline
+AWS Labda/API Gateway
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.5 out of 5.
+ $7K+ spent 
+
+  United States
+Posted yesterday
+•
+Proposals: 50+
+Front-End Developer ( React)
+Hourly: $15-$30 - Intermediate - Est. Time: More than 6 months, 30+ hrs/week
+Front-End Developer (React) – Contract 3+ Years Experience | Remote-Friendly | Car Transportation Platform We are building a modern car transportation platform focused on simplifying how vehicles are shipped across the country. This includes real-time pricing, smart routing, and seamless user experiences for customers and carriers. We are looking for a Front-End Developer who can take ownership of the UI and help deliver fast, clean, and scalable interfaces. What You’ll Do • Build and maintain responsive, high-performance web applications using React • Develop clean, reusable UI components using Tailwind CSS and shadcn/ui • Manage server state and API interactions using TanStack Query • Collaborate closely with backend developers to integrate REST APIs • Translate product requirements and wireframes into polished user interfaces • Optimize application performance, load times, and usability • Ensure cross-browser compatibility and mobile responsiveness • Contribute to UI/UX decisions and improve overall user experience What We’re Looking For • 3+ years of professional front-end development experience • Strong proficiency in React • Solid experience with Tailwind CSS, shadcn/ui, and TanStack Query • Good understanding of modern JavaScript (ES6+) and component-driven architecture • Experience working with REST APIs • Ability to write clean, maintainable, and scalable code • Strong attention to UI detail and user experience Nice to Have • Experience working on logistics, transportation, or marketplace platforms • Familiarity with TypeScript • Basic understanding of backend technologies (Node.js, PHP, etc.) • Experience with form handling, validation, and complex UI states • Ability to work with Figma or design systems Bonus • Experience using AI tools to improve development speed (developer remains responsible for delivered code quality) What You’ll Get • Opportunity to shape a product from early stages • Flexible working environment • Fast-moving team with real ownership • Direct impact on product and business !!!We are looking for individual freelancers / contractors and we are not working with agencies!!!
+more about "Front-End Developer ( React)"
+Skills
+Tailwind CSS
+Website Redesign
+Agile Software Development
+CSS 3
+React
+react query
+JavaScript
+HTML5
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $2K+ spent 
+
+  USA
+Number of freelancers needed: 2
+Posted yesterday
+•
+Proposals: 20 to 50
+Internal Operations & Facilities Management Platform Development
+Hourly: $5-$10 - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+Hi, I hope you are well. I am looking for a React + Supabase developer to help me build an internal operations platform for my company, MMO. The platform is intended to manage daily operations for serviced offices and facilities management activities. The initial objective is to build an internal MVP for our own operations, but I want the database and architecture to be SaaS-ready from the beginning using proper multi-company structure (company_id, client_id, site_id). Preferred stack: * React + Vite * Supabase * Replit initially * GitHub for version control The application should be mobile-friendly because many users, especially technicians and supervisors, will access it from phones while on-site. Main modules required for MVP: 1. Authentication & Roles * Login/logout * User roles and permissions * Admin * Operations * Technician * Finance * Viewer 2. CRM * Clients * Sites * Contacts * Opportunities/leads 3. Service Requests Module This should not be limited to maintenance only. The system should allow clients and staff to submit different operational requests such as: * maintenance * cleaning * stock replenishment * office services * pest control * IT support * access requests * inspections * transport/logistics * security issues * general operational requests Features: * Create/update/assign requests * Priority and status * SLA/due dates * Photos/uploads * Mobile technician mode * Comments/history * Audit trail * Categories/subcategories * Request routing to different teams 4. Asset Management Examples: * ACs * phones * laptops * furniture * lamps * printers * generators Features: * QR/barcode * serial numbers * transfers between sites * maintenance history * warranty tracking * assigned user/site * asset lifecycle tracking 5. Stock Management Examples: * stationery * cleaning stock * kitchen/bathroom consumables * PPE * operational consumables Features: * Reorder levels * Consumption logs * Monthly usage tracking * Cost center allocation * Site allocation * Supplier linkage 6. Procurement & Suppliers * Supplier database * Procurement requests * Approval workflow * Order status * Delivery tracking 7. HR Operations * Staff register * Holidays * Sick leave * No-shows * Shift planning * Overtime tracking * Leave balances * Supervisor approvals * Payroll impact summary * Site coverage 8. Cleaning QA & Inspections * Daily cleaning checklists * Weekly inspection checklists * QA scoring * Supervisor inspections * Photo evidence * Site-based inspections * Scheduled inspections 9. HSE / ESG / Compliance Module Utility Consumption Tracking: * Water consumption * Electricity consumption * Paper consumption * Site-based tracking * Historical comparison * Monthly summaries Incident Management: * Internal incidents * Client site incidents * Near misses * HSE observations * Safety issues * Environmental incidents * Corrective actions * Incident tracking * Photo uploads Training Management: * Training register * Staff attendance * Training topics * Training dates * Expiry/renewal dates * Certificates upload * Number of training hours per employee 10. Client Reporting Auto-generated monthly FM reports including: * QA scores * Consumption reports * Incident summaries * Attendance summaries * Service request statistics * Open vs resolved requests * Stock usage * Recommendations * Export functionality 11. System Features * Audit trail * Notifications * File uploads * Mobile responsive * SaaS-ready database structure * Secure database permissions * Multi-company structure * Role-based access Important: The system should remain operationally simple and practical for daily use by supervisors, technicians and operations teams. The objective is operational efficiency and reporting, not a complex ERP system. It must also allow adding and update items. I already have the initial workflows, structure, and prototype ideas mapped out. I need support mainly with development, database structure, and implementation. Please let me know: * your experience with React + Supabase * estimated timeline for MVP * hourly rate or project estimate * examples of similar systems, if available I have a code that can help kick start the project that I created with Chatgpt. Thank you, and I look forward to hearing from you. Best regards, SW
+more about "Internal Operations & Facilities Management Platform Development"
+Skills
+React
+TypeScript
+Node.js
+ExpressJS
+Flutter
+Full-Stack Development
+NestJS
+Next.js
+Nuxt.js
+Tailwind CSS
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Mozambique
+Posted yesterday
+•
+Proposals: 50+
+Senior React/Next.js Developer Needed for Ongoing Website Development
+Hourly: $35-$50 - Intermediate - Est. Time: 3 to 6 months, 30+ hrs/week
+We are looking for an experienced React and Next.js developer to join our team and help maintain, improve and scale our company website. The ideal candidate should have strong frontend development skills, a solid understanding of modern web technologies, and experience building high-performance, responsive web applications. Our platfrom is built using React and Next.js and we are seeking a developer who can quickly understand existing codebases, implement new features, optimize performance, and ensure a seamless user experience.
+more about "Senior React/Next.js Developer Needed for Ongoing Website Development"
+Skills
+Next.js
+Tailwind CSS
+RESTful API
+MongoDB
+AWS CloudFormation
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Ukraine
+Posted 4 hours ago
+•
+Proposals: 50+
+n8n Developer + AI Agent Specialist (Long-Term)
+Hourly: $30-$50 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+We're an AI-powered SEO platform. Our system runs on n8n with AI agent handling content, technical SEO, competitor monitoring, and reporting. Phase 1 is built, and we're looking for a long-term developer to take us through Phase 2 and beyond. About the Work: We need a skilled n8n developer with deep experience in AI agents to deliver four workstreams: - Phase 2 of our existing automation system. Extending and refining live n8n workflows. - Build a clean, premium client-facing user dashboard. React/Next.js preferred. - Automate our client onboarding process end-to-end. - Automate our client acquisition process from initial signup through to live client. You're a strong fit if you have: - Proven n8n workflow experience (please include examples) - Strong API integration skills (REST, webhooks, JSON) - Python or JavaScript backend development - Experience building or deploying AI agents / LLM-powered tools - Familiarity with data visualisation or dashboard reporting - Basic understanding of SEO concepts is advantageous but not required Full project scope and architecture details shared after NDA. Required Skills: - Strong proficiency in n8n (non-negotiable, please show examples) - Deep working knowledge of AI agents and orchestration (Claude, GPT, multi-step agent design) - Experience with Airtable as a database layer - Frontend development (React/Next.js or similar) - API integrations (Google Search Console, GA4, booking systems) - Clean documentation habits Working Requirements (please read before applying): - You'll sign an NDA before any project details, code, or access is shared - All accounts, platforms, and integrations must be created under our usernames and billing, never yours - Every milestone requires a detailed written record of work completed for our files - All work is delivered into our existing infrastructure, not built on yours - All IP created belongs to us (covered in the NDA) To Apply: In your proposal, please include: - Examples of n8n workflows you've built - An example of an AI agent system you've designed - Your typical milestone structure for projects of this size Generic AI-generated proposals will be ignored. Budget & Timeline: Open to milestone-based fixed pricing per workstream. Looking to start immediately. If the work is done to a high standard, there's an opportunity for a long-term ongoing working relationship as we scale.
+more about "n8n Developer + AI Agent Specialist (Long-Term)"
+Skills
+API Integration
+Python
+n8n
+Automation
+SEO Performance
+AI Agent Development
+Artificial Intelligence
+Data Visualization
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.5 out of 5.
+ $7K+ spent 
+
+  Australia
+Posted 13 hours ago
+•
+Proposals: 50+
+**Full-Stack SaaS Developer — Fire Protection Industry AI Tool**
+Fixed-price - Expert - Est. Budget: $20,000
+**Full-Stack SaaS Developer — Fire Protection Industry AI Tool** **About the Project** We are building a vertical SaaS product for the fire protection and electrical contracting industry. The tool allows fire alarm contractors and estimators to upload construction drawings (PDF/images), and receive an AI-generated NFPA 72-compliant fire alarm system design and material takeoff — ready for estimating. The core AI engine is already prototyped and working. We need an experienced full-stack developer to build the production SaaS platform around it. This is a greenfield build with a clear, well-scoped spec. You will be the sole developer on this project with direct access to the founder. --- **What You'll Build** - User authentication and account management (Clerk or Auth0) - Subscription billing with usage metering (Stripe — monthly plans, per-design limits) - Secure server-side proxy for the Anthropic Claude API (API key never exposed to client) - Project dashboard — users can save, review, and export past designs - File upload and processing flow (PDF and image construction drawings) - Admin dashboard — user management, usage analytics, billing overview - Responsive web UI built in Next.js / React - Deployment pipeline on Vercel with custom domain - PostgreSQL database via Supabase --- **Tech Stack** - Frontend: Next.js 14+ / React / Tailwind CSS - Auth: Clerk (preferred) or Auth0 - Billing: Stripe (subscriptions + webhooks + usage metering) - Database: Supabase (PostgreSQL) - AI integration: Anthropic Claude API (server-side only) - Hosting: Vercel - File storage: Supabase Storage or AWS S3 --- **You Are a Strong Fit If You Have** - Previously shipped at least one live SaaS product end-to-end (please share a link) - Hands-on Stripe subscription integration experience, including webhooks and metering - Experience securing third-party API keys server-side in a Next.js environment - Built user dashboards with project/file management - Comfortable working directly with a non-technical founder - Strong communication — you ask questions, flag blockers early, and give realistic timelines --- **Project Scope and Timeline** Estimated build: 6–10 weeks Expected hours: 20–30 hours per week Engagement type: Freelance / contract (potential for ongoing retainer after launch) --- **To Apply** Please send: 1. A link to a live SaaS product you built (required — applications without this will not be reviewed) 2. Your hourly rate or project rate estimate 3. A brief note (3–5 sentences) on how you would approach securing the Anthropic API key and metering usage per user The question in #3 is intentional — it tells us immediately whether you understand the architecture. We are ready to start immediately. Looking forward to building something great in a niche that's never had a tool like this.
+more about "**Full-Stack SaaS Developer — Fire Protection Industry AI Tool**"
+Skills
+SaaS
+API
+API Integration
+Amazon Web Services
+
+Unverified
+ 
+Payment unverified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted 3 hours ago
+•
+Proposals: 50+
+React/Node Developer for Bug Fixes
+Fixed-price - Intermediate - Est. Budget: $200
+Hi there, and thanks for taking a look at our posting! We're a small, friendly web studio that builds calm, welcoming websites for mental-health practitioners. Like any living product, ours collects a steady trickle of small bugs — a button that's slightly off, a label showing the wrong text, a page that doesn't quite behave, a little backend hiccup. Nothing dramatic, but we'd love a dependable person to keep things tidy as we grow. We're looking for someone easygoing and reliable to fix these in small batches, on a fixed-price basis. If you enjoy the satisfying work of squashing well-defined bugs and leaving a codebase a little cleaner than you found it, we'd genuinely love to hear from you. How we'll work together: We keep a simple board (Trello) where every bug is a clear ticket — each one comes with a screenshot, the exact page/URL, and a plain "here's what I see vs. here's what I'd expect" description. No vague "it's broken" tickets, we promise. As bugs accumulate, we'll group a handful into one batch and ask you for a single fixed price to handle the whole set. You're never on the hook for anything outside the batch you quoted — new bugs simply become the next batch. You fix them, open a pull request, we review and test together, and then we release the milestone payment. Clean and predictable for both sides. We genuinely care about a good working relationship. We answer questions quickly, we don't nitpick, and we'd much rather build something steady and ongoing than churn through people. Workflow & deployment (please read — this part matters): You work locally and through GitHub (branches + pull requests). You run the app on your own machine to reproduce and fix each issue. You do not deploy anything. Hosting and publishing are handled entirely on our side — your work is done once your pull request is reviewed and merged. That keeps your scope simple and stress-free. Because our run-and-publish setup is a little specific to us, the very first engagement includes a short, paid "calibration" step: you get the repo running locally, we walk one tiny sample fix all the way through (your local → pull request → our publish), and we align on a few conventions. Once that loop is proven, real batches move quickly and smoothly. We'll give you setup notes and a short onboarding doc. As with any new repo, expect to spend a little time getting set up at the very beginning — totally normal, and we'll be there to help. Our stack (you should be comfortable with most of this): TypeScript and React (Vite) Node.js and Express PostgreSQL with the Drizzle ORM Comfortable Git / pull-request workflow Nice-to-have: Playwright (end-to-end tests) and a little Stripe familiarity What you can count on from us: Clear, reproducible tickets — every single one has steps, a screenshot, and a URL. Repository access and a friendly onboarding doc to get you going. Prompt, respectful answers whenever you're mid-batch and need something. Honest reviews and on-time milestone payments. Who we think will love this: Someone who's quick and tidy on small, well-scoped fixes — this is bug-squashing, not a big feature build. A clean-commit, short-PR kind of developer who leaves things better than they found them. Someone with clear, warm written English who enjoys easy back-and-forth communication. A person who's comfortable giving honest fixed-price quotes per batch. To apply, please tell us: A little about your experience with React, TypeScript, and Node. How you'd typically price a batch of roughly 5–10 small bugs (just your general approach — not a number we'll hold you to). So we know you actually read this: what's your usual turnaround for a batch of small bugs? (Optional) One or two examples of small bug-fix work or pull requests you're proud of. We care far more about reliability, clear communication, and a pleasant working relationship than about the absolute lowest rate. If the first batch goes well, we'd love for this to become a steady, ongoing thing. Thanks again — we're looking forward to meeting you!
+more about "React/Node Developer for Bug Fixes"
+Skills
+JavaScript
+React
+Node.js
+Git
+
+Verified
+ 
+Payment verified
+ 
+Rating is 4.4 out of 5.
+ $2K+ spent 
+
+  Canada
+Posted 14 hours ago
+•
+Proposals: 50+
+TypeScript dev for stateless PDF + HTML email rendering service (React-PDF, Vercel, Resend)
+Fixed-price - Intermediate - Est. Budget: $2,000
+I'm building a small, standalone rendering service for a youth soccer evaluation platform. It's a stateless Vercel service with exactly two POST endpoints: one renders parent-facing PDF reports, the other renders transactional HTML email templates. No database, no UI, no public surface. Everything the service needs to render arrives in the request body. The work, across four sprints: Stand up the service: token auth, in-memory idempotency, the report endpoint, and the first PDF report renderer Render three to four parent-report PDF variants to match provided HTML mockups Build and redesign five Resend email templates, two of them with conditional variant switching Email-client compatibility testing and a final QA pass How the engagement works: About 35 to 45 hours across four 2-week sprints, roughly 8 weeks calendar Fixed price per sprint. After each sprint we continue, request rework, or stop, so you're never committed more than one sprint ahead In your bid, give me a fixed price per sprint plus an hours estimate for each What you need: Strong TypeScript on Vercel serverless (Next.js API routes, or Hono/Express, your call) PDF generation experience. React-PDF (@react-pdf/renderer) preferred, or make the case for Puppeteer or headless Chrome Real HTML email experience: Resend or a comparable ESP, and you've dealt with email-client rendering quirks before (Outlook, Gmail clipping, the usual) Comfort building precisely to a written spec and a defined HTTP contract, and matching visual fidelity from mockups Nice to have: privacy-conscious service work, and experience keeping serverless bundles under size and cold-start limits. The service renders reports about youth athletes, so it's built to hold no data: zero persistence, no PII in logs. You'll need to be comfortable working that way. An NDA and a one-page data processing agreement get signed before any access. The full spec, the HTTP contract, and the mockups go to shortlisted candidates after the NDA. Bids without answers to the questions below won't be considered.
+more about "TypeScript dev for stateless PDF + HTML email rendering service (React-PDF, Vercel, Resend)"
+Skills
+TypeScript
+React
+Vercel
+Node.js
+API Development
+PDF
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $7K+ spent 
+
+  USA
+Posted yesterday
+•
+Proposals: 20 to 50
+Senior Full-Stack Developer (Python + React) - 9-Week SaaS Build (Stripe, LLM, PDF)
+Hourly: $10-$15 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+We're an agency building a web platform for a client and need a senior full-stack developer to own the builld. You're building the web platform.. What you'll build: FastAPI (or Flask) backend; PostgreSQL schema (users, questionnaires, reports, payments) + migrations Stripe checkout + webhooks (payment confirmation, receipts, failed-payment handling) Auth (signup/login, email verification, password reset) Frontend (React, Vue, or Svelte): multi-step questionnaires, in-browser report rendering, payment flow PDF generation pipeline (WeasyPrint or similar) with charts and brand styling Transactional email (Postmark / SendGrid / Resend) Admin panel (queue status, customer DB, report + payment management) Deployment (Docker, Hetzner/DO/AWS), CI/CD basics, monitoring (Sentry) Must-haves: Python 3.10+, FastAPI or Flask, production experience PostgreSQL schema design + migrations Redis / async workers (asyncio or similar) Modern JS/TS with React, Vue, or Svelte = used professionally Stripe API in production (checkout + webhooks) LLM API integration (Anthropic / OpenAI) = real, shipped experience PDF generation (WeasyPrint, Puppeteer, or similar) Docker, a cloud host, CI/CD basics Self-directed, works from clear specs, strong async communication Big plus: Shipped SaaS product launches GDPR-aware data handling (EU users) To apply, send: 2–3 production apps you built (live links or repos), note which parts were yours Applications without app examples won't be reviewed. "I can learn Stripe/LLM integration" is not a fit, these are core.
+more about "Senior Full-Stack Developer (Python + React) - 9-Week SaaS Build (Stripe, LLM, PDF)"
+Skills
+React
+JavaScript
+API
+Python
+API Integration
+Web Application
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Bulgaria
+Posted yesterday
+•
+Proposals: 20 to 50
+React Native Engineer — Global eSIM Travel App (TypeScript, AI-assisted workflow)
+Hourly: $30-$45 - Intermediate - Est. Time: Less than 1 month, 30+ hrs/week
+Our product is a global eSIM for travelers — one download, one install, data that works in 200+ countries with no per-country plan switching. Our web app is live and the marketplace is generating revenue. Our native mobile app is the next big build — and that's where you come in. We're looking for a senior React Native engineer to own and ship our mobile app, taking over work currently carried by our founder so we can free him to focus elsewhere. What you'll build Our React Native app: onboarding, eSIM activation, top-up and membership purchase flows, usage dashboard, and a points/rewards surface. - The onboarding-to-activation flow is our most important funnel — installing an eSIM is the hardest step a new user takes, and getting them through it reliably is the difference-maker. - Integration with our backend APIs and a third-party embedded-wallet auth provider. - Collaborating with our founder, frontend (Next.js), and backend engineers. Must-haves - Multiple production React Native apps shipped to the App Store and/or Play Store (please share live links). - Strong TypeScript; solid grasp of state management, navigation, and API integration. - Comfort with native modules / device-level APIs and debugging real-device issues. - LLM-based engineering deeply integrated into your daily workflow. You work fluently with AI coding tools — we use Claude Code daily — and you ship faster because of it. This is a core requirement, not a bonus. Clear communicator who works well async in a small team. Nice-to-haves - Embedded-wallet or web3 auth experience (Privy, Magic, Dynamic, or similar). - Fintech/payments, telecom/eSIM, or subscription-product experience. Expo familiarity; Next.js familiarity for shared-types work.
+more about "React Native Engineer — Global eSIM Travel App (TypeScript, AI-assisted workflow)"
+Skills
+Smartphone
+iOS
+Android
+User Authentication
+User Profile Creation
+React Native
+JavaScript
+Node.js
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United States
+Posted 12 hours ago
+•
+Proposals: 15 to 20
+Senior Backend Developer / Technical Operations Lead — Trusted Technical Advisor to Founder
+Fixed-price - Intermediate - Est. Budget: $800
+We are looking for a strong, hands-on **Senior Backend Developer / Technical Operations Lead** to take ownership of a soon-to-launch platform and become a trusted technical advisor to the founder. This is a **technical-first role** for someone with deep backend ability, strong judgement, and the confidence to help guide a business through launch, stabilisation and growth. The right person will not just be handed tickets. You will be expected to understand the platform, challenge weak assumptions, stabilise what exists, improve the technical foundation, and help shape the next stage of the business. This is ideal for someone who has the ability and maturity to operate at a higher level, but has perhaps not yet been fully given the chance to step into real technical ownership. --- ### The Role You will report directly to the founder and have real input into important technical decisions. You will help turn a working but imperfect platform into something stable, documented, scalable and production-ready. You will be responsible for: * Taking ownership of the backend and API side of the platform * Reviewing existing code, architecture and data flows * Supporting handover from the previous backend developer * Identifying what is working, unfinished, fragile or undocumented * Stabilising the platform for launch * Reviewing database structure, data integrity and backend logic * Reviewing API push/pull flows and integrations * Debugging issues safely and methodically * Supporting deployment and launch readiness * Creating clear technical notes, SOPs and handover documents * Advising the founder on technical risks, priorities and sensible next steps * Helping create a technical roadmap after the system is stable --- ### Core Technical Skills You should be strong in: * Backend development * Node.js / JavaScript / TypeScript * API development and integrations * Database design and data-flow logic * PostgreSQL / Supabase / similar databases * Strapi or headless CMS experience * Git / GitHub workflows * Server / VPS / hosting basics * Production deployment basics * Environment/configuration management * Redis / caching concepts * BullMQ / queues / background jobs * Cron jobs / scheduled tasks * Logs, error tracking and troubleshooting * Reading and taking over existing codebases * Technical documentation and handover You do not need to know every tool from day one, but you must be technically strong enough to investigate properly, learn quickly, make sensible decisions and avoid guessing. --- ### Helpful Additional Experience Useful but not essential: * Digital signage / DOOH systems * Android player/device support * WordPress * Cloudflare / DNS / CDN basics * CRM or customer-data integrations * Sports, events, venue or scheduling data * Small business systems * Working directly with founders * Stabilising messy or poorly documented projects before launch --- ### The Person We Want We are looking for someone who is: * technically strong * commercially aware * honest * practical * reliable * calm under pressure * confident enough to challenge weak decisions * careful with live systems * strong at debugging * good at written communication * able to explain technical issues simply * willing to document properly * comfortable taking ownership * ready to step into a trusted technical leadership role We want someone who can see the path forward, not just wait for instructions. This role suits someone who wants real impact, founder-level visibility, and the chance to become the technical backbone of a growing business. --- ### Commitment & Mindset This is a serious role in a bootstrapped business, so results matter. We are looking for someone who can fully commit during agreed working hours, deliver consistently, and grow with the business. The mindset should be: * deliver first * stabilise the platform * protect the business * help the team * grow the company * earn trust and rewards through results This is not for clock-watchers, negative personalities, or “jack of all trades” candidates who claim everything but cannot truly own anything. It is for a strong backend developer who is ready for the next step: real ownership, real influence, and real responsibility. AI Replies will not get priority. reach out directly with a full response to get interview priority.
+more about "Senior Backend Developer / Technical Operations Lead — Trusted Technical Advisor to Founder"
+Skills
+DevOps
+Redis
+GitHub
+Node.js
+API
+Software Architecture & Design
+PostgreSQL
+Ruby
+Strapi
+Supabase
+
+Verified
+ 
+Payment verified
+ 
+Rating is 3.9 out of 5.
+ $1K+ spent 
+
+  THA
+Posted 7 hours ago
+•
+Proposals: 20 to 50
+Part-time AI Voice / Backend Developer for Ongoing Maintenance + V2 Development
+Fixed-price - Intermediate - Est. Budget: $450
+Part-Time AI Voice / Backend Developer Required Project Overview We are looking for a reliable part-time developer to take over maintenance and future development of an existing AI receptionist system for a real estate sales business. The system currently handles inbound phone enquiries, speaks with callers, captures details, matches enquiries to property projects, and sends lead notifications to the correct salesperson. The first priority is to maintain and stabilise the current V1 system, fix bugs, document the setup properly, and ensure the system is reliable. Once V1 is stable, we will move into V2 upgrades as a separate paid project. Current Tech Stack The existing system uses: OpenAI API Retell AI Twilio Supabase Render GitHub SMS / email notifications Google Sheets or lead allocation logic Webhooks and API integrations Real estate project matching workflow Expected Work Phase 1 — System Audit & Handover Review The first task is to review the current system and provide a clear written summary of: How the system currently works Key risks or weak points Required credentials and access Current bugs or likely failure points Deployment process Database / Supabase structure Twilio / Retell / Render setup Recommendations to stabilise V1 This phase will be paid separately as a fixed audit fee. Phase 2 — V1 Maintenance & Bug Fixes Once the system has been reviewed, the developer will help maintain the current system and fix bugs as required. Expected maintenance work may include: Fixing Twilio / Retell call flow issues Fixing SMS or email notification bugs Updating project matching logic Checking Supabase records and lead routing Debugging Render deployment issues Monitoring failed calls, failed SMS, or broken webhooks Minor wording, prompt, or workflow adjustments Keeping the system stable and properly documented Phase 3 — V2 Development After V1 is stable, we will move to V2 upgrades. V2 will be quoted separately on a fixed-price or milestone basis. Possible V2 features may include: Returning caller recognition Better call history Improved agent matching Improved project recommendation logic Smarter duplicate enquiry handling Better SMS / email workflow Admin dashboard Reporting and analytics CRM-style lead tracking Integration with other business tools Compensation Structure Paid Audit US$200 fixed fee Purpose: review system, identify risks, and provide written handover / technical report. Monthly Maintenance Retainer US$450/month The monthly retainer should include light maintenance and bug fixes, approximately 10-12 hours per month. Included in the retainer: Minor bug fixes System checks Small updates Prompt or logic adjustments Basic support Documentation updates Response to system issues within agreed timeframe The monthly retainer does not include major feature development, large rebuilds, or V2 upgrades. Extra Work / Larger Bug Fixes Any work outside the monthly maintenance scope will be quoted separately. This may be billed: Hourly, with prior approval; or Fixed-price per task V2 Upgrade Work V2 development will be handled as a separate project with clear milestones. Example structure: Milestone 1: Technical design and scope Milestone 2: Build core V2 features Milestone 3: Testing and bug fixes Milestone 4: Deployment and documentation Payment will be milestone-based. Required Skills The ideal developer should have experience with: Backend development OpenAI API Twilio Retell AI or similar voice AI platforms Supabase Render GitHub Webhooks API integrations SMS / email automation Basic database design Debugging live production systems Experience with real estate, CRM systems, call automation, or lead routing is preferred but not essential. Important Requirements We need someone who is: Reliable Responsive Clear in communication Able to document their work Comfortable maintaining an existing system Able to explain problems in simple terms Available for ongoing support Honest about what they can and cannot do This is not just a one-off coding job. We are looking for someone who can become the ongoing technical support person for this system. How to Apply Please reply with: Your relevant experience with Twilio, Retell AI, OpenAI, Supabase, Render, or similar systems Examples of similar systems you have worked on Your hourly rate Your availability Your usual response time for urgent bugs Whether you are willing to start with a paid technical audit Any questions you have about the current system Reliability and proper documentation are extremely important for this role.
+more about "Part-time AI Voice / Backend Developer for Ongoing Maintenance + V2 Development"
+Skills
+OpenAI API
+GitHub
+Node.js
+Python
+Supabase
+Twilio
+Retell
+render deployment
+webhooks / API integration
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  Australia
+Posted 2 hours ago
+•
+Proposals: 20 to 50
+CBAM Proof — Full-Stack Deployment (React · Supabase · n8n · Vercel)
+Fixed-price - Intermediate - Est. Budget: $600
+Summary I have a complete compliance SaaS platform ready to deploy. This is DEPLOYMENT ONLY — all code is finished, audited, and production-ready. You will deploy existing code and configure API integrations. No development required. Timeline is tight — I need this live by end of next week to begin customer acquisition. The Stack LayerTechnologyFrontendReact (JSX) — deployed to VercelAutomationn8n (self-hosted or cloud)DatabaseSupabase (PostgreSQL)AIAnthropic Claude API (claude-sonnet-4-6)VideoHeyGen APIEmailPostmark (SMTP) What I Provide cbam-landing-page-UPDATED-9Apr2026.jsx — React landing page with embedded CBAM calculator cbam-proof-calculator-UPDATED-9Apr2026.jsx — Full liability calculator component cbam-proof-database-schema-UPDATED-9Apr2026.sql — Complete PostgreSQL schema with seed data, triggers, and helper functions cbam-proof-n8n-workflow-UPDATED-9Apr2026.json — Full n8n automation workflow (53-parameter pipeline) cbam-proof-report-CORRECTED.jsx — Personalised compliance report component cbam-proof-n8n-field-mapping-CORRECTED.js — Supabase INSERT field mapping reference cbam-proof-n8n-video-script-prompt-CORRECTED.js — Claude API prompt template cbam-proof-heygen-callback-CORRECTED.js — HeyGen webhook callback handler CBAM-Proof-Developer-Handoff-v3.pdf — Step-by-step deployment checklist with verification queries All API keys: Anthropic, HeyGen, Postmark SMTP, Supabase service role key Domain access (DNS) — cbamproof.co.uk (I own it) Quick response during project (UK timezone, GMT) Scope of Work 1. Frontend Deployment (Vercel) Deploy 2 React JSX files to Vercel Replace WEBHOOK_URL placeholder in both JSX files with your live n8n webhook URL Configure custom domain (cbamproof.co.uk) with SSL Verify mobile + desktop rendering 2. Database Setup (Supabase) Run the provided SQL schema in Supabase SQL Editor Verify all helper functions return correct values: SELECT get_emission_factor('iron'); → 1.60 SELECT get_emission_factor('cement'); → 0.65 SELECT get_emission_factor('aluminium'); → 8.0 SELECT get_carbon_price('TR'); → 7.50 SELECT get_carbon_price('IN'); → 1.60 Confirm all DB triggers fire correctly (weight_kg auto-calc, record retention, pipeline stage) Configure Row Level Security 3. n8n Workflow Deployment Import cbam-proof-n8n-workflow-UPDATED-9Apr2026.json Configure 4 credentials: Anthropic API key (Claude) HeyGen API key + Avatar ID Supabase service role key Postmark SMTP Activate workflow and verify all nodes connect 4. Pre-Deploy Check (Critical — 2 minutes) Before importing the workflow, run this query in Supabase and confirm the result: sqlSELECT column_name FROM information_schema.columns WHERE table_name = 'cbam_proof_reports' AND column_name IN ('goodsvalue', 'estimatedgoodsvalue'); Full details in the handoff PDF. 5. Integration & Testing (7 Test Cases) Run all 7 test cases from the handoff document and confirm each passes: #TestVerify1Steel / TurkeyGross £1.02M, CPR £138,750, net_levy populated 2 IronEF 1.60 fires, 'iron' constraint accepted 3 Fertiliser'fertiliser' key saves without constraint error 4 AluminiumGWP PFC fields present in Supabase row 5 Production-year basismonitoring_period_basis saves correctly 6 Actual emissionsemissionsDataType = 'actual' routes correctly 7 Retarget email - 3-day follow-up fires for non-converters For each test: confirm form submits → Supabase row inserted (no null values in critical columns) → Claude generates video script → HeyGen initiates → email delivered → report URL renders. 6. Documentation & Handover 3–5 page written guide covering: How to monitor leads in Supabase How to check n8n execution logs How to update API keys Common troubleshooting steps 10–15 min screen recording walkthrough of all admin panels All admin credentials shared (Vercel, Supabase, n8n) 5 days post-launch bug fix support (response within 24 hours) Timeline & Milestones Milestone 1 — 50% ($300) — Day 3 Frontend deployed to Vercel with custom domain + SSL Database schema running in Supabase (all 6 verification queries pass) n8n workflow imported and all 4 credentials configured Milestone 2 — 50% ($300) — Day 5 All 7 test cases passing end-to-end Documentation completed (written guide + screen recording) Admin credentials handed over 5 days support committed Required Skills Must Have (non-negotiable): n8n workflow configuration — show examples Vercel deployment experience Supabase / PostgreSQL schema setup REST API integrations (webhooks, authentication, payload mapping) React deployment experience Nice to Have: Anthropic / Claude API experience HeyGen or video generation API experience Experience with compliance or fintech products To Apply Start your proposal with: "N8N DEPLOYMENT $600" Then answer these 5 questions: 1. n8n Experience (Critical) How many n8n projects have you completed? Have you worked with Anthropic / Claude API in n8n? Share a screenshot or link to your n8n dashboard (blur sensitive data) 2. Deployment Experience How many Vercel deployments have you completed? Have you set up Supabase databases before? Have you configured custom domains with SSL? 3. Availability When can you start? (I need start within 24–48 hours) Can you complete in 3–5 days? What is your daily availability in hours? 4. Portfolio Share 1–2 similar projects (deployment + API integration) Links to live sites you have deployed if available 5. Confirmation Confirm $600 fixed price for this exact scope Confirm you understand this is deployment, not development Any questions about the technical stack? ❌ Do Not Apply If: You do not have n8n experience — will reject immediately You want to negotiate scope or rebuild the code You cannot start within 48 hours You cannot show portfolio or examples You want to "discuss on a call first" without demonstrating expertise ✅ Perfect Candidate: Has deployed 5+ n8n workflows with external API integrations Comfortable with Vercel + Supabase + React stack Can start immediately and deliver in 3–5 days Clear English communication Shows examples of previous work Why $600 Works This is straightforward deployment — all code is written, all APIs are set up, clear instructions are provided. For an experienced developer, estimated hours: TaskHours Frontend deployment + domain3–4 hrsDatabase schema + verification2–3 hrsn8n configuration + testing6–8 hrsDocumentation + screen recording3–4 hrsTotal14–19 hrs I will review applications within 12 hours and hire within 24 hours. Selected candidate receives a Google Drive folder with all files, API keys, credentials, and direct communication via Upwork chat. Payment via Upwork escrow, milestone-based as outlined above.
+more about "CBAM Proof — Full-Stack Deployment (React · Supabase · n8n · Vercel)"
+Skills
+PostgreSQL
+React
+JavaScript
+API Integration
+React Native
+
+Verified
+ 
+Payment verified
+ 
+Rating is 0 out of 5.
+ $0 spent 
+
+  United Kingdom
+Federico P.
+Federico P.
+
+Full-Stack Developer specializing in React Node.js TypeScript and AI I
+
+Complete your profile
+65%
+
+Identity verification
+Increase your profile visibility in search results and win more work with an IDV Badge.
+Get an IDV Badge
+Promote with ads
+
+Availability badge
+Off
+Boost your profile
+Off
+Connects: 39
+
+Preferences
+
+Proposals
+
+Project Catalog
+
+Direct Contracts  
+Withdrawals  
+Help Center  
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices California Consumer Privacy Act (CCPA) Opt-Out
+Accessibility
+Desktop App
+Cookie Policy
+Enterprise Solutions
+Release notes
+Follow Us
+Visit Upwork on Facebook
+
+Read Upwork company news on LinkedIn
+
+Follow @Upwork on Twitter
+
+Watch Upwork videos on YouTube
+
+Follow Upwork on Instagram
+
+Mobile app
+Download Upwork app from iTunes
+
+Download Upwork app from Google Play
+
