@@ -1,0 +1,126 @@
+
+You have already submitted a proposal.
+View Proposal
+Freelance Software Dev – SaaS MVP (Web Management + Mobile App) – Italian Speaker Preferred
+
+Posted 2 days ago
+
+Worldwide
+Summary
+About Us & What We Are Building
+We are a Product Manager with 7 years of Big Tech experience and an experienced Nutritionist, and we are launching a new software ecosystem in the HealthTech / Management SaaS (nutrition) space, codenamed Project Double A. The project consists of a web management platform (professional side) and a native mobile application (client/patient side).
+We are looking for an independent, precise, and highly analytical Freelance Developer to take charge of the technical development of an MVP (Phase P0). Applications from agencies, software houses, or intermediaries will not be considered. 
+You will work directly with the PM. We are not starting from scratch, and there won't be changing requirements every week: We have already designed the relational database schema for the MVP (22 tables in total) and defined the software's logical specifications.
+
+The Tech Stack (Open to Developer Evaluation)
+The baseline idea involves using advanced No-Code/Low-Code tools to maximize speed to market (Bubble.io, FlutterFlow), paired with Supabase, Stripe integrations, and AI APIs.
+If you believe a different combination of tools would guarantee better performance or optimized timelines for this MVP, we are open to evaluating your reasoned technical proposal.
+
+MVP Scope (Key Features to Develop)
+•	Multi-tenant Architecture & GDPR Compliance
+•	Logic Workflows & AI Modules (transcription, generation, and asynchronous database writes).
+•	Structured Meal Plan Management
+•	Calculation Engine for food item substitution/exclusion.
+•	User Diary, Notifications, and In-App Chat
+
+Your Requirements
+•	Proven experience in autonomous development (as a solo freelance developer) and deployment of complex applications (SaaS / Web App + Mobile App).
+•	Excellent proficiency in managing external relational databases and complex relationships, and API call optimization to keep the front-end lightweight.
+•	Experience integrating webhooks and external APIs (Stripe Billing for web SaaS plans, OpenAI/Anthropic or similar for text processing and transcriptions).
+
+What We Offer & Working Terms
+•	Contract: The collaboration will be governed by a direct contract including a Non-Disclosure Agreement (NDA), full Intellectual Property Transfer (IP Transfer), and a 36-month non-compete clause.
+•	Compensation: Milestone-based payments preferred, to be defined during the interview phase. 
+•	Location: 100% Remote.
+
+How to Apply
+If you are a freelancer and have the skills to make Project Double A take off, please send your application including:
+1.	A brief summary of your specific experience with Full-Stack No-Code/Low-Code development.
+2.	Your take on the tech stack: Do you endorse the Bubble + FlutterFlow + Supabase/Xano combination, or do you suggest variations for a solo-developed MVP with these features? Briefly explain why.
+3.	Links to your portfolio or case studies of complex applications/SaaS you have personally developed.
+4.	Your initial availability (weekly hours or potential start date).
+Shortlisted candidates will receive the NDA, after which I will share the complete database schema for a final time and cost estimate.
+
+Hours to be determined
+Hourly
+
+3 to 6 months
+Duration
+
+Intermediate
+I am looking for a mix of experience and value
+Project Type:Complex project
+Skills and Expertise
+
+Mandatory skills
+Web Application
+SaaS
+API
+Preferred qualifications
+
+Location:
+Europe, Asia
+
+Activity on this job
+
+Proposals:
+
+Less than 5
+Last viewed by client:
+
+36 minutes ago
+Interviewing:
+1
+Invites sent:
+0
+Unanswered invites:
+0
+Upgrade your membership to see the bid range
+Send a proposal for: 13 Connects
+Available Connects: 8
+About the client
+
+Payment method verified
+
+Phone number verified
+Italy
+2:07 PM
+1 job posted
+0% hire rate, 1 open job
+Health & Fitness
+Individual client
+Member since Jun 2, 2026
+Job link
+Copy link
+Footer navigation
+About Us
+Feedback
+Trust, Safety & Security
+Help & Support
+Upwork Foundation
+Terms of Service
+Privacy Policy
+CA Notice at Collection
+Your Privacy Choices California Consumer Privacy Act (CCPA) Opt-Out
+Accessibility
+Desktop App
+Cookie Policy
+Enterprise Solutions
+Release notes
+Follow Us
+Visit Upwork on Facebook
+
+Read Upwork company news on LinkedIn
+
+Follow @Upwork on Twitter
+
+Watch Upwork videos on YouTube
+
+Follow Upwork on Instagram
+
+Mobile app
+Download Upwork app from iTunes
+
+Download Upwork app from Google Play
+
+© 2015 - 2026 Upwork® Global LLC
