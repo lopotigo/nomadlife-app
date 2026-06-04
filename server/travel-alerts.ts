@@ -35,6 +35,31 @@ export async function checkTravelAlerts() {
     return;
   }
 
+  try {
+    const { knowledgeCache } = await import("@shared/schema");
+    const { ilike: ilikeOp } = await import("drizzle-orm");
+    const existing = await db.select().from(knowledgeCache)
+      .where(ilikeOp(knowledgeCache.queryNormalized, "__travel_alerts_last_run__"))
+      .limit(1);
+    if (existing.length > 0) {
+      const lastRun = new Date(existing[0].createdAt!).getTime();
+      if (Date.now() - lastRun < 3 * 24 * 60 * 60 * 1000) {
+        console.log("[Travel Alerts] Skipped — ran recently.");
+        return;
+      }
+      await db.delete(knowledgeCache).where(ilikeOp(knowledgeCache.queryNormalized, "__travel_alerts_last_run__"));
+    }
+    await db.insert(knowledgeCache).values({
+      query: "travel_alerts_job",
+      queryNormalized: "__travel_alerts_last_run__",
+      answer: new Date().toISOString(),
+      source: "system",
+      category: "system",
+    });
+  } catch (e) {
+    console.warn("[Travel Alerts] Could not check last run time:", e);
+  }
+
   console.log("[Travel Alerts] Starting alert check...");
 
   const userCountries = await getUserCountries();

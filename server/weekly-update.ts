@@ -71,6 +71,29 @@ function sleep(ms: number) {
 }
 
 async function updateAllCities() {
+  try {
+    const existing = await db.select().from(knowledgeCache)
+      .where(ilike(knowledgeCache.queryNormalized, "__weekly_update_last_run__"))
+      .limit(1);
+    if (existing.length > 0) {
+      const lastRun = new Date(existing[0].createdAt!).getTime();
+      if (Date.now() - lastRun < UPDATE_INTERVAL_MS) {
+        console.log("[Weekly Update] Skipped — ran recently.");
+        return;
+      }
+      await db.delete(knowledgeCache).where(ilike(knowledgeCache.queryNormalized, "__weekly_update_last_run__"));
+    }
+    await db.insert(knowledgeCache).values({
+      query: "weekly_update_job",
+      queryNormalized: "__weekly_update_last_run__",
+      answer: new Date().toISOString(),
+      source: "system",
+      category: "system",
+    });
+  } catch (e) {
+    console.warn("[Weekly Update] Could not check last run time:", e);
+  }
+
   console.log("[Weekly Update] Starting city data refresh...");
 
   const allCities = await db.select().from(cities);
