@@ -1,0 +1,96 @@
+Welyk
+Condividi
+Mostra altre opzioni
+Full Stack Engineer - Corpo Sostenibile
+Italia · 1 giorno fa · 61 persone hanno cliccato sul pulsante “Candidati”
+Promossa da recruiter · Risposte gestite esternamente a LinkedIn
+ 
+ Da remoto
+
+Candidati
+ 
+Salva
+Salva Full Stack Engineer - Corpo Sostenibile presso Welyk
+Full Stack Engineer - Corpo Sostenibile
+Welyk · Italia (Da remoto)
+
+Candidati
+ 
+Salva
+Salva Full Stack Engineer - Corpo Sostenibile presso Welyk
+Mostra altre opzioni
+Vedi un confronto con altre 61 persone che hanno cliccato su “Candidati”
+
+Accedi a informazioni esclusive sui candidati, scopri le offerte di lavoro per cui hai le maggiori probabilità di ricevere un riscontro, e tanto altro.
+
+Prova Premium per 0 €
+Informazioni sull’offerta di lavoro
+🚗 Modalità: full remote (SOLO P IVA), Europa, ±3h
+👾 Key tech skills:Python, React, TypeScript, GCP, LLM/RAG
+📊 Anni di esperienza: 5+
+💰 Ingaggio: 230€-260€/day
+
+
+🏢 Sull'azienda
+
+Corposostenibile è una realtà in forte crescita nel settore health & wellness: in poco più di un anno è passata da 30 a oltre 200 professionisti tra coach, nutrizionisti, psicologi e team di supporto. Il team IT ha sviluppato una piattaforma tecnologica proprietaria con forte componente di automazione, integrazione API e sistemi AI attualmente utilizzata internamente per la gestione dei workflow aziendali.
+Per supportare la forte crescita, l’azienda è alla ricerca di profili senior per la formazione di un nuovo team interamente dedicato allo sviluppo di una nuova web app per il team interno di marketing.
+
+Cosa farai
+
+Sarai una figura chiave per la scelta delle tecnologie utilizzate dal nuovo team di sviluppo in costruzione, con la possibilità di avere impatto diretto sin dalle prime fasi progettuali. Avrai la possibilità di sperimentare ed integrare tool AI.
+Scriverai codice riutilizzabile, avendo ownership di aprire pull request e fare code review con i peer.
+Se c'è un bug nel codice che hai scritto, scrivi un test, risolvi e mandi in produzione l’hotfix usando le pipeline di deployment automatizzate.
+Costruirai integrazioni con piattaforme esterne (Meta, TikTok, Google, GoHighLevel, ManyChat) e workflow agentici con LLM, RAG e MCP.
+Scriverai un’ADR (Architectural Design Record) ogni volta che deve essere fatta una scelta architetturale importante.
+Utilizzerai Claude Code/Codex/Gemini e/o qualsiasi altro LLM tu ritenga utile per accelerare lo sviluppo, a condizione che sia tu a dominare il tool (e non il contrario). Devi essere in grado di comprendere al 100% il codice generato da AI e le eventuali scelte tecniche che il tool ti suggerisce.
+
+Stack Tecnologico:
+
+Python, React + TypeScript, PostgreSQL, GraphQL, REST, GCP (Cloud Run, Cloud Functions, Cloud Storage, IAM), Docker, GitHub CI/CD, JWT/OAuth.
+
+Requisiti tecnici
+
+Python e React + TypeScript
+PostgreSQL/SQL, REST e GraphQL
+GCP, Docker, CI/CD con GitHub Actions
+JWT/OAuth
+Capacità di scrivere e valutare ADR (Architectural Decision Records)
+
+Nice to have
+
+Esperienza su RAG, agenti LLM, MCP
+React Native
+Background in marketing automation (API Meta, Google, TikTok)
+Esperienza in ambito startup, marketing automation, health tech o gestione di dati sensibili
+
+Sei la persona ideale se
+
+Hai lavorato in startup o team piccoli, hai indossato più cappelli e hai una sensibilità per il prodotto che va oltre il codice. Sai valutare i trade-off delle tue scelte architetturali, inclusi i worst case. Sai dire "ho sbagliato" e sai fare un passo indietro quando serve. Non hai bisogno di micromanagement, ma sai quando alzare la mano. Se hai esperienza su RAG e agenti LLM, sai spiegarla.
+
+Cosa offre l’azienda
+
+Collaborazione a partita IVA
+Full remote, fuso orario europeo (±3h)
+Ingaggio: 230€-260€/day
+
+This job posting is open to candidates of all genders, in accordance with Italian Laws 903/77 and 125/91, and to people of all ages and nationalities, in accordance with Legislative Decrees 215/03 and 216/03.
+Raggiungi i tuoi obiettivi più velocemente con Premium
+
+Accedi a informazioni esclusive sui candidati, scopri le offerte di lavoro per cui rientreresti fra i migliori candidati, e tanto altro
+
+
+
+
+Dina e milioni di altri utenti usano Premium
+Prova Premium per 0 €
+Prova gratuita di 1 mese con assistenza 24/7. Ti invieremo un promemoria 7 giorni prima della fine del periodo di prova.
+Informazioni sull’azienda
+Logo dell’azienda Welyk
+Welyk
+7761 follower
+
+Segui
+Selezione e ricerca di personale  11-50 dipendenti  14 su LinkedIn
+We'll let you know.
+Visualizza altro
