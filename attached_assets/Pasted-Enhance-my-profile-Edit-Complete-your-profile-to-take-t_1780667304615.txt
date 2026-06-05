@@ -1,0 +1,58 @@
+Enhance my profile
+
+Edit
+
+Complete your profile to take the first step in unlocking full A.Team access
+Once you’ve added the items below, submit your profile for review on the setup page.
+Upload a profile picture 
+Add at least 3 industries 
+Add your preferred minimum hourly and monthly rate 
+Connect your calendar or set your availability to enable client interviews 
+About me
+As an AI Engineer with a knack for autonomy and innovation, I've consistently delivered impactful solutions across diverse projects. At NomadLife, I single-handedly designed and implemented a comprehensive social platform, integrating AI chatbots, real-time maps, and a booking engine, showcasing my prowess in AI integration and full-stack development. My ability to seamlessly blend AI with modern React architecture and API-driven development has been pivotal in shipping over 50 features, including advanced tools for booking and itinerary generation. My strategic approach and problem-solving skills were also evident in my role as a Property Host & Operations Manager, where I optimized pricing and logistics, achieving consistent 5-star ratings. Fluent in both Italian and English, I thrive in dynamic environments, consistently delivering results that exceed expectations.
+Projects
+cover
+Company logo
+nomadlife
+Independent Political Science Research
+mag 2026 - Present
+Open Project arrow-right
+cover
+Company logo
+NomadLife
+Independent Full-Stack Development Project
+gen 2025 - Present
+Open Project arrow-right
+cover
+Company logo
+Company logo
+Vacation Rental
+Vacation Rental Management
+gen 2020 - Present
+Open Project arrow-right
+Jobs
+
+Company logo
+developer
+nomad-life
+·
+giu 2026 - giu 2026
+I'm a self-taught full-stack developer and AI engineer based in Sardinia, Italy. In the past year I built NomadLife (nomad-life.app) from scratch — a production social platform with React, Node.js, PostgreSQL, real-time chat, OpenAI integration, interactive maps, and PWA support. I shipped 50+ features solo using AI-assisted development.
+Before tech, I managed vacation rental operations for 5+ years and hold a PhD in Political Science. I bring both technical execution and strategic thinking to every project. I work autonomously, communicate clearly in English and Italian, and I'm available full-time for remote missions.
+Read more
+10 skills
+cover
+1 related project
+Company logo
+doctor in science politic
+Imported
+Lavoratore autonomo
+·
+mag 2026 - Present
+Company logo
+Independent Researcher
+University of Pisa
+·
+feb 2000 - feb 2002
+PhD-level political science research. Data analysis, academic writing, and qualitative/quantitative research methodologies.
+1 skill
