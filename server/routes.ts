@@ -3477,5 +3477,116 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
     }
   });
 
+  // Startup Scout API
+  app.get("/api/inspector/startups", async (_req, res) => {
+    try {
+      const FEDERICO_PROFILE = `
+Name: Federico Poletti
+Age: 48, Sardinia Italy, remote only
+Stack: TypeScript, React 18, Node.js, Express, PostgreSQL, Drizzle ORM, OpenAI API, Tailwind CSS, Leaflet, WebSockets, PWA
+Experience: 1 year self-taught — built NomadLife (nomad-life.app) solo: full production app with AI chatbot, real-time chat, maps, booking, marketplace, multi-language, SEO
+Background: PhD Political Science, former intelligence analyst, entrepreneur (holiday rental business)
+Rate: €25-35/hr or €2000-5000/month
+Looking for: Remote, EU-compatible, small teams, AI/SaaS startups
+Languages: Italian (native), English (professional)
+`;
+
+      async function tavilySearch(query: string) {
+        try {
+          const r = await fetch("https://api.tavily.com/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              api_key: process.env.TAVILY_API_KEY,
+              query,
+              search_depth: "basic",
+              max_results: 6,
+            }),
+          });
+          const d: any = await r.json();
+          return d.results || [];
+        } catch { return []; }
+      }
+
+      const queries = [
+        "AI SaaS startup seed funded 2024 2025 Netherlands Belgium Switzerland Italy small team developer React Node remote hire",
+        "YC W24 W25 S24 S25 European AI startup small team developer remote job opening",
+        "startup italiana AI seed 2024 2025 piccolo team sviluppatore React Node PostgreSQL",
+        "new AI startup Amsterdam Zurich Milan Antwerp small team React TypeScript developer remote 2025",
+      ];
+
+      const searchResults = await Promise.all(queries.map(q => tavilySearch(q)));
+      const seen = new Set<string>();
+      const allResults = searchResults.flat().filter((r: any) => {
+        if (seen.has(r.url)) return false;
+        seen.add(r.url);
+        return true;
+      });
+
+      const allContent = allResults
+        .map((r: any) => `[${r.title}](${r.url})\n${(r.content || "").slice(0, 500)}`)
+        .join("\n\n---\n\n");
+
+      const { OpenAI } = await import("openai");
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
+
+      const extractResponse = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+          role: "user",
+          content: `You are a startup research analyst. Extract small AI/tech startups from these search results.
+
+TARGET: Federico Poletti — full-stack dev (React, Node.js, PostgreSQL, OpenAI API), EU remote.
+CRITERIA: team <15 people, EU/UK/CH countries, seed/early stage, AI/SaaS, remote-friendly.
+
+SEARCH RESULTS:
+${allContent}
+
+Extract up to 8 distinct startups. Return JSON:
+{"startups": [{"name":"","country":"","city":"","description":"","techStack":[],"teamSize":"","fundingInfo":"","founderName":"","founderLinkedIn":"","founderEmail":"","website":"","pitchHook":""}]}`
+        }],
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+      });
+
+      let startups: any[] = [];
+      try {
+        const parsed = JSON.parse(extractResponse.choices[0].message.content || "{}");
+        startups = parsed.startups || [];
+      } catch { startups = []; }
+
+      const withPitches = await Promise.all(startups.map(async (s: any) => {
+        try {
+          const pitchRes = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{
+              role: "user",
+              content: `Write a cold email pitch (max 120 words) from Federico to ${s.founderName || "the founder"} of ${s.name}.
+
+FEDERICO: ${FEDERICO_PROFILE}
+STARTUP: ${s.name} (${s.city}, ${s.country}) — ${s.description}
+WHY HE FITS: ${s.pitchHook}
+
+Rules: personal, direct, mention nomad-life.app as proof, end with clear ask. English for non-Italian companies, Italian for Italian companies. No filler phrases.
+
+Return JSON: {"subject":"","pitch":""}`
+            }],
+            max_tokens: 400,
+            response_format: { type: "json_object" },
+          });
+          const pd = JSON.parse(pitchRes.choices[0].message.content || "{}");
+          return { ...s, subject: pd.subject || "", pitch: pd.pitch || "" };
+        } catch { return { ...s, subject: "", pitch: "" }; }
+      }));
+
+      res.json({ startups: withPitches, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return httpServer;
 }
