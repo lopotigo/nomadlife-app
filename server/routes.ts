@@ -3564,13 +3564,27 @@ Extract up to 8 distinct startups. Return JSON:
             model: "gpt-4o-mini",
             messages: [{
               role: "user",
-              content: `Write a cold email pitch (max 120 words) from Federico to ${s.founderName || "the founder"} of ${s.name}.
+              content: `Write a cold email pitch (max 120 words) from Federico Poletti to ${s.founderName ? s.founderName : "the team"} at ${s.name}.
 
-FEDERICO: ${FEDERICO_PROFILE}
+FEDERICO:
+- Full-stack dev: TypeScript, React 18, Node.js, Express, PostgreSQL, OpenAI API
+- Built NomadLife solo (nomad-life.app) — production PWA with AI chatbot, real-time chat, maps, booking
+- 48yo, PhD Political Science, 1yr self-taught, remote from Sardinia Italy
+- Rate: €25-35/hr or €2000-5000/month
+- Email: federicopoletti83@gmail.com
+- LinkedIn: linkedin.com/in/federico-poletti-dev
+
 STARTUP: ${s.name} (${s.city}, ${s.country}) — ${s.description}
 WHY HE FITS: ${s.pitchHook}
 
-Rules: personal, direct, mention nomad-life.app as proof, end with clear ask. English for non-Italian companies, Italian for Italian companies. No filler phrases.
+STRICT RULES:
+- If founder name is not known, open with "Hi," (English) or "Ciao," (Italian) — NEVER use "[Founder's Name]" or any placeholder
+- Sign off as: Federico Poletti | federicopoletti83@gmail.com | nomad-life.app
+- NO placeholder text like "[Your LinkedIn]" or "[link]" — use the real URL above or omit
+- Mention nomad-life.app as concrete proof of work
+- End with one specific ask (call or reply)
+- English for non-Italian companies, Italian for Italian ones
+- Max 120 words, punchy and direct
 
 Return JSON: {"subject":"","pitch":""}`
             }],
