@@ -8,20 +8,30 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f13; color: #e2e8f0; min-height: 100vh; }
 
-    .header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 28px 32px; border-bottom: 1px solid #2d2d4e; display: flex; align-items: center; gap: 16px; }
-    .header-icon { font-size: 32px; }
-    .header h1 { font-size: 22px; font-weight: 700; color: #fff; }
-    .header p { font-size: 13px; color: #94a3b8; margin-top: 2px; }
-    .scan-btn { margin-left: auto; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; gap: 8px; }
+    .header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 20px 32px; border-bottom: 1px solid #2d2d4e; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .header-icon { font-size: 28px; }
+    .header-text h1 { font-size: 20px; font-weight: 700; color: #fff; }
+    .header-text p { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .header-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .scan-btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .scan-btn:hover { opacity: 0.9; }
     .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .scan-btn.scout { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
 
-    .stats-bar { display: flex; gap: 24px; padding: 16px 32px; background: #13131a; border-bottom: 1px solid #2d2d4e; flex-wrap: wrap; }
+    /* Tabs */
+    .tabs { display: flex; background: #13131a; border-bottom: 1px solid #2d2d4e; padding: 0 32px; }
+    .tab { padding: 14px 20px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .tab:hover { color: #94a3b8; }
+    .tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+    .tab.active.scout-tab { color: #0ea5e9; border-bottom-color: #0ea5e9; }
+
+    .stats-bar { display: flex; gap: 24px; padding: 14px 32px; background: #13131a; border-bottom: 1px solid #2d2d4e; flex-wrap: wrap; }
     .stat { display: flex; flex-direction: column; gap: 2px; }
-    .stat-value { font-size: 20px; font-weight: 700; color: #6366f1; }
-    .stat-label { font-size: 12px; color: #64748b; }
+    .stat-value { font-size: 18px; font-weight: 700; color: #6366f1; }
+    .stat-value.scout { color: #0ea5e9; }
+    .stat-label { font-size: 11px; color: #64748b; }
 
-    .filters { display: flex; gap: 10px; padding: 16px 32px; background: #0f0f13; flex-wrap: wrap; align-items: center; }
+    .filters { display: flex; gap: 10px; padding: 14px 32px; background: #0f0f13; flex-wrap: wrap; align-items: center; }
     .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #2d2d4e; background: transparent; color: #94a3b8; font-size: 13px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
     .filter-btn:hover:not(.active) { border-color: #6366f1; color: #6366f1; }
@@ -34,6 +44,7 @@
 
     .loading { text-align: center; padding: 80px 20px; }
     .spinner { width: 48px; height: 48px; border: 3px solid #2d2d4e; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    .spinner.scout { border-top-color: #0ea5e9; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading p { color: #64748b; font-size: 15px; }
     .loading-step { color: #94a3b8; font-size: 13px; margin-top: 8px; }
@@ -41,16 +52,15 @@
     .empty { text-align: center; padding: 80px 20px; }
     .empty-icon { font-size: 64px; margin-bottom: 16px; }
     .empty h2 { font-size: 20px; color: #94a3b8; margin-bottom: 8px; }
-    .empty p { color: #64748b; font-size: 14px; }
+    .empty p { color: #64748b; font-size: 14px; line-height: 1.6; }
 
+    /* JOB CARDS */
     .jobs-grid { display: flex; flex-direction: column; gap: 14px; }
-
     .job-card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px; padding: 20px 24px; transition: border-color 0.2s; display: grid; grid-template-columns: 1fr auto; gap: 16px; }
     .job-card:hover { border-color: #6366f1; }
     .job-card.score-high { border-left: 3px solid #10b981; }
     .job-card.score-mid { border-left: 3px solid #f59e0b; }
     .job-card.score-low { border-left: 3px solid #ef4444; }
-
     .job-main { display: flex; flex-direction: column; gap: 8px; }
     .job-header { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
     .job-source { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6366f1; background: #1e1e3f; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
@@ -60,30 +70,24 @@
     .job-tag { font-size: 12px; color: #64748b; background: #0f0f1a; padding: 3px 8px; border-radius: 4px; border: 1px solid #2d2d4e; }
     .job-salary { font-size: 12px; color: #10b981; font-weight: 600; }
     .job-location { font-size: 12px; color: #64748b; }
-
     .competition-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
     .competition-badge.low { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
     .competition-badge.medium { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
     .competition-badge.high { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
-
     .freshness-badge { font-size: 11px; color: #64748b; }
     .freshness-badge.fresh { color: #10b981; font-weight: 600; }
-
     .score-breakdown { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
     .score-pill { font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
     .score-pill.match { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
     .score-pill.opportunity { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
-
     .job-reasons { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
     .reason { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; }
     .reason::before { content: '✓'; color: #10b981; font-weight: 700; }
     .dealbreaker { font-size: 12px; color: #ef4444; display: flex; align-items: center; gap: 6px; }
     .dealbreaker::before { content: '✗'; font-weight: 700; }
-
     .pitch-box { margin-top: 10px; background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px; padding: 8px 12px; }
     .pitch-label { font-size: 10px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
     .pitch-text { font-size: 12px; color: #94a3b8; line-height: 1.5; }
-
     .job-right { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 100px; }
     .score-circle { width: 68px; height: 68px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; border: 3px solid; }
     .score-circle.high { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.08); }
@@ -93,13 +97,57 @@
     .apply-btn { background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; display: block; text-align: center; width: 100%; transition: opacity 0.2s; }
     .apply-btn:hover { opacity: 0.85; }
 
+    /* STARTUP SCOUT CARDS */
+    .startups-grid { display: flex; flex-direction: column; gap: 16px; }
+
+    .startup-card { background: #1a1a2e; border: 1px solid #2d2d4e; border-radius: 14px; padding: 22px 26px; transition: border-color 0.2s; border-left: 3px solid #0ea5e9; }
+    .startup-card:hover { border-color: #0ea5e9; }
+
+    .startup-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .startup-title-group { flex: 1; }
+    .startup-name { font-size: 18px; font-weight: 700; color: #f1f5f9; }
+    .startup-location { font-size: 13px; color: #64748b; margin-top: 3px; }
+    .startup-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 10px; white-space: nowrap; }
+    .badge-country { background: rgba(14,165,233,0.15); color: #38bdf8; border: 1px solid rgba(14,165,233,0.3); }
+    .badge-funding { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-team { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+    .startup-description { font-size: 14px; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
+
+    .startup-stack { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .stack-tag { font-size: 11px; color: #6366f1; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); padding: 3px 10px; border-radius: 6px; font-weight: 500; }
+
+    .startup-hook { background: rgba(14,165,233,0.07); border: 1px solid rgba(14,165,233,0.2); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; }
+    .hook-label { font-size: 10px; font-weight: 700; color: #0ea5e9; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .hook-text { font-size: 13px; color: #7dd3fc; line-height: 1.5; }
+
+    .startup-pitch-area { background: #13131a; border: 1px solid #2d2d4e; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+    .pitch-area-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pitch-area-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pitch-subject { font-size: 12px; color: #6366f1; font-weight: 600; margin-bottom: 8px; }
+    .pitch-subject span { color: #94a3b8; font-weight: 400; }
+    .pitch-body { font-size: 13px; color: #cbd5e1; line-height: 1.7; white-space: pre-wrap; }
+
+    .copy-btn { font-size: 11px; padding: 5px 12px; border-radius: 6px; border: 1px solid #2d2d4e; background: transparent; color: #94a3b8; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+    .copy-btn:hover { border-color: #0ea5e9; color: #0ea5e9; }
+    .copy-btn.copied { border-color: #10b981; color: #10b981; }
+
+    .startup-contacts { display: flex; gap: 8px; flex-wrap: wrap; }
+    .contact-btn { font-size: 12px; padding: 7px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: opacity 0.2s; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: none; }
+    .contact-btn:hover { opacity: 0.85; }
+    .contact-btn.linkedin { background: #0077b5; color: white; }
+    .contact-btn.email { background: #1e40af; color: white; }
+    .contact-btn.website { background: #1e293b; color: #94a3b8; border: 1px solid #2d2d4e; }
+
     .timestamp { text-align: center; padding: 24px; color: #374151; font-size: 12px; }
 
     @media (max-width: 600px) {
-      .header { flex-wrap: wrap; padding: 20px; }
-      .container { padding: 16px; }
-      .filters { padding: 12px 16px; }
-      .stats-bar { padding: 12px 16px; gap: 16px; }
+      .header { padding: 16px; }
+      .container { padding: 14px; }
+      .filters { padding: 10px 14px; }
+      .stats-bar { padding: 10px 14px; gap: 14px; }
+      .tabs { padding: 0 14px; }
       .job-card { grid-template-columns: 1fr; }
       .job-right { flex-direction: row; min-width: auto; justify-content: space-between; }
     }
@@ -109,56 +157,110 @@
 
 <div class="header">
   <div class="header-icon">🔍</div>
-  <div>
+  <div class="header-text">
     <h1>Job Inspector</h1>
-    <p>Match tecnico + analisi opportunità strategica con AI</p>
+    <p>Match tecnico AI + Startup Scout diretto a founder</p>
   </div>
-  <button class="scan-btn" id="scanBtn" onclick="scanJobs()">
-    <span id="scanIcon">⚡</span>
-    <span id="scanText">Scan offerte</span>
-  </button>
+  <div class="header-actions">
+    <button class="scan-btn" id="scanBtn" onclick="scanJobs()" style="display:none">
+      <span id="scanIcon">⚡</span>
+      <span id="scanText">Scan offerte</span>
+    </button>
+    <button class="scan-btn scout" id="scoutBtn" onclick="runScout()" style="display:none">
+      <span id="scoutIcon">🚀</span>
+      <span id="scoutText">Scout startup</span>
+    </button>
+  </div>
 </div>
 
-<div class="stats-bar" id="statsBar" style="display:none">
-  <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Offerte trovate</div></div>
-  <div class="stat"><div class="stat-value" id="statHigh">0</div><div class="stat-label">Match alto (≥70)</div></div>
-  <div class="stat"><div class="stat-value" id="statFresh">0</div><div class="stat-label">Freschi (≤3 giorni)</div></div>
-  <div class="stat"><div class="stat-value" id="statLowComp">0</div><div class="stat-label">Bassa concorrenza</div></div>
-  <div class="stat"><div class="stat-value" id="statSources">0</div><div class="stat-label">Fonti analizzate</div></div>
+<div class="tabs">
+  <div class="tab active" id="tab-jobs" onclick="switchTab('jobs')">🎯 Job Board AI</div>
+  <div class="tab scout-tab" id="tab-scout" onclick="switchTab('scout')">🚀 Startup Scout</div>
 </div>
 
-<div class="filters" id="filtersBar" style="display:none">
-  <button class="filter-btn active" onclick="setFilter('all', this)">Tutti</button>
-  <button class="filter-btn" onclick="setFilter('high', this)">🟢 Alto match</button>
-  <button class="filter-btn" onclick="setFilter('mid', this)">🟡 Medio match</button>
-  <button class="filter-btn" onclick="setFilter('low-comp', this)">⚡ Bassa concorrenza</button>
-  <button class="filter-btn" onclick="setFilter('fresh', this)">🆕 Freschi</button>
-  <div class="filter-sep"></div>
-  <span class="sort-label">Ordina:</span>
-  <button class="sort-btn active" id="sortScore" onclick="setSort('score', this)">Punteggio</button>
-  <button class="sort-btn" id="sortOpp" onclick="setSort('opportunity', this)">Opportunità</button>
-  <button class="sort-btn" id="sortFresh" onclick="setSort('fresh', this)">Più recenti</button>
+<!-- JOB BOARD PANEL -->
+<div id="panel-jobs">
+  <div class="stats-bar" id="statsBar" style="display:none">
+    <div class="stat"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Offerte trovate</div></div>
+    <div class="stat"><div class="stat-value" id="statHigh">0</div><div class="stat-label">Match alto (≥70)</div></div>
+    <div class="stat"><div class="stat-value" id="statFresh">0</div><div class="stat-label">Freschi (≤3 giorni)</div></div>
+    <div class="stat"><div class="stat-value" id="statLowComp">0</div><div class="stat-label">Bassa concorrenza</div></div>
+    <div class="stat"><div class="stat-value" id="statSources">0</div><div class="stat-label">Fonti analizzate</div></div>
+  </div>
+  <div class="filters" id="filtersBar" style="display:none">
+    <button class="filter-btn active" onclick="setFilter('all', this)">Tutti</button>
+    <button class="filter-btn" onclick="setFilter('high', this)">🟢 Alto match</button>
+    <button class="filter-btn" onclick="setFilter('mid', this)">🟡 Medio match</button>
+    <button class="filter-btn" onclick="setFilter('low-comp', this)">⚡ Bassa concorrenza</button>
+    <button class="filter-btn" onclick="setFilter('fresh', this)">🆕 Freschi</button>
+    <div class="filter-sep"></div>
+    <span class="sort-label">Ordina:</span>
+    <button class="sort-btn active" id="sortScore" onclick="setSort('score', this)">Punteggio</button>
+    <button class="sort-btn" id="sortOpp" onclick="setSort('opportunity', this)">Opportunità</button>
+    <button class="sort-btn" id="sortFresh" onclick="setSort('fresh', this)">Più recenti</button>
+  </div>
+  <div class="container">
+    <div class="empty" id="emptyJobs">
+      <div class="empty-icon">🎯</div>
+      <h2>Job Board AI</h2>
+      <p>Aggrega offerte da Remotive, Jobicy e RemoteOK.<br>Le punteggia con AI basandosi sul tuo profilo tecnico.</p>
+    </div>
+    <div class="loading" id="loadingJobs" style="display:none">
+      <div class="spinner"></div>
+      <p>Analisi in corso...</p>
+      <p class="loading-step" id="loadingStep">Recupero offerte da Remotive e Jobicy...</p>
+    </div>
+    <div class="jobs-grid" id="jobsGrid"></div>
+    <div class="timestamp" id="timestampJobs"></div>
+  </div>
 </div>
 
-<div class="container">
-  <div class="empty" id="emptyState">
-    <div class="empty-icon">🎯</div>
-    <h2>Pronto per la ricerca</h2>
-    <p>Clicca "Scan offerte" per cercare e classificare le opportunità più adatte al tuo profilo.<br>Ora con analisi strategica: concorrenza, freschezza del job e angolo di pitch.</p>
+<!-- STARTUP SCOUT PANEL -->
+<div id="panel-scout" style="display:none">
+  <div class="stats-bar" id="scoutStatsBar" style="display:none">
+    <div class="stat"><div class="stat-value scout" id="scoutStatTotal">0</div><div class="stat-label">Startup trovate</div></div>
+    <div class="stat"><div class="stat-value scout" id="scoutStatWithContact">0</div><div class="stat-label">Con contatto diretto</div></div>
+    <div class="stat"><div class="stat-value scout" id="scoutStatWithPitch">0</div><div class="stat-label">Pitch generati</div></div>
+    <div class="stat"><div class="stat-value scout" id="scoutStatCountries">0</div><div class="stat-label">Paesi coperti</div></div>
   </div>
-  <div class="loading" id="loadingState" style="display:none">
-    <div class="spinner"></div>
-    <p>Analisi in corso...</p>
-    <p class="loading-step" id="loadingStep">Recupero offerte da Remotive e Jobicy...</p>
+  <div class="container">
+    <div class="empty" id="emptyScout">
+      <div class="empty-icon">🚀</div>
+      <h2>Startup Scout</h2>
+      <p>Cerca startup piccole (&lt;15 persone) con funding recente in EU/UK/CH.<br>Per ognuna genera un pitch email personalizzato con AI.<br>Approccio diretto al founder — niente ATS.</p>
+    </div>
+    <div class="loading" id="loadingScout" style="display:none">
+      <div class="spinner scout"></div>
+      <p>Ricerca startup in corso...</p>
+      <p class="loading-step" id="scoutLoadingStep">Scanning EU funded startups via Tavily...</p>
+    </div>
+    <div class="startups-grid" id="startupsGrid"></div>
+    <div class="timestamp" id="timestampScout"></div>
   </div>
-  <div class="jobs-grid" id="jobsGrid"></div>
-  <div class="timestamp" id="timestamp"></div>
 </div>
 
 <script>
 let allJobs = [];
 let currentFilter = 'all';
 let currentSort = 'score';
+let activeTab = 'jobs';
+
+// ─── TAB SWITCHING ───────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tab-jobs').classList.toggle('active', tab === 'jobs');
+  document.getElementById('tab-scout').classList.toggle('active', tab === 'scout');
+  document.getElementById('panel-jobs').style.display = tab === 'jobs' ? 'block' : 'none';
+  document.getElementById('panel-scout').style.display = tab === 'scout' ? 'block' : 'none';
+  document.getElementById('scanBtn').style.display = tab === 'jobs' ? 'flex' : 'none';
+  document.getElementById('scoutBtn').style.display = tab === 'scout' ? 'flex' : 'none';
+}
+
+// Initialize tab
+switchTab('jobs');
+
+// ─── JOB BOARD ───────────────────────────────────────────────────────────────
 
 function setFilter(filter, btn) {
   currentFilter = filter;
@@ -245,17 +347,14 @@ function renderJobs() {
             <span class="competition-badge ${compLevel}">${competitionLabel(compLevel)}</span>
             ${tags.map(t => `<span class="job-tag">${t}</span>`).join('')}
           </div>
-
           <div class="score-breakdown">
             <span class="score-pill match">🎯 Match tecnico: ${job.matchScore != null && job.matchScore !== 0 ? job.matchScore : job.score}</span>
             <span class="score-pill opportunity">✨ Opportunità: ${job.opportunityScore != null ? job.opportunityScore : '?'}/15</span>
           </div>
-
           <div class="job-reasons">
             ${reasons.map(r => `<div class="reason">${r}</div>`).join('')}
             ${dealbreakers.map(d => `<div class="dealbreaker">${d}</div>`).join('')}
           </div>
-
           ${job.pitchAngle ? `
           <div class="pitch-box">
             <div class="pitch-label">💬 Angolo di pitch</div>
@@ -283,8 +382,8 @@ async function scanJobs() {
   scanText.textContent = 'Analisi...';
   scanIcon.textContent = '⏳';
 
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('emptyJobs').style.display = 'none';
+  document.getElementById('loadingJobs').style.display = 'block';
   document.getElementById('jobsGrid').innerHTML = '';
   document.getElementById('statsBar').style.display = 'none';
   document.getElementById('filtersBar').style.display = 'none';
@@ -307,7 +406,6 @@ async function scanJobs() {
   try {
     const res = await fetch('/api/inspector/jobs');
     clearInterval(stepInterval);
-
     if (!res.ok) throw new Error('Server error');
     const data = await res.json();
     allJobs = data.jobs || [];
@@ -322,11 +420,10 @@ async function scanJobs() {
     document.getElementById('statFresh').textContent = fresh;
     document.getElementById('statLowComp').textContent = lowComp;
     document.getElementById('statSources').textContent = sources;
-
     document.getElementById('statsBar').style.display = 'flex';
     document.getElementById('filtersBar').style.display = 'flex';
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('timestamp').textContent = `Ultimo aggiornamento: ${new Date(data.timestamp).toLocaleString('it-IT')}`;
+    document.getElementById('loadingJobs').style.display = 'none';
+    document.getElementById('timestampJobs').textContent = `Ultimo aggiornamento: ${new Date(data.timestamp).toLocaleString('it-IT')}`;
 
     currentFilter = 'all';
     currentSort = 'score';
@@ -335,14 +432,159 @@ async function scanJobs() {
     renderJobs();
   } catch (e) {
     clearInterval(stepInterval);
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'block';
-    document.getElementById('emptyState').innerHTML = `<div class="empty-icon">⚠️</div><h2>Errore durante la scansione</h2><p>${e.message}</p>`;
+    document.getElementById('loadingJobs').style.display = 'none';
+    document.getElementById('emptyJobs').style.display = 'block';
+    document.getElementById('emptyJobs').innerHTML = `<div class="empty-icon">⚠️</div><h2>Errore</h2><p>${e.message}</p>`;
   }
 
   btn.disabled = false;
   scanText.textContent = 'Riscansiona';
   scanIcon.textContent = '🔄';
+}
+
+// ─── STARTUP SCOUT ───────────────────────────────────────────────────────────
+
+function copyPitch(id) {
+  const el = document.getElementById(`pitch-${id}`);
+  if (!el) return;
+  const text = el.dataset.fullPitch;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(`copybtn-${id}`);
+    if (btn) {
+      btn.textContent = '✓ Copiato';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 Copia pitch';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  });
+}
+
+function renderStartups(startups) {
+  const grid = document.getElementById('startupsGrid');
+
+  if (!startups || startups.length === 0) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">😕</div><h2>Nessuna startup trovata</h2><p>Riprova tra qualche minuto.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = startups.map((s, i) => {
+    const stack = (s.techStack || []).map(t => `<span class="stack-tag">${t}</span>`).join('');
+    const fullPitch = `Oggetto: ${s.subject || ''}\n\n${s.pitch || ''}`;
+    const encodedPitch = encodeURIComponent(fullPitch).replace(/'/g, '%27');
+
+    const linkedinBtn = s.founderLinkedIn
+      ? `<a class="contact-btn linkedin" href="${s.founderLinkedIn}" target="_blank">🔗 LinkedIn ${s.founderName ? s.founderName.split(' ')[0] : ''}</a>`
+      : '';
+    const emailBtn = s.founderEmail
+      ? `<a class="contact-btn email" href="mailto:${s.founderEmail}?subject=${encodeURIComponent(s.subject || '')}&body=${encodeURIComponent(s.pitch || '')}">✉️ Email diretta</a>`
+      : '';
+    const websiteBtn = s.website
+      ? `<a class="contact-btn website" href="${s.website}" target="_blank">🌐 Sito</a>`
+      : '';
+
+    return `
+      <div class="startup-card">
+        <div class="startup-header">
+          <div class="startup-title-group">
+            <div class="startup-name">${s.name}</div>
+            <div class="startup-location">📍 ${s.city ? s.city + ', ' : ''}${s.country || 'EU'}</div>
+          </div>
+          <div class="startup-badges">
+            ${s.country ? `<span class="badge badge-country">🌍 ${s.country}</span>` : ''}
+            ${s.fundingInfo ? `<span class="badge badge-funding">💰 ${s.fundingInfo}</span>` : ''}
+            ${s.teamSize ? `<span class="badge badge-team">👥 ${s.teamSize}</span>` : ''}
+          </div>
+        </div>
+
+        <div class="startup-description">${s.description || ''}</div>
+
+        ${stack ? `<div class="startup-stack">${stack}</div>` : ''}
+
+        ${s.pitchHook ? `
+        <div class="startup-hook">
+          <div class="hook-label">⚡ Perché Federico si adatta</div>
+          <div class="hook-text">${s.pitchHook}</div>
+        </div>` : ''}
+
+        ${s.pitch ? `
+        <div class="startup-pitch-area">
+          <div class="pitch-area-header">
+            <span class="pitch-area-label">✉️ Pitch email generato</span>
+            <button class="copy-btn" id="copybtn-${i}" onclick="copyPitch(${i})">📋 Copia pitch</button>
+          </div>
+          <div class="pitch-subject">Oggetto: <span>${s.subject || ''}</span></div>
+          <div class="pitch-body" id="pitch-${i}" data-full-pitch="${fullPitch.replace(/"/g, '&quot;')}">${s.pitch}</div>
+        </div>` : ''}
+
+        <div class="startup-contacts">
+          ${linkedinBtn}
+          ${emailBtn}
+          ${websiteBtn}
+          ${s.founderName && !s.founderLinkedIn && !s.founderEmail ? `<span style="font-size:12px;color:#64748b;padding:7px 0">👤 Founder: ${s.founderName}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function runScout() {
+  const btn = document.getElementById('scoutBtn');
+  btn.disabled = true;
+  document.getElementById('scoutIcon').textContent = '⏳';
+  document.getElementById('scoutText').textContent = 'Ricerca...';
+
+  document.getElementById('emptyScout').style.display = 'none';
+  document.getElementById('loadingScout').style.display = 'block';
+  document.getElementById('startupsGrid').innerHTML = '';
+  document.getElementById('scoutStatsBar').style.display = 'none';
+
+  const steps = [
+    'Scanning EU funded startups via Tavily...',
+    'Analisi YC W24/W25 European companies...',
+    'Ricerca startup italiane seed 2024/2025...',
+    'Estrazione dati founder e tech stack...',
+    'Generazione pitch personalizzati con AI...',
+  ];
+  let stepIdx = 0;
+  const stepInterval = setInterval(() => {
+    if (stepIdx < steps.length - 1) {
+      stepIdx++;
+      document.getElementById('scoutLoadingStep').textContent = steps[stepIdx];
+    }
+  }, 12000);
+
+  try {
+    const res = await fetch('/api/inspector/startups');
+    clearInterval(stepInterval);
+    if (!res.ok) throw new Error('Server error: ' + res.status);
+    const data = await res.json();
+    const startups = data.startups || [];
+
+    const withContact = startups.filter(s => s.founderLinkedIn || s.founderEmail).length;
+    const withPitch = startups.filter(s => s.pitch).length;
+    const countries = [...new Set(startups.map(s => s.country).filter(Boolean))].length;
+
+    document.getElementById('scoutStatTotal').textContent = startups.length;
+    document.getElementById('scoutStatWithContact').textContent = withContact;
+    document.getElementById('scoutStatWithPitch').textContent = withPitch;
+    document.getElementById('scoutStatCountries').textContent = countries;
+    document.getElementById('scoutStatsBar').style.display = 'flex';
+    document.getElementById('loadingScout').style.display = 'none';
+    document.getElementById('timestampScout').textContent = `Ultimo aggiornamento: ${new Date(data.timestamp).toLocaleString('it-IT')}`;
+
+    renderStartups(startups);
+  } catch (e) {
+    clearInterval(stepInterval);
+    document.getElementById('loadingScout').style.display = 'none';
+    document.getElementById('emptyScout').style.display = 'block';
+    document.getElementById('emptyScout').innerHTML = `<div class="empty-icon">⚠️</div><h2>Errore</h2><p>${e.message}</p>`;
+  }
+
+  btn.disabled = false;
+  document.getElementById('scoutIcon').textContent = '🔄';
+  document.getElementById('scoutText').textContent = 'Riscansiona';
 }
 </script>
 </body>

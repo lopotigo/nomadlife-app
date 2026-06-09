@@ -289,6 +289,149 @@ app.get('/api/inspector/jobs', async (req, res) => {
   }
 });
 
+// ── STARTUP SCOUT ──────────────────────────────────────────────────────────
+
+async function tavilySearch(query) {
+  try {
+    const res = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: process.env.TAVILY_API_KEY,
+        query,
+        search_depth: 'basic',
+        max_results: 6,
+        include_answer: false,
+      }),
+    });
+    const data = await res.json();
+    return data.results || [];
+  } catch (e) {
+    console.error('Tavily error:', e.message);
+    return [];
+  }
+}
+
+async function scoutStartups() {
+  const queries = [
+    'AI SaaS startup seed funded 2024 2025 Netherlands Belgium Switzerland Italy small team 5 people developer React Node remote hire',
+    'YC W24 W25 S24 S25 European AI startup small team developer remote job opening',
+    'startup italiana AI intelligenza artificiale seed 2024 2025 piccolo team sviluppatore React Node',
+    'new AI startup Amsterdam Zurich Milan Antwerp London small team React TypeScript developer remote 2025',
+  ];
+
+  const searchResults = await Promise.all(queries.map(q => tavilySearch(q)));
+  const seen = new Set();
+  const allResults = searchResults.flat().filter(r => {
+    if (seen.has(r.url)) return false;
+    seen.add(r.url);
+    return true;
+  });
+
+  const allContent = allResults
+    .map(r => `[${r.title}](${r.url})\n${(r.content || '').slice(0, 500)}`)
+    .join('\n\n---\n\n');
+
+  const extractResponse = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [{
+      role: 'user',
+      content: `You are a startup research analyst. Extract small AI/tech startups from these search results.
+
+TARGET CRITERIA for Federico Poletti (full-stack dev: React, Node.js, PostgreSQL, OpenAI API, EU-based remote):
+- Team size: ideally <15 people
+- Location: EU countries (Italy, Netherlands, Belgium, Switzerland, Germany, France, UK)
+- Stage: seed / pre-seed / early stage (not big corporations)
+- Focus: AI / SaaS / tech products
+- Remote-friendly
+
+SEARCH RESULTS:
+${allContent}
+
+Extract up to 8 distinct startups. Return JSON:
+{"startups": [
+  {
+    "name": "Company Name",
+    "country": "Netherlands",
+    "city": "Amsterdam",
+    "description": "One sentence what they do",
+    "techStack": ["React", "Node.js", "AI"],
+    "teamSize": "5-10",
+    "fundingInfo": "€500K seed Oct 2024",
+    "founderName": "Name if found",
+    "founderLinkedIn": "full linkedin URL if found or empty string",
+    "founderEmail": "email if found or empty string",
+    "website": "https://...",
+    "pitchHook": "One sentence: why Federico's NomadLife background fits this company specifically"
+  }
+]}`
+    }],
+    max_tokens: 2500,
+    response_format: { type: 'json_object' },
+  });
+
+  let startups = [];
+  try {
+    const parsed = JSON.parse(extractResponse.choices[0].message.content);
+    startups = parsed.startups || [];
+  } catch (e) {
+    console.error('Parse error:', e.message);
+    return [];
+  }
+
+  // Generate pitch for each startup (in parallel, batched)
+  const withPitches = await Promise.all(startups.map(async (startup) => {
+    try {
+      const pitchResponse = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{
+          role: 'user',
+          content: `Write a cold email pitch from Federico Poletti to ${startup.founderName || 'the founder'} of ${startup.name}.
+
+FEDERICO'S PROFILE:
+${FEDERICO_PROFILE}
+
+TARGET STARTUP: ${startup.name} (${startup.city}, ${startup.country})
+WHAT THEY DO: ${startup.description}
+WHY HE FITS: ${startup.pitchHook}
+
+RULES:
+- Max 120 words
+- Personal and direct, not generic
+- Reference nomad-life.app as concrete proof
+- End with a clear ask (call, demo, or reply)
+- Use English for non-Italian companies, Italian for Italian companies
+- Do NOT say "I hope this email finds you well" or similar filler
+
+Return JSON: {"subject": "email subject line", "pitch": "full email body"}`
+        }],
+        max_tokens: 400,
+        response_format: { type: 'json_object' },
+      });
+      const pitchData = JSON.parse(pitchResponse.choices[0].message.content);
+      return { ...startup, subject: pitchData.subject || '', pitch: pitchData.pitch || '' };
+    } catch (e) {
+      return { ...startup, subject: '', pitch: '' };
+    }
+  }));
+
+  return withPitches;
+}
+
+app.get('/api/inspector/startups', async (req, res) => {
+  try {
+    console.log('Startup Scout: searching...');
+    const startups = await scoutStartups();
+    console.log(`Startup Scout: found ${startups.length} startups`);
+    res.json({ startups, timestamp: new Date().toISOString() });
+  } catch (e) {
+    console.error('Scout error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+
 const PORT = 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Job Inspector running on port ${PORT}`);
