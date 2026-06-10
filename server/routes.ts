@@ -3540,12 +3540,19 @@ Languages: Italian (native), English (professional)
           content: `You are a startup research analyst. Extract small AI/tech startups from these search results.
 
 TARGET: Federico Poletti — full-stack dev (React, Node.js, PostgreSQL, OpenAI API), EU remote.
-CRITERIA: team <15 people, EU/UK/CH countries, seed/early stage, AI/SaaS, remote-friendly.
+
+STRICT INCLUSION CRITERIA (ALL must be true):
+- Team size: genuinely <20 people (pre-seed, seed, or Series A MAX)
+- Geography: Italy, Netherlands, Belgium, Switzerland, France, Germany, Spain, Sweden, Denmark
+- Stage: pre-seed, seed, or early Series A — EXCLUDE Series B, C, D and any company with >50 employees
+- Domain: AI, SaaS, EdTech, developer tools, data platforms — NOT autonomous driving, hardware, biotech
+- EXCLUDE any well-known large company (Mistral AI, Wayve, Nscale, Stability AI, etc. — these have 50-500+ employees)
 
 SEARCH RESULTS:
 ${allContent}
 
-Extract up to 8 distinct startups. Return JSON:
+Extract up to 8 startups that strictly match ALL criteria above. If a company is Series C/D or clearly has >20 people, skip it entirely.
+Return JSON:
 {"startups": [{"name":"","country":"","city":"","description":"","techStack":[],"teamSize":"","fundingInfo":"","founderName":"","founderLinkedIn":"","founderEmail":"","website":"","pitchHook":""}]}`
         }],
         max_tokens: 2500,
