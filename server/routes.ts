@@ -3486,7 +3486,6 @@ Age: 48, Sardinia Italy, remote only
 Stack: TypeScript, React 18, Node.js, Express, PostgreSQL, Drizzle ORM, OpenAI API, Tailwind CSS, Leaflet, WebSockets, PWA
 Experience: 1 year self-taught — built NomadLife (nomad-life.app) solo: full production app with AI chatbot, real-time chat, maps, booking, marketplace, multi-language, SEO
 Background: PhD Political Science, former intelligence analyst, entrepreneur (holiday rental business)
-Rate: €25-35/hr or €2000-5000/month
 Looking for: Remote, EU-compatible, small teams, AI/SaaS startups
 Languages: Italian (native), English (professional)
 `;
@@ -3577,7 +3576,6 @@ FEDERICO:
 - Full-stack dev: TypeScript, React 18, Node.js, Express, PostgreSQL, OpenAI API
 - Built NomadLife solo (nomad-life.app) — production PWA with AI chatbot, real-time chat, maps, booking
 - 48yo, PhD Political Science, 1yr self-taught, remote from Sardinia Italy
-- Rate: €25-35/hr or €2000-5000/month
 - Email: federicopoletti83@gmail.com
 - LinkedIn: linkedin.com/in/federico-poletti-dev
 
@@ -3587,6 +3585,7 @@ WHY HE FITS: ${s.pitchHook}
 STRICT RULES:
 - If founder name is not known, open with "Hi," (English) or "Ciao," (Italian) — NEVER use "[Founder's Name]" or any placeholder
 - Sign off as: Federico Poletti | federicopoletti83@gmail.com | nomad-life.app
+- NEVER mention rates, salary, or hourly price in the email — discuss compensation only if they ask
 - NO placeholder text like "[Your LinkedIn]" or "[link]" — use the real URL above or omit
 - Mention nomad-life.app as concrete proof of work
 - End with one specific ask (call or reply)
