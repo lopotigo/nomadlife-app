@@ -1,0 +1,1 @@
+- [Federico dev profile](federico-profile.md) — NomadLife built in 6 weeks with AI, not months; his skill is AI-orchestrated product building
