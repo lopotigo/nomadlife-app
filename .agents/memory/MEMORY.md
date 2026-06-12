@@ -1,1 +1,2 @@
 - [Federico dev profile](federico-profile.md) — NomadLife built in 6 weeks with AI, not months; his skill is AI-orchestrated product building
+- [Francesco Normo strategy](normo-strategy.md) — freelance/contract framing beats job application; CV gap is real but solvable
