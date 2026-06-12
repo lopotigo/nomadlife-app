@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Noleggio Barche Cugnana — Olbia, Sardegna</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Georgia', serif;
+      color: #1a1a2e;
+      background: #fff;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      padding: 20px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+    }
+    .nav-logo {
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .nav-logo span { color: #7dd3fc; }
+    nav ul { list-style: none; display: flex; gap: 28px; }
+    nav ul a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: #7dd3fc; }
+
+    /* HERO */
+    .hero {
+      height: 100vh;
+      background: linear-gradient(160deg, #0c4a6e 0%, #0369a1 40%, #0ea5e9 100%);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.05)" d="M0,160L48,144C96,128,192,96,288,106.7C384,117,480,171,576,186.7C672,203,768,181,864,154.7C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') bottom/cover no-repeat;
+    }
+    .hero-content { position: relative; z-index: 1; padding: 20px; }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #e0f2fe;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .hero h1 span { color: #7dd3fc; }
+    .hero p {
+      font-size: 1.2rem;
+      color: rgba(255,255,255,0.85);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .btn {
+      display: inline-block;
+      padding: 16px 36px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: #fff;
+      color: #0369a1;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.6);
+      margin-left: 16px;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+    /* WAVE */
+    .wave { width: 100%; overflow: hidden; line-height: 0; }
+    .wave svg { display: block; width: 100%; }
+
+    /* SECTIONS */
+    section { padding: 80px 40px; }
+
+    /* BARCHE */
+    #barche { background: #f0f9ff; }
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .section-title h2 {
+      font-size: 2.4rem;
+      color: #0c4a6e;
+      margin-bottom: 12px;
+    }
+    .section-title p {
+      color: #64748b;
+      font-size: 1.05rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .boats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .boat-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .boat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+    .boat-img {
+      height: 220px;
+      background: linear-gradient(135deg, #bae6fd, #7dd3fc, #38bdf8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .boat-img-label {
+      position: absolute; bottom: 12px; right: 12px;
+      background: rgba(255,255,255,0.9);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: #0369a1;
+      font-weight: bold;
+    }
+    .boat-info { padding: 24px; }
+    .boat-info h3 { font-size: 1.3rem; color: #0c4a6e; margin-bottom: 8px; }
+    .boat-info p { color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 16px; }
+    .boat-specs {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .spec {
+      background: #f0f9ff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #0369a1;
+    }
+    .boat-price {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #0369a1;
+    }
+    .boat-price span { font-size: 0.85rem; font-weight: normal; color: #94a3b8; }
+
+    /* VIDEO */
+    #video { background: #fff; }
+    .video-placeholder {
+      max-width: 800px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #0c4a6e, #0369a1);
+      border-radius: 20px;
+      height: 450px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 20px 60px rgba(3,105,161,0.3);
+      transition: transform 0.3s;
+    }
+    .video-placeholder:hover { transform: scale(1.01); }
+    .play-btn {
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.15);
+      border: 3px solid rgba(255,255,255,0.5);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    .video-placeholder h3 { font-size: 1.5rem; margin-bottom: 8px; }
+    .video-placeholder p { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
+
+    /* FOTO */
+    #gallery { background: #f0f9ff; }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 200px);
+      gap: 12px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .gallery-item {
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #bae6fd, #0ea5e9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      position: relative;
+    }
+    .gallery-item:hover { opacity: 0.9; }
+    .gallery-item:first-child { grid-row: span 2; }
+    .gallery-label {
+      position: absolute; bottom: 10px; left: 10px;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+
+    /* LOCATION */
+    #location { background: #fff; }
+    .location-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      max-width: 1000px;
+      margin: 0 auto;
+      align-items: center;
+    }
+    .map-placeholder {
+      height: 320px;
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #1e40af;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    .map-placeholder .pin { font-size: 3rem; margin-bottom: 12px; }
+    .map-placeholder h3 { font-size: 1.2rem; font-weight: bold; }
+    .map-placeholder p { font-size: 0.9rem; color: #3b82f6; }
+    .location-info h3 { font-size: 1.8rem; color: #0c4a6e; margin-bottom: 16px; }
+    .location-info p { color: #64748b; line-height: 1.8; margin-bottom: 24px; }
+    .info-items { display: flex; flex-direction: column; gap: 12px; }
+    .info-item {
+      display: flex; align-items: center; gap: 12px;
+      color: #475569;
+    }
+    .info-item .icon { font-size: 1.2rem; }
+
+    /* CONTATTI */
+    #contatti {
+      background: linear-gradient(160deg, #0c4a6e, #0369a1);
+      color: #fff;
+    }
+    #contatti .section-title h2 { color: #fff; }
+    #contatti .section-title p { color: rgba(255,255,255,0.7); }
+    .contact-card {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+    }
+    .contact-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .contact-method {
+      display: flex; align-items: center; gap: 16px;
+      background: rgba(255,255,255,0.08);
+      padding: 16px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .contact-method:hover { background: rgba(255,255,255,0.15); }
+    .contact-method .icon { font-size: 1.5rem; }
+    .contact-method .label { font-size: 0.8rem; color: rgba(255,255,255,0.6); text-align: left; }
+    .contact-method .value { font-size: 1rem; font-weight: bold; text-align: left; }
+
+    /* FOOTER */
+    footer {
+      background: #0c4a6e;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: 24px;
+      font-size: 0.85rem;
+    }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      nav ul { display: none; }
+      section { padding: 60px 20px; }
+      .location-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-item:first-child { grid-row: span 1; }
+      .btn-outline { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚓ <span>Cugnana</span> Barche</div>
+  <ul>
+    <li><a href="#barche">Le barche</a></li>
+    <li><a href="#video">Video</a></li>
+    <li><a href="#gallery">Foto</a></li>
+    <li><a href="#location">Dove siamo</a></li>
+    <li><a href="#contatti">Contatti</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">🌊 Cugnana · Olbia · Sardegna</div>
+    <h1>Il mare della <span>Sardegna</span><br>a portata di timone</h1>
+    <p>Noleggia una barca e scopri le calette più belle della Costa Smeralda. Patente non richiesta per alcune imbarcazioni.</p>
+    <a href="#barche" class="btn btn-primary">Vedi le barche</a>
+    <a href="#contatti" class="btn btn-outline">Contattaci</a>
+  </div>
+</div>
+
+<!-- BARCHE -->
+<section id="barche">
+  <div class="section-title">
+    <h2>Le nostre imbarcazioni</h2>
+    <p>Dalla gita di mezza giornata alla settimana in mare — abbiamo la barca giusta per te</p>
+  </div>
+  <div class="boats-grid">
+    <div class="boat-card">
+      <div class="boat-img">
+        ⛵
+        <div class="boat-img-label">📸 Foto in arrivo</div>
+      </div>
+      <div class="boat-info">
+        <h3>Gozzo 5.5m</h3>
+        <p>Perfetto per famiglie e gite giornaliere. Facile da guidare, stabile e confortevole.</p>
+        <div class="boat-specs">
+          <span class="spec">👥 Max 6 persone</span>
+          <span class="spec">⛽ Benzina inclusa</span>
+          <span class="spec">📍 Cugnana</span>
+        </div>
+        <div class="boat-price">da €150 <span>/ mezza giornata</span></div>
+      </div>
+    </div>
+    <div class="boat-card">
+      <div class="boat-img" style="background: linear-gradient(135deg, #93c5fd, #3b82f6, #1d4ed8);">
+        🚤
+        <div class="boat-img-label">📸 Foto in arrivo</div>
+      </div>
+      <div class="boat-info">
+        <h3>Motoscafo 7m</h3>
+        <p>Veloce e potente per raggiungere le cale più lontane. Ideale per snorkeling e aperitivi al tramonto.</p>
+        <div class="boat-specs">
+          <span class="spec">👥 Max 8 persone</span>
+          <span class="spec">🎣 Attrezzatura inclusa</span>
+          <span class="spec">🌅 Tramonto</span>
+        </div>
+        <div class="boat-price">da €250 <span>/ giornata</span></div>
+      </div>
+    </div>
+    <div class="boat-card">
+      <div class="boat-img" style="background: linear-gradient(135deg, #6ee7b7, #10b981, #047857);">
+        🛥️
+        <div class="boat-img-label">📸 Foto in arrivo</div>
+      </div>
+      <div class="boat-info">
+        <h3>Cabin cruiser 9m</h3>
+        <p>Per chi vuole dormire a bordo. Equipaggiata con cabina, cucina e bagno. Esplora la costa in totale autonomia.</p>
+        <div class="boat-specs">
+          <span class="spec">👥 Max 4+2 persone</span>
+          <span class="spec">🛏️ Cabina doppia</span>
+          <span class="spec">🗓️ Week charter</span>
+        </div>
+        <div class="boat-price">da €900 <span>/ settimana</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section id="video">
+  <div class="section-title">
+    <h2>Vivi l'esperienza</h2>
+    <p>Un assaggio di quello che ti aspetta in mare</p>
+  </div>
+  <div class="video-placeholder">
+    <div class="play-btn">▶</div>
+    <h3>Video in arrivo</h3>
+    <p>Le immagini delle nostre barche e delle calette più belle</p>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="section-title">
+    <h2>Le calette che raggiungerai</h2>
+    <p>Acque turchesi, fondali cristallini, posti segreti che solo chi naviga può trovare</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item" style="background: linear-gradient(135deg, #7dd3fc, #0284c7);">
+      🏝️
+      <div class="gallery-label">Isola dei Porri</div>
+    </div>
+    <div class="gallery-item" style="background: linear-gradient(135deg, #6ee7b7, #059669);">
+      🤿
+      <div class="gallery-label">Fondali Cugnana</div>
+    </div>
+    <div class="gallery-item" style="background: linear-gradient(135deg, #fcd34d, #f59e0b);">
+      🌅
+      <div class="gallery-label">Tramonto sul golfo</div>
+    </div>
+    <div class="gallery-item" style="background: linear-gradient(135deg, #c4b5fd, #7c3aed);">
+      ⚓
+      <div class="gallery-label">Porto di Cugnana</div>
+    </div>
+    <div class="gallery-item" style="background: linear-gradient(135deg, #fda4af, #e11d48);">
+      🌊
+      <div class="gallery-label">Costa Smeralda</div>
+    </div>
+  </div>
+  <p style="text-align:center; color:#94a3b8; margin-top:24px; font-size:0.9rem;">📸 Foto reali in arrivo — inviale al tuo referente</p>
+</section>
+
+<!-- LOCATION -->
+<section id="location">
+  <div class="section-title">
+    <h2>Dove siamo</h2>
+    <p>Nel cuore del golfo di Cugnana, a 10 minuti da Olbia</p>
+  </div>
+  <div class="location-grid">
+    <div class="map-placeholder">
+      <div class="pin">📍</div>
+      <h3>Porto di Cugnana</h3>
+      <p>Golfo Aranci · Olbia · OT</p>
+    </div>
+    <div class="location-info">
+      <h3>Come trovarci</h3>
+      <p>Siamo nel porto di Cugnana, a 10 minuti dall'aeroporto di Olbia e a pochi chilometri dalla Costa Smeralda. Arrivi, ritiri la barca e sei già in mare.</p>
+      <div class="info-items">
+        <div class="info-item"><span class="icon">✈️</span> 10 min dall'aeroporto di Olbia</div>
+        <div class="info-item"><span class="icon">🚗</span> Ampio parcheggio gratuito</div>
+        <div class="info-item"><span class="icon">⏰</span> Check-in dalle 8:00 alle 20:00</div>
+        <div class="info-item"><span class="icon">🌊</span> Uscite anche in giornata</div>
+        <div class="info-item"><span class="icon">🧭</span> Briefing e mappa cale inclusi</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATTI -->
+<section id="contatti">
+  <div class="section-title">
+    <h2>Prenota la tua uscita</h2>
+    <p>Rispondiamo entro pochi minuti — anche su WhatsApp</p>
+  </div>
+  <div class="contact-card">
+    <div class="contact-methods">
+      <a href="https://wa.me/39XXXXXXXXXX" class="contact-method">
+        <span class="icon">📱</span>
+        <div>
+          <div class="label">WhatsApp (risposta rapida)</div>
+          <div class="value">+39 XXX XXX XXXX</div>
+        </div>
+      </a>
+      <a href="tel:+39XXXXXXXXXX" class="contact-method">
+        <span class="icon">📞</span>
+        <div>
+          <div class="label">Telefono</div>
+          <div class="value">+39 XXX XXX XXXX</div>
+        </div>
+      </a>
+      <a href="mailto:info@cugnaname.it" class="contact-method">
+        <span class="icon">✉️</span>
+        <div>
+          <div class="label">Email</div>
+          <div class="value">info@cugnanabarche.it</div>
+        </div>
+      </a>
+    </div>
+    <p style="color:rgba(255,255,255,0.6); font-size:0.9rem;">Disponibili tutti i giorni • Stagione aprile–ottobre</p>
+  </div>
+</section>
+
+<footer>
+  <p>⚓ Cugnana Barche · Porto di Cugnana, Olbia (OT) · Sardegna</p>
+  <p style="margin-top:6px;">© 2026 — Tutti i diritti riservati</p>
+</footer>
+
+</body>
+</html>
