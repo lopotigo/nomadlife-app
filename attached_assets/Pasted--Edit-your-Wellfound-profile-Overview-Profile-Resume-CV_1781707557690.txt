@@ -1,0 +1,91 @@
+
+Edit your Wellfound profile
+Overview
+Profile
+Resume / CV
+Preferences
+Culture
+AI Interview
+Profile viewsView public profile
+About
+Tell us about yourself so startups know who you are.
+Your name*
+
+Avatar for Federico Poletti
+Upload a new photo
+Where are you based?*
+Europa, Dunklin County
+Select your primary role*
+Full-Stack Engineer
+
+Years of experience*
+< 1 Year
+
+Open to the following roles
+Mobile Developer
+Select role
+
+Your bio
+0
+Social Profiles
+Where can people find you online?
+Website
+
+LinkedIn
+
+GitHub
+
+Twitter
+
+Your work experience
+What other positions have you held?
+nomad-life.app
+Self Project
+Sep 2025 to Mar 2026
+"Built and launched nomad-life.app, a PWA for digital nomads, using Replit AI. Managed the entire lifecycle: from UI/UX design to backend logic and database integration. Successfully conducted user testing to iterate on features and fix bugs."
+Edit
++ Add work experience
+Education
+What schools have you studied at?
+Avatar for University of Pisa
+University of Pisa
+political science, Master's
+2004
+Edit
++ Add education
+Your Skills
+This will help startups hone in on your strengths.
+Javascript
+React.js
+Progressive Web Apps (PWA)
+
+Achievements
+Sharing more details about yourself will help you stand out more.
+723
+Identity
+At Wellfound, we’re committed to helping companies hire in a more inclusive way. Part of that includes asking candidates to share demographic information so we can help recruiters understand and build their pipeline.
+
+Self identifying is completely optional, and we'll handle your information with care. Your responses to gender and ethnicity will not be displayed on your profile, and displaying your pronouns is optional.
+Pronouns
+He / Him
+
+
+Display pronouns on my profile
+Gender Identity
+Man
+
+
+Race/Ethnicity
+You can select multiple
+
+Black / African-American
+East Asian (including Chinese, Japanese, Korean, and Mongolian)
+Hispanic or Latino/a/x
+Middle Eastern
+Native American or Alaskan Native
+Pacific Islander
+South Asian (including Bangladeshi, Bhutanese, Indian, Nepali, Pakistani, and Sri Lankan)
+Southeast Asian (including Burmese, Cambodian, Filipino, Hmong, Indonesian, Laotian, Malaysian, Mien, Singaporean, Thai, and Vietnamese)
+White
+Prefer not to say
+Self-describe
