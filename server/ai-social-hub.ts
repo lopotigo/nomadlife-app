@@ -7,6 +7,7 @@ import * as schema from "@shared/schema";
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
 });
 
 function requireAuth(req: Request, res: Response, next: NextFunction) {

@@ -9,6 +9,7 @@ import { join } from "path";
 export const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
 });
 
 export type AudioFormat = "wav" | "mp3" | "webm" | "mp4" | "ogg" | "unknown";

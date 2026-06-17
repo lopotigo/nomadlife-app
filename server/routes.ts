@@ -3056,6 +3056,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
           const ai = new OpenAI({
             apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
             baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+            fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
           });
           
           const prompt = `Genera una guida per nomadi digitali per "${city}" in Italia. IMPORTANTE: Usa SOLO informazioni verificate. Se non hai dati certi su un aspetto specifico (es. nomi di coworking, velocità wifi), scrivi consigli generali utili senza inventare nomi di locali, servizi o dati specifici che non conosci con certezza.${webContext}
@@ -3452,6 +3453,7 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
       const openai = new OpenAI({
         apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
         baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+        fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
       });
 
       const scored = await Promise.all(allJobs.map(async (job: any) => {
@@ -3530,6 +3532,7 @@ Languages: Italian (native), English (professional)
       const openai = new OpenAI({
         apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
         baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+        fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
       });
 
       const extractResponse = await openai.chat.completions.create({
