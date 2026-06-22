@@ -1,0 +1,105 @@
+Seeking Technical Co-Founder / Founding Engineer for Fintech Startup
+
+Posted 2 hours ago
+
+Worldwide
+Summary
+Hi,
+
+I’m a solo founder from Sweden building Runda, a fintech startup focused on making saving money effortless.
+
+The concept is simple:
+
+Users connect their bank account through Open Banking, and every card purchase is automatically rounded up to the nearest whole amount. The spare change is then accumulated as savings.
+
+Example:
+
+* €4.60 purchase
+* Rounded to €5.00
+* €0.40 saved automatically
+
+The goal is to help people build savings habits without changing their lifestyle.
+
+⸻
+
+Current Stage
+
+I have:
+
+* Product vision and roadmap
+* Pitch deck
+* Initial MVP specification
+* Market research completed
+* Research on Open Banking providers (Tink, Nordigen, etc.)
+
+I am now looking for a technical partner to help build the first MVP and shape the product from the ground up.
+
+⸻
+
+What I Am Looking For
+
+Ideally someone who:
+
+* Has experience with React / Next.js
+* Can work with APIs and backend systems
+* Understands authentication and security
+* Has an interest in fintech
+* Wants to build a startup, not just complete a project
+
+This could begin as a freelance engagement but my goal is to find someone interested in becoming a long-term technical co-founder.
+
+⸻
+
+MVP Scope
+
+Phase 1:
+
+* User onboarding
+* Savings dashboard
+* Round-up calculation engine
+* Transaction history
+* Savings goals
+* Responsive mobile-friendly design
+
+Initially, the MVP can use simulated transactions before integrating Open Banking.
+
+⸻
+
+Tech Stack (Flexible)
+
+* Next.js
+* TypeScript
+* Tailwind
+* Supabase
+* Vercel
+
+Open to suggestions.
+
+⸻
+
+Why Join?
+
+I am not looking for someone to simply write code.
+
+I am looking for a partner who wants to help build a company with long-term potential in the fintech space.
+
+If you’re interested, please send:
+
+* A short introduction
+* Relevant projects you’ve worked on
+* Your preferred tech stack
+* Whether you would be interested in a long-term founder journey
+
+Looking forward to connecting.
+
+Less than 30 hrs/week
+Hourly
+
+1 to 3 months
+Duration
+
+Intermediate
+I am looking for a mix of experience and value
+Contract-to-hire opportunity
+This lets talent know that this job could become full time.
+Learn more
