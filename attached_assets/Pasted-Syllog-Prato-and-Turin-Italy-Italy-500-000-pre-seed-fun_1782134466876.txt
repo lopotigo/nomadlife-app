@@ -1,0 +1,47 @@
+Syllog
+📍 Prato and Turin, Italy
+🌍 Italy
+💰 €500,000 pre-seed funding
+👥 <20
+Syllog is an innovative startup that has developed an autonomous learning platform, using artificial intelligence to create engaging and personalized training paths for employee growth and development within companies.
+AI
+⚡ PERCHÉ FEDERICO SI ADATTA
+Transforming employee training experiences with AI.
+✉️ PITCH EMAIL GENERATO
+📋 Copia pitch
+Oggetto: Transforming Employee Training with AI
+Hi,
+
+I'm Federico Poletti, a full-stack developer with expertise in TypeScript, React, and Node.js. I recently launched NomadLife, a production PWA featuring an AI chatbot and real-time chat functionalities (nomad-life.app).
+
+I admire Syllog's innovative approach to personalized employee training using AI. I believe my experience in integrating AI solutions can help enhance your platform further.
+
+I'd love to chat about potential synergies and how I could contribute to Syllog's mission. Would you be open to a quick call or a reply?
+
+Best regards,
+Federico Poletti | federicopoletti83@gmail.com | nomad-life.app
+🌐 Sito
+PugliAI
+📍 Italy
+🌍 Italy
+👥 <20
+PugliAI is an Italian AI consulting team focused on helping SMEs with custom AI solutions, leveraging over 15 years of expertise in the industry.
+AI
+⚡ PERCHÉ FEDERICO SI ADATTA
+Custom AI solutions tailored for SMEs.
+✉️ PITCH EMAIL GENERATO
+📋 Copia pitch
+Oggetto: Collaboration Opportunity with a Full-Stack Developer
+Hi,
+
+I’m Federico, a full-stack developer skilled in TypeScript, React, Node.js, and PostgreSQL. I’ve built NomadLife (nomad-life.app), a production PWA featuring an AI chatbot and booking capabilities.
+
+With my technical expertise and your team’s 15 years of experience in custom AI solutions, I see a great opportunity for collaboration to empower SMEs further. I’m passionate about leveraging technology to create impactful solutions.
+
+Would you be open to a brief call to discuss potential synergies?
+
+Looking forward to your reply.
+
+Federico Poletti | federicopoletti83@gmail.com | nomad-life.app
+🌐 Sito
+Ultimo aggiornamento: 22/06/2026, 14:43:29
