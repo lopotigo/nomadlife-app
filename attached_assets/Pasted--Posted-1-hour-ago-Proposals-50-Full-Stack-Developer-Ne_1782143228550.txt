@@ -1,0 +1,473 @@
+
+Posted 1 hour ago
+•
+Proposals: 50+
+Full-Stack Developer Needed for Existing SaaS Platform
+Hourly: $25-$60 - Expert - Est. Time: Less than 1 week, not_sure
+We're looking for a full-stack developer to help out with an existing SaaS platform that manages partner workflows, data pipelines, and business operations. The platform is already live and being used by clients, so this isn't a greenfield project. We have a list of features and improvements that need to be built, along with integrations and backend tasks that have piled up.   Some of the things you'll be working on: - Building new features across the full stack - Python backend + React frontend - Extending existing API endpoints and adding new ones - Adding business logic around workflows and data processing - Integrating third-party services (Stripe, Twilio, CRM, analytics) - Improving database queries and overall performance - Fixing issues as you touch related areas - Building admin dashboards and internal tools   Tech stack: Python (FastAPI/Django), Node.js (Express/NestJS), React/Next.js, PostgreSQL, REST APIs.   What we're looking for: - Strong full-stack experience - Python is our preferred backend language, but we also have Node.js services - Comfortable jumping into an existing codebase - Able to figure things out without hand-holding - Experience with SaaS products, multi-tenant platforms, marketplaces, or workflow systems If you've worked on data-heavy applications, internal business tools, or AI-powered platforms, definitely reach out. Please include examples of similar platforms you've worked on and your approach to taking over an existing codebase.
+more about "Full-Stack Developer Needed for Existing SaaS Platform"
+Skills
+React
+Next.js
+Node.js
+Python
+Web Application
+Laravel
+PostgreSQL
+SaaS
+API Integration
+Stripe
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$6K+ spent
+
+  ITA
+Posted 6 hours ago
+•
+Proposals: 50+
+Full‑Stack + AI Developer for a Mobile + Backend + LLM Feature
+Hourly: $30-$47 - Expert - Est. Time: Less than 1 week, Less than 30 hrs/week
+We’re looking for a developer who can implement a feature that spans mobile, backend, and AI/LLM layers. The scope is focused, the requirements are clear, and we need someone who writes stable, well‑structured code and communicates reliably. For new projects, we prepare clear MVP roadmaps; for existing ones, we run code audits and strengthen architecture. For this engagement, we need a developer who can take a feature from idea to working implementation with minimal supervision. What needs to be done - Implement or refine a mobile feature (React Native or Flutter) - Update or extend the backend API (Laravel or FastAPI) - Add an AI/LLM component such as semantic search, RAG, or a chat workflow - Ensure smooth UX, stable performance, and clean architecture - Provide short, regular progress updates Deliverables A working feature (mobile + backend + AI) with clean code and brief implementation notes. To apply Send: - A couple of relevant projects - Short examples of mobile + backend + AI work - Your availability for the next 1-2 weeks
+more about "Full‑Stack + AI Developer for a Mobile + Backend + LLM Feature"
+Skills
+Laravel
+PostgreSQL
+Redis
+OpenAI API
+Docker
+GitLab
+Full-Stack Development
+React Native
+Flutter
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$20K+ spent
+
+  Latvia
+Posted 2 hours ago
+•
+Proposals: 20 to 50
+Seeking Technical Co-Founder / Founding Engineer for Fintech Startup
+Hourly - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+Hi, I’m a solo founder from Sweden building Runda, a fintech startup focused on making saving money effortless. The concept is simple: Users connect their bank account through Open Banking, and every card purchase is automatically rounded up to the nearest whole amount. The spare change is then accumulated as savings. Example: * €4.60 purchase * Rounded to €5.00 * €0.40 saved automatically The goal is to help people build savings habits without changing their lifestyle. ⸻ Current Stage I have: * Product vision and roadmap * Pitch deck * Initial MVP specification * Market research completed * Research on Open Banking providers (Tink, Nordigen, etc.) I am now looking for a technical partner to help build the first MVP and shape the product from the ground up. ⸻ What I Am Looking For Ideally someone who: * Has experience with React / Next.js * Can work with APIs and backend systems * Understands authentication and security * Has an interest in fintech * Wants to build a startup, not just complete a project This could begin as a freelance engagement but my goal is to find someone interested in becoming a long-term technical co-founder. ⸻ MVP Scope Phase 1: * User onboarding * Savings dashboard * Round-up calculation engine * Transaction history * Savings goals * Responsive mobile-friendly design Initially, the MVP can use simulated transactions before integrating Open Banking. ⸻ Tech Stack (Flexible) * Next.js * TypeScript * Tailwind * Supabase * Vercel Open to suggestions. ⸻ Why Join? I am not looking for someone to simply write code. I am looking for a partner who wants to help build a company with long-term potential in the fintech space. If you’re interested, please send: * A short introduction * Relevant projects you’ve worked on * Your preferred tech stack * Whether you would be interested in a long-term founder journey Looking forward to connecting.
+more about "Seeking Technical Co-Founder / Founding Engineer for Fintech Startup"
+Skills
+JavaScript
+Tech & IT
+Web Development
+React
+Product Management
+Technical Writing
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  Sweden
+Posted 2 hours ago
+•
+Proposals: 50+
+Full-Stack Developer (React/Node) for Multi-Vendor Marketplace MVP
+Fixed-price - Expert - Est. Budget: $400
+We're building a multi‑vendor marketplace that connects customers with local service providers - think booking, payments, and vendor dashboards in one place. Targeting Europe, with a mobile‑first web app. We have a clear product vision, but we're starting small. For Phase 1, we need a functional vendor onboarding flow. What we need right now: Vendor registration form with business name, contact info, and category Dashboard where vendors can: Edit their profile Add services (name, description, price) Edit or delete services Tech is flexible - we're open to your stack recommendations. Probably React / Next.js + Node.js + PostgreSQL, but happy to hear your suggestions. Deliverables: Working registration + login Profile edit Service CRUD Mobile‑friendly UI Data saved to database Please include: Similar projects you've built Your recommended stack
+more about "Full-Stack Developer (React/Node) for Multi-Vendor Marketplace MVP"
+Skills
+Full-Stack Development
+Next.js
+React
+Node.js
+API Integration
+SaaS
+Web Application
+FastAPI
+Dashboard
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$6K+ spent
+
+  ITA
+
+Featured
+Posted 8 hours ago
+•
+Proposals: 50+
+Full-Stack Developer wanted: Architect Booking Marketplace (Germany) — Next.js / React + Backend
+Hourly: $25-$120 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+### What we're building We are building a booking marketplace for architects in Germany — think booking.com for architects. The core idea: homeowners and property developers who are planning a construction project (new builds, renovations, extensions) can find the right architect in their region, view their profile, and directly book a paid 60-minute consultation — online or in person. No back-and-forth enquiries, no uncertainty about pricing. One clear price, one clear booking. The platform will cover architects across all of Germany, from major cities like Munich, Berlin, and Hamburg down to smaller towns. Our primary growth engine is local SEO — we want to rank for search terms like "Architekt in München", "Architekt in Nürnberg", "Architekt für Einfamilienhaus München" and thousands of similar location-based queries. The platform therefore needs to generate individual landing pages for each city/region, dynamically from the database. This is a long-term project, not a quick prototype. We want to build this properly from the start. --- ### Core functionality we need **1. Architect profiles** Each architect has a public profile page with: photo, office details, specialisations (new build, renovation, interior architecture etc.), project gallery, ratings, pricing, and available appointment slots. Profiles exist in two states: - **Unclaimed** — automatically created from publicly available data (name, address, phone, Google reviews). Visible in search but not bookable. Shows a "Are you this architect? Claim your profile" CTA. - **Claimed** — the architect has registered, verified their identity, and filled out the profile themselves. Fully bookable, calendar connected, pricing set. **2. Search & filtering** Users can search and filter architects by: region/city, project type (Einfamilienhaus, Sanierung, Mehrfamilienhaus etc.), budget range, architectural style, and availability. Results page similar to Booking.com in UX. **3. Booking system** Direct calendar booking for a 60-minute consultation. Integration with Google Calendar, Outlook, and Apple Calendar. Payment collected upfront at time of booking. Automatic split: client pays ~349 €, architect receives ~199 €, platform retains ~150 € commission — all handled automatically. **4. Payment & commission splitting** Stripe Connect for automatic payment routing. No manual transfers. Platform acts as the intermediary — payment flows through platform, architect payout is automatic. **5. Automated profile creation (scraping)** We need a pipeline that automatically creates Unclaimed profiles by pulling data from public sources (German Architektenkammer directories, Google Maps, etc.) and writing them into the database. This is key for our SEO volume strategy — we want hundreds to thousands of profiles from day one, even before architects claim them. **6. SEO city pages** Dynamically generated landing pages for every city/region in Germany: "Architekt in [Stadt]", showing the local architects. These pages need to be properly server-side rendered for Google indexing. Scalable to thousands of pages. **7. Architect dashboard** After claiming their profile, architects can: edit their profile, connect their calendar, set availability and pricing, view upcoming bookings, and see their earnings/payouts. **8. Reviews** Google reviews pulled in automatically. Option for platform-internal review after a completed session. --- ### Tech stack we have in mind We are leaning towards **Next.js** (frontend + SSR for SEO) and **Supabase** (database + auth) combined with **Stripe Connect** (payments) and **Cal.com** (calendar booking), deployed on **Vercel**. However, we are open to your input. If you have a strong case for a different approach that better serves the requirements above — especially the SEO scalability and the automated profile pipeline — we want to hear it. Please tell us in your application how you would approach this technically and why. --- ### What we are looking for **Must-have skills:** - Strong experience building marketplace or directory platforms - Next.js (App Router, SSR/SSG, dynamic route generation) - Supabase or comparable (PostgreSQL, Auth, Row Level Security) - Stripe Connect (marketplace payment splitting) - REST API / webhook integrations - Calendar integrations (Google Calendar API, Cal.com or similar) - Experience with scraping / automated data pipelines (Python or Node) - Clean, maintainable code — this is a long-term project **Nice to have:** - Experience with German-language projects or the German market - SEO-technical understanding (structured data, performance, crawlability) - Familiarity with directory/listing platforms --- ### What we expect from your application We are not just looking for someone who can execute a spec. We want a developer who thinks with us. Please answer the following in your application: 1. Have you built something similar before? If yes, please share examples. 2. How would you approach the tech stack? Do you agree with our direction or would you suggest something different — and why? 3. How would you structure the automated profile creation pipeline? 4. What is your realistic estimate for getting to a working MVP (core features: profiles, search, booking, payment)? 5. What is your rough budget estimate for the full scope described above?
+more about "Full-Stack Developer wanted: Architect Booking Marketplace (Germany) — Next.js / React + Backend"
+Skills
+Database Development
+Web Development
+CSS
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$60K+ spent
+
+  Germany
+Posted 3 hours ago
+•
+Proposals: 50+
+AI SaaS Developer for AI-Powered HR Management Platform
+Hourly: $25-$47 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+We are looking for an experienced AI SaaS Developer to build an AI-powered HR Management platform that automates recruitment and HR operations. The platform will leverage LLMs and AI agents to streamline tasks such as: - Resume parsing and screening - Candidate ranking and shortlisting - AI-powered candidate-job matching - Interview scheduling and automation - Employee onboarding workflowsHR chatbot and knowledge assistant - Automated reporting and analytics Required Skills - React / Next.js - Node.js, NestJS, or Python (FastAPI) - OpenAI, Claude, Gemini, or other LLMs - AI Agents, LangChain/LangGraph - RAG Architecture & Vector Databases - PostgreSQL / MongoDB - AWS, Docker, CI/CD Ideal Candidate - Proven experience building AI SaaS products - Experience with workflow automation and AI-driven applications - Strong system architecture and scalability knowledge - Ability to deliver production-ready solutions When Applying Please share: - Similar AI SaaS projects you’ve built - Relevant AI agent or automation experience - Your proposed tech stack and development approach - Estimated timeline and availability
+more about "AI SaaS Developer for AI-Powered HR Management Platform"
+Skills
+Artificial Intelligence
+SaaS
+Python
+API
+React
+JavaScript
+Amazon Web Services
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+ 
+5.0
+$1K+ spent
+
+  Sweden
+Posted 10 hours ago
+•
+Proposals: 50+
+Senior Full-Stack Developer (AI + GoHighLevel Integrations)
+Hourly: $25-$60 - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+Senior Full-Stack Developer (AI + GoHighLevel Integrations) Project Overview I'm building a sales execution platform that sits on top of GoHighLevel. This is NOT a CRM replacement. GoHighLevel remains the system of record. The goal is to create a faster, cleaner, and more intelligent operating layer for sales teams. The platform will connect to multiple GoHighLevel subaccounts and provide a unified workspace for managing conversations, follow-ups, tasks, and sales activity across all locations. Core Problem Sales teams lose revenue because follow-ups get buried. A lead says: * "Call me next week" * "Call me tomorrow at 3pm" * "Reach back out after I get approval" * "Follow up in 30 days" These conversations disappear into thousands of messages. Managers have no visibility into which opportunities are being neglected, and reps spend hours searching through conversations. Vision Build a platform that provides: Unified Multi-Location Inbox Users can connect multiple GoHighLevel subaccounts and view conversations in one centralized interface. Examples: * Location A * Location B * Location C * Location D Users can: * View conversations by location * View conversations across all locations * Search across all connected accounts * Filter by status, owner, tags, and follow-up stage AI Follow-Up Management The system automatically identifies follow-up commitments inside conversations. Examples: * Call back tomorrow * Follow up next week * Waiting on approval * Waiting on estimate * Requested pricing * No response received AI should create actionable follow-up tasks and surface overdue opportunities. ### Sales Execution Dashboard Managers should immediately see: * Overdue follow-ups * Leads needing responses * Opportunities at risk * Rep performance * Follow-up completion rates The goal is to identify revenue leaks before they become lost deals. Task Layer Instead of manually searching conversations, users receive structured tasks generated from communication history. Examples: * Call Suzanne tomorrow at 10am * Follow up with Bob in 7 days * Waiting on homeowner approval * Quote sent, no response for 14 days Long-Term AI Features Future roadmap: * AI-generated follow-up suggestions * AI conversation summaries * Opportunity health scoring * Automated lead prioritization * Revenue-risk detection * Manager alerts Technical Requirements Looking for someone experienced with: * React / Next.js * Node.js * PostgreSQL * Supabase * GoHighLevel APIs * AI workflows (OpenAI, Claude, etc.) * Multi-tenant SaaS architecture * Authentication and permissions * Scalable dashboard applications ## What I'm Looking For I am NOT looking for a freelancer who only builds pages. I need someone who can help architect a real SaaS product and make strong technical decisions as the platform evolves. Experience building CRM-adjacent tools, communication platforms, sales software, or AI workflow products is a major advantage.
+more about "Senior Full-Stack Developer (AI + GoHighLevel Integrations)"
+Skills
+Web Application
+API
+API Integration
+JavaScript
+Node.js
+Amazon Web Services
+Python
+MongoDB
+PHP
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$7K+ spent
+
+  USA
+Posted 10 hours ago
+•
+Proposals: 50+
+AI Specialist for Custom Solutions
+Hourly: $20-$50 - Expert - Est. Time: More than 6 months, Less than 30 hrs/week
+We are seeking an AI specialist to develop custom solutions for our small professional services business. The role involves leveraging AI tools to create tailored solutions that enhance our business operations. The ideal candidate will have experience in AI development and a strong understanding of how to apply AI in practical business scenarios.
+Skills
+Artificial Intelligence
+GitHub
+Vercel
+Supabase
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$10K+ spent
+
+  Australia
+Posted 6 hours ago
+•
+Proposals: 50+
+AI Automation Specialist for E-Commerce Brand
+Hourly: $20-$55 - Intermediate - Est. Time: 3 to 6 months, Less than 30 hrs/week
+AI automation specialist (n8n/Make + LLM) for Shopify e-commerce - ongoing We're an established Shopify e-commerce brand operating across 9+ markets, looking for an AI automation specialist to build and maintain our internal automations and the lightweight internal tools that sit on top of them. What the work involves: We automate repetitive operational processes - product content generation and localization across markets, review handling, data syncing between tools, support routing, and ad-ops reporting. Some of these feed internal dashboards and tools that we host ourselves. Most run continuously at volume, so reliability, cost control, and clean error handling are important. Stack and skills: 1. Strong with n8n and/or Make, using Claude or OpenAI APIs as the intelligence layer inside workflows. 2. Comfortable wiring MCP tools into workflows, and able to judge when a task should be a deterministic workflow versus an AI agent. 3. Able to build and deploy lightweight internal dashboards/tools - e.g., pushing a React or static front-end from GitHub to Vercel and managing environment variables 4. Some coding ability (JavaScript or Python) for custom nodes and edge cases. 5. Real e-commerce experience required - ideally Shopify, with multi-market a strong plus. Familiarity with the Meta/Google APIs is welcome. How we work: We start with a small paid test task that mirrors real work, then move to an ongoing engagement if it's a good fit. To be considered, please include in your reply: 1. Links to 2–3 things you've actually shipped to production (not demo videos) - automations and, if you have them, internal tools/dashboards, e-commerce if possible. 2. Which automation platform you default to, and why. 3. A short outline of how you'd build a pipeline that pulls data from several sources, combines it, and feeds a dashboard you'd host. 4. Your rate and your timezone / typical availability. Looking forward to seeing your work.
+more about "AI Automation Specialist for E-Commerce Brand"
+Skills
+Automation
+AI Agent Development
+AI Builder
+
+Verified
+ 
+Payment verified
+ 
+5.0
+$100K+ spent
+
+  Germany
+Posted 3 hours ago
+•
+Proposals: 20 to 50
+Full Stack Developer for E-Commerce
+Hourly: $15-$35 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are seeking a skilled Full Stack Developer to enhance our existing E-Commerce platform. The ideal candidate will have experience in both front-end and back-end development, with a strong understanding of code maintenance and updates. Responsibilities include improving user experience, optimizing performance, and integrating new features. Familiarity with existing codebases is essential.
+more about "Full Stack Developer for E-Commerce"
+Skills
+Next.js
+NestJS
+postgress
+Ecommerce Website
+
+Actively Recruiting
+ 
+Unverified
+ 
+Payment unverified
+$0 spent
+
+  United Kingdom
+Posted 10 hours ago
+•
+Proposals: 50+
+Senior Full-Stack Developer to Build MVP from Existing SaaS Prototype
+Hourly - Expert - Est. Time: Less than 1 month, not_sure
+I am looking for a strong full-stack developer to help take an existing AI-enabled SaaS prototype into MVP. The prototype is already built and the product workflow is mapped. I now need someone who can help translate that into a real product with clean architecture, sensible MVP scope, and strong technical judgement. What I need I need someone who can: * review the existing prototype * recommend the right MVP structure * build the first functional version properly * make good decisions about what belongs in MVP vs later phases * work clearly with a non-technical founder Core skills required Please only apply if you are confident with most of the following: * Frontend: Next.js, React, TypeScript, Tailwind CSS * Backend: Node.js / full-stack JavaScript or TypeScript * Database: Supabase, PostgreSQL, Firebase, or similar * Authentication: NextAuth/Auth.js, Clerk, Supabase Auth, or similar * Deployment: Vercel * Version control: GitHub * Product build: taking a prototype or design into a structured MVP * Workflow logic: building multi-step user journeys and connected dashboard-style products * Clean architecture: scalable code structure, sensible component organisation, reusable logic * API / AI integration readiness: experience preparing products for future AI/API workflows * Communication: ability to explain technical decisions clearly to a non-technical founder Nice to have * experience with SaaS dashboards or workflow tools * experience with EdTech, productivity, or HR / professional development platforms * experience integrating AI features or preparing products for AI-supported workflows * experience with Figma handoff / design-to-build implementation This is a good fit if you have * built SaaS products from prototype to MVP before * strong frontend and backend experience * good product sense, not just coding ability * the ability to think practically about scope, speed, and future scalability In your proposal, please include * 2–3 relevant SaaS / MVP examples * whether you have taken a product from prototype to MVP before * the tech stack you would recommend for this build * how you would approach scoping Phase 1 of the MVP * your pricing approach and likely budget range * your availability and estimated timeline Process I would expect to start with a prototype review and a clear MVP recommendation before development begins. At this stage, I am sharing enough to recruit the right person. More detailed product information will be shared with shortlisted candidates.
+more about "Senior Full-Stack Developer to Build MVP from Existing SaaS Prototype"
+Skills
+SaaS
+Tailwind CSS
+TypeScript
+Node.js
+React
+JavaScript
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+ 
+5.0
+$900+ spent
+
+  United Kingdom
+Posted 15 hours ago
+•
+Proposals: 50+
+OpenAI API Integration for Existing Web App
+Hourly: $50-$75 - Intermediate - Est. Time: Less than 1 month, Less than 30 hrs/week
+I need a developer to add a simple OpenAI API feature to my existing web app. Users should be able to submit text and receive a clean AI-generated summary or response. Please have experience with OpenAI API, frontend integration, backend API routes, and basic error handling.
+Skills
+Python
+API
+API Integration
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  United States
+Posted 9 hours ago
+•
+Proposals: 20 to 50
+Senior Full-Stack Engineer — AI Data Pipeline + PWA (B2B SaaS Platform, UAE Market)
+Hourly - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+OVERVIEW: We are building a B2B SaaS platform for licensed professionals in the UAE. The platform ingests structured and unstructured data files from multiple enterprise sources daily, normalises them using AI into a unified database, and serves results via a natural language search interface. We cannot share further details about the industry or use case until an NDA is signed. This is intentional and non-negotiable. THE CORE TECHNICAL CHALLENGE: We receive files daily from 30+ enterprise data sources. Every source uses a different file format and column naming convention. We need a system that: - Automatically ingests files from a monitored email inbox - Uses an LLM to identify and normalise column names into a canonical schema — without any hard-coded rules - Adapts automatically when source file formats change - Makes all data searchable via natural language queries - Serves results in under 2 seconds TECH STACK: Backend: FastAPI (Python) or Node.js Database: PostgreSQL + pgvector Frontend: Next.js + Tailwind CSS (PWA) AI: OpenAI GPT-4o or Anthropic Claude Sonnet Storage: AWS S3 Hosting: Vercel + AWS
+more about "Senior Full-Stack Engineer — AI Data Pipeline + PWA (B2B SaaS Platform, UAE Market)"
+Skills
+Full-Stack Development
+AI Development
+Next.js
+fast api
+PostgreSQL Programming
+
+Unverified
+ 
+Payment unverified
+$0 spent
+
+  India
+Posted yesterday
+•
+Proposals: 20 to 50
+Experienced Developer for AI Tools
+Hourly: $15-$25 - Intermediate - Est. Time: 3 to 6 months, Less than 30 hrs/week
+I'm looking for an experienced developer who enjoys building things quickly with AI tools and teaching others along the way. My goal is not to outsource but to build a team. The ideal candidate will have a strong background in AI development and a passion for mentoring. If you're excited about creating innovative solutions and sharing your expertise, let's connect!
+Skills
+HTML5
+Artificial Intelligence
+Python
+Machine Learning
+API
+Node.js
+Prototyping
+Chatbot Development
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  Croatia
+Posted yesterday
+•
+Proposals: 50+
+AI Developer / AI Agent Engineer to Build & Ship Production Agentic Workflows
+Hourly: $35-$85 - Expert - Est. Time: More than 6 months, not_sure
+We are looking for a senior AI Developer who is also a strong Full Stack Engineer. We need someone who can actually build and ship the product, not just advise us or hand over a demo. We want a real, working generative AI system that runs day to day, not a prototype that sits on a shelf. You will design the AI layer, including AI agents, agentic workflows, and a RAG setup that can answer questions from our internal documents and knowledge base. You will also build the full product around it, deploy it on AWS, and make sure it is stable, secure, and cost-efficient. What Phase One Looks Like The first phase will include: * Building one or more AI agents that can take over a high-volume internal workflow, such as intake, scheduling, and document handling, while integrating with the tools we already use. * Creating a reliable RAG pipeline that pulls accurate answers from our documents without hallucinating. You should be comfortable with Pinecone or Qdrant, hybrid search, re-ranking, and effective chunking. * Building a conversational layer so users can interact with the system through a voice AI assistant and/or chatbot. Experience with LiveKit, ElevenLabs, or the OpenAI Realtime API is useful, especially with WhatsApp and Slack integrations. * Setting up the orchestration layer using LangChain or LangGraph, with n8n for lighter automations, connected to Claude and GPT-4. * Building the full-stack product using React / Next.js and Node.js, with Python for the AI components. * Deploying the system on AWS using services such as Lambda, ECS/Fargate, RDS, S3, and SQS. * Integrating the product with the systems we use day to day, including Stripe, HubSpot, Salesforce, and Slack. About You You are a senior AI Developer / AI Engineer and a genuine Full Stack Engineer with 5+ years of experience shipping production software. You have taken generative AI, LLMs, AI agents, and RAG systems live in real-world environments, not just notebooks, demos, or experiments. You should be able to own this end to end, from architecture and implementation to deployment and production stability. Bonus points if you have experience working in regulated or operations-heavy businesses.
+more about "AI Developer / AI Agent Engineer to Build & Ship Production Agentic Workflows"
+Skills
+AI Agent Development
+AI App Development
+Computer Vision
+Data Science
+Artificial Intelligence
+Machine Learning
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  Germany
+Posted yesterday
+•
+Proposals: 50+
+Website Generation Saas
+Hourly - Expert - Est. Time: Less than 1 month, Less than 30 hrs/week
+We are commissioning an experienced full-stack developer with Anthropic Claude API expertise to build a SaaS platform that automatically generates professional, hosted websites for UK local service businesses — plumbers, electricians, decorators, landscapers, cleaners, and similar tradespeople. The platform uses the Claude API to generate tailored website copy, structure, and SEO content from a short onboarding questionnaire. Sites are hosted on our infrastructure on a monthly subscription. Clients log in to make edits through a simple dashboard — no technical knowledge required. Two telephony add-ons (Virtual Landline and Missed Call SMS) are included in Phase 1. A comprehensive self-serve SEO module — designed to be as simple as possible for non-technical users — is built in Phase 2. The single most important requirement across both phases is design quality and ease of use. Every screen, every interaction, every piece of copy must be designed for someone who has never used a SaaS product before. If a 60-year-old plumber cannot figure it out in 30 seconds, it needs to be redesigned.
+more about "Website Generation Saas"
+Skills
+Full-Stack Development
+Next.js
+React
+JavaScript
+Node.js
+TypeScript
+Python
+NestJS
+PostgreSQL
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  United Kingdom
+Posted 5 hours ago
+•
+Proposals: 50+
+HIPAA-compliant system handling real patient data
+Hourly: $35-$45 - Expert - Est. Time: 3 to 6 months, 30+ hrs/week
+We're building a modern, secure patient portal that actually fixes how healthcare communication should work - fast, simple, and safe. This is a HIPAA-compliant system handling real patient data, so security isn't a checkbox for us - it's the foundation of everything. We're looking for a strong Full Stack Developer who's excited to build real product, not just tickets. What you'll build You'll help create a patient + provider platform where people can: - Log in securely and access health info anytime - View records, appointments, and updates - Message healthcare providers safely - Upload and manage sensitive documents - Receive reminders and notifications that actually matter On the provider side: - Manage patients in a clean dashboard - Communicate securely with patients - Handle documents and clinical workflows - Control access with proper roles and permissions What you'll own - End-to-end feature development (frontend + backend) - Secure auth, roles, and permissions (HIPAA-grade) - APIs for core healthcare workflows - Data security (encryption, safe storage, transmission) - Scalable architecture decisions - Clean, reliable, production-ready code What we're looking for - Solid Full Stack experience (React, Next.js, Node, etc.) - Strong API design skills - Experience with auth systems (JWT, OAuth, sessions) - Comfortable with PostgreSQL or similar databases - Strong understanding of web security (OWASP basics at minimum) - Experience working with cloud (AWS/GCP/Azure) Bonus points if you've touched healthcare or regulated systems before. Why this is interesting You're not joining a feature factory - you're helping design a system that will be used in real clinical environments. That means your decisions actually matter. If you like building things that are secure, scalable, and meaningful - this is a good one. How to apply Send: - A short intro about your full-stack experience - Projects where you've built secure or production systems - Your stack preferences - Anything you've done with sensitive data or complex auth
+more about "HIPAA-compliant system handling real patient data"
+Skills
+Full-Stack Development
+HIPAA
+Healthcare
+AI Platform
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  Spain
+Posted yesterday
+•
+Proposals: 20 to 50
+Real Estate Investment Calculator Website — React, Firebase, Stripe
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
+I'm building Atlas Estate — a real estate investment calculator platform for France. PROJECT OVERVIEW: Convert an existing HTML/CSS/JavaScript demo into a live, production-ready website. I'll provide the demo file — it needs to look and work exactly like this online. TECHNICAL STACK: - Front-end: React (convert from HTML/JS) - Back-end: Node.js (Express) - Database: Firebase (Firestore + Auth) - Payments: Stripe integration - Email: SendGrid for automated reports - Hosting: Vercel - Domain: Custom domain (atlas-estate.fr or similar) KEY FEATURES: - Responsive design (desktop + mobile) - Multi-page: Home, Calculator, Listings, Investor Dashboard, Promoter Dashboard, Pricing - Real-time calculator with 12 French cities, VEFA payment schedules, mortgage options - Email lead capture with backend storage - Stripe subscription + payment integration - Claude AI chat integration (I'll provide API key) - Fully French language DELIVERABLES: - GitHub repo with clean, documented code - Staging server access - All API keys & database access under my accounts - Deployment to production TIMELINE: 4–6 weeks IMPORTANT: Full code ownership for me. I need complete access to all code, repos, and infrastructure. I'll provide the HTML demo file + detailed specifications. Please confirm you have experience with Firebase, Stripe, and React before applying.
+more about "Real Estate Investment Calculator Website — React, Firebase, Stripe"
+Skills
+Elementor
+WordPress
+Web Development
+WordPress Website Design
+Web Design
+Figma
+WooCommerce
+Landing Page
+
+Actively Recruiting
+ 
+Unverified
+ 
+Payment unverified
+$0 spent
+
+  France
+Posted 15 hours ago
+•
+Proposals: 50+
+Senior AI Engineer for Web App Launch
+Hourly: $25-$47 - Expert - Est. Time: Less than 1 week, Less than 30 hrs/week
+I’m the founder of mxtape, an AI-powered consumer web app heading into launch, and I need a senior engineer to help finish the hardest part. The app is built with React, Node.js, and MongoDB, and we’re looking for someone who can work closely with me to deliver a polished, reliable product. This is a small, focused project for someone who can move quickly, solve complex problems, and help us cross the finish line.
+more about "Senior AI Engineer for Web App Launch"
+Skills
+JavaScript
+HTML5
+PHP
+Android App Development
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  United States
+Posted yesterday
+•
+Proposals: 20 to 50
+React / TypeScript Developer for Live SaaS Platform (Supabase, Stripe)
+Hourly - Intermediate - Est. Time: More than 6 months, Less than 30 hrs/week
+Hi, I run a software platform that helps nonprofits raise money and manage their donors. It is already built and live, real organizations use it, and it is growing. I am looking for a developer to help me build out our features over the coming months. The platform is built on React, TypeScript, Supabase (Postgres), and Stripe, deployed on Cloudflare. This stack is already in place, so you would be building on top of an existing product, not starting from scratch. One thing that is important to me: I want someone who works with AI coding tools like Claude Code and uses them well. I work this way already and I want to move fast. At the same time, I want someone who actually understands their code and can tell when the AI is wrong. I am not looking for someone who just pastes whatever the AI gives them. Real skill plus AI fluency is the combination I want. What you would help build, mostly on the organization side of the product: - A full donor CRM: donor profiles with complete giving history, notes, tags and groups, contact and relationship fields, and a spreadsheet import wizard so organizations can move their existing donors in - A donor timeline that shows every donation, email, and interaction in one place - Dashboards, analytics, and reporting across donations and campaigns - A calendar with reminders, plus a notification center - Email and donor relationship tools, including automated and AI-assisted emails - Custom branding and reusable templates for organization pages and campaigns - An embeddable donation widget organizations can drop into their own websites - General polish and consistency across desktop and mobile A few things that matter to me: - You communicate clearly and you respond. I am easy to work with, but I need a teammate I can reach when I need to. - You are organized and careful. We work one feature at a time, you build on a branch, you show me your work, and nothing ships without review. - You can work independently once we agree on what is being built. To start this is around 5 to 10 hours a week. For the right person there is real room to grow into a much bigger ongoing role, including full time. Nice to have: experience with Stripe, with SaaS products, or with building CRM or donor tools. If this sounds like you, please tell me a little about yourself and include: 1. A project you have built with React and Supabase, with a link or a short walkthrough. 2. A short Loom video walking me through any past project you are proud of. 3. One thing you built using an AI coding tool, and a moment where you had to step in and fix something the AI got wrong. 4. How many years you have been coding, and your general availability. I would rather read a few honest sentences and see one real example than a long generic proposal. Looking forward to hearing from you, thank you.
+more about "React / TypeScript Developer for Live SaaS Platform (Supabase, Stripe)"
+Skills
+PostgreSQL
+CSS
+React
+TypeScript
+Git
+Stripe
+Supabase
+AI Fluency
+REST API
+
+Actively Recruiting
+ 
+Verified
+ 
+Payment verified
+$0 spent
+
+  United States
+Posted 14 hours ago
+•
+Proposals: 50+
+Web/Mobile Developer (React)
+Hourly - Intermediate - Est. Time: Less than 1 week, Less than 30 hrs/week
