@@ -1,0 +1,499 @@
+
+REMOTIVE
+Senior Independent Software Developer
+A.Team
+📍 Americas, Europe, Israel
+💰 $90 - $150 /hour
+🕐
+〜 Media
+go
+wordpress
+chat
+apple
+🎯 Match tecnico: 85
+✨ Opportunità: ?/15
+Strong match with remote work and location preference (Europe)
+Skilled in relevant technologies (TypeScript, React) but lacks the seniority level required for 'Senior' position
+Proficiency in web development aligns with the job scope, but not a direct match for the specific stack (go, wordpress)
+85
+SCORE
+Candidati →
+REMOTIVE
+Frontend Developer
+Quinncia Inc
+📍 Worldwide
+💰 $20k – $35k • No equity
+🕐
+〜 Media
+CSS
+docker
+frontend
+graphql
+🎯 Match tecnico: 70
+✨ Opportunità: ?/15
+Strong match with front-end technologies like React and TypeScript.
+Experience in building a full production application, though only 1 year which is below the desired experience for this role.
+Remote work is acceptable, but the required hours may not align with Federico's preference for EU timezone compatibility.
+Job requires full-time commitment which Federico did not express as his preference.
+Salary range may be lower than Federico's minimum rate of €25/hr equivalent.
+70
+SCORE
+Candidati →
+REMOTIVE
+Staff Software Engineer, Product (Campinas)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 55
+✨ Opportunità: ?/15
+Stack partially matches; TypeScript and React are applicable, but PHP and Laravel are not in Federico's expertise.
+Remote work is available, but the required location is specifically Campinas, Brazil, which does not align perfectly with Federico's preference for EU timezone compatibility.
+Federico has 1 year of experience, while the role likely requires more seniority given the title's focus on staff responsibilities.
+Location requirement (must be in Campinas, Brazil)
+Higher experience level required for Staff Software Engineer position
+55
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer (Campinas)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 55
+✨ Opportunità: ?/15
+Strong alignment with some technologies (TypeScript, React) but lack of experience with AWS, PHP, and backend management roles.
+Remote work is available but location preference does not align since the position is primarily targeted at candidates in Brazil.
+1 year of self-taught experience may not meet expectations for a 'Staff Product Engineer' role, typically requiring more experience.
+Location preference does not match as it is tailored for candidates in Brazil.
+55
+SCORE
+Candidati →
+REMOTIVE
+Senior Independent AI Engineer / Architect
+A.Team
+📍 Americas, Europe, Israel
+💰 $120 - $170 /hour
+🕐
+〜 Media
+go
+UI/UX
+wordpress
+chat
+🎯 Match tecnico: 45
+✨ Opportunità: ?/15
+The stack match is limited because the job is for an AI Engineer/Architect and requires experience with more advanced technologies than listed in Federico's profile.
+Remote work is available, but location compatibility may be an issue due to the requirements and target locations of the job.
+Federico has only 1 year of self-taught experience, while the position is looking for a senior level engineer, reflecting a significant mismatch in experience.
+Position is for a senior role which requires significantly more experience than Federico has
+Role might require additional skills or technologies not present in Federico's stack
+45
+SCORE
+Candidati →
+REMOTIVE
+Staff Software Engineer, Product (Belo Horizonte)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 45
+✨ Opportunità: ?/15
+Strong match on stack (TypeScript, React) but lacks experience with key technologies (AWS, PHP, Laravel, etc.)
+Job is remote but specifically located for candidates in Brazil, which may create timezone conflicts with Federico's EU preference
+Limited experience (1 year) does not meet the expectations for a Staff Software Engineer role
+Location requirement (remote only for candidates in Brazil)
+Experience level (Staff Software Engineer typically requires more than 1 year)
+45
+SCORE
+Candidati →
+REMOTIVE
+Staff Software Engineer, Product (São Paulo)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 45
+✨ Opportunità: ?/15
+Strong stack match with TypeScript and React skills.
+Lacks geographical eligibility as the position is remote but requires candidates in São Paulo.
+Experience level does not meet the 5+ years requirement for a Staff Software Engineer role.
+Requires 5+ years experience
+Location preference is not aligned with the job's São Paulo requirement.
+45
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer (Florianópolis)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 45
+✨ Opportunità: ?/15
+Stack partially matches, familiar with Typescript and React, but lacks experience with PHP, AWS, and Laravel.
+Remote position not compatible with EU timezone; location preference is not met as company is located in Brazil.
+Experience is on the lower end with only 1 year and the role may require more experience in management or larger teams.
+Not located in EU timezone
+Lacks preferred backend experience (PHP, AWS)
+45
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer (Belo Horizonte)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 45
+✨ Opportunità: ?/15
+Stack match is limited as it emphasizes PHP and React Native which are not in Federico's stack.
+Remote position is only open for candidates in Belo Horizonte, Brazil, which does not align with Federico's preference for EU timezone compatibility.
+Location requirement
+45
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer (São Paulo)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 40
+✨ Opportunità: ?/15
+Stack match includes TypeScript and React, but lacks experience with AWS, PHP, and backend frameworks like Laravel, which are crucial for this role.
+The job is remote but specifically targets candidates located in São Paulo, Brazil, which is outside Federico's preferred location in the EU timezone.
+Location requirements (São Paulo only)
+40
+SCORE
+Candidati →
+REMOTIVE
+Head of Engineering
+Lemon.io
+📍 LATAM, Europe, Central America
+🕐
+〜 Media
+AI/ML
+startup
+marketplace
+fundraising
+🎯 Match tecnico: 40
+✨ Opportunità: ?/15
+Stack match is low as the job is for Head of Engineering which likely requires more than just hands-on technical skills; Federico's experience is more suited for junior roles.
+Remote work preference matches, but the location of the company targets LATAM and Central America, which may lead to time zone challenges depending on company's operating hours.
+Federico has only 1 year of experience which is insufficient for a Head of Engineering position, usually requiring several years of managerial and technical experience.
+Position requires significantly more experience than Federico has.
+40
+SCORE
+Candidati →
+REMOTIVE
+Staff Software Engineer, Product (Porto Alegre)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 40
+✨ Opportunità: ?/15
+Federico has experience with TypeScript and React, which aligns with some of the stack, but other important technologies like PHP and AWS are not part of his expertise.
+The job requires candidates located in Brazil, which is outside of Federico's preferred remote only, EU timezone compatible location.
+Experience required is likely significantly higher than Federico's 1 year self-taught experience, particularly for a Staff Engineer role.
+Location requirement for Porto Alegre, Brazil.
+Potentially higher experience level required for the Staff Software Engineer position.
+40
+SCORE
+Candidati →
+REMOTIVE
+Senior Quality Engineer (Campinas)
+LawnStarter
+📍 Brazil
+💰 $45k - $65k
+🕐
+〜 Media
+backend
+php
+react
+sql
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Stack match is low due to significant use of PHP and React Native, while Federico's expertise is in TypeScript and React 18.
+Location preference and remote compatibility are not met as the role specifies Campinas, Brazil, which may pose timezone difficulties despite being remote.
+Experience match is inadequate as the role seeks a Senior Quality Engineer, which typically requires more than 1 year of experience.
+On-site requirement or priority for specific location (Brazil)
+Requires a senior level of experience that Federico does not meet.
+35
+SCORE
+Candidati →
+REMOTIVE
+Tech Lead Full-Stack Rails Engineer
+Mitre Media
+📍 USA, Canada, USA timezones
+💰 $170k - $200k
+🕐
+〜 Media
+api
+CSS
+docker
+elasticsearch
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Strong stack match with React and PostgreSQL, but no experience with Ruby on Rails or other required technologies like Docker or Kubernetes.
+Remote location preferred, but the job is in US/Canada timezones which may not be ideal for EU compatibility.
+Only 1 year of experience compared to the typical expectations for a Tech Lead position which often demands more extensive experience.
+Job location not compatible with preferred time zone.
+Required experience level exceeds the candidate's self-taught background.
+35
+SCORE
+Candidati →
+REMOTIVE
+Online Data Analyst Canada (French Language)
+TELUS Digital
+📍 Canada
+🕐
+〜 Media
+go
+social media
+research
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+No direct match for the technology stack as the job focuses on data analysis and research rather than development.
+Job requires French language skills, which are not mentioned in Federico's profile.
+Not aligned with Federico's skillset in web development and programming.
+35
+SCORE
+Candidati →
+REMOTIVE
+Online Data Analyst Canada
+TELUS Digital
+📍 Canada
+🕐
+〜 Media
+go
+social media
+research
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Job does not match Federico's technical stack which primarily revolves around TypeScript, React, and backend technologies, while this role focuses on data analysis related to digital maps and research.
+Position is remote but located in Canada, which may lead to time zone compatibility issues, especially if it does not align with the EU timezone.
+Federico has a year of experience in development, while this role may require more specialized skills in data analysis and geography that are not a match for his background.
+Not tech stack aligned (TypeScript, React)
+Experience mismatch for a data-focused role
+35
+SCORE
+Candidati →
+REMOTIVE
+Staff Software Engineer, Product (Florianópolis)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Strong stack match with Typescript and React experience
+Remote role is available
+Limited experience requirements compared to Federico's self-taught background
+Location preference for EU timezone, unclear if work schedules align
+Position is aimed at staff level, generally requiring more experience than Federico has
+35
+SCORE
+Candidati →
+REMOTIVE
+Staff Product Engineer (Porto Alegre)
+LawnStarter
+📍 Brazil
+💰 $80k - $100k
+🕐
+〜 Media
+AWS
+backend
+frontend
+php
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+Strong stack match with TypeScript and React experience.
+Remote work option available.
+Job location preference not compatible with Porto Alegre, Brazil.
+Job requires candidates located in a specific location.
+35
+SCORE
+Candidati →
+REMOTIVE
+Data Labeling Specialists
+Workada
+📍 USA
+💰 $18 - $22/hr
+🕐
+〜 Media
+research
+digital content
+spreadsheets
+🎯 Match tecnico: 35
+✨ Opportunità: ?/15
+The job doesn't align with Federico's technical stack, which is focused on development, while this role is primarily about data labeling and focuses on research and organization.
+The compensation offered is significantly lower than Federico's expectations for his skills and experience.
+Not aligned with skills in software development.
+Compensation well below desired range.
+35
+SCORE
+Candidati →
+REMOTIVE
+Customer Operations & Writing Specialist
+Clerky, Inc.
+📍 Worldwide
+💰 $12K
+🕐
+〜 Media
+AI/ML
+startup
+fundraising
+testing
+🎯 Match tecnico: 30
+✨ Opportunità: ?/15
+Stack match is low, as the job does not require coding skills inherent to Federico's technical stack.
+The role is heavily customer operations and writing-focused, which does not align with Federico's technical background in software development.
+Job does not match Federico's preference for technical roles.
+30
+SCORE
+Candidati →
+REMOTIVE
+Senior Quality Engineer (Florianópolis)
+LawnStarter
+📍 Brazil
+💰 $45k - $65k
+🕐
+〜 Media
+backend
+php
+react
+sql
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+The tech stack is not aligned; the job requires PHP and Laravel while Federico's expertise is in TypeScript, React, and Node.js.
+The position is for a Senior Quality Engineer role, requiring more experience than Federico has (1 year) and the role seems to lean heavily on testing and automation, which he hasn't specifically mentioned in his experience.
+The job is located in Brazil and specifically states a preference for candidates in Florianópolis, which does not align with Federico's location preference for EU timezone.
+The job requires senior-level experience, which Federico does not have.
+25
+SCORE
+Candidati →
+REMOTIVE
+Senior Quality Engineer (São Paulo)
+LawnStarter
+📍 Brazil
+💰 $45k - $65k
+🕐
+〜 Media
+backend
+php
+react
+sql
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+Stack match is weak: Only React and SQL are relevant; other technologies like PHP, Laravel, and Cypress are not aligned with Federico's skillset.
+Preferred location not met: Job is for candidates located in São Paulo, Brazil, while Federico is looking for remote roles compatible with EU timezone.
+Experience match is low: The position is for a Senior Quality Engineer, which typically requires more experience than Federico's 1 year.
+On-site requirement
+Need for more than 5 years of experience
+25
+SCORE
+Candidati →
+REMOTIVE
+Assistant Account Payable
+The Obesity Society
+📍 USA
+🕐
+〜 Media
+accounting
+excel
+data entry
+outlook
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+The job is unrelated to Federico's tech stack (TypeScript, React, Node.js, etc.) and focuses on accounting and clerical tasks.
+The position may require on-site presence, which contradicts Federico's preference for remote work.
+On-site requirement
+25
+SCORE
+Candidati →
+REMOTIVE
+Office Assistant
+Coalition Technologies
+📍 Worldwide
+💰 $31,2k- $52k
+🕐
+〜 Media
+CSS
+excel
+frontend
+git
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+No match for required skills such as CSS, Excel, HTML, PHP, etc.
+The job is not aligned with Federico's skill set in TypeScript, React, Node.js, etc.
+The position is for an Office Assistant, which is unrelated to Federico's expertise in software development.
+25
+SCORE
+Candidati →
+REMOTIVE
+Quality Assurance Rater - German (Germany)
+TELUS Digital
+📍 Germany
+🕐
+〜 Media
+social media
+AI/ML
+research
+product development
+🎯 Match tecnico: 25
+✨ Opportunità: ?/15
+No direct match for the technology stack as this role is focused on quality assurance and analysis rather than development.
+Preferred location is not fully compatible as the job is based in Germany, which may not align with Federico's desired EU timezone compatibility.
+The job doesn't align with Federico's stack and experience in development roles.
+25
+SCORE
+Candidati →
+REMOTIVE
+Senior Data Scientist
