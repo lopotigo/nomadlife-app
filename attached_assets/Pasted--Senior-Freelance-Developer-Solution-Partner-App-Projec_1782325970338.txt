@@ -1,0 +1,68 @@
+
+Senior Freelance Developer & Solution Partner — App Projects (React/Vite · TypeScript · Node · Supabase)
+
+About us
+We're an established German marketing & communications agency. Alongside our core work, we build small-to-mid web applications and internal tools for our clients. We are talking Configurators, Sales Apps, Client Portals. 
+
+We either are tasked to replace an subscription software with a custom webapp. Or we are tasked to build an individual solution that does not exist in the market.
+
+We're expanding our delivery capacity and looking for a senior freelance developer who doesn't just write code, but helps shape the right solution - working from goals and requirements, not purely from finished detailed specs. The goal is a long-term, dependable collaboration, not a one-off.
+
+What you'll do
+- Take a business goal and a set of requirements from us, and help shape the right solution: propose the approach, scope, and a realistic plan, with clear recommendations and tradeoffs
+- Turn that into a working technical plan and acceptance criteria together with us: we don't have to hand you finished detailed specs; we bring the goal, the client context, and what "done" means, you bring the technical answer
+- Build production web apps end-to-end: from plan to running, deployable software
+- Use modern AI-assisted workflows (Claude Code, partly Lovable) where they genuinely speed up delivery without sacrificing code quality, security, or maintainability
+- Hand off clean, documented, maintainable code
+
+How we work (read this carefully — it's the core of the role)
+
+- We own the business goal, the client relationship, and the definition of success.
+- You own turning that into the technical solution, the plan, and the build.
+- We expect you to ask the right questions, recommend the appropriate solution, and push back when a requirement is unclear or scope is drifting — not to silently build whatever is stated.
+- Spec-light, not spec-free: we bring goals and acceptance criteria; you co-create the technical plan.
+- We start with one paid trial project so we both see how the collaboration works in practice and then scale into ongoing work if it's a fit.
+
+Our stack
+- Frontend: React + Vite, TypeScript
+- Backend: Node, Supabase (Postgres, Auth, Row Level Security, Edge Functions)
+- Hosting: Vercel (preferred) or Lovable Cloud (partly)
+- Tooling: GitHub, Claude Code, partly Lovable
+- We're pragmatic about tooling — if you'd build something differently, tell us why.
+
+You're a strong fit if you
+- Are genuinely senior: you've shipped multiple real web apps end-to-end and shaped the solution, not just executed someone else's blueprint
+- Can take a rough goal and come back with a clear, justified plan and recommendation
+- Are strong in TypeScript, React/Vite, Node and Supabase — including Auth and Row Level Security, not just basic CRUD
+- Use AI coding tools fluently and know exactly where they produce fragile or insecure output — and fix it
+- Work cleanly with Git: pull requests, sensible commits, clear branching
+- Communicate and advise clearly in English, work async, and have reasonable EU time overlap
+
+Nice to have
+- Experience handing projects over to other teams (documentation, environment setup, maintainability)
+- Design sensibility for clean, usable UIs
+- German language skills
+
+How to apply
+Applications missing any of the following will be skipped:
+1. 2–3 web apps you personally built; live URLs, your specific role, and one line on where you shaped the solution vs. just executed a given spec
+2. A link to your GitHub or representative code samples
+3. Your availability (hours/week) and your hourly rate (EUR or USD)
+4. Start your message with the word "Effect" so we know you actually read to the end
+
+We read every application that follows these steps. We're looking forward to seeing your work.
+
+Less than 30 hrs/week
+Hourly
+
+1 to 3 months
+Duration
+
+Expert
+I am willing to pay higher rates for the most experienced freelancers
+
+$30.00
+-
+$50.00
+Hourly
+Project Type: Complex project
