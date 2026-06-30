@@ -299,9 +299,11 @@ async function tavilySearch(query) {
       body: JSON.stringify({
         api_key: process.env.TAVILY_API_KEY,
         query,
-        search_depth: 'basic',
-        max_results: 6,
+        search_depth: 'advanced',
+        max_results: 8,
         include_answer: false,
+        include_domains: [],
+        exclude_domains: ['reddit.com', 'quora.com', 'medium.com'],
       }),
     });
     const data = await res.json();
@@ -314,10 +316,12 @@ async function tavilySearch(query) {
 
 async function scoutStartups() {
   const queries = [
-    'AI SaaS startup seed funded 2024 2025 Netherlands Belgium Switzerland Italy small team 5 people developer React Node remote hire',
-    'YC W24 W25 S24 S25 European AI startup small team developer remote job opening',
-    'startup italiana AI intelligenza artificiale seed 2024 2025 piccolo team sviluppatore React Node',
-    'new AI startup Amsterdam Zurich Milan Antwerp London small team React TypeScript developer remote 2025',
+    'site:wellfound.com "full-stack" OR "frontend" OR "react" remote Europe 2025',
+    'site:wellfound.com "TypeScript" OR "Node.js" remote "EU" OR "Europe" 2025',
+    'YC S25 W25 startup hiring "full stack developer" OR "react developer" remote Europe 2025',
+    'site:linkedin.com/jobs "react developer" OR "full stack" startup seed "remote" Europe 2025',
+    '"we are hiring" "react" OR "typescript" startup seed "remote" Europe site:twitter.com OR site:x.com 2025',
+    'startup "react" "node.js" hiring developer seed round Europe Italy Germany Netherlands 2025',
   ];
 
   const searchResults = await Promise.all(queries.map(q => tavilySearch(q)));
