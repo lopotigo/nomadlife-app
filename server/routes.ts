@@ -3500,8 +3500,9 @@ Languages: Italian (native), English (professional)
             body: JSON.stringify({
               api_key: process.env.TAVILY_API_KEY,
               query,
-              search_depth: "basic",
-              max_results: 6,
+              search_depth: "advanced",
+              max_results: 8,
+              exclude_domains: ["reddit.com", "quora.com"],
             }),
           });
           const d: any = await r.json();
@@ -3510,10 +3511,12 @@ Languages: Italian (native), English (professional)
       }
 
       const queries = [
-        "AI SaaS startup seed funded 2024 2025 Netherlands Belgium Switzerland Italy small team developer React Node remote hire",
-        "YC W24 W25 S24 S25 European AI startup small team developer remote job opening",
-        "startup italiana AI seed 2024 2025 piccolo team sviluppatore React Node PostgreSQL",
-        "new AI startup Amsterdam Zurich Milan Antwerp small team React TypeScript developer remote 2025",
+        "react node typescript developer remote EU startup hiring 2025 small team seed",
+        "YC 2025 European startup full stack engineer remote hire react node",
+        "seed funded AI SaaS startup Europe hiring frontend developer remote 2025",
+        "early stage startup EU hiring react developer typescript 2025 openai",
+        "startup italiana cerca sviluppatore react node typescript remote 2025",
+        "wellfound angel.co startup europe react node hiring developer 2025",
       ];
 
       const searchResults = await Promise.all(queries.map(q => tavilySearch(q)));
@@ -3539,23 +3542,22 @@ Languages: Italian (native), English (professional)
         model: "gpt-4o-mini",
         messages: [{
           role: "user",
-          content: `You are a startup research analyst. Extract small AI/tech startups from these search results.
+          content: `You are a startup scout finding companies where Federico Poletti could work as a remote full-stack developer.
 
-TARGET: Federico Poletti — full-stack dev (React, Node.js, PostgreSQL, OpenAI API), EU remote.
-
-STRICT INCLUSION CRITERIA (ALL must be true):
-- Team size: genuinely <20 people (pre-seed, seed, or Series A MAX)
-- Geography: Italy, Netherlands, Belgium, Switzerland, France, Germany, Spain, Sweden, Denmark
-- Stage: pre-seed, seed, or early Series A — EXCLUDE Series B, C, D and any company with >50 employees
-- Domain: AI, SaaS, EdTech, developer tools, data platforms — NOT autonomous driving, hardware, biotech
-- EXCLUDE any well-known large company (Mistral AI, Wayve, Nscale, Stability AI, etc. — these have 50-500+ employees)
+FEDERICO: React/Node.js/TypeScript/PostgreSQL/OpenAI developer, EU-based (Italy), remote only, small teams preferred.
 
 SEARCH RESULTS:
 ${allContent}
 
-Extract up to 8 startups that strictly match ALL criteria above. If a company is Series C/D or clearly has >20 people, skip it entirely.
+From the results above, extract up to 8 companies or job opportunities that involve:
+- Tech work (web apps, SaaS, AI tools, developer tools, platforms)
+- Remote-friendly or fully remote
+- EU-based or timezone-compatible
+
+Be PERMISSIVE: include anything that looks like a tech company or job opening, even if some data is missing. Use reasonable defaults for missing fields. If a URL looks like a job listing page, include it. Do NOT return an empty array — always extract whatever is available.
+
 Return JSON:
-{"startups": [{"name":"","country":"","city":"","description":"","techStack":[],"teamSize":"","fundingInfo":"","founderName":"","founderLinkedIn":"","founderEmail":"","website":"","pitchHook":""}]}`
+{"startups": [{"name":"","country":"","city":"","description":"one sentence what they do","techStack":["React","Node.js"],"teamSize":"unknown","fundingInfo":"","founderName":"","founderLinkedIn":"","founderEmail":"","website":"https://...","pitchHook":"why Federico fits this company"}]}`
         }],
         max_tokens: 2500,
         response_format: { type: "json_object" },
