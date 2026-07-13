@@ -3480,7 +3480,14 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
   });
 
   // Startup Scout API
-  app.get("/api/inspector/startups", async (_req, res) => {
+  let startupCache: { data: any; ts: number } | null = null;
+  const STARTUP_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+  app.get("/api/inspector/startups", async (req, res) => {
+    const forceRefresh = req.query.refresh === '1';
+    if (!forceRefresh && startupCache && Date.now() - startupCache.ts < STARTUP_CACHE_TTL) {
+      return res.json({ ...startupCache.data, cached: true });
+    }
     try {
       const FEDERICO_PROFILE = `
 Name: Federico Poletti
@@ -3500,9 +3507,9 @@ Languages: Italian (native), English (professional)
             body: JSON.stringify({
               api_key: process.env.TAVILY_API_KEY,
               query,
-              search_depth: "advanced",
-              max_results: 8,
-              exclude_domains: ["reddit.com", "quora.com"],
+              search_depth: "basic",
+              max_results: 5,
+              exclude_domains: ["reddit.com", "quora.com", "hnhiring.com"],
             }),
           });
           const d: any = await r.json();
@@ -3510,13 +3517,12 @@ Languages: Italian (native), English (professional)
         } catch { return []; }
       }
 
+      const month = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
       const queries = [
-        "react node typescript developer remote EU startup hiring 2025 small team seed",
-        "YC 2025 European startup full stack engineer remote hire react node",
-        "seed funded AI SaaS startup Europe hiring frontend developer remote 2025",
-        "early stage startup EU hiring react developer typescript 2025 openai",
-        "startup italiana cerca sviluppatore react node typescript remote 2025",
-        "wellfound angel.co startup europe react node hiring developer 2025",
+        `remote react node typescript developer job startup Europe ${month}`,
+        `YC W25 S25 startup hiring full stack developer remote Europe ${month}`,
+        `seed funded SaaS startup Italy Germany Netherlands hiring engineer ${month}`,
+        `AI startup Europe small team developer remote openai typescript ${month}`,
       ];
 
       const searchResults = await Promise.all(queries.map(q => tavilySearch(q)));
@@ -3569,45 +3575,49 @@ Return JSON:
         startups = parsed.startups || [];
       } catch { startups = []; }
 
-      const withPitches = await Promise.all(startups.map(async (s: any) => {
+      let withPitches = startups.map((s: any) => ({ ...s, subject: '', pitch: '' }));
+      const validStartups = startups.filter((s: any) => s.website && s.website !== 'https://...');
+      if (validStartups.length > 0) {
         try {
-          const pitchRes = await openai.chat.completions.create({
+          const batchRes = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [{
               role: "user",
-              content: `Write a cold email pitch (max 120 words) from Federico Poletti to ${s.founderName ? s.founderName : "the team"} at ${s.name}.
+              content: `Write cold email pitches for Federico Poletti to each company below.
 
-FEDERICO:
-- Full-stack dev: TypeScript, React 18, Node.js, Express, PostgreSQL, OpenAI API
-- Built NomadLife solo (nomad-life.app) — production PWA with AI chatbot, real-time chat, maps, booking
-- 48yo, PhD Political Science, 1yr self-taught, remote from Sardinia Italy
-- Email: federicopoletti83@gmail.com
-- LinkedIn: linkedin.com/in/federico-poletti-dev
+FEDERICO: Full-stack dev (TypeScript, React 18, Node.js, PostgreSQL, OpenAI API). Built NomadLife solo (nomad-life.app) — production PWA. 48yo, remote from Sardinia Italy. Email: federicopoletti83@gmail.com
 
-STARTUP: ${s.name} (${s.city}, ${s.country}) — ${s.description}
-WHY HE FITS: ${s.pitchHook}
+RULES for ALL pitches:
+- Open with "Hi," or "Ciao," (never use placeholder names)
+- Sign off: Federico Poletti | federicopoletti83@gmail.com | nomad-life.app
+- Never mention rates or salary
+- Mention nomad-life.app as proof
+- End with a clear ask (call or reply)
+- English for non-Italian, Italian for Italian companies
+- Max 80 words each, punchy
 
-STRICT RULES:
-- If founder name is not known, open with "Hi," (English) or "Ciao," (Italian) — NEVER use "[Founder's Name]" or any placeholder
-- Sign off as: Federico Poletti | federicopoletti83@gmail.com | nomad-life.app
-- NEVER mention rates, salary, or hourly price in the email — discuss compensation only if they ask
-- NO placeholder text like "[Your LinkedIn]" or "[link]" — use the real URL above or omit
-- Mention nomad-life.app as concrete proof of work
-- End with one specific ask (call or reply)
-- English for non-Italian companies, Italian for Italian ones
-- Max 120 words, punchy and direct
+COMPANIES:
+${validStartups.map((s: any, i: number) => `${i+1}. ${s.name} (${s.country}) — ${s.description}`).join('\n')}
 
-Return JSON: {"subject":"","pitch":""}`
+Return JSON: {"pitches": [{"subject": "...", "pitch": "..."}]} — one entry per company in the same order.`
             }],
-            max_tokens: 400,
+            max_tokens: 1500,
             response_format: { type: "json_object" },
           });
-          const pd = JSON.parse(pitchRes.choices[0].message.content || "{}");
-          return { ...s, subject: pd.subject || "", pitch: pd.pitch || "" };
-        } catch { return { ...s, subject: "", pitch: "" }; }
-      }));
+          const bd = JSON.parse(batchRes.choices[0].message.content || "{}");
+          const pitches = bd.pitches || [];
+          let pi = 0;
+          withPitches = startups.map((s: any) => {
+            if (!s.website || s.website === 'https://...') return { ...s, subject: '', pitch: '' };
+            const p = pitches[pi++] || {};
+            return { ...s, subject: p.subject || '', pitch: p.pitch || '' };
+          });
+        } catch { /* keep empty pitches */ }
+      }
 
-      res.json({ startups: withPitches, timestamp: new Date().toISOString() });
+      const responseData = { startups: withPitches, timestamp: new Date().toISOString() };
+      startupCache = { data: responseData, ts: Date.now() };
+      res.json(responseData);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

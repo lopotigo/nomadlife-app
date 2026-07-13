@@ -556,7 +556,9 @@ async function runScout() {
   }, 12000);
 
   try {
-    const res = await fetch('/api/inspector/startups');
+    const isRefresh = document.getElementById('scoutText').textContent === 'Riscansiona';
+    const url = '/api/inspector/startups' + (isRefresh ? '?refresh=1' : '');
+    const res = await fetch(url);
     clearInterval(stepInterval);
     if (!res.ok) throw new Error('Server error: ' + res.status);
     const data = await res.json();
