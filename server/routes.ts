@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, RequestHandler, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import passport from "passport";
@@ -13,6 +13,7 @@ import { registerImageRoutes } from "./replit_integrations/image";
 import { registerAiSocialHubRoutes } from "./ai-social-hub";
 import { createRepository, pushFile, getGitHubUser } from "./github";
 import { checkProximityAndNotify, getActiveAlerts, checkTravelAlerts } from "./travel-alerts";
+import { z } from "zod";
 
 // Configure VAPID keys for push notifications
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
@@ -59,6 +60,181 @@ async function sendPushToUser(userId: string, title: string, body: string, url?:
   } catch (err) {
     console.error("Push notification error:", err);
   }
+}
+
+const EXTERNAL_API_TIMEOUT_MS = 30_000;
+const EXTERNAL_API_RETRIES = 2;
+const EXTERNAL_API_BACKOFF_MS = 500;
+const RETRIABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const AI_UNAVAILABLE_MESSAGE = "L'AI è temporaneamente non disponibile. Riprova tra qualche minuto.";
+
+class RetryableExternalApiError extends Error {
+  status?: number;
+  code?: string;
+
+  constructor(message: string, options?: { status?: number; code?: string }) {
+    super(message);
+    this.name = "RetryableExternalApiError";
+    this.status = options?.status;
+    this.code = options?.code;
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isAbortError(error: unknown) {
+  return (
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (error instanceof Error && error.name === "AbortError")
+  );
+}
+
+function isRetryableError(error: unknown) {
+  if (error instanceof RetryableExternalApiError) return true;
+  if (isAbortError(error)) return true;
+  const maybeStatus = (error as any)?.status;
+  if (typeof maybeStatus === "number" && RETRIABLE_STATUS_CODES.has(maybeStatus)) return true;
+  const maybeCode = (error as any)?.code;
+  return (
+    typeof maybeCode === "string" &&
+    ["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "UND_ERR_HEADERS_TIMEOUT"].includes(maybeCode)
+  );
+}
+
+async function runWithExternalRetry<T>(operation: (attempt: number) => Promise<T>) {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await operation(attempt);
+    } catch (error) {
+      if (attempt >= EXTERNAL_API_RETRIES || !isRetryableError(error)) {
+        throw error;
+      }
+      await sleep(EXTERNAL_API_BACKOFF_MS * Math.pow(2, attempt));
+      attempt += 1;
+    }
+  }
+}
+
+function createTimeoutSignal(timeoutMs: number) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  return {
+    signal: controller.signal,
+    cleanup: () => clearTimeout(timeoutId),
+  };
+}
+
+async function fetchWithTimeoutAndRetry(input: RequestInfo | URL, init?: RequestInit) {
+  return runWithExternalRetry(async () => {
+    const { signal, cleanup } = createTimeoutSignal(EXTERNAL_API_TIMEOUT_MS);
+    try {
+      const response = await fetch(input, { ...init, signal });
+      if (RETRIABLE_STATUS_CODES.has(response.status)) {
+        throw new RetryableExternalApiError(`Retryable upstream status ${response.status}`, {
+          status: response.status,
+        });
+      }
+      return response;
+    } catch (error: any) {
+      if (isAbortError(error)) {
+        throw new RetryableExternalApiError("External API timeout", { code: "TIMEOUT" });
+      }
+      throw error;
+    } finally {
+      cleanup();
+    }
+  });
+}
+
+function isAiServiceUnavailableError(error: unknown) {
+  if (isRetryableError(error)) return true;
+  const status = (error as any)?.status;
+  return typeof status === "number" && RETRIABLE_STATUS_CODES.has(status);
+}
+
+function sendAiUnavailable(res: Response) {
+  return res.status(503).json({
+    error: AI_UNAVAILABLE_MESSAGE,
+    code: "AI_UNAVAILABLE",
+  });
+}
+
+type PostValidationRule = {
+  body?: z.ZodTypeAny;
+  params?: z.ZodTypeAny;
+};
+
+const pathParamSchema = z.record(z.string(), z.string().trim().min(1, "Path parameter is required"));
+const defaultPostBodySchema = z.record(z.string(), z.unknown());
+const noBodyPostRoutes = new Set<string>([
+  "/api/auth/logout",
+  "/api/posts/:id/like",
+  "/api/moments/:id/view",
+  "/api/moments/:id/like",
+  "/api/posts/:id/save",
+  "/api/trips/:id/follow",
+  "/api/chat-groups/:id/join",
+  "/api/chat-groups/:id/leave",
+  "/api/events/:id/register",
+  "/api/events/:id/like",
+  "/api/follow/:userId",
+  "/api/notifications/:id/read",
+  "/api/notifications/read-all",
+  "/api/travel-alerts/check",
+  "/api/marketplace/products/:id/click",
+]);
+
+const postValidationRules: Record<string, PostValidationRule> = {
+  "/api/auth/signup": {
+    body: insertUserSchema
+      .omit({ password: true })
+      .extend({ password: z.string().min(8), recaptchaToken: z.string().optional() }),
+  },
+  "/api/auth/login": {
+    body: z.object({ username: z.string().min(1), password: z.string().min(1), recaptchaToken: z.string().optional() }),
+  },
+  "/api/auth/forgot-password": { body: z.object({ email: z.string().email("Inserisci una email valida") }) },
+  "/api/auth/reset-password": { body: z.object({ token: z.string().min(1), newPassword: z.string().min(8) }) },
+  "/api/posts/:id/comments": {
+    body: z.object({ content: z.string().trim().min(1, "Commento richiesto") }),
+    params: pathParamSchema,
+  },
+  "/api/push/subscribe": {
+    body: z.object({
+      endpoint: z.string().url(),
+      keys: z.object({ p256dh: z.string().min(1), auth: z.string().min(1) }),
+    }),
+  },
+  "/api/push/unsubscribe": { body: z.object({ endpoint: z.string().url() }) },
+};
+
+function validatePostRequest(routePath: string): RequestHandler {
+  return (req, res, next) => {
+    const rule = postValidationRules[routePath];
+
+    if (Object.keys(req.params || {}).length > 0) {
+      const paramsResult = (rule?.params ?? pathParamSchema).safeParse(req.params);
+      if (!paramsResult.success) {
+        return res.status(400).json({ error: "Parametri URL non validi. Controlla il link e riprova." });
+      }
+    }
+
+    const bodySchema = rule?.body ?? (!noBodyPostRoutes.has(routePath) ? defaultPostBodySchema : undefined);
+    if (!bodySchema) return next();
+
+    const bodyResult = bodySchema.safeParse(req.body ?? {});
+    if (!bodyResult.success) {
+      return res.status(400).json({
+        error: "Dati inviati non validi. Controlla i campi e riprova.",
+      });
+    }
+
+    req.body = bodyResult.data;
+    next();
+  };
 }
 
 // Configure Passport Local Strategy
@@ -110,7 +286,7 @@ async function verifyRecaptcha(token: string): Promise<{ success: boolean; score
     return { success: true, score: 1.0 };
   }
   try {
-    const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    const res = await fetchWithTimeoutAndRetry("https://www.google.com/recaptcha/api/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${token}`,
@@ -138,6 +314,14 @@ export async function registerRoutes(
   registerChatRoutes(app);
   registerImageRoutes(app);
   registerAiSocialHubRoutes(app);
+
+  const originalPost = app.post.bind(app);
+  app.post = ((path: any, ...handlers: any[]) => {
+    if (typeof path === "string") {
+      return originalPost(path, validatePostRequest(path), ...handlers);
+    }
+    return originalPost(path, ...handlers);
+  }) as typeof app.post;
 
   // ========== SEO: robots.txt (served explicitly to avoid platform override) ==========
   app.get("/robots.txt", (_req, res) => {
@@ -1072,7 +1256,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
       let longitude: string | undefined;
       if (data.city) {
         try {
-          const geoRes = await fetch(
+          const geoRes = await fetchWithTimeoutAndRetry(
             `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(data.city)}&format=json&limit=1`,
             { headers: { "User-Agent": "NomadLife/1.0" } }
           );
@@ -1419,7 +1603,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
         return res.status(400).send({ error: "lat and lon are required" });
       }
       
-      const response = await fetch(
+      const response = await fetchWithTimeoutAndRetry(
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto`
       );
       
@@ -2487,7 +2671,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
       // Also search OpenStreetMap Nominatim for cities not in our database
       let externalCities: any[] = [];
       try {
-        const nominatimRes = await fetch(
+        const nominatimRes = await fetchWithTimeoutAndRetry(
           `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`,
           { headers: { "User-Agent": "NomadLife/1.0" } }
         );
@@ -3013,6 +3197,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
     try {
       const { city, category } = req.query;
       let guides = await storage.getCityGuides(city as string, category as string);
+      let aiUnavailable = false;
       
       if (guides.length === 0 && city && typeof city === "string" && city.length >= 2) {
         try {
@@ -3025,7 +3210,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
               ];
               const results: string[] = [];
               for (const q of searches) {
-                const tavilyRes = await fetch("https://api.tavily.com/search", {
+                const tavilyRes = await fetchWithTimeoutAndRetry("https://api.tavily.com/search", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -3056,7 +3241,7 @@ Sitemap: https://nomad-life.app/sitemap.xml
           const ai = new OpenAI({
             apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
             baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-            fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
+            fetch: fetchWithTimeoutAndRetry,
           });
           
           const prompt = `Genera una guida per nomadi digitali per "${city}" in Italia. IMPORTANTE: Usa SOLO informazioni verificate. Se non hai dati certi su un aspetto specifico (es. nomi di coworking, velocità wifi), scrivi consigli generali utili senza inventare nomi di locali, servizi o dati specifici che non conosci con certezza.${webContext}
@@ -3065,15 +3250,12 @@ Return a JSON array with exactly 6 guide entries covering these categories: wifi
 Each entry must have: city (proper name), country, latitude (number, must be accurate for the actual city), longitude (number, must be accurate for the actual city), category, title (in Italian), content (detailed paragraph in Italian, 100+ words with practical tips based on REAL data), icon (emoji), rating (1-5, be honest - smaller cities may have lower ratings for some categories), tags (array of 3-4 relevant tags in Italian).
 Return ONLY the JSON array, no markdown.`;
           
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 45000);
           const response = await ai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [{ role: "system", content: "Sei un esperto di viaggi e nomadismo digitale in Italia. Rispondi SOLO con dati verificati. Non inventare mai nomi di locali, coworking, ristoranti o servizi. Se non conosci informazioni specifiche, fornisci consigli generali utili. Preferisci informazioni provenienti dai dati di ricerca web forniti." }, { role: "user", content: prompt }],
             temperature: 0.3,
             max_tokens: 4000,
-          }, { signal: controller.signal });
-          clearTimeout(timeout);
+          });
           
           const content = response.choices[0]?.message?.content?.trim() || "[]";
           const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
@@ -3099,7 +3281,12 @@ Return ONLY the JSON array, no markdown.`;
           guides = await storage.getCityGuides(city, category as string);
         } catch (aiErr) {
           console.log("AI guide generation failed:", aiErr);
+          aiUnavailable = isAiServiceUnavailableError(aiErr);
         }
+      }
+
+      if (guides.length === 0 && aiUnavailable) {
+        return sendAiUnavailable(res);
       }
       
       res.send(guides);
@@ -3383,7 +3570,7 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
 `;
 
       async function fetchRemotive() {
-        const r = await fetch("https://remotive.com/api/remote-jobs?category=software-dev&limit=25");
+        const r = await fetchWithTimeoutAndRetry("https://remotive.com/api/remote-jobs?category=software-dev&limit=25");
         const d: any = await r.json();
         return (d.jobs || []).map((j: any) => ({
           id: `remotive-${j.id}`, title: j.title, company: j.company_name,
@@ -3394,7 +3581,7 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
       }
 
       async function fetchJobicy() {
-        const r = await fetch("https://jobicy.com/api/v2/remote-jobs?tag=react,nodejs,typescript&count=20");
+        const r = await fetchWithTimeoutAndRetry("https://jobicy.com/api/v2/remote-jobs?tag=react,nodejs,typescript&count=20");
         const d: any = await r.json();
         return (d.jobs || []).map((j: any) => ({
           id: `jobicy-${j.id}`, title: j.jobTitle, company: j.companyName,
@@ -3407,7 +3594,7 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
 
       async function fetchRemoteOK() {
         try {
-          const r = await fetch("https://remoteok.com/api", { headers: { "User-Agent": "Mozilla/5.0 (compatible; JobInspector/1.0)" } });
+          const r = await fetchWithTimeoutAndRetry("https://remoteok.com/api", { headers: { "User-Agent": "Mozilla/5.0 (compatible; JobInspector/1.0)" } });
           const d: any = await r.json();
           return (d || [])
             .filter((j: any) => j.id && j.position)
@@ -3429,7 +3616,7 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
 
       async function fetchRemotiveAI() {
         try {
-          const r = await fetch("https://remotive.com/api/remote-jobs?category=ai&limit=20");
+          const r = await fetchWithTimeoutAndRetry("https://remotive.com/api/remote-jobs?category=ai&limit=20");
           const d: any = await r.json();
           return (d.jobs || []).map((j: any) => ({
             id: `remotive-ai-${j.id}`, title: j.title, company: j.company_name,
@@ -3453,7 +3640,7 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
       const openai = new OpenAI({
         apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
         baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-        fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
+        fetch: fetchWithTimeoutAndRetry,
       });
 
       const scored = await Promise.all(allJobs.map(async (job: any) => {
@@ -3475,7 +3662,10 @@ NOT interested in: On-site only, requires 5+ years experience, pure mobile nativ
       const sorted = scored.sort((a: any, b: any) => b.score - a.score);
       res.json({ jobs: sorted, total: sorted.length, timestamp: new Date().toISOString() });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      if (isAiServiceUnavailableError(error)) {
+        return sendAiUnavailable(res);
+      }
+      res.status(500).json({ error: "Si è verificato un errore durante l'analisi delle offerte." });
     }
   });
 
@@ -3501,7 +3691,7 @@ Languages: Italian (native), English (professional)
 
       async function tavilySearch(query: string) {
         try {
-          const r = await fetch("https://api.tavily.com/search", {
+          const r = await fetchWithTimeoutAndRetry("https://api.tavily.com/search", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -3541,7 +3731,7 @@ Languages: Italian (native), English (professional)
       const openai = new OpenAI({
         apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
         baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-        fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, init),
+        fetch: fetchWithTimeoutAndRetry,
       });
 
       const extractResponse = await openai.chat.completions.create({
@@ -3619,7 +3809,10 @@ Return JSON: {"pitches": [{"subject": "...", "pitch": "..."}]} — one entry per
       startupCache = { data: responseData, ts: Date.now() };
       res.json(responseData);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      if (isAiServiceUnavailableError(error)) {
+        return sendAiUnavailable(res);
+      }
+      res.status(500).json({ error: "Si è verificato un errore durante la ricerca startup." });
     }
   });
 
