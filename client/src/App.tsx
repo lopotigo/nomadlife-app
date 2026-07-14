@@ -11,6 +11,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { OnboardingProvider } from "@/lib/onboarding";
 import { WelcomeTutorial } from "@/components/welcome-tutorial";
 import { AiChatbot } from "@/components/ai-chatbot";
+import { AppErrorBoundary } from "@/components/app-error-boundary";
 
 import AiHome from "@/pages/ai-home";
 import CityBriefing from "@/pages/city-briefing";
@@ -114,8 +115,10 @@ function App() {
               <TooltipProvider>
                 <Toaster />
                 <WelcomeTutorial />
-                <Router />
-                <AuthenticatedChatbot />
+                <AppErrorBoundary>
+                  <Router />
+                  <AuthenticatedChatbot />
+                </AppErrorBoundary>
               </TooltipProvider>
             </OnboardingProvider>
           </AuthProvider>
